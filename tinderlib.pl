@@ -26,6 +26,9 @@
 # $Id$
 #
 
+use strict;
+use Net::SMTP;
+
 sub cleanup {
         my ($ds, $code, $msg) = @_;
 
@@ -44,7 +47,7 @@ sub cleanup {
 sub buildenv {
         my $pb        = shift;
         my $build     = shift;
-	my $jail      = shift;
+        my $jail      = shift;
         my $portstree = shift;
 
         my ($major_version) = ($jail =~ /(^\d)/);
@@ -58,12 +61,12 @@ sub buildenv {
                 next if /^#/;
                 s|##PB##|$pb|g;
                 s|##BUILD##|$build|g;
-		s|##JAIL##|$jail|g;
+                s|##JAIL##|$jail|g;
                 s|##PORTSTREE##|$portstree|g;
                 s|\^\^([^\^]+)\^\^|$ENV{$1}|g;
                 my ($var, $expr) = split(/=/, $_, 2);
                 my @words = split(/\s+/, $expr);
-                my @cmd = (), @value = ();
+                my @cmd = (), my @value = ();
                 my $exec = 0;
             WORD: foreach my $word (@words) {
 
@@ -90,6 +93,36 @@ sub buildenv {
         }
 
         close(RAWENV);
+}
+
+# This function sends email based on the given parameters.
+#   $from should be one valid email address
+#   $to should be a reference to an array of addresses
+#   $subject should be a valid email subject line
+#   $data should be a string representing the body of the email
+#   $host should be the SMTP host through which the mail will be relayed
+sub sendMail {
+        my ($from, $to, $subject, $data, $host) = @_;
+        my ($smtp, $header);
+        my $rc = 1;
+
+        $smtp = Net::SMTP->new($host);
+        $smtp->mail($from);
+        $smtp->to(@{$to});
+
+        $header = "From: $from\n";
+        $header .= "To: " . (join(",", @{$to}));
+        $header .= "\n";
+        $header .= "Subject: $subject\n";
+        $header .= "\n";
+
+        $data = $header . $data;
+
+        $rc = $smtp->data($data);
+
+        $smtp->quit;
+
+        return $rc;
 }
 
 1;
