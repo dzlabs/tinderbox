@@ -1,8 +1,9 @@
-$Id: README,v 1.7 2005/01/03 02:20:41 marcus Exp $
+$Id: README,v 1.8 2005/01/03 02:58:55 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
-Requirements: perl, DBD::Mysql perl module, MySQL 4.1 or newer.
+Requirements: FreeBSD 6-CURRENT (earlier versions should work, but development
+  happens on -CURRENT only) perl, DBD::Mysql perl module, MySQL 4.1 or newer.
   php4, php4-mysql extension, PEAR::DB() for web frontend
   Make sure you have register_globals=on in your php.ini
 
@@ -77,6 +78,9 @@ will let you know if the cache is working.
 ===================================================================
 
 GETTING TINDERBOX
+
+The latest release of Tinderbox can be downloaded from
+http://tinderbox.marcuscom.com.
 
 Tinderbox lives in Marcuscom CVS repository under portstools module.
 
