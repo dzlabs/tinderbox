@@ -5,6 +5,11 @@ usage () {
     exit 1
 }
 
+if [ `id -u` != 0 ]; then
+    echo "ERROR: You must be root to run $0."
+    exit 1
+fi
+
 pb=/space
 
 buil_name=""
