@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.16 2004/03/03 20:27:33 pav Exp $
+# $Id: TinderboxDS.php,v 1.17 2004/03/03 20:35:20 pav Exp $
 #
 
     require_once 'DB.php';
@@ -116,6 +116,7 @@
 		foreach ($params as $key => $param) {
 		    switch ($key) {
 			case "Port_Id": $query.= "AND build_ports.Port_Id = '" . $param . "' "; break;
+			case "Last_Status": $query.= "AND Last_Status = '" . $param . "' "; break;
 			case "Last_Built": $query.= "ORDER BY Last_Built DESC LIMIT " . (int)$param; break;
 		    }
 		}
