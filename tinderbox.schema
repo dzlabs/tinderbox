@@ -7,7 +7,7 @@ CREATE TABLE ports (
   Port_Comment varchar(255),
   PRIMARY KEY (Port_Id),
   UNIQUE (Port_Directory),
-  INDEX Port_Directory_Idx (Port_Directory),
+  INDEX Port_Directory_Idx (Port_Directory)
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS jails;
@@ -20,7 +20,7 @@ CREATE TABLE jails (
   Jail_Description text,
   PRIMARY KEY (Jail_Id),
   UNIQUE (Jail_Name),
-  INDEX Jail_Name_Idx (Jail_Name),
+  INDEX Jail_Name_Idx (Jail_Name)
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS ports_trees;
@@ -33,7 +33,7 @@ CREATE TABLE ports_trees (
   Ports_Tree_CVSweb_URL varchar(255),
   PRIMARY KEY (Ports_Tree_Id),
   UNIQUE (Ports_Tree_Name),
-  INDEX Ports_Tree_Name_Idx (Ports_Tree_Name),
+  INDEX Ports_Tree_Name_Idx (Ports_Tree_Name)
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS builds;
@@ -103,5 +103,5 @@ CREATE TABLE build_ports (
   INDEX (Port_Id),
   FOREIGN KEY (Port_Id)
     REFERENCES ports(Port_Id)
-    ON UPDATE CASCADE ON DELETE RESTRICT,
+    ON UPDATE CASCADE ON DELETE RESTRICT
 ) TYPE=INNODB;
