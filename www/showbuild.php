@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showbuild.php,v 1.7 2004/03/03 19:04:44 pav Exp $
+# $Id: showbuild.php,v 1.8 2004/03/03 20:13:54 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -50,7 +50,7 @@
 	echo "Description: " . $build->getDescription() . "<br />\n";
 
 	$jail = $ds->getJailById($build->getJailId());
-	echo "System: FreeBSD " . $jail->getName() . " (" . $jail->getTag() . ") updated on " . $jail->prettyDatetime($jail->getLastBuilt()) . "<br />\n";
+	echo "System: FreeBSD " . $jail->getName() . " (" . $jail->getTag() . ") updated on " . $ds->prettyDatetime($jail->getLastBuilt()) . "<br />\n";
 
 	$ports_tree = $ds->getPortsTreeById($build->getPortsTreeId());
 	echo "Ports Tree: " . $ports_tree->getDescription() . "<br />\n";
@@ -75,7 +75,7 @@
 		foreach ($ports as $port) {
 			echo "<tr>\n";
 			echo "<td><a href=\"showport.php?id=" . $port->getId() . "\">" . $port->getDirectory() . "</a></td>\n";
-			echo "<td>" . $port->prettyEmail($port->getMaintainer()) . "</td>\n";
+			echo "<td>" . $ds->prettyEmail($port->getMaintainer()) . "</td>\n";
 			echo "<td>" . $port->getLastBuiltVersion() . "</td>\n";
 			if ($port->getLastStatus() == "SUCCESS") {
 				echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
@@ -87,8 +87,8 @@
 				echo "<td style=\"background-color: grey\">&nbsp;</td>\n";
 				echo "<td>&nbsp;</td>\n";
 			}
-			echo "<td>" . $port->prettyDatetime($port->getLastBuilt()) . "</td>\n";
-			echo "<td>" . $port->prettyDatetime($port->getLastSuccessfulBuilt()) . "</td>\n";
+			echo "<td>" . $ds->prettyDatetime($port->getLastBuilt()) . "</td>\n";
+			echo "<td>" . $ds->prettyDatetime($port->getLastSuccessfulBuilt()) . "</td>\n";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";

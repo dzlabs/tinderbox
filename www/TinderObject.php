@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderObject.php,v 1.4 2004/03/03 16:39:21 pav Exp $
+# $Id: TinderObject.php,v 1.5 2004/03/03 17:13:57 pav Exp $
 #
 
     class TinderObject {
@@ -48,26 +48,6 @@
 	    }
 
 	    return $hashref;
-	}
-
-	function prettyDatetime($input) {
-		if (ereg("[0-9]{14}", $input)) {
-			/* timestamp */
-			return substr($input,0,4)."-".substr($input,4,2)."-".substr($input,6,2)." ".substr($input,8,2).":".substr($input,10,2).":".substr($input,12,2);
-		} elseif (ereg("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}", $input)) {
-			/* datetime */
-			if ($input == "0000-00-00 00:00:00") {
-				return "";
-			} else {
-				return $input;
-			}
-		} else {
-			return $input;
-		}
-	}
-
-	function prettyEmail($input) {
-		return str_replace("@FreeBSD.org", "", $input);
 	}
 
     }

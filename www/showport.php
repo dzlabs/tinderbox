@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showport.php,v 1.4 2004/03/03 20:13:54 pav Exp $
+# $Id: showport.php,v 1.5 2004/03/03 20:24:23 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -92,8 +92,8 @@
 				echo "<td style=\"background-color: grey\">&nbsp;</td>\n";
 				echo "<td>&nbsp;</td>\n";
 			}
-			echo "<td>" . $port->prettyDatetime($build["Last_Built"]) . "</td>\n";
-			echo "<td>" . $port->prettyDatetime($build["Last_Successful_Built"]) . "</td>\n";
+			echo "<td>" . $ds->prettyDatetime($build["Last_Built"]) . "</td>\n";
+			echo "<td>" . $ds->prettyDatetime($build["Last_Successful_Built"]) . "</td>\n";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
