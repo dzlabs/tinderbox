@@ -15,6 +15,7 @@ cleanup()
     umount -f ${chroot}/a/ports >/dev/null 2>&1
     umount -f ${chroot}/usr/src >/dev/null 2>&1
     umount -f ${chroot}/dev >/dev/null 2>&1
+    umount -f ${chroot}/ccache >/dev/null 2>&1
 
     if [ $noclean = 0 ]; then
 	rm -rf ${chroot}/tmp/*
@@ -111,6 +112,12 @@ export USA_RESIDENT=yes
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/X11R6/bin
 
+if [ -n "${CCACHE_ENABLED}" ]; then
+    # XXX We need to do this since certain ports (e.g. cdrtools) don't
+    # respect CC the way they should (thanks for the tip, Adam).
+    export PATH=/opt:${PATH}
+fi
+
 # Use the *.env file to specify per-jail, per-portstree, and per-build
 # environment variables.
 [ -f ${pb}/jails/${jail}/jail.env ] && . ${pb}/jails/${jail}/jail.env
@@ -141,6 +148,10 @@ if [ -f ${pb}/jails/${jail}/pkg_install.tar ]; then
     tar -C ${chroot} -xf ${pb}/jails/${jail}/pkg_install.tar
 fi
 
+if [ -n "${CCACHE_ENABLED}" -a -f ${pb}/jails/${jail}/ccache.tar ]; then
+    tar -C ${chroot} -xf ${pb}/jails/${jail}/ccache.tar
+fi
+
 echo ${OSREL}-${BRANCH} > ${chroot}/usr/bin/UNAME_VERSION
 
 trap  "cleanup ${chroot} ${noclean} ${error} \"${cleandirs}\" ${pkgname} ${pb} ${branch}" 1 2 3 9 10 11 15
@@ -162,6 +173,16 @@ mkdir -p ${chroot}/usr/src
 mount -o nfsv3,intr -r localhost:${pb}/jails/${jail}/src ${chroot}/usr/src
 
 mount -t devfs foo ${chroot}/dev
+
+if [ -n "${CCACHE_ENABLED}" ]; then
+    mkdir -p ${pb}/ccache/${branch}
+    mkdir -p ${chroot}/ccache
+    if [ -n "${CCACHE_JAIL}" ]; then
+	mount -o rw,nfsv3,intr localhost:${pb}/ccache/${jail} ${chroot}/ccache
+    else
+        mount -o rw,nfsv3,intr localhost:${pb}/ccache/${branch} ${chroot}/ccache
+    fi
+fi
 
 for dir in ${cleandirs}; do
     if ! rm -rf ${chroot}${dir} >/dev/null 2>&1; then
@@ -231,6 +252,7 @@ if [ "${error}" = 0 ]; then
     error=$(cat ${chroot}/tmp/status)
 
     if [ -e ${chroot}/tmp/work.tbz ]; then
+	mkdir -p ${pb}/wrkdirs/${branch}
 	cp ${chroot}/tmp/work.tbz ${pb}/wrkdirs/${branch}/${pkgname}.tbz
     fi
 
