@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: Port.php,v 1.3 2004/03/02 21:51:10 pav Exp $
+# $Id: Port.php,v 1.4 2004/03/03 16:39:21 pav Exp $
 #
 
     require_once 'TinderObject.php';
@@ -38,7 +38,10 @@
 		Port_Directory => "",
 		Port_Comment => "",
 		Port_Maintainer => "",
-		Last_Built => ""
+		Last_Built => "",
+		Last_Status => "",
+		Last_Successful_Built => "",
+		Last_Built_Version => ""
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
@@ -66,6 +69,18 @@
 
 	function getLastBuilt() {
 	    return $this->Last_Built;
+	}
+
+	function getLastStatus() {
+	    return $this->Last_Status;
+	}
+
+	function getLastSuccessfulBuilt() {
+	    return $this->Last_Successful_Built;
+	}
+
+	function getLastBuiltVersion() {
+	    return $this->Last_Built_Version;
 	}
 
 	function setName($name) {
