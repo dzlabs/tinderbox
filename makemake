@@ -27,7 +27,6 @@
 # $Id$
 #
 
-
 use strict;
 use TinderboxDS;
 use vars qw(
@@ -135,7 +134,10 @@ while (scalar(@PORTS)) {
 
         $pkgdeps{$portdir} = [];
         $pkgdir{$portdir}  = $pkgname;
-        $deplist           = `cd $tportdir && make all-depends-list`;
+        my $deplist = "";
+        foreach my $deptarget ("build-depends-list", "run-depends-list") {
+                $deplist .= `cd $tportdir && make $deptarget`;
+        }
         chomp $deplist;
         @deps = split(/\n/, $deplist);
         foreach my $dep (@deps) {

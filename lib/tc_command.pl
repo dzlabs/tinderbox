@@ -27,7 +27,6 @@
 # $Id$
 #
 
-
 # This is a hack to make sure we can always find our modules.
 BEGIN {
         my $pb = "/space";
@@ -1116,7 +1115,12 @@ sub addPorts {
                         # We need to add all ports on which this port depends
                         # recursively.
 
-                        my @deplist = `cd $portdir && make all-depends-list`;
+                        my @deplist = ();
+                        foreach my $deptarget ("build-depends-list",
+                                "run-depends-list")
+                        {
+                                push @deplist, `cd $portdir && make $deptarget`;
+                        }
                         foreach my $dep (@deplist) {
                                 chomp $dep;
                                 $dep =~ s|^$ENV{'PORTSDIR'}/||;
