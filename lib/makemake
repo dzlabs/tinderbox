@@ -50,6 +50,11 @@ $PORTSTREE_NAME = $PORTSTREE->getName();
 
 buildenv($BUILD_ROOT, $BUILD_NAME, $JAIL_NAME, $PORTSTREE_NAME);
 
+# Set LOCALBASE and X11BASE to bogus values to prevent system installed
+# packages from affecting the tinderbox.
+$ENV{'LOCALBASE'} = "/nonexistentlocal";
+$ENV{'X11BASE'}   = "/nonexistentx";
+
 if (!scalar(@ARGV)) {
         my @dsPorts = $ds->getPortsForBuild($BUILD);
         if (!defined(@dsPorts)) {
