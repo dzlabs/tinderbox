@@ -143,7 +143,9 @@ if [ "${major_version}" = "4" ]; then
     mkdir -p ${chroot}/libexec
     mkdir -p ${chroot}/lib
     cp -p /libexec/ld-elf.so.1 ${chroot}/libexec
-    cp -p /lib/libc.so.5 /lib/libkvm.so.2 /lib/libm.so.2 ${chroot}/lib
+    cp -p /lib/libkvm.so.2 /lib/libm.so.3 ${chroot}/lib
+elif [ "${major_version}" -lt "6" ]; then
+    cp -p /lib/libc.so.6 ${chroot}/lib
 fi
 cp -p /bin/ps ${chroot}/bin
 cp -p /usr/bin/killall ${chroot}/usr/bin
