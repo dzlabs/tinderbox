@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.20 2004/03/09 11:33:13 pav Exp $
+# $Id: TinderboxDS.php,v 1.21 2004/11/08 00:33:04 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -59,6 +59,7 @@
 	    }
 
 	    $this->db->setFetchMode(DB_FETCHMODE_ASSOC);
+	    $this->db->setOption('persistent', true);
 	}
 
 	function getAllPorts() {
