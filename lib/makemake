@@ -29,6 +29,7 @@
 
 use strict;
 use TinderboxDS;
+use Getopt::Std;
 use vars qw(
     $BUILD
     $BUILD_NAME
@@ -54,12 +55,21 @@ if (!defined(@build_names) && defined($ds->getError())) {
         cleanup($ds, 1, "There are no builds configured in this tinderbox\n");
 }
 if (scalar(@ARGV) < 1) {
-        print STDERR "usage: $0 <build name> [<port directory> ...]\n";
+        print STDERR "usage: $0 [-n] <build name> [<port directory> ...]\n";
         print STDERR "Current builds are:\n";
         foreach (@build_names) {
                 print STDERR "\t" . $_->getName() . "\n";
         }
         cleanup($ds, 1, undef);
+}
+
+my $noduds = 0;
+my $opts   = {};
+
+getopts('n', $opts);
+
+if ($opts->{'n'}) {
+        $noduds = 1;
 }
 
 @PORTS = ();
@@ -137,10 +147,12 @@ while (scalar(@PORTS)) {
 
         # Create a list of duds (ports that will not be attempted because they
         # are marked IGNORE or FORBIDDEN).
-        my $dudpkg = `cd $tportdir && make ignorelist ECHO_MSG=true`;
-        if ($dudpkg) {
-                chomp $dudpkg;
-                push @duds, $dudpkg;
+        if (!$noduds) {
+                my $dudpkg = `cd $tportdir && make ignorelist ECHO_MSG=true`;
+                if ($dudpkg) {
+                        chomp $dudpkg;
+                        push @duds, $dudpkg;
+                }
         }
 
         $pkgdeps{$portdir} = [];
@@ -188,14 +200,18 @@ foreach my $key (keys %pkgdir) {
 close(MK);
 
 my $dudsfile = join("/", $BUILD_ROOT, "builds", $BUILD_NAME, "duds");
-unless (open(DUDS, ">" . $dudsfile)) {
-        cleanup($ds, 1, "Failed to open $dudsfile for writing: $!\n");
-}
-foreach my $dud (sort @duds) {
-        print DUDS $dud . "\n";
-}
+unlink($dudsfile);
 
-close(DUDS);
+if (!$noduds) {
+        unless (open(DUDS, ">" . $dudsfile)) {
+                cleanup($ds, 1, "Failed to open $dudsfile for writing: $!\n");
+        }
+        foreach my $dud (sort @duds) {
+                print DUDS $dud . "\n";
+        }
+
+        close(DUDS);
+}
 
 # Now, symlink the Makefile to the correct All directory.
 system("mkdir -p $BUILD_ROOT/packages/$BUILD_NAME/All");
