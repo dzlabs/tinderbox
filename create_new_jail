@@ -1,0 +1,81 @@
+#!/bin/sh
+
+pb=/space
+suphost=cvsup12.FreeBSD.org
+cvsup_compress= #*default compress
+
+if [ $# -lt 2 ]; then
+    echo "usage: $0 <jail name> <jail tag>"
+    exit 1
+fi
+
+jail_name=$1
+jail_tag=$2
+
+_jails=$(${pb}/scripts/list_jails)
+if echo ${_jails} | grep -qw ${jail_name}; then
+    echo "Jail ${jail_name} already exists."
+    exit 1
+fi
+
+echo -n "INFO: Creating directories and supfiles for new jail..."
+rm -rf ${pb}/${jail_name}
+
+mkdir -p ${pb}/${jail_name}/ports
+mkdir -p ${pb}/${jail_name}/src
+
+cat > ${pb}/${jail_name}/ports-supfile << EOSF
+*default host=${suphost}
+*default base=${pb}/${jail_name}
+*default prefix=${pb}/${jail_name}
+*default release=cvs tag=.
+*default delete use-rel-suffix
+${cvsup_compress}
+ports-all
+EOSF
+
+cat > ${pb}/${jail_name}/src-supfile << EOSF
+*default host=${suphost}
+*default base=${pb}/${jail_name}
+*default prefix=${pb}/${jail_name}
+*default release=cvs tag=${jail_tag}
+*default delete use-rel-suffix
+${cvsup_compress}
+src-all
+EOSF
+
+echo "DONE."
+
+echo "INFO: Initializing new jail..."
+${pb}/scripts/mkjail ${jail_name}
+
+if [ $? != 0 ]; then
+    echo "FAILED."
+    exit 1
+fi
+
+echo "DONE."
+
+# mkjail will cvsup src, but we need to cvsup ports.
+echo -n "INFO: CVSup'ing ports tree..."
+/usr/local/bin/cvsup -g ${pb}/${jail_name}/ports-supfile > /dev/null 2>&1
+
+if [ $? != 0 ]; then
+    echo "FAILED."
+    exit 1
+fi
+
+echo "DONE."
+
+# Add the new jail to the database, and we're done.
+echo -n "INFO: Adding jail to datastore..."
+${pb}/scripts/add_jail -n ${jail_name} -t ${jail_tag}
+
+if [ $? != 0 ]; then
+    echo "FAILED."
+    exit 1
+fi
+
+echo "DONE."
+
+exit 0
