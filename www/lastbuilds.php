@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: lastbuilds.php,v 1.12 2005/01/21 06:24:36 marcus Exp $
+# $Id: lastbuilds.php,v 1.13 2005/01/21 07:01:01 marcus Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -94,7 +94,7 @@
 		<th style="width: 20px">&nbsp;</th>
 		<th>&nbsp;</th>
 		<th>Last Build Attempt</th>
-		<th>Last Successfull Build</th>
+		<th>Last Successful Build</th>
 		</tr>
 		<?php
 		foreach ($builds as $build) {
