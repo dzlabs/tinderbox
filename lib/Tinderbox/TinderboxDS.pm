@@ -37,25 +37,7 @@ sub getAllPorts {
         my $self  = shift;
         my @ports = ();
 
-        my @result;
-
-        my $rc = $self->_doQueryHashRef("SELECT * FROM ports", \@result);
-
-        if (!$rc) {
-                return undef;
-        }
-
-        foreach (@result) {
-                my $port = new Port(
-                        {
-                                Id        => $_->{'Port_Id'},
-                                Name      => $_->{'Port_Name'},
-                                Directory => $_->{'Port_Directory'},
-                                Comment   => $_->{'Port_Comment'}
-                        }
-                );
-                push @ports, $port;
-        }
+        @ports = $self->getPorts();
 
         return @ports;
 }
@@ -138,6 +120,32 @@ sub getPorts {
         return @ports;
 }
 
+sub getJailByName {
+        my $self = shift;
+        my $name = shift;
+
+        my @results = $self->getJails({Name => $name});
+
+        if (!defined(@results)) {
+                return undef;
+        }
+
+        return $results[0];
+}
+
+sub getJailById {
+        my $self = shift;
+        my $id   = shift;
+
+        my @results = $self->getJails({Id => $id});
+
+        if (!defined(@results)) {
+                return undef;
+        }
+
+        return $results[0];
+}
+
 sub getJails {
         my $self      = shift;
         my @params    = @_;
@@ -153,7 +161,7 @@ sub getJails {
                 # portion of the query.
                 my @ands = ();
                 foreach my $andcond (keys %{$param}) {
-                        push @ands,   "Port_$andcond=?";
+                        push @ands,   "Jail_$andcond=?";
                         push @values, $param->{$andcond};
                 }
                 push @conds, "(" . (join(" AND ", @ands)) . ")";
@@ -189,17 +197,34 @@ sub getJails {
         return @jails;
 }
 
+sub addJail {
+        my $self = shift;
+        my $jail = shift;
+        my $jCls = (ref($jail) eq "REF") ? $$jail : $jail;
+
+        my $rc =
+            $self->_doQuery(
+                "INSERT INTO jails (Jail_Name, Jail_Tag) VALUES (?, ?)",
+                [$jCls->getName(), $jCls->getTag()]);
+
+        if (ref($jail) eq "REF") {
+                $$jail = $self->getJailByName($jCls->getName());
+        }
+
+        return $rc;
+}
+
 sub addPort {
         my $self = shift;
         my $port = shift;
-        my $pCls = ref($port) ? $$port : $port;
+        my $pCls = (ref($port) eq "REF") ? $$port : $port;
 
         my $rc = $self->_doQuery(
                 "INSERT INTO ports (Port_Directory, Port_Name, Port_Comment) VALUES (?, ?, ?)",
                 [$pCls->getDirectory(), $pCls->getName(), $pCls->getComment()]
         );
 
-        if (ref($port)) {
+        if (ref($port) eq "REF") {
                 $$port = $self->getPortByDirectory($pCls->getDirectory());
         }
 
@@ -228,7 +253,7 @@ sub isPortInDS {
                 "SELECT Port_Id FROM ports WHERE Port_Directory=?",
                 $port->getDirectory());
 
-        return ($rc > 0) ? 1 : 0;
+        return (($rc > 0) ? 1 : 0);
 }
 
 sub isValidJail {
@@ -272,26 +297,10 @@ sub isPortForJail {
 }
 
 sub getAllJails {
-        my $self = shift;
-        my (@jails);
+        my $self  = shift;
+        my @jails = ();
 
-        my @result;
-        my $rc = $self->_doQueryHashRef("SELECT * FROM jails", \@result);
-
-        if (!$rc) {
-                return undef;
-        }
-
-        foreach (@result) {
-                my $jail = new Jail(
-                        {
-                                Id   => $_->{'Id'},
-                                Name => $_->{'Name'},
-                                Tag  => $_->{'Tag'}
-                        }
-                );
-                push @jails, $jail;
-        }
+        @jails = $self->getJails();
 
         return @jails;
 }
@@ -388,6 +397,8 @@ sub _doQuery {
         } else {
                 $_sth->finish;
         }
+
+        $self->{'error'} = undef;
 
         1;
 }

@@ -4,6 +4,7 @@ use strict;
 use TinderboxDS;
 use vars qw(
     $JAIL
+    $JAIL_NAME
     @PORTS
     $JAIL_REPO
     $BUILD_ROOT
@@ -23,49 +24,65 @@ require "tinderbox.ph";    # Setup the tinderbox config.
 require "buildenv.pl";
 
 # Get a database handle for obtaining the ports.
-my $ds         = TinderboxDS->new();
-my @jail_types = $ds->getJailTypes();
-if (!defined(@jail_types)) {
+my $ds         = new TinderboxDS();
+my @jail_names = $ds->getAllJails();
+if (!defined(@jail_names) && defined($ds->getError())) {
         cleanup($ds, 1,
                 "Failed to get list of jails: " . $ds->getError() . "\n");
+} elsif (!defined(@jail_names)) {
+        cleanup($ds, 1, "There are no jails configured in this tinderbox\n");
 }
 if (scalar(@ARGV) < 1) {
         print STDERR
             "usage: tinderbuild <jail name> [<portname> <port directory> ...]\n";
         print STDERR "Current jails are:\n";
-        foreach (@jail_types) {
-                print STDERR "\t$_\n";
+        foreach (@jail_names) {
+                print STDERR "\t" . $_->getName() . "\n";
         }
-        exit(1);
+        cleanup($ds, 1, undef);
 }
 
 @PORTS = ();
-$JAIL  = $ARGV[0];
+$JAIL  = $ds->getJailByName($ARGV[0]);
+if (!$JAIL) {
+        cleanup($ds, 1, "Unknown jail $ARGV[0]\n");
+}
+$JAIL_NAME = $JAIL->getName();
 shift @ARGV;
 
-if (scalar(@ARGV) > 0) {
-        @PORTS = @ARGV;
-}
+buildenv($BUILD_ROOT, $JAIL_NAME);
 
-buildenv($BUILD_ROOT, $JAIL);
-
-if (!scalar(@PORTS)) {
-        my @dsPorts = $ds->getPorts("Port_Id", "Port_Directory");
+if (!scalar(@ARGV)) {
+        my @dsPorts = $ds->getAllPorts();
         if (!defined(@dsPorts)) {
                 cleanup($ds, 1,
                               "Failed to get port information: "
                             . $ds->getError()
                             . "\n");
         }
-        my $hash_ref;
-	foreach $hash_ref (@dsPorts) {
-                push @PORTS, $hash_ref->{'Port_Directory'}
-                    if $ds->isPortForJail($hash_ref->{'Port_Id'}, $JAIL);
+        foreach my $port (@dsPorts) {
+                push @PORTS, $port
+                    if $ds->isPortForJail($port, $JAIL);
+        }
+} else {
+        foreach my $arg (@ARGV) {
+                my $port = $ds->getPortByDirectory($arg);
+                if (!$port) {
+
+                        # Simply create a sparse port with just a directory.
+                        # If the port doesn't exist in the datastore, that's
+                        # okay.
+                        $port = new Port({Directory => $arg});
+                        push @PORTS, $port;
+                } else {
+                        push @PORTS, $port if $ds->isPortForJail($port, $JAIL);
+                }
         }
 }
 my (%pkgdir, %pkgdeps);
 while (scalar(@PORTS)) {
-        my $portdir = shift @PORTS;
+        my $port    = shift @PORTS;
+        my $portdir = $port->getDirectory();
         my ($pkgname, $deplist, $tportdir, @deps);
 
         next if (defined($pkgdir{$portdir}));
@@ -82,7 +99,7 @@ while (scalar(@PORTS)) {
         foreach my $dep (@deps) {
                 $dep =~ s|^$ENV{'PORTSDIR'}/||;
                 push @{$pkgdeps{$portdir}}, $dep;
-                push @PORTS, $dep;
+                push @PORTS, (new Port({Directory => $dep}));
         }
 }
 my $makefile = join("/", $BUILD_ROOT, "Makefile." . $JAIL);
@@ -97,14 +114,14 @@ foreach my $key (keys %pkgdir) {
         print MK "$pkgdir{$key}$ENV{'PKGSUFFIX'}: "
             . join(" ", @deppkgnames) . "\n";
         print MK
-            "\t\@$PORTBUILD $JAIL $pkgdir{$key}$ENV{'PKGSUFFIX'} /usr/ports/$key "
+            "\t\@$PORTBUILD $JAIL_NAME $pkgdir{$key}$ENV{'PKGSUFFIX'} /usr/ports/$key "
             . join(" ", @deppkgnames) . "\n";
 }
 close(MK);
 
 # Now, symlink the Makefile to the correct All directory.
-system("mkdir -p $BUILD_ROOT/packages/$JAIL/All");
-symlink $makefile, "$BUILD_ROOT/packages/$JAIL/All/Makefile";
+system("mkdir -p $BUILD_ROOT/packages/$JAIL_NAME/All");
+symlink $makefile, "$BUILD_ROOT/packages/$JAIL_NAME/All/Makefile";
 
 cleanup($ds, 0, undef);
 
@@ -113,6 +130,8 @@ sub cleanup {
 
         if ($code && defined($msg)) {
                 $msg = "ERROR: " . $msg;
+        } elsif (defined($msg)) {
+                $msg = "INFO: " . $msg;
         }
 
         $ds->destroy()    if (defined($ds));

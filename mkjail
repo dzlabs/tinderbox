@@ -53,7 +53,7 @@ mtree -deU -f ${SRCBASE}/etc/mtree/BSD.usr.dist -p ${D}/usr
 mtree -deU -f ${SRCBASE}/etc/mtree/BSD.local.dist -p ${D}/usr/local
 
 date '+%Y%m%d' > ${D}/var/db/port.mkversion
-mkdir ${D}/var/run
+mkdir -p ${D}/var/run
 
 rm -f ${D}/usr/lib/aout/lib*_p.a
 

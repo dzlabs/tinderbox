@@ -15,7 +15,6 @@ sub buildenv {
                 next if /^#/;
                 s|##PB##|$pb|g;
                 s|##JAIL##|$jail|g;
-                s|##MAKE##|$pb/make.conf|g;
                 s|\^\^([^\^]+)\^\^|$ENV{$1}|g;
                 my ($var, $expr) = split(/=/, $_, 2);
                 my @words = split(/\s+/, $expr);

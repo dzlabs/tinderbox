@@ -3,17 +3,20 @@
 use strict;
 use TinderboxDS;
 
-my $ds = TinderboxDS->new();
+my $ds = new TinderboxDS();
 
-my @jails = $ds->getJailTypes();
+my @jails = $ds->getAllJails();
 
 if (defined(@jails)) {
         foreach my $jail (@jails) {
-                print "$jail\n";
+                print $jail->getName() . "\n";
         }
+} elsif (defined($ds->getError)) {
+        $ds->destroy();
+        die "ERROR: Failed to list jails: " . $ds->getError . "\n";
 } else {
         $ds->destroy();
-        die "Failed to list jails: " . $ds->getError . "\n";
+        die "ERROR: There are no jails configured on this system\n";
 }
 $ds->destroy();
 exit 0;

@@ -1,11 +1,11 @@
 DROP TABLE IF EXISTS ports;
 CREATE TABLE ports (
   Port_Id int NOT NULL auto_increment,
-  Port_Name varchar(255) NOT NULL,
-  Port_Directory text,
-  Port_Comment text,
+  Port_Directory varchar(255) NOT NULL,
+  Port_Name varchar(64),
+  Port_Comment varchar(255),
   PRIMARY KEY (Port_Id),
-  UNIQUE (Port_Name),
+  UNIQUE (Port_Directory),
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS jails;
