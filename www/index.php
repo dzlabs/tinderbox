@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: index.php,v 1.15 2004/03/04 23:49:03 pav Exp $
+# $Id: index.php,v 1.16 2004/03/05 07:51:23 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -43,7 +43,7 @@
 <body>
 <h1>GNOME 2 Packages for i386</h1>
 <?php
-    if (is_array($builds)) {
+    if (is_array($builds) && sizeof($builds) > 0) {
 ?>
 <table>
 <tr>
