@@ -1,30 +1,32 @@
 #!/bin/sh
 
+pb=/space
+
 if [ -z "$1" ]; then
     echo "Please specify a jail type."
     echo "Current jail types are:"
-    for i in `/space/scripts/list_jails`; do
+    for i in `${pb}/scripts/list_jails`; do
 	echo "	${i}"
     done
     exit 1
 fi
 
-. /space/scripts/buildenv
+. ${pb}/scripts/buildenv
 
 jail=$1
 
-buildenv /space ${jail}
+buildenv ${pb} ${jail}
 
-/usr/local/bin/cvsup -L 2 -g /space/${jail}/src-supfile > /dev/null 2>&1
+/usr/local/bin/cvsup -L 2 -g ${pb}/${jail}/src-supfile > /dev/null 2>&1
 
-D=/space/jails/${jail}
+D=${pb}/jails/${jail}
 umount -f ${D}/a/ports > /dev/null 2>&1
 umount -f ${D}/usr/src > /dev/null 2>&1
 umount -f ${D}/dev > /dev/null 2>&1
 chflags -R noschg ${D}
 rm -rf ${D}
 
-export __MAKE_CONF=/space/${jail}/make.conf
+export __MAKE_CONF=${pb}/${jail}/make.conf
 
 cd ${SRCBASE}
 mkdir -p ${D}
@@ -55,7 +57,7 @@ mkdir ${D}/var/run
 
 rm -f ${D}/usr/lib/aout/lib*_p.a
 
-mkdir -p /space/repo
+mkdir -p ${pb}/repo
 cd ${D}
-tar cf /space/repo/${jail}.tar.new .
-mv -f /space/repo/${jail}.tar.new /space/repo/${jail}.tar
+tar cf ${pb}/repo/${jail}.tar.new .
+mv -f ${pb}/repo/${jail}.tar.new ${pb}/repo/${jail}.tar

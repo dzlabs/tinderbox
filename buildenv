@@ -7,8 +7,8 @@ buildenv () {
 
     IFS='
 '
-    for i in `cat ${pb}/scripts/rawenv`; do
-	var=$(echo ${i} | sed -e "s|^#${major_version}||")
+    for _tb_var in `cat ${pb}/scripts/rawenv`; do
+	var=$(echo ${_tb_var} | sed -e "s|^#${major_version}||")
 	var=$(echo ${var} | sed -e 's|##PB##|${pb}|g')
 	var=$(echo ${var} | sed -e 's|##JAIL##|${jail}|g')
 	var=$(echo ${var} | sed -e 's|##MAKE##|${pb}/make.conf|g')
@@ -16,4 +16,3 @@ buildenv () {
 	eval "export ${var}" > /dev/null 2>&1
     done
 }
-

@@ -1,17 +1,19 @@
 #!/bin/sh
 
+pb=/space
+
 if [ -z "$1" ]; then
     echo "Please specify a jail type."
     echo "Current jail types are:"
-    for i in `/space/scripts/list_jails`; do
+    for i in `${pb}/scripts/list_jails`; do
 	echo "	${i}"
     done
     exit 1
 fi
 
 
-repo=/space/repo
-jails=/space/jails
+repo=${pb}/repo
+jails=${pb}/jails
 jail=$1
 
 umount -f ${jails}/${jail}/a/ports > /dev/null 2>&1
