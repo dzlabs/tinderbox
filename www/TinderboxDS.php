@@ -33,16 +33,10 @@
 	}
 
 	function getAllPorts() {
-	    $ports = array();
-
-	    $ports = $this->getPorts();
-
-	    return $ports;
+	    return $ports = $this->getPorts();
 	}
 
 	function getPortsForBuild($build) {
-	    $ports = array();
-
 	    $rc = $this->_doQueryHashRef("SELECT * FROM ports WHERE Port_Id IN (SELECT Port_Id FROM build_ports WHERE Build_Id=?)", $results, $build->getId());
 
 	    if (!$rc) {
@@ -82,12 +76,11 @@
 	    global $objectMap;
 
 	    if (!isset($objectMap[$type])) {
-		die("Uknown object type, $type\n");
+		die("Unknown object type, $type\n");
 	    }
 
 	    $table = $objectMap[$type];
 	    $condition = "";
-	    $objects = array();
 
 	    $values = array();
 	    $conds = array();
@@ -105,7 +98,6 @@
 
 	    $condition = implode(" OR ", $conds);
 
-	    $query = "";
 	    if ($condition != "") {
 		$query = "SELECT * FROM $table WHERE $condition";
 	    }
@@ -120,9 +112,7 @@
 		return null;
 	    }
 
-	    $objects = $this->_newFromArray($type, $results);
-
-	    return $objects;
+	    return $this->_newFromArray($type, $results);
 	}
 
 	function getJailByName($name) {
@@ -203,16 +193,12 @@
 	}
 
 	function getAllBuilds() {
-	    $builds = array();
-
 	    $builds = $this->getBuilds();
 
 	    return $builds;
 	}
 
 	function getAllJails() {
-	    $jails = array();
-
 	    $jails = $this->getJails();
 
 	    return $jails;
@@ -231,11 +217,11 @@
 	    }
 
 	    if ($res->numRows() > -1) {
-		$row = $res->numRows();
+		$rows = $res->numRows();
 	    }
 	    else {
 		while($res->fetchRow()) {
-		    $row++;
+		    $rows++;
 		}
 	    }
 
