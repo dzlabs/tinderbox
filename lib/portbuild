@@ -233,14 +233,16 @@ if [ "${error}" = 0 ]; then
 	[ -f ${packages}/All/${pkgname}${PKGSUFFIX} ] && \
 		touch ${packages}/All/${pkgname}${PKGSUFFIX}
 	rm -f ${pb}/errors/${branch}/${pkgname}.log
+	${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${branch}
+	${pb}/scripts/tc updatePortLastSuccessfulBuilt -d ${portdir} -b ${branch}
+	${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${branch} -s SUCCESS
+	${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${branch} -v ${pkgname}
     else
 	cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${branch}/${pkgname}.log
+	${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${branch}
+	${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${branch} -s FAIL
+	${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${branch} -v ${pkgname}
     fi
-# Now update the datastore with our results.
-    ${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${branch}
-    ${pb}/scripts/tc updatePortLastSuccessfulBuilt -d ${portdir} -b ${branch}
-    ${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${branch} -s SUCCESS
-    ${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${branch} -v ${pkgname}
 else
     cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${branch}/${pkgname}.log
     cp ${chroot}/tmp/${pkgname}.log ${pb}/logs/${branch}/${pkgname}.log
