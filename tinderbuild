@@ -96,6 +96,7 @@ ${pb}/scripts/makemake ${build} ${ports}
 
 if [ $? != 0 ]; then
     echo "ERROR: Failed to generate Makefile for ${build}"
+    rm -f ${lock}
     exit 1
 fi
 
@@ -134,4 +135,5 @@ echo "phase 2 took $(date -u -j -r $(($phase2end - $phase2start)) | awk '{print 
 echo $(echo $(ls -1 ${PACKAGES}/All/*${PKGSUFFIX} | wc -l) | bc) "packages built"
 echo $(echo $(du -sh ${PACKAGES} | awk '{print $1}')) " of packages"
 
+rm -r ${lock}
 exit 0
