@@ -352,7 +352,7 @@ sub addPortsTree {
         $portstree->setUpdateCmd($update_cmd);
         $portstree->setDescription($opts->{'d'}) if ($opts->{'d'});
         $portstree->setCVSwebURL($opts->{'w'})   if ($opts->{'w'});
-	$portstree->setLastBuilt($ds->getTime());
+        $portstree->setLastBuilt($ds->getTime());
 
         my $rc = $ds->addPortsTree($portstree);
 
@@ -1116,7 +1116,7 @@ sub addPorts {
                         }
                 }
 
-                if (!$ds->isPortForBuild($pCls, $build)) {
+                if (!$ds->isPortInBuild($pCls, $build)) {
                         $rc = $ds->addPortForBuild($pCls, $build);
                         if (!$rc) {
                                 warn "WARN: Failed to add port for build, "

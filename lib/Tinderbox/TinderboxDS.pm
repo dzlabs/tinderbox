@@ -664,7 +664,8 @@ sub removePortsTree {
         my $self      = shift;
         my $portstree = shift;
 
-        my $rc = $self->_doQuery("DELETE FROM ports_trees WHERE Ports_Tree_Id=?",
+        my $rc =
+            $self->_doQuery("DELETE FROM ports_trees WHERE Ports_Tree_Id=?",
                 [$portstree->getId()]);
 
         return $rc;
@@ -782,6 +783,24 @@ sub isValidPortsTree {
         }
 
         if (scalar(@results)) {
+                return 1;
+        }
+
+        return 0;
+}
+
+sub isPortInBuild {
+        my $self  = shift;
+        my $port  = shift;
+        my $build = shift;
+
+        my @result;
+        my $rc = $self->_doQueryNumRows(
+                "SELECT Port_Id FROM build_ports WHERE Port_Id=? AND Build_Id=?",
+                $port->getId(), $build->getId()
+        );
+
+        if ($rc > 0) {
                 return 1;
         }
 
@@ -1040,8 +1059,8 @@ sub getTime {
                 @time = localtime($localtime);
         }
 
-	my $year = $time[5] + 1900;
-	my $mon = $time[4] + 1;
+        my $year = $time[5] + 1900;
+        my $mon  = $time[4] + 1;
 
         return "$year-$mon-$time[3] $time[2]:$time[1]:$time[0]";
 }
