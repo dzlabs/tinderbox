@@ -352,6 +352,7 @@ sub addPortsTree {
         $portstree->setUpdateCmd($update_cmd);
         $portstree->setDescription($opts->{'d'}) if ($opts->{'d'});
         $portstree->setCVSwebURL($opts->{'w'})   if ($opts->{'w'});
+	$portstree->setLastBuiltTime($ds->getTime());
 
         my $rc = $ds->addPortsTree($portstree);
 

@@ -1029,4 +1029,18 @@ sub destroy {
         $self->{dbh}->disconnect;
 }
 
+sub getTime {
+        my $self      = shift;
+        my $localtime = shift;
+
+        my @time = ();
+        if (!defined($localtime)) {
+                @time = localtime;
+        } else {
+                @time = localtime($localtime);
+        }
+
+        return "$time[5]-$time[4]-$time[3] $time[2]:$time[1]:$time[0]";
+}
+
 1;
