@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.3 2004/03/02 19:51:43 marcus Exp $
+# $Id: TinderboxDS.php,v 1.4 2004/03/02 20:59:17 pav Exp $
 #
 
     require_once 'DB.php';
@@ -64,7 +64,7 @@
 	}
 
 	function getPortsForBuild($build) {
-	    $rc = $this->_doQueryHashRef("SELECT * FROM ports WHERE Port_Id IN (SELECT Port_Id FROM build_ports WHERE Build_Id=?)", $results, $build->getId());
+	    $rc = $this->_doQueryHashRef("SELECT ports.* FROM ports,build_ports WHERE ports.Port_Id = build_ports.Port_Id AND Build_Id=?", $results, $build->getId());
 
 	    if (!$rc) {
 		return null;
@@ -270,6 +270,7 @@
 		return 0;
 	    }
 
+	    $results = array();
 	    while ($row = $res->fetchRow()) {
 		array_push($results, $row);
 	    }
