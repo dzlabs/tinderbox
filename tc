@@ -389,6 +389,8 @@ sub addPort {
 
         buildenv($BUILD_ROOT, $buildname, $jail->getName(),
                 $portstree->getName());
+        $ENV{'LOCALBASE'} = "/nonexistentlocal";
+        $ENV{'X11BASE'}   = "/nonexistentx";
 
         if ($opts->{'r'}) {
                 my @deps = ();
