@@ -1,4 +1,4 @@
-$Id: README,v 1.5 2004/12/08 23:34:16 pav Exp $
+$Id: README,v 1.6 2004/12/31 12:46:00 pav Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -8,6 +8,10 @@ Requirements: perl, DBD::Mysql perl module, MySQL 4.1 or newer.
 
 - Create /space, put scripts under /space/scripts, edit ds.pm, tinderbox.ph,
   setup MySQL database
+- Create database tinderbox and grant permissions to user tinder
+- Create tables within tinderbox database with:
+	mysql -utinder -p tinderbox < tinderbox.schema
+
 - Initialize the Tinderbox: cd /space/scripts && ./tc init
 - Setup NFS server with this in /etc/exports:
   /space  -ro -alldirs -maproot=0:0 localhost
