@@ -13,6 +13,7 @@ sub new {
                 Ports_Tree_Description => "",
                 Ports_Tree_Last_Built  => "",
                 Ports_Tree_Update_Cmd  => "",
+                Ports_Tree_CVSweb_URL  => "",
         };
 
         my @args = ();
@@ -57,6 +58,12 @@ sub getUpdateCmd {
         return $self->{Ports_Tree_Update_Cmd};
 }
 
+sub getCVSwebURL {
+        my $self = shift;
+
+        return $self->{Ports_Tree_CVSweb_URL};
+}
+
 sub setName {
         my $self = shift;
         my $name = shift;
@@ -83,6 +90,13 @@ sub setUpdateCmd {
         my $updateCmd = shift;
 
         $self->{Ports_Tree_Update_Cmd} = $updateCmd;
+}
+
+sub setCVSwebURL {
+        my $self = shift;
+        my $url  = shift;
+
+        $self->{Ports_Tree_CVSweb_URL} = $url;
 }
 
 1;
