@@ -30,6 +30,7 @@ CREATE TABLE ports_trees (
   Ports_Tree_Description text,
   Ports_Tree_Last_Built datetime,
   Ports_Tree_Update_Cmd varchar(255) DEFAULT 'CVSUP',
+  Ports_Tree_CVSweb_URL varchar(255),
   PRIMARY KEY (Ports_Tree_Id),
   UNIQUE (Ports_Tree_Name),
   INDEX Ports_Tree_Name_Idx (Ports_Tree_Name),
