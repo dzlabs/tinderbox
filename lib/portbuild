@@ -247,6 +247,8 @@ fi
 
 mount -t devfs foo ${chroot}/dev
 
+umount -f ${chroot}/compat/linux/proc > /dev/null 2>&1
+
 if [ -n "${CCACHE_ENABLED}" ]; then
     mkdir -p ${pb}/ccache/${branch}
     mkdir -p ${chroot}/ccache
