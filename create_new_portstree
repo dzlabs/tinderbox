@@ -1,0 +1,100 @@
+#!/bin/sh
+
+usage () {
+    echo "usage: $0 -n <portstree name> [-d <description>] [-u <update command|CVSUP|NONE>]"
+    exit 1
+}
+
+pb=/space
+suphost=cvsup12.FreeBSD.org
+cvsup_compress= #*default compress
+
+args=$(getopt n:d:u: $*)
+
+if [ $? != 0 ]; then
+    usage
+fi
+
+portstree=""
+descr=""
+update_cmd=""
+uc=""
+
+set -- $args
+
+for i; do
+    case "$i" in
+	-n)
+	  portstree="$2"; shift;
+	  shift;;
+	-d)
+	  descr="$2"; shift;
+	  shift;;
+	-u)
+	  update_cmd="$2"; shift;
+	  shift;;
+	--)
+	  shift; break;;
+    esac
+done
+
+if [ -z "${portstree}" ]; then
+    usage
+fi
+
+_portstrees=$(${pb}/scripts/tc listPortsTrees)
+if echo ${_portstrees} | grep -qw ${portstree}; then
+    echo "ERROR: Portstree, \"${portstree}\" already exists."
+    exit 1
+fi
+
+if [ -z "${update_cmd}" ]; then
+    update_cmd="/usr/local/bin/cvsup -g ${pb}/portstrees/${portstree}/ports-supfile"
+elif [ "${update_cmd}" = "NONE" ]; then
+    update_cmd=""
+    uc="-u NONE"
+else
+    uc="-u ${update_cmd}"
+fi
+
+echo -n "INFO: Creating directories and supfile for new portstree..."
+rm -rf ${pb}/portstrees/${portstree}
+
+mkdir -p ${pb}/portstrees/${portstree}/ports
+
+cat > ${pb}/portstrees/${portstree}/ports-supfile << EOSF
+*default host=${suphost}
+*default base=${pb}/portstrees/${portstree}
+*default prefix=${pb}/portstrees/${portstree}
+*default release=cvs tag=.
+*default delete use-rel-suffix
+${cvsup_compress}
+ports-all
+EOSF
+
+echo "DONE."
+
+if [ ! -z "${update_cmd}" ]; then
+    echo -n "INFO: Updating portstree with ${update_cmd}..."
+    ${update_cmd} > /dev/null 2>&1
+    if [ $? != 0 ]; then
+	echo "FAILED."
+	exit 1
+    fi
+    echo "DONE."
+fi
+
+echo -n "INFO: Adding portstree to datastore..."
+if [ ! -z "${descr}" ]; then
+    descr="-d ${descr}"
+fi
+${pb}/scripts/tc addPortsTree -n ${portstree} ${descr} ${uc}
+
+if [ $? != 0 ]; then
+    echo "FAILED."
+    exit 1
+fi
+
+echo "DONE."
+
+exit 0
