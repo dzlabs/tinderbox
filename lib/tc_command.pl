@@ -4,7 +4,7 @@
 BEGIN {
         my $pb = "/space";
         push @INC, "$pb/scripts";
-        use lib "$pb/sctips";
+        use lib "$pb/scripts";
 }
 
 use strict;
