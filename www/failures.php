@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id$
+# $Id: failures.php,v 1.1 2004/03/05 07:51:23 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -36,7 +36,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>MarcusCom Tinderbox - All Build Failures</title>
+<title><?= $tinderbox_name ?> - All Build Failures</title>
 <link href="tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
 <body>

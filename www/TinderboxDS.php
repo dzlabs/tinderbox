@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.17 2004/03/03 20:35:20 pav Exp $
+# $Id: TinderboxDS.php,v 1.18 2004/03/05 07:51:23 pav Exp $
 #
 
     require_once 'DB.php';
@@ -33,6 +33,7 @@
     require_once 'Jail.php';
     require_once 'PortsTree.php';
     require_once 'ds.inc';
+    require_once 'tinderbox.inc';
 
     $objectMap = array(
 	"Port" => "ports",
@@ -40,10 +41,6 @@
 	"Build" => "builds",
 	"PortsTree" => "ports_trees"
     );
-
-    $pkgdir = "/tb/packages";
-    $logdir = "/tb/logs";
-    $errorlogdir = "/tb/errors";
 
     class TinderboxDS {
 	var $db;

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showport.php,v 1.9 2004/03/04 18:53:46 pav Exp $
+# $Id: showport.php,v 1.10 2004/03/07 08:13:58 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -37,14 +37,14 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>GNOME 2 Packages For i386</title>
+<title><?= $tinderbox_name ?></title>
 <link href="tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <?php
     if ($port) {
 ?>
-<h1>GNOME 2 Packages for i386 - <?= $port->getName() ?></h1>
+<h1><?= $tinderbox_title ?> - <?= $port->getName() ?></h1>
 <?php
 	$builds = $ds->getBuildsDetailed(array("Port_Id" => $id));
 

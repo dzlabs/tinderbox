@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: lastbuilds.php,v 1.5 2004/03/04 23:49:31 pav Exp $
+# $Id: lastbuilds.php,v 1.6 2004/03/07 08:13:58 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -36,7 +36,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>MarcusCom Tinderbox - Latest Builds</title>
+<title><?= $tinderbox_name ?> - Latest Builds</title>
 <link href="tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
