@@ -958,6 +958,13 @@ sub removeBuild {
                 return $rc;
         }
 
+        $rc = $self->_doQuery("DELETE FROM build_users WHERE Build_Id=?",
+                [$build->getId()]);
+
+        if (!$rc) {
+                return $rc;
+        }
+
         $rc = $self->_doQuery("DELETE FROM builds WHERE Build_Id=?",
                 [$build->getId()]);
 
