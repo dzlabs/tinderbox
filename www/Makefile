@@ -1,5 +1,5 @@
 SRCS=	Port.php Build.php PortsTree.php TinderObject.php TinderboxDS.php \
-	index.php showbuild.php tinderstyle.css
+	index.php showbuild.php showport.php tinderstyle.css
 DESTDIR?=	/www/data/tinderbox
 
 install:

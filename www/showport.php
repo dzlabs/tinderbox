@@ -31,7 +31,7 @@
 
     $ds = new TinderboxDS();
 
-    $build = $ds->getBuildByName($name);
+    $port = $ds->getPortById($id);
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -42,29 +42,24 @@
 </head>
 <body>
 <?php
-    if ($build) {
+    if ($port) {
 ?>
-<h1>GNOME 2 Packages for i386 - <?= $build->getName() ?></h1>
+<h1>GNOME 2 Packages for i386 - <?= $port->getName() ?></h1>
 <?php
 	echo "<p>\n";
-	echo "Description: " . $build->getDescription() . "<br />\n";
-
-	$jail = $ds->getJailById($build->getJailId());
-	echo "System: FreeBSD " . $jail->getName() . " (" . $jail->getTag() . ") updated on " . $jail->prettyDatetime($jail->getLastBuilt()) . "<br />\n";
-
-	$ports_tree = $ds->getPortsTreeById($build->getPortsTreeId());
-	echo "Ports Tree: " . $ports_tree->getDescription() . "<br />\n";
+	echo "Directory: " . $port->getDirectory() . "<br />\n";
+	echo "Comment: " . $port->getComment() . "<br />\n";
+	echo "Maintainer: " . $port->getMaintainer() . "<br />\n";
 	echo "</p>\n";
 
-	$ports = $ds->getPortsForBuild($build);
+	$builds = $ds->getBuildsOfPort($id);
 
-	if ($ports) {
+	if ($builds) {
 
 		?>
 		<table>
 		<tr>
-		<th>Port Directory</th>
-		<th>Maintainer</th>
+		<th>Build</th>
 		<th>Version</th>
 		<th style="width: 20px">&nbsp;</th>
 		<th>&nbsp;</th>
@@ -72,36 +67,35 @@
 		<th>Last Successfull Build</th>
 		</tr>
 		<?php
-		foreach ($ports as $port) {
+		foreach ($builds as $build) {
 			echo "<tr>\n";
-			echo "<td><a href=\"showport.php?id=" . $port->getId() . "\">" . $port->getDirectory() . "</a></td>\n";
-			echo "<td>" . $port->prettyEmail($port->getMaintainer()) . "</td>\n";
-			echo "<td>" . $port->getLastBuiltVersion() . "</td>\n";
-			if ($port->getLastStatus() == "SUCCESS") {
+			echo "<td><a href=\"showbuild.php?name=" . $build["Build_Name"] . "\">" . $build["Build_Name"] . "</a></td>\n";
+			echo "<td>" . $build["Last_Built_Version"] . "</td>\n";
+			if ($build["Last_Status"] == "SUCCESS") {
 				echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
-				echo "<td><a href=\"" . $pkgdir . "/" . $build->getName() . "/All/" . $port->getLastBuiltVersion() . ".tbz" . "\">package</a></td>\n";
-			} elseif ($port->getLastStatus() == "FAIL") {
+				echo "<td><a href=\"" . $pkgdir . "/" . $build["Build_Name"] . "/All/" . $build["Last_Built_Version"] . ".tbz" . "\">package</a></td>\n";
+			} elseif ($build["Last_Status"] == "FAIL") {
 				echo "<td style=\"background-color: red\">&nbsp;</td>\n";
-				echo "<td><a href=\"" . $errorlogdir . "/" . $build->getName() . "/" . $port->getLastBuiltVersion() . ".log\">log</a></td>\n";
+				echo "<td><a href=\"" . $errorlogdir . "/" . $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log\">log</a></td>\n";
 			} else { /* UNKNOWN */
 				echo "<td style=\"background-color: grey\">&nbsp;</td>\n";
 				echo "<td>&nbsp;</td>\n";
 			}
-			echo "<td>" . $port->prettyDatetime($port->getLastBuilt()) . "</td>\n";
-			echo "<td>" . $port->prettyDatetime($port->getLastSuccessfulBuilt()) . "</td>\n";
+			echo "<td>" . $port->prettyDatetime($build["Last_Built"]) . "</td>\n";
+			echo "<td>" . $port->prettyDatetime($build["Last_Successful_Built"]) . "</td>\n";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
 
 	} else {
 
-		echo "<p>No ports are being build.</p>\n";
+		echo "<p>This port is not being built.</p>\n";
 
 	}
 
     } else {
 
-	echo "<p>Invalid build name.</p>\n";
+	echo "<p>Invalid port ID.</p>\n";
 
     }
 

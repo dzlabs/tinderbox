@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.9 2004/03/03 18:15:02 pav Exp $
+# $Id: TinderboxDS.php,v 1.10 2004/03/03 18:40:32 pav Exp $
 #
 
     require_once 'DB.php';
@@ -105,6 +105,13 @@
 	    }
 
 	    return $results[0];
+	}
+
+	function getBuildsOfPort($port_id) {
+	    $query = "SELECT build_ports.*,builds.Build_Name FROM build_ports,builds WHERE build_ports.Build_Id = builds.Build_Id AND build_ports.Port_Id = ?";
+	    $rc = $this->_doQueryHashRef($query, $results, $port_id);
+	    if (!$rc) return null;
+	    return $results;
 	}
 
 	function getPorts($params = array()) {
