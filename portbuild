@@ -50,7 +50,7 @@ noclean=0
 nullfs=0
 
 # check parameter count
-if [ $# -lt 5 -o $# -gt 8 ]; then
+if [ $# -lt 5 ]; then
     usage
 fi
 
