@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id$
+# $Id: Jail.pm,v 1.3 2004/03/10 04:56:12 marcus Exp $
 #
 
 package Jail;
@@ -118,7 +118,7 @@ sub setDescription {
         my $self  = shift;
         my $descr = shift;
 
-        $self->{Description} = $descr;
+        $self->{Jail_Description} = $descr;
 }
 
 1;
