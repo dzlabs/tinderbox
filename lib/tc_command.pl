@@ -266,8 +266,9 @@ require "tinderlib.pl";
                 func => \&sendBuildErrorMail,
                 help =>
                     "Send email to the build interest list when a port fails to build",
-                usage  => "-b <build name> -d <port directory>",
-                optstr => 'b:d:',
+                usage =>
+                    "-b <build name> -d <port directory> [-p <package name>]",
+                optstr => 'b:d:p:',
         },
         "listUsers" => {
                 func  => \&listUsers,
@@ -1173,7 +1174,10 @@ sub sendBuildErrorMail {
         my $build = $ds->getBuildByName($buildname);
         my $port  = $ds->getPortByDirectory($portdir);
 
-        my $version = $ds->getPortLastBuiltVersion($port, $build);
+        my $version = $opts->{'p'};
+        if (!$version) {
+                $version = $ds->getPortLastBuiltVersion($port, $build);
+        }
 
         my $subject = $SUBJECT . " Port $portdir failed for build $buildname";
         my $now     = scalar localtime;
