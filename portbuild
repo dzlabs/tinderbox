@@ -1,0 +1,223 @@
+#!/bin/sh
+
+# usage: $0 <jail type> [-init] [-noclean] [-plistcheck] pkgname dirname
+
+cleanup()
+{
+    chroot=$1
+    noclean=$2
+    error=$3
+    cleandirs=$4
+    pkgname=$5
+
+    umount -f ${chroot}/a/ports
+    umount -f ${chroot}/usr/src
+    umount -f ${chroot}/dev
+
+    if [ $noclean = 0 -o $error = 0 ]; then
+	rm -rf ${chroot}/tmp/*
+	for dir in ${cleandirs}; do
+	    if ! rm -rf ${chroot}${dir} >/dev/null 2>&1; then
+		chflags -R noschg ${chroot}${dir}
+		rm -rf ${chroot}${dir} >/dev/null 2>&1
+	    fi
+	done
+	chroot ${chroot} /sbin/ldconfig -R
+	chroot ${chroot} /sbin/ldconfig -aout -R
+	rm -rf ${chroot}/var/db/pkg/*
+    fi
+
+    echo -n "$pkgname done at "
+    date
+
+    exit $error
+}
+
+# Configurable variables
+pb=/space
+
+error=0
+init=0
+noclean=0
+
+branch=$1
+shift
+
+# Default niceness value
+nice=0
+
+. ${pb}/scripts/buildenv
+
+if [ "x$1" = "x-init" ]; then
+    init=1
+    shift
+fi
+
+if [ "x$1" = "x-noclean" ]; then
+    noclean=1
+    shift
+fi
+
+plistcheck=0
+if [ "x$1" = "x-plistcheck" ]; then
+    plistcheck=1
+    export PLISTCHECK=1
+    shift
+fi
+args="$*"
+
+buildenv ${pb} ${branch}
+
+pkgname=$(basename $1 ${PKGSUFFIX})
+dirname=$2
+shift 2
+
+export WRKDIRPREFIX=/tmp
+export DISTDIR=/tmp/distfiles
+export PACKAGES=/tmp/packages
+
+unset MAKEFLAGS
+unset PORTSDIR
+
+export TIMEOUT=7200
+
+ulimit -f 524288
+ulimit -t 3600
+
+cleandirs="/usr/local /usr/X11R6 /compat /var/db/pkg"
+
+export FTP_TIMEOUT=900
+export HTTP_TIMEOUT=900
+export FTP_PASSIVE_MODE=yes
+
+export BATCH=1
+export PACKAGE_BUILDING=1
+
+export PORTOBJFORMAT=elf
+
+export USA_RESIDENT=yes
+
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/X11R6/bin:.
+
+echo "building $pkgname"
+
+chroot=${pb}/jails/${branch}
+packages=${pb}/packages/${branch}
+
+major_version=$(echo ${jail} | cut -d'-' -f1 | cut -d'.' -f1)
+
+if [ "${major_version}" = "4" ]; then
+    mkdir -p ${chroot}/libexec
+    mkdir -p ${chroot}/lib
+    cp -p /libexec/ld-elf.so.1 ${chroot}/libexec
+    cp -p /lib/libc.so.5 /lib/libkvm.so.2 /lib/libm.so.2 ${chroot}/lib
+fi
+cp -p /bin/ps ${chroot}/bin
+cp -p /usr/bin/killall ${chroot}/usr/bin
+
+echo ${OSREL}-${BRANCH} > ${chroot}/usr/bin/UNAME_VERSION
+
+trap  "cleanup ${chroot} ${noclean} ${error} \"${cleandirs}\" ${pkgname}" 1 2 3 9 10 11 15
+
+rm -rf ${chroot}/tmp/*
+cd ${chroot}/tmp
+mkdir -p depends distfiles packages
+
+echo "building ${pkgname} in directory ${chroot}" | tee ${chroot}/tmp/${pkgname}.log
+echo "with arguments: ${args}" | tee -a ${chroot}/tmp/${pkgname}.log
+
+mkdir -p ${chroot}/a/ports
+rm -rf ${chroot}/usr/ports
+mount -o nfsv3,intr -r localhost:${pb}/${branch}/ports ${chroot}/a/ports
+ln -sf ../a/ports ${chroot}/usr/ports
+
+mkdir -p ${chroot}/usr/src
+
+mount -o nfsv3,intr -r localhost:${pb}/${branch}/src ${chroot}/usr/src
+
+mount -t devfs foo ${chroot}/dev
+
+for dir in ${cleandirs}; do
+    if ! rm -rf ${chroot}${dir} >/dev/null 2>&1; then
+	chflags -R noschg ${chroot}${dir}
+	rm -rf ${chroot}${dir} >/dev/null 2>&1
+    fi
+done
+
+rm -rf ${chroot}/var/db/pkg/*
+mkdir -p ${chroot}/usr/X11R6
+
+mtree -deU -f ${chroot}/etc/mtree/BSD.root.dist -p ${chroot} \
+  >/dev/null 2>&1
+mtree -deU -f ${chroot}/etc/mtree/BSD.var.dist -p ${chroot}/var \
+  >/dev/null 2>&1
+mtree -deU -f ${chroot}/etc/mtree/BSD.usr.dist -p ${chroot}/usr \
+  >/dev/null 2>&1
+mtree -deU -f ${chroot}/etc/mtree/BSD.local.dist -p ${chroot}/usr/local \
+  >/dev/null 2>&1
+mtree -deU -f ${chroot}/etc/mtree/BSD.x11-4.dist -p ${chroot}/usr/X11R6 \
+  >/dev/null 2>&1
+
+_ldconfig_dirs="/lib /usr/lib /usr/lib/compat"
+ldconfig_dirs=""
+for i in ${_ldconfig_dirs}; do
+    if [ -d ${chroot}/${i} ]; then
+	ldconfig_dirs="${ldconfig_dirs} ${i}"
+    fi
+done
+chroot ${chroot} /sbin/ldconfig ${ldconfig_dirs}
+chroot ${chroot} /sbin/ldconfig -aout /usr/lib/aout /usr/lib/compat/aout
+
+while [ $# -gt 0 ]; do
+    if [ -f ${packages}/All/$1 ]; then
+	if [ ! -f ${chroot}/tmp/depends/$1 ]; then
+	    echo "copying package $1 for ${pkgname}"
+	    cp -p ${packages}/All/$1 ${chroot}/tmp/depends
+	fi
+    else
+	echo "skipping package $1 for ${pkgname} since it is missing"
+    fi
+    shift
+done
+
+cp -p ${pb}/scripts/buildscript ${chroot}
+cp -p ${pb}/scripts/pnohang ${chroot}
+
+chroot ${chroot} /buildscript ${dirname} 1 2>&1 | tee -a ${chroot}/tmp/${pkgname}.log
+if [ -f ${chroot}/tmp/status ]; then
+    error=$(cat ${chroot}/tmp/status)
+else
+    error=255
+fi
+
+if [ "${error}" = 0 ]; then
+    ln -sf ${pkgname}.log2 ${chroot}/tmp/make.log
+
+    chroot ${chroot} /usr/bin/nice -n $nice /buildscript ${dirname} 2  > ${chroot}/tmp/${pkgname}.log2 2>&1
+
+    grep pnohang ${chroot}/tmp/${pkgname}.log2
+    cat ${chroot}/tmp/${pkgname}.log2 >> ${chroot}/tmp/${pkgname}.log
+    rm ${chroot}/tmp/${pkgname}.log2
+
+    cp ${chroot}/tmp/${pkgname}.log ${pb}/logs/${branch}/${pkgname}.log
+    error=$(cat ${chroot}/tmp/status)
+
+    if [ -e ${chroot}/tmp/work.tbz ]; then
+	cp ${chroot}/tmp/work.tbz ${pb}/wrkdirs/${branch}/${pkgname}.tbz
+    fi
+
+    if [ "${error}" = 0 ]; then
+	tar -C ${chroot}/tmp/packages -cf - . | \
+		tar --unlink -C ${packages} -xvf -
+	[ -f ${packages}/All/${pkgname}${PKGSUFFIX} ] && \
+		touch ${packages}/All/${pkgname}${PKGSUFFIX}
+	rm -f ${pb}/errors/${branch}/${pkgname}.log
+    else
+	cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${branch}/${pkgname}.log
+    fi
+else
+    cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${branch}/${pkgname}.log
+    cp ${chroot}/tmp/${pkgname}.log ${pb}/logs/${branch}/${pkgname}.log
+fi
+
+cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname}

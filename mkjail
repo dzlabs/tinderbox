@@ -1,0 +1,61 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+    echo "Please specify a jail type."
+    echo "Current jail types are:"
+    for i in `/space/scripts/list_jails`; do
+	echo "	${i}"
+    done
+    exit 1
+fi
+
+. /space/scripts/buildenv
+
+jail=$1
+
+buildenv /space ${jail}
+
+/usr/local/bin/cvsup -L 2 -g /space/${jail}/src-supfile > /dev/null 2>&1
+
+D=/space/jails/${jail}
+umount -f ${D}/a/ports > /dev/null 2>&1
+umount -f ${D}/usr/src > /dev/null 2>&1
+umount -f ${D}/dev > /dev/null 2>&1
+chflags -R noschg ${D}
+rm -rf ${D}
+
+export __MAKE_CONF=/space/${jail}/make.conf
+
+cd ${SRCBASE}
+mkdir -p ${D}
+make world DESTDIR=${D}
+cd etc
+make distribution DESTDIR=${D}
+
+cd ${D}
+ln -sf dev/null kernel
+ln -sf aj ${D}/etc/malloc.conf
+
+touch -f ${D}/etc/fstab
+touch -f ${D}/etc/wall_cmos_clock
+echo "portmap_enable=\"NO\"" > ${D}/etc/rc.conf
+echo "network_interfaces=\"\"" >> ${D}/etc/rc.conf
+cp ${D}/usr/share/zoneinfo/EST5EDT ${D}/etc/localtime
+chmod 0444 ${D}/etc/localtime
+echo "domain marcuscom.com" > ${D}/etc/resolv.conf
+echo "nameserver 192.168.1.1" >> ${D}/etc/resolv.conf
+
+mtree -deU -f ${SRCBASE}/etc/mtree/BSD.root.dist -p ${D}/
+mtree -deU -f ${SRCBASE}/etc/mtree/BSD.var.dist -p ${D}/var
+mtree -deU -f ${SRCBASE}/etc/mtree/BSD.usr.dist -p ${D}/usr
+mtree -deU -f ${SRCBASE}/etc/mtree/BSD.local.dist -p ${D}/usr/local
+
+date '+%Y%m%d' > ${D}/var/db/port.mkversion
+mkdir ${D}/var/run
+
+rm -f ${D}/usr/lib/aout/lib*_p.a
+
+mkdir -p /space/repo
+cd ${D}
+tar cf /space/repo/${jail}.tar.new .
+mv -f /space/repo/${jail}.tar.new /space/repo/${jail}.tar

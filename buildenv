@@ -1,0 +1,19 @@
+
+buildenv () {
+    pb=$1
+    jail=$2
+
+    major_version=$(echo ${jail} | cut -d'-' -f1 | cut -d'.' -f1)
+
+    IFS='
+'
+    for i in `cat ${pb}/scripts/rawenv`; do
+	var=$(echo ${i} | sed -e "s|^#${major_version}||")
+	var=$(echo ${var} | sed -e 's|##PB##|${pb}|g')
+	var=$(echo ${var} | sed -e 's|##JAIL##|${jail}|g')
+	var=$(echo ${var} | sed -e 's|##MAKE##|${pb}/make.conf|g')
+	var=$(echo ${var} | sed -E -e 's|\^\^([^\^]+)\^\^|${\1}|g')
+	eval "export ${var}" > /dev/null 2>&1
+    done
+}
+

@@ -1,0 +1,122 @@
+#!/usr/bin/perl
+
+use strict;
+use TinderboxDS;
+use vars qw(
+    $JAIL
+    @PORTS
+    $JAIL_REPO
+    $BUILD_ROOT
+    $PORTBUILD
+    $ERROR_DIR
+    $LOG_DIR
+    $SERVER_PROTOCOL
+    $SERVER_HOST
+    $SERVER_DIR
+    $SENDMAIL
+    $SENDER
+    $SUBJECT
+    $TINDER_STOP
+);
+
+require "tinderbox.ph";    # Setup the tinderbox config.
+require "buildenv.pl";
+
+# Get a database handle for obtaining the ports.
+my $ds         = TinderboxDS->new();
+my @jail_types = $ds->getJailTypes();
+if (!defined(@jail_types)) {
+        cleanup($ds, 1,
+                "Failed to get list of jails: " . $ds->getError() . "\n");
+}
+if (scalar(@ARGV) < 1) {
+        print STDERR
+            "usage: tinderbuild <jail type> [<portname> <port directory> ...]\n";
+        print STDERR "Current jail types are:\n";
+        foreach (@jail_types) {
+                print STDERR "\t$_\n";
+        }
+        exit(1);
+}
+
+@PORTS = ();
+$JAIL  = $ARGV[0];
+shift @ARGV;
+
+if (scalar(@ARGV) > 0) {
+        @PORTS = @ARGV;
+}
+
+buildenv($BUILD_ROOT, $JAIL);
+
+if (!scalar(@PORTS)) {
+        my @dsPorts = $ds->getPorts("Port_Id", "Port_Directory");
+        if (!defined(@dsPorts)) {
+                cleanup($ds, 1,
+                              "Failed to get port information: "
+                            . $ds->getError()
+                            . "\n");
+        }
+        my $hash_ref;
+	foreach $hash_ref (@dsPorts) {
+                push @PORTS, $hash_ref->{'Port_Directory'}
+                    if $ds->isPortForJail($hash_ref->{'Port_Id'}, $JAIL);
+        }
+}
+my (%pkgdir, %pkgdeps);
+while (scalar(@PORTS)) {
+        my $portdir = shift @PORTS;
+        my ($pkgname, $deplist, $tportdir, @deps);
+
+        next if (defined($pkgdir{$portdir}));
+
+        $tportdir = $ENV{'PORTSDIR'} . "/" . $portdir;
+        $pkgname  = `cd $tportdir && make -V PKGNAME`;
+        chomp $pkgname;
+
+        $pkgdeps{$portdir} = [];
+        $pkgdir{$portdir}  = $pkgname;
+        $deplist           = `cd $tportdir && make all-depends-list`;
+        chomp $deplist;
+        @deps = split(/\n/, $deplist);
+        foreach my $dep (@deps) {
+                $dep =~ s|^$ENV{'PORTSDIR'}/||;
+                push @{$pkgdeps{$portdir}}, $dep;
+                push @PORTS, $dep;
+        }
+}
+my $makefile = join("/", $BUILD_ROOT, "Makefile." . $JAIL);
+unless (open(MK, ">" . $makefile)) {
+        cleanup($ds, 1, "Failed to open $makefile for writing: $!\n");
+}
+foreach my $key (keys %pkgdir) {
+        my @depsarr = @{$pkgdeps{$key}};
+        my @deppkgnames = map { $pkgdir{$_} . $ENV{'PKGSUFFIX'} } @depsarr;
+        print MK "all: $pkgdir{$key}$ENV{'PKGSUFFIX'}\n";
+        print MK "$pkgdir{$key}: $pkgdir{$key}$ENV{'PKGSUFFIX'}\n";
+        print MK "$pkgdir{$key}$ENV{'PKGSUFFIX'}: "
+            . join(" ", @deppkgnames) . "\n";
+        print MK
+            "\t\@$PORTBUILD $JAIL $pkgdir{$key}$ENV{'PKGSUFFIX'} /usr/ports/$key "
+            . join(" ", @deppkgnames) . "\n";
+}
+close(MK);
+
+# Now, symlink the Makefile to the correct All directory.
+system("mkdir -p $BUILD_ROOT/packages/$JAIL/All");
+symlink $makefile, "$BUILD_ROOT/packages/$JAIL/All/Makefile";
+
+cleanup($ds, 0, undef);
+
+sub cleanup {
+        my ($ds, $code, $msg) = @_;
+
+        if ($code && defined($msg)) {
+                $msg = "ERROR: " . $msg;
+        }
+
+        $ds->destroy()    if (defined($ds));
+        print STDERR $msg if (defined($msg));
+
+        exit($code);
+}

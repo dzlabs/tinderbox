@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+
+use strict;
+use TinderboxDS;
+use vars qw(
+    $PORTS_DIR
+);
+
+require "tinderbox.ph";
+
+$PORTS_DIR = '/usr/ports';
+
+if (!(scalar @ARGV)) {
+        die "usage: builddb <category/port> ...\n";
+}
+if ($ENV{'PORTSDIR'}) {
+        $PORTS_DIR = $ENV{'PORTSDIR'};
+}
+
+my $ds = TinderboxDS->new();
+
+foreach my $port (@ARGV) {
+        my $portdir = $PORTS_DIR . "/" . $port;
+        next if (!-d $portdir);
+        next if ($ds->isPortInDS($portdir));
+
+        my $portname = `cd $portdir && make -V PORTNAME`;
+        chomp $portname;
+        my $portcomment = `cd $portdir && make -V COMMENT`;
+        chomp $portcomment;
+
+        my $rc = $ds->addPort($portdir, $portname, $portcomment);
+        if (!$rc) {
+                warn "Failed to add port $portdir: " . $ds->getError() . "\n";
+        }
+}
+
+$ds->destroy();
+exit(0);

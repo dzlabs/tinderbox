@@ -1,0 +1,19 @@
+#!/usr/bin/perl
+
+use strict;
+use TinderboxDS;
+
+my $ds = TinderboxDS->new();
+
+my @jails = $ds->getJailTypes();
+
+if (defined(@jails)) {
+        foreach my $jail (@jails) {
+                print "$jail\n";
+        }
+} else {
+        $ds->destroy();
+        die "Failed to list jails: " . $ds->getError . "\n";
+}
+$ds->destroy();
+exit 0;

@@ -1,0 +1,122 @@
+#!/usr/bin/perl
+
+use strict;
+use vars qw(
+    $BRANCH
+    $TINDERBUILD
+    $PORTS_SUPFILE
+    $MKJAIL
+    $MKJAILFROMREPO
+    $INIT
+    $CVSUP
+    $TINDER_STOP
+    $PATCHES_DIR
+);
+push @INC, "/usr/local/share/tinderbox";
+require "tinderbox.ph";
+
+$INIT  = 0;
+$CVSUP = 0;
+
+$SIG{INT} = sub { die "\nInterrupted.\n" };
+
+if (scalar(@ARGV) > 0 && $ARGV[0] eq "-init") {
+        $INIT = 1;
+        shift @ARGV;
+}
+
+if (scalar(@ARGV) > 0 && $ARGV[0] eq "-cvsup") {
+        $CVSUP = 1;
+        shift @ARGV;
+}
+
+# First CVSup the latest ports tree
+my $rc;
+if ($CVSUP) {
+        print "Running CVSup on ports...";
+        $rc =
+            0xffff &
+            system("/usr/local/bin/cvsup -g $PORTS_SUPFILE > /dev/null 2>&1");
+        if ($rc) {
+                handle_error("Failed to run CVSup", $rc);
+        }
+        print "DONE\n";
+
+        print "Patching ports tree...";
+        if (opendir(PATCHES, $PATCHES_DIR)) {
+                my @patches =
+                    grep { /^patch-/ && $_ !~ /orig$/ && -f "$PATCHES_DIR/$_" }
+                    readdir(PATCHES);
+                closedir(PATCHES);
+
+                foreach (@patches) {
+                        $rc =
+                            0xffff &
+                            system(
+                                "/usr/bin/patch --forward --quiet -E -p < $PATCHES_DIR/$_"
+                            );
+                        if ($rc) {
+                                handle_error("Failed to apply patch $_", $rc);
+                        }
+                }
+        } else {
+                warn "Unable to open $PATCHES_DIR\n";
+        }
+
+        print "DONE\n";
+}
+
+# First, initialize the jail.
+if ($INIT) {
+        print "Creating jails from scratch...";
+        $rc = 0xffff & system("$MKJAIL current");
+        if ($rc) {
+                handle_error("Failed to create jail for current", $rc);
+        }
+        $rc = 0xffff & system("$MKJAIL stable");
+        if ($rc) {
+                handle_error("Failed to create jail for stable", $rc);
+        }
+} else {
+        print "Creating jails from repo...";
+        $rc = 0xffff & system("$MKJAILFROMREPO current");
+        if ($rc) {
+                handle_error("Failed to create jail for current", $rc);
+        }
+        $rc = 0xffff & system("$MKJAILFROMREPO stable");
+        if ($rc) {
+                handle_error("Failed to create jail for stable", $rc);
+        }
+}
+print "DONE\n";
+
+$rc = 0xffff & system("$TINDERBUILD current > /dev/null 2>&1 &");
+if ($rc) {
+        handle_error("Tinderbuild failed for current", $rc);
+}
+$rc = 0xffff & system("$TINDERBUILD stable > /dev/null 2>&1 &");
+if ($rc) {
+        handle_error("Tinderbuild failed for stable", $rc);
+}
+
+exit(0);
+
+sub handle_error {
+        my ($msg, $rc) = @_;
+
+        if ($rc == 0xff00) {
+                die "$msg: $!\n";
+        } elsif ($rc > 0x80) {
+                $rc >>= 8;
+                die "$msg: (ran with non-zero exit status $rc)\n";
+        } else {
+                $msg .= ": (ran with ";
+                if ($rc & 0x80) {
+                        $rc &= ~0x80;
+                        $msg .= "coredump from ";
+                }
+                $msg .= "signal $rc)\n";
+                die $msg;
+        }
+}
+

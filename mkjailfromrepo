@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+    echo "Please specify a jail type."
+    echo "Current jail types are:"
+    for i in `/space/scripts/list_jails`; do
+	echo "	${i}"
+    done
+    exit 1
+fi
+
+
+repo=/space/repo
+jails=/space/jails
+jail=$1
+
+umount -f ${jails}/${jail}/a/ports > /dev/null 2>&1
+umount -f ${jails}/${jail}/usr/src > /dev/null 2>&1
+umount -f ${jails}/${jail}/dev > /dev/null 2>&1
+chflags -R noschg ${jails}/${jail}
+rm -rf ${jails}/${jail}
+
+mkdir -p ${jails}/${jail}
+
+tar -C ${jails}/${jail} -xf ${repo}/${jail}.tar
+
