@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: index.php,v 1.3 2004/03/02 19:51:43 marcus Exp $
+# $Id: index.php,v 1.4 2004/03/02 20:08:27 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -35,16 +35,18 @@
     $builds = $ds->getAllBuilds();
 ?>
 
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>GNOME 2 Packages For i386</title>
+<link href="tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
-<body bgcolor="#FFFFFF">
+<body>
 <h1>GNOME 2 Packages for i386</h1>
 <?php
     if (is_array($builds)) {
 ?>
-<table border="1" cellpadding="1" cellspacing="1">
+<table>
 <tr>
 <th>Build Name</th>
 <th>Build Description</th>
