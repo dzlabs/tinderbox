@@ -67,20 +67,27 @@ if [ "x$1" = "x-plistcheck" ]; then
     export PLISTCHECK=1
     shift
 fi
-args="$*"
+
+ED=$1
+PD=$2
+FD=$3
+BD=$4
+RD=$5
 
 buildenv ${pb} ${branch} ${jail} ${portstree}
 unset DISPLAY
 
-pkgname=$(basename $1 ${PKGSUFFIX})
+pkgname=$(basename $6 ${PKGSUFFIX})
+dirname=$7
+shift 2
+
+echo $pkgname
+echo $dirname
 
 if grep -qxF ${pkgname} ${pb}/builds/${branch}/duds; then
     echo "skipping ${pkgname} (found in duds)"
     exit 1
 fi
-
-dirname=$2
-shift 2
 
 portdir=$(echo ${dirname} | sed -e 's|^/usr/ports/||')
 
@@ -130,6 +137,8 @@ major_version=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
 if [ "${major_version}" = "4" ]; then
     mkdir -p ${chroot}/libexec
     mkdir -p ${chroot}/lib
+    cp -p /sbin/mount_linprocfs /sbin/mount /sbin/umount ${chroot}/sbin
+    cp -p /lib/libufs.so.2 ${chroot}/lib
     cp -p /libexec/ld-elf.so.1 ${chroot}/libexec
     cp -p /lib/libc.so.5 /lib/libkvm.so.2 /lib/libm.so.2 ${chroot}/lib
 fi
@@ -150,7 +159,6 @@ cd ${chroot}/tmp
 mkdir -p depends distfiles packages
 
 echo "building ${pkgname} in directory ${chroot}" | tee ${chroot}/tmp/${pkgname}.log
-echo "with arguments: ${args}" | tee -a ${chroot}/tmp/${pkgname}.log
 
 mkdir -p ${chroot}/a/ports
 rm -rf ${chroot}/usr/ports
@@ -162,6 +170,8 @@ mkdir -p ${chroot}/usr/src
 mount -o nfsv3,intr -r localhost:${pb}/jails/${jail}/src ${chroot}/usr/src
 
 mount -t devfs foo ${chroot}/dev
+
+umount -f ${chroot}/compat/linux/dev > /dev/null 2>&1
 
 for dir in ${cleandirs}; do
     if ! rm -rf ${chroot}${dir} >/dev/null 2>&1; then
@@ -184,6 +194,9 @@ mtree -deU -f ${chroot}/etc/mtree/BSD.local.dist -p ${chroot}/usr/local \
 mtree -deU -f ${chroot}/etc/mtree/BSD.x11-4.dist -p ${chroot}/usr/X11R6 \
   >/dev/null 2>&1
 
+mkdir -p ${chroot}/compat/linux/proc
+chroot ${chroot} mount -t linprocfs linprocfs /compat/linux/proc
+
 _ldconfig_dirs="/lib /usr/lib /usr/lib/compat"
 ldconfig_dirs=""
 for i in ${_ldconfig_dirs}; do
@@ -194,14 +207,13 @@ done
 chroot ${chroot} /sbin/ldconfig ${ldconfig_dirs}
 chroot ${chroot} /sbin/ldconfig -aout /usr/lib/aout /usr/lib/compat/aout
 
+set x $ED $FD $PD $BD $RD
+shift 1
+
 while [ $# -gt 0 ]; do
-    if [ -f ${packages}/All/$1 ]; then
-	if [ ! -f ${chroot}/tmp/depends/$1 ]; then
-	    echo "copying package $1 for ${pkgname}"
-	    cp -p ${packages}/All/$1 ${chroot}/tmp/depends
-	fi
-    else
-	echo "skipping package $1 for ${pkgname} since it is missing"
+    if [ ! -f ${chroot}/tmp/depends/$1 ]; then
+	echo "copying package $1 for ${pkgname}"
+	cp -p ${packages}/All/$1 ${chroot}/tmp/depends
     fi
     shift
 done
@@ -209,7 +221,7 @@ done
 cp -p ${pb}/scripts/buildscript ${chroot}
 cp -p ${pb}/scripts/pnohang ${chroot}
 
-chroot ${chroot} /buildscript ${dirname} 1 2>&1 | tee -a ${chroot}/tmp/${pkgname}.log
+chroot ${chroot} /buildscript ${dirname} 1 "$ED" "$PD" "$FD" "$BD" "$RD" 2>&1 | tee -a ${chroot}/tmp/${pkgname}.log
 if [ -f ${chroot}/tmp/status ]; then
     error=$(cat ${chroot}/tmp/status)
 else
@@ -221,7 +233,7 @@ last_version=$(${pb}/scripts/tc getPortLastBuiltVersion -d ${portdir} -b ${branc
 if [ "${error}" = 0 ]; then
     ln -sf ${pkgname}.log2 ${chroot}/tmp/make.log
 
-    chroot ${chroot} /usr/bin/nice -n $nice /buildscript ${dirname} 2  > ${chroot}/tmp/${pkgname}.log2 2>&1
+    chroot ${chroot} /usr/bin/nice -n $nice /buildscript ${dirname} 2 "$ED" "$PD" "$FD" "$BD" "$RD" > ${chroot}/tmp/${pkgname}.log2 2>&1
 
     grep pnohang ${chroot}/tmp/${pkgname}.log2
     cat ${chroot}/tmp/${pkgname}.log2 >> ${chroot}/tmp/${pkgname}.log
