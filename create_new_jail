@@ -72,6 +72,13 @@ if [ -z "${jail_name}" -o -z "${jail_tag}" ]; then
     usage
 fi
 
+valid_jail_name=$(echo ${jail_name} | awk '{if (/^[[:digit:]]/) {print;}}')
+
+if [ -z "${valid_jail_name}" ]; then
+    echo "ERROR: The first character in a jail name must be a FreeBSD major version number." | /usr/bin/fmt 75 79
+    exit 1
+fi
+
 _jails=$(${pb}/scripts/tc listJails)
 if echo ${_jails} | grep -qw ${jail_name}; then
     echo "ERROR: Jail, \"${jail_name}\" already exists."
