@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: lastbuilds.php,v 1.2 2004/03/04 08:30:37 pav Exp $
+# $Id: lastbuilds.php,v 1.3 2004/03/04 18:53:46 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -40,6 +40,39 @@
 <link href="tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
+<?php
+	$builds = $ds->getBuilds();
+
+	$activeBuilds = array();
+	if ($builds) {
+		foreach ($builds as $build) {
+			if ($build->getBuildStatus() == "PORTBUILD" && $build->getBuildCurrentPort()) {
+				$activeBuilds[] = $build;
+			}
+		}
+	}
+
+	if (sizeof($activeBuilds) > 0) {
+		?>
+		<h1>Current Builds</h1>
+		<table>
+		<tr>
+		<th>Build</th>
+		<th>Port</th>
+		</tr>
+		<?php
+		foreach ($activeBuilds as $build) {
+			echo "<tr>\n";
+			echo "<td><a href=\"showbuild.php?name=" . $build->getName() . "\">" . $build->getName() . "</a></td>\n";
+			echo "<td>" . $build->getBuildCurrentPort() . "</td>\n";
+			echo "</tr>\n";
+		}
+		?>
+		</table>
+		<?php
+	}
+
+?>
 <h1>Latest Builds</h1>
 <?php
 	$builds = $ds->getBuildsDetailed(array("Last_Built" => 20));

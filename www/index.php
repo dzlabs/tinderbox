@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: index.php,v 1.13 2004/03/03 20:35:20 pav Exp $
+# $Id: index.php,v 1.14 2004/03/04 22:24:28 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -93,7 +93,7 @@
 ?>
 
 <p>
-<a href="lastbuilds.php">Latest Builds</a><br />
+<a href="lastbuilds.php">Current And Latest Builds</a><br />
 </p>
 
 </body>
