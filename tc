@@ -88,7 +88,7 @@ require "tinderlib.pl";
                 func => \&addPort,
                 help =>
                     "Add a port, and optionally, its dependencies, to the datastore",
-                usage => "-b <build name> -d <port directory> [-r]",
+                usage => "{-b <build name> | -a} -d <port directory> [-r]",
         },
         "getJailForBuild" => {
                 func  => \&getJailForBuild,
@@ -394,37 +394,50 @@ sub addPortsTree {
 sub addPort {
         my $opts = {};
 
-        getopts('b:d:r', $opts);
+        getopts('ab:d:r', $opts);
 
-        if (!$opts->{'b'} || !$opts->{'d'}) {
+        if (       (!$opts->{'b'} && !$opts->{'a'})
+                || ($opts->{'b'} && $opts->{'a'})
+                || !$opts->{'d'})
+        {
                 usage("addPort");
         }
 
         my $buildname = $opts->{'b'};
-        if (!$ds->isValidBuild($buildname)) {
+        if ($buildname && !$ds->isValidBuild($buildname)) {
                 cleanup($ds, 1, "Unknown build, $buildname\n");
         }
 
-        my $build     = $ds->getBuildByName($buildname);
-        my $jail      = $ds->getJailById($build->getJailId());
-        my $portstree = $ds->getPortsTreeById($build->getPortsTreeId());
-        my $tag       = $jail->getTag();
-
-        if (!$tag) {
-                $tag = $jail->getName();
+        my @builds = ();
+        if ($opts->{'a'}) {
+                @builds = $ds->getAllBuilds();
+        } else {
+                push @builds, $ds->getBuildByName($buildname);
         }
 
-        buildenv($BUILD_ROOT, $buildname, $jail->getName(),
-                $portstree->getName());
-        $ENV{'LOCALBASE'} = "/nonexistentlocal";
-        $ENV{'X11BASE'}   = "/nonexistentx";
+        foreach my $build (@builds) {
+                my $jail      = $ds->getJailById($build->getJailId());
+                my $portstree = $ds->getPortsTreeById($build->getPortsTreeId());
+                my $tag       = $jail->getTag();
 
-        if ($opts->{'r'}) {
-                my @deps = ();
-                addPorts([$opts->{'d'}], $build, \@deps);
-                addPorts(\@deps, $build, undef);
-        } else {
-                addPorts([$opts->{'d'}], $build, undef);
+                if (!$tag) {
+                        $tag = $jail->getName();
+                }
+
+                buildenv(
+                        $BUILD_ROOT,      $build->getName(),
+                        $jail->getName(), $portstree->getName()
+                );
+                $ENV{'LOCALBASE'} = "/nonexistentlocal";
+                $ENV{'X11BASE'}   = "/nonexistentx";
+
+                if ($opts->{'r'}) {
+                        my @deps = ();
+                        addPorts([$opts->{'d'}], $build, \@deps);
+                        addPorts(\@deps, $build, undef);
+                } else {
+                        addPorts([$opts->{'d'}], $build, undef);
+                }
         }
 }
 
