@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.19 2004/03/07 11:10:22 pav Exp $
+# $Id: TinderboxDS.php,v 1.20 2004/03/09 11:33:13 pav Exp $
 #
 
     require_once 'DB.php';
@@ -375,7 +375,11 @@
 		} elseif (substr($jail->getName(), 0, 1) == "5") {
 			$this->packageSuffixCache[$jail_id] = ".tbz";
 			return ".tbz";
+		} elseif (substr($jail->getName(), 0, 1) == "6") {
+			$this->packageSuffixCache[$jail_id] = ".tbz";
+			return ".tbz";
 		}
+
 	    }
 	}
 
