@@ -63,9 +63,13 @@ rm -f ${pb}/builds/${build}/make.*
 # First we check to see if we need to clean out old packages.
 if [ "$cleanpackages" = "1" ]; then
     rm -rf ${PACKAGES}
+    rm -rf ${pb}/logs/${build}
+    rm -rf ${pb}/errors/${build}
 fi
 
 mkdir -p ${PACKAGES}
+mkdir -p ${pb}/logs/${build}
+mkdir -p ${pb}/errors/${build}
 
 if [ "$updateports" = "1" ]; then
     update_cmd=$(${pb}/scripts/tc getPortsUpdateCmd -p ${portstree})
