@@ -1,0 +1,85 @@
+#!/bin/sh
+
+usage () {
+    echo "usage: $0 -n <build name> -j <jail name> -p <portstree name> [-d <build description>]"
+    exit 1
+}
+
+pb=/space
+
+args=$(getopt n:j:p:d: $*)
+
+if [ $? != 0 ]; then
+    usage
+fi
+
+buil_name=""
+jail=""
+portstree=""
+descr=""
+
+set -- $args
+
+for i; do
+    case "$i" in
+	-n)
+	  build_name="$2"; shift;
+	  shift;;
+	-j)
+	  jail="$2"; shift;
+	  shift;;
+	-p)
+	  portstree="$2"; shift;
+	  shift;;
+	-d)
+	  descr="$2"; shift;
+	  shift;;
+	--)
+	  shift; break;;
+    esac
+done
+
+if [ -z "${build_name}" -o -z "${jail}" -o -z "${portstree}" ]; then
+    usage
+fi
+
+_builds=$(${pb}/scripts/tc listBuilds 2> /dev/null)
+if echo ${_builds} | grep -qw ${build_name}; then
+    echo "ERROR: Build, \"${build_name}\" already exists."
+    exit 1
+fi
+
+echo -n "INFO: Creating directories for new build..."
+rm -rf ${pb}/builds/${build_name}
+rm -rf ${pb}/${build_name}
+
+mkdir -p ${pb}/builds/${build_name}
+mkdir -p ${pb}/${build_name}
+
+echo "DONE."
+
+# Add the new build to the datastore.
+echo -n "INFO: Adding build to datastore..."
+if [ ! -z "${descr}" ]; then
+    descr="-d ${descr}"
+fi
+${pb}/scripts/tc addBuild -n ${build_name} -j ${jail} -p ${portstree} ${descr}
+
+if [ $? != 0 ]; then
+    echo "FAILED."
+    exit 1
+fi
+
+echo "DONE."
+
+echo "INFO: Initializing new build..."
+${pb}/scripts/mkbuild ${build_name}
+
+if [ $? != 0 ]; then
+    echo "FAILED."
+    exit 1
+fi
+
+echo "DONE."
+
+exit 0

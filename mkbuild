@@ -1,0 +1,33 @@
+#!/bin/sh
+
+pb=/space
+
+if [ -z "$1" ]; then
+    echo "Please specify a build name."
+    echo "Current build names are:"
+    for i in `${pb}/scripts/tc listBuilds`; do
+	echo "	${i}"
+    done
+    exit 1
+fi
+
+build=$1
+
+jail=$(${pb}/scripts/tc getJailForBuild -b ${build})
+
+if [ ! -f ${pb}/jails/${jail}/${jail}.tar ]; then
+    echo "ERROR: Tarball for jail, ${jail}, does not exist."
+    echo "ERROR: Run mkjail first."
+    exit 1
+fi
+
+D=${pb}/${build}
+
+chflags -R noschg ${D}
+umount -f ${D}/a/ports
+umount -f ${D}/usr/src
+umount -f ${D}/dev
+rm -rf ${D}
+mkdir -p ${D}
+
+tar -C ${D} -xf ${pb}/jails/${jail}/${jail}.tar
