@@ -192,7 +192,7 @@ sub init {
         system("mkdir -p $BUILD_ROOT/packages");
 
         # Compile pnohang.c
-        system("cd $BUILD_ROOT/scripts && cc -o pnohang pnohang.c");
+        system("cd $BUILD_ROOT/scripts && cc -o pnohang -static pnohang.c");
 }
 
 sub listJails {
