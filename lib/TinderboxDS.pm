@@ -556,6 +556,29 @@ sub updateBuildStatus {
         return $rc;
 }
 
+sub updateBuildCurrentPort {
+        my $self    = shift;
+        my $build   = shift;
+        my $pkgname = shift;
+        croak "ERROR: Argument 1 not of type build\n"
+            if (ref($build) ne "Build");
+
+        my $rc;
+        if (!defined($pkgname)) {
+                $rc = $self->_doQuery(
+                        "UPDATE builds SET Build_Current_Port=NULL WHERE Build_Id=?",
+                        [$build->getId()]
+                );
+        } else {
+                $rc = $self->_doQuery(
+                        "UPDATE builds SET Build_Current_Port=? WHERE Build_Id=?",
+                        [$pkgname, $build->getId()]
+                );
+        }
+
+        return $rc;
+}
+
 sub addPortForBuild {
         my $self  = shift;
         my $port  = shift;
@@ -890,8 +913,8 @@ sub _doQuery {
 
         my $_sth;              # This is the real statement handler.
 
-	#print STDERR "XXX: query = $query\n";
-	#print STDERR "XXX: values = " . (join(", ", @{$params})) . "\n";
+        #print STDERR "XXX: query = $query\n";
+        #print STDERR "XXX: values = " . (join(", ", @{$params})) . "\n";
 
         $_sth = $self->{'dbh'}->prepare($query);
 

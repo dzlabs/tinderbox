@@ -9,6 +9,8 @@ cleanup()
     error=$3
     cleandirs=$4
     pkgname=$5
+    pb=$6
+    branch=$7
 
     umount -f ${chroot}/a/ports
     umount -f ${chroot}/usr/src
@@ -18,8 +20,8 @@ cleanup()
 	rm -rf ${chroot}/tmp/*
 	for dir in ${cleandirs}; do
 	    if ! rm -rf ${chroot}${dir} >/dev/null 2>&1; then
-		chflags -R noschg ${chroot}${dir} >/dev/null 2>&1
-		rm -rf ${chroot}${dir}
+		chflags -R noschg ${chroot}${dir}
+		rm -rf ${chroot}${dir} >/dev/null 2>&1
 	    fi
 	done
 	chroot ${chroot} /sbin/ldconfig -R
@@ -29,6 +31,8 @@ cleanup()
 
     echo -n "$pkgname done at "
     date
+
+    ${pb}/scripts/tc updateBuildCurrentPort -b ${branch}
 
     exit $error
 }
@@ -71,6 +75,8 @@ pkgname=$(basename $1 ${PKGSUFFIX})
 dirname=$2
 shift 2
 
+portdir=$(echo ${dirname} | sed -e 's|^/usr/ports/||')
+
 export WRKDIRPREFIX=/tmp
 export DISTDIR=/tmp/distfiles
 export PACKAGES=/tmp/packages
@@ -100,6 +106,8 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/X11R6/bin:.
 
 echo "building $pkgname"
 
+${pb}/scripts/tc updateBuildCurrentPort -b ${branch} -n ${pkgname}
+
 chroot=${pb}/${branch}
 packages=${pb}/packages/${branch}
 
@@ -121,7 +129,7 @@ fi
 
 echo ${OSREL}-${BRANCH} > ${chroot}/usr/bin/UNAME_VERSION
 
-trap  "cleanup ${chroot} ${noclean} ${error} \"${cleandirs}\" ${pkgname}" 1 2 3 9 10 11 15
+trap  "cleanup ${chroot} ${noclean} ${error} \"${cleandirs}\" ${pkgname} ${pb} ${branch}" 1 2 3 9 10 11 15
 
 rm -rf ${chroot}/tmp/*
 cd ${chroot}/tmp
@@ -143,8 +151,8 @@ mount -t devfs foo ${chroot}/dev
 
 for dir in ${cleandirs}; do
     if ! rm -rf ${chroot}${dir} >/dev/null 2>&1; then
-	chflags -R noschg ${chroot}${dir} >/dev/null 2>&1
-	rm -rf ${chroot}${dir}
+	chflags -R noschg ${chroot}${dir}
+	rm -rf ${chroot}${dir} >/dev/null 2>&1
     fi
 done
 
@@ -194,7 +202,6 @@ else
     error=255
 fi
 
-portdir=$(echo ${dirname} | sed -e 's|^/usr/ports/||')
 last_version=$(${pb}/scripts/tc getPortLastBuiltVersion -d ${portdir} -b ${branch})
 
 if [ "${error}" = 0 ]; then
@@ -243,4 +250,4 @@ else
     ${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${branch} -v ${pkgname}
 fi
 
-cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname}
+cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${pb} ${branch}

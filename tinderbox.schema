@@ -43,7 +43,8 @@ CREATE TABLE builds (
   Jail_Id int NOT NULL,
   Ports_Tree_Id int NOT NULL,
   Build_Description text,
-  Build_Status enum('IDLE','PORTBUILD') DEFAULT 'IDLE',
+  Build_Status enum('IDLE','PREPARE','PORTBUILD') DEFAULT 'IDLE',
+  Build_Current_Port varchar(255),
   PRIMARY KEY (Build_Id),
   UNIQUE (Build_Name),
   INDEX Build_Name_Idx (Build_Name),
@@ -54,7 +55,7 @@ CREATE TABLE builds (
   INDEX (Ports_Tree_Id),
   FOREIGN KEY (Ports_Tree_Id)
     REFERENCES ports_trees(Ports_Tree_Id)
-    ON UPDATE CASCADE ON DELETE RESTRICT,
+    ON UPDATE CASCADE ON DELETE RESTRICT
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS build_ports;

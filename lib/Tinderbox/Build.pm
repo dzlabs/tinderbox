@@ -7,18 +7,20 @@ use vars qw(@ISA %STATUS_HASH);
 
 %STATUS_HASH = (
         IDLE      => 0,
-        PORTBUILD => 1,
+        PREPARE   => 1,
+        PORTBUILD => 2,
 );
 
 sub new {
         my $that        = shift;
         my $object_hash = {
-                Build_Id          => "",
-                Build_Name        => "",
-                Jail_Id           => "",
-                Ports_Tree_Id     => "",
-                Build_Status      => "",
-                Build_Description => "",
+                Build_Id           => "",
+                Build_Name         => "",
+                Jail_Id            => "",
+                Ports_Tree_Id      => "",
+                Build_Status       => "",
+                Build_Description  => "",
+                Build_Current_Port => "",
         };
 
         my @args = ();
@@ -63,6 +65,12 @@ sub getDescription {
         return $self->{Build_Description};
 }
 
+sub getCurrentPort {
+        my $self = shift;
+
+        return $self->{Build_Current_Port};
+}
+
 sub setName {
         my $self = shift;
         my $name = shift;
@@ -98,6 +106,13 @@ sub setDescription {
         my $descr = shift;
 
         $self->{Build_Description} = $descr;
+}
+
+sub setCurrentPort {
+        my $self = shift;
+        my $port = shift;
+
+        $self->{Build_Current_Port} = $port;
 }
 
 1;
