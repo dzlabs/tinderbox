@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: Port.php,v 1.2 2004/03/02 19:51:43 marcus Exp $
+# $Id: Port.php,v 1.3 2004/03/02 21:51:10 pav Exp $
 #
 
     require_once 'TinderObject.php';
@@ -37,6 +37,7 @@
 		Port_Name => "",
 		Port_Directory => "",
 		Port_Comment => "",
+		Port_Maintainer => "",
 		Last_Built => ""
 	    );
 
@@ -59,6 +60,10 @@
 	    return $this->Port_Comment;
 	}
 
+	function getMaintainer() {
+	    return $this->Port_Maintainer;
+	}
+
 	function getLastBuilt() {
 	    return $this->Last_Built;
 	}
@@ -74,5 +79,10 @@
 	function setComment($comment) {
 	    $this->Port_Comment = $comment;
 	}
+
+	function setMaintainer($maintainer) {
+	    $this->Port_Maintainer = $maintainer;
+	}
+
     }
 ?>

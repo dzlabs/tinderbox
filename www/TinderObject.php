@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderObject.php,v 1.2 2004/03/02 19:51:43 marcus Exp $
+# $Id: TinderObject.php,v 1.3 2004/03/02 21:48:58 pav Exp $
 #
 
     class TinderObject {
@@ -60,6 +60,10 @@
 		} else {
 			return $input;
 		}
+	}
+
+	function prettyEmail($input) {
+		return str_replace("@FreeBSD.org", "", $input);
 	}
 
     }

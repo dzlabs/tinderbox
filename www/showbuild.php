@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showbuild.php,v 1.2 2004/03/03 09:00:24 marcus Exp $
+# $Id: showbuild.php,v 1.3 2004/03/03 09:04:03 marcus Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -65,12 +65,14 @@
 		<table>
 		<tr>
 		<th>Port Directory</th>
+		<th>Maintainer</th>
 		<th>Last Built</th>
 		</tr>
 		<?php
 		foreach ($ports as $port) {
 			echo "<tr>\n";
 			echo "<td>" . $port->getDirectory() . "</td>\n";
+			echo "<td>" . $port->prettyEmail($port->getMaintainer()) . "</td>\n";
 			echo "<td>" . $port->prettyDatetime($port->getLastBuilt()) . "</td>\n";
 			echo "</tr>\n";
 		}
