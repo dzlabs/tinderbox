@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: makemake,v 1.17 2004/07/17 15:39:35 marcus Exp $
+# $Id: makemake,v 1.18 2004/08/29 21:36:36 marcus Exp $
 #
 
 use strict;
@@ -63,14 +63,28 @@ if (scalar(@ARGV) < 1) {
         cleanup($ds, 1, undef);
 }
 
-my $noduds = 0;
-my $opts   = {};
+my $noduds  = 0;
+my $opts    = {};
+my @flarr   = ();
+my $pbflags = "";
 
 getopts('n', $opts);
 
 if ($opts->{'n'}) {
         $noduds = 1;
 }
+
+if (defined($ENV{'NOCLEAN'})) {
+        push @flarr, "-noclean";
+}
+if (defined($ENV{'PLISTCHECK'})) {
+        push @flarr, "-plistcheck";
+}
+if (defined($ENV{'NULLFS'})) {
+        push @flarr, "-nullfs";
+}
+
+$pbflags = join(" ", @flarr);
 
 @PORTS = ();
 $BUILD = $ds->getBuildByName($ARGV[0]);
@@ -195,7 +209,7 @@ foreach my $key (keys %pkgdir) {
         print MK "$pkgdir{$key}$ENV{'PKGSUFFIX'}: "
             . join(" ", @deppkgnames) . "\n";
         print MK
-            "\t\@$PORTBUILD $BUILD_NAME $JAIL_NAME $PORTSTREE_NAME $pkgdir{$key}$ENV{'PKGSUFFIX'} /usr/ports/$key "
+            "\t\@$PORTBUILD $BUILD_NAME $JAIL_NAME $PORTSTREE_NAME $pbflags $pkgdir{$key}$ENV{'PKGSUFFIX'} /usr/ports/$key "
             . join(" ", @deppkgnames) . "\n";
 }
 close(MK);
