@@ -94,8 +94,8 @@ else
 		echo "== phase $count =="
 		prevlist="$(echo *)"
 		for i in *; do
-		    echo "pkg_delete $i"
-		    pkg_delete $i
+		    echo "pkg_delete -r $i"
+		    pkg_delete -r $i
 		done
 		count=$(($count + 1))
 	    done
