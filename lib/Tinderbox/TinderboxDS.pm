@@ -794,17 +794,12 @@ sub isPortInBuild {
         my $port  = shift;
         my $build = shift;
 
-        my @result;
         my $rc = $self->_doQueryNumRows(
                 "SELECT Port_Id FROM build_ports WHERE Port_Id=? AND Build_Id=?",
                 $port->getId(), $build->getId()
         );
 
-        if ($rc > 0) {
-                return 1;
-        }
-
-        return 0;
+        return (($rc > 0) ? 1 : 0);
 }
 
 sub isPortForBuild {
