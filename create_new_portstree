@@ -48,6 +48,7 @@ elif [ "${update_cmd}" = "NONE" ]; then
     update_cmd=""
     uc="-u NONE"
 else
+    update_cmd="${pb}/scripts/${update_cmd}"
     uc="-u ${update_cmd}"
 fi
 
@@ -70,7 +71,7 @@ echo "DONE."
 
 if [ ! -z "${update_cmd}" ]; then
     echo -n "INFO: Updating portstree with ${update_cmd}..."
-    eval ${update_cmd} > /dev/null 2>&1
+    eval ${update_cmd} ${portstree} > /dev/null 2>&1
     if [ $? != 0 ]; then
 	echo "FAILED."
 	exit 1

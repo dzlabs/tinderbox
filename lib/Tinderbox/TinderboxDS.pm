@@ -369,6 +369,152 @@ sub addPortsTree {
         return $rc;
 }
 
+sub updateJailLastBuilt {
+        my $self = shift;
+        my $jail = shift;
+        croak "ERROR: Argument not of type Jail\n" if (ref($jail) ne "Jail");
+
+        my $rc;
+        if ($jail->getLastBuilt()) {
+                my $last_built = $jail->getLastBuilt();
+                $rc =
+                    $self->_doQuery(
+                        "UPDATE jails SET Jail_Last_Built=? WHERE Jail_Id=?",
+                        [$last_built, $jail->getId()]);
+        } else {
+                $rc = $self->_doQuery(
+                        "UPDATE jails SET Jail_Last_Built=NOW() WHERE Jail_Id=?",
+                        [$jail->getId()]
+                );
+        }
+
+        return $rc;
+}
+
+sub updatePortLastBuilt {
+        my $self = shift;
+        return $self->updatePortLastBuilts(@_, "Last_Built");
+}
+
+sub updatePortLastSuccessfulBuilt {
+        my $self = shift;
+        return $self->updatePortLastBuilts(@_, "Last_Successful_Built");
+}
+
+sub updatePortLastBuilts {
+        my $self       = shift;
+        my $port       = shift;
+        my $build      = shift;
+        my $last_built = shift;
+        my $column     = shift;
+        croak "ERROR: Argument 1 not of type Port\n" if (ref($port) ne "Port");
+        croak "ERROR: Argument 2 not of type Build\n"
+            if (ref($build) ne "Build");
+
+        my $rc;
+        if (!defined($last_built) || $last_built eq "") {
+                $rc = $self->_doQuery(
+                        "UPDATE build_ports SET $column=NOW() WHERE Port_Id=? AND Build_Id=?",
+                        [$port->getId(), $build->getId()]
+                );
+        } else {
+                $rc = $self->_doQuery(
+                        "UPDATE build_ports SET $column=? WHERE Port_Id=? AND Build_Id=?",
+                        [$last_built, $port->getId(), $build->getId()]
+                );
+        }
+
+        return $rc;
+}
+
+sub updatePortLastStatus {
+        my $self   = shift;
+        my $port   = shift;
+        my $build  = shift;
+        my $status = shift;
+        croak "ERROR: Argument 1 not of type Port\n" if (ref($port) ne "Port");
+        croak "ERROR: Argument 2 not of type Build\n"
+            if (ref($build) ne "Build");
+
+        my %status_hash = (
+                UNKNOWN => 0,
+                SUCCESS => 1,
+                FAIL    => 1,
+        );
+
+        if (!defined($status_hash{$status})) {
+                $status = "UNKNOWN";
+        }
+
+        my $rc = $self->_doQuery(
+                "UPDATE build_ports SET Last_Status=? WHERE Port_Id=? AND Build_Id=?",
+                [$status, $port->getId(), $build->getId()]
+        );
+
+        return $rc;
+}
+
+sub updatePortLastBuiltVersion {
+        my $self    = shift;
+        my $port    = shift;
+        my $build   = shift;
+        my $version = shift;
+        croak "ERROR: Argument 1 not of type Port\n" if (ref($port) ne "Port");
+        croak "ERROR: Argument 2 not of type Build\n"
+            if (ref($build) ne "Build");
+
+        my $rc = $self->_doQuery(
+                "UPDATE build_ports SET Last_Built_Version=? WHERE Port_Id=? AND Build_Id=?",
+                [$version, $port->getId(), $build->getId()]
+        );
+
+        return $rc;
+}
+
+sub getPortLastBuiltVersion {
+        my $self  = shift;
+        my $port  = shift;
+        my $build = shift;
+        croak "ERROR: Argument 1 not of type Port\n" if (ref($port) ne "Port");
+        croak "ERROR: Argument 2 not of type Build\n"
+            if (ref($build) ne "Build");
+
+        my @results;
+        my $rc = $self->_doQueryHashRef(
+                "SELECT Last_Built_Version FROM build_ports WHERE Port_Id=? AND Build_Id=?",
+                \@results, $port->getId(), $build->getId()
+        );
+
+        if (!$rc) {
+                return undef;
+        }
+
+        return $results[0]->{Last_Built_Version};
+}
+
+sub updatePortsTreeLastBuilt {
+        my $self      = shift;
+        my $portstree = shift;
+        croak "ERROR: Argument not of type PortsTree\n"
+            if (ref($portstree) ne "PortsTree");
+
+        my $rc;
+        if ($portstree->getLastBuilt()) {
+                my $last_built = $portstree->getLastBuilt();
+                $rc = $self->_doQuery(
+                        "UPDATE ports_trees SET Ports_Tree_Last_Built=? WHERE Ports_Tree_Id=?",
+                        [$last_built, $portstree->getId()]
+                );
+        } else {
+                $rc = $self->_doQuery(
+                        "UPDATE ports_trees SET Ports_Tree_Last_Built=NOW() WHERE Ports_Tree_Id=?",
+                        [$portstree->getId()]
+                );
+        }
+
+        return $rc;
+}
+
 sub addPortForBuild {
         my $self  = shift;
         my $port  = shift;
@@ -703,8 +849,8 @@ sub _doQuery {
 
         my $_sth;              # This is the real statement handler.
 
-	#print STDERR "XXX: query = $query\n";
-	#print STDERR "XXX: values = " . (join(", ", @{$params})) . "\n";
+        #print STDERR "XXX: query = $query\n";
+        #print STDERR "XXX: values = " . (join(", ", @{$params})) . "\n";
 
         $_sth = $self->{'dbh'}->prepare($query);
 

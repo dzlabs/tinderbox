@@ -210,6 +210,8 @@ if [ "${error}" = 0 ]; then
 	cp ${chroot}/tmp/work.tbz ${pb}/wrkdirs/${branch}/${pkgname}.tbz
     fi
 
+    portdir=$(echo ${dirname} | sed -e 's|^/usr/ports/||')
+
     if [ "${error}" = 0 ]; then
 	tar -C ${chroot}/tmp/packages -cf - . | \
 		tar --unlink -C ${packages} -xvf -
@@ -219,9 +221,21 @@ if [ "${error}" = 0 ]; then
     else
 	cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${branch}/${pkgname}.log
     fi
+# Now update the datastore with our results.
+    last_version=$(${pb}/scripts/tc getPortLastBuiltVersion -d ${portdir} -b ${branch})
+    if [ ! -z "${last_version}" ]; then
+	find ${packages} -name "${last_version}${PKGSUFFIX}" | xargs rm -f
+    fi
+    ${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${branch}
+    ${pb}/scripts/tc updatePortLastSuccessfulBuilt -d ${portdir} -b ${branch}
+    ${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${branch} -s SUCCESS
+    ${pb}/scripts/tc updatePortLastBuiltVersion -d ${portname} -b ${branch} -v ${pkgname}
 else
     cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${branch}/${pkgname}.log
     cp ${chroot}/tmp/${pkgname}.log ${pb}/logs/${branch}/${pkgname}.log
+
+    ${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${branch}
+    ${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${branch} -s FAIL
 fi
 
 cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname}

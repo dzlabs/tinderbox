@@ -87,7 +87,7 @@ if [ "$updateports" = "1" ]; then
     update_cmd=$(${pb}/scripts/tc getPortsUpdateCmd -p ${portstree})
     if [ ! -z "${update_cmd}" ]; then
 	echo "INFO: Running ${update_cmd} to update the ports tree"
-	eval ${update_cmd} >/dev/null 2>&1
+	eval ${update_cmd} ${portstree} >/dev/null 2>&1
     fi
 fi
 
@@ -105,7 +105,7 @@ if [ "$init" = "1" -o \( ! -d ${pb}/${build} -a ! -f ${pb}/jails/${jail}/${jail}
     echo "INFO: Initializing a new build directory for ${build}..."
     ${pb}/scripts/mkjail ${jail}
     ${pb}/scripts/mkbuild ${build}
-elif [ ! -d ${pb}/${build} -a -f ${pb}/jails/${jail}/${jail}.tar ]; then
+else
     echo "INFO: Creating build directory for ${build} from repository..."
     ${pb}/scripts/mkbuild ${build}
 fi
@@ -122,6 +122,11 @@ phase1end=$(date +%s)
 echo "phase 1 took $(date -u -j -r $(($phase1end - $phase1start)) | awk '{print $4}')" 
 echo $(echo $(ls -1 ${PACKAGES}/All/*${PKGSUFFIX} | wc -l) | bc) "packages built"
 echo $(echo $(du -sh ${PACKAGES} | awk '{print $1}')) " of packages"
+
+# Reinitialize the build from the tarfile before starting phase 2.  This helps
+# to reduce some errors related to stale files.
+echo "INFO: Creating build directory for ${build} from repository..."
+${pb}/scripts/mkbuild ${build}
 
 echo "================================================"
 echo "building packages (phase 2)"

@@ -27,7 +27,7 @@ buildenv ${pb} "NULL" ${jail} "NULL"
 
 update_cmd=$(${pb}/scripts/tc getSrcUpdateCmd -j ${jail})
 if [ ! -z "${update_cmd}" ]; then
-    eval ${update_cmd} > /dev/null 2>&1
+    eval ${update_cmd} ${jail} > /dev/null 2>&1
 fi
 
 D=${pb}/jails/${jail}/tmp
@@ -74,3 +74,5 @@ if [ -d ${D} ]; then
     chflags -R noschg ${D}
     rm -rf ${D}
 fi
+
+${pb}/scripts/tc updateJailLastBuilt -j ${jail}
