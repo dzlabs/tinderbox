@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showport.php,v 1.1 2004/03/03 19:04:44 pav Exp $
+# $Id: showport.php,v 1.2 2004/03/03 19:37:25 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -46,7 +46,7 @@
 ?>
 <h1>GNOME 2 Packages for i386 - <?= $port->getName() ?></h1>
 <?php
-	$builds = $ds->getBuildsOfPort($id);
+	$builds = $ds->getBuildsOfPort(array("Port_Id" => $id));
 
 	foreach ($builds as $build) {
 		$ports_trees[$build["Ports_Tree_Name"]] = $build["Ports_Tree_CVSweb_URL"];

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.11 2004/03/03 19:04:44 pav Exp $
+# $Id: TinderboxDS.php,v 1.12 2004/03/03 19:37:25 pav Exp $
 #
 
     require_once 'DB.php';
@@ -107,12 +107,18 @@
 	    return $results[0];
 	}
 
-	function getBuildsOfPort($port_id) {
+	function getBuildsOfPort($params) {
 	    $query = "SELECT build_ports.*,builds.Build_Name,ports_trees.Ports_Tree_Name,ports_trees.Ports_Tree_CVSweb_URL ";
 	    $query.= "FROM build_ports,builds,ports_trees ";
 	    $query.= "WHERE build_ports.Build_Id = builds.Build_Id AND builds.Ports_Tree_Id = ports_trees.Ports_Tree_Id ";
-	    $query.= "AND build_ports.Port_Id = ?";
-	    $rc = $this->_doQueryHashRef($query, $results, $port_id);
+	    if (is_array($params)) {
+		foreach ($params as $key => $param) {
+		    switch ($key) {
+			case "Port_Id": $query.= "AND build_ports.Port_Id = '" . $param . "' "; break;
+		    }
+		}
+	    }
+	    $rc = $this->_doQueryHashRef($query, $results, array());
 	    if (!$rc) return null;
 	    return $results;
 	}
