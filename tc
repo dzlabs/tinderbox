@@ -725,6 +725,11 @@ sub updatePortsTree {
         $portstree->setLastBuilt($opts->{'l'});
 
         if ($update_cmd eq "CVSUP") {
+                if (!-x "/usr/local/bin/cvsup") {
+                        cleanup($ds, 1,
+                                "Failed to find executable cvsup in /usr/local/bin.\n"
+                        );
+                }
                 $update_cmd =
                     "/usr/local/bin/cvsup -g $BUILD_ROOT/portstrees/$name/ports-supfile";
         } elsif ($update_cmd eq "NONE") {
