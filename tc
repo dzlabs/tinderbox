@@ -210,6 +210,9 @@ NOPROFILE=true
 MAKE_KERBEROS5= yes
 NO_MODULES=damnit
 EOMC
+
+        # Compile pnohang.c
+        system("cd $BUILD_ROOT/scripts && cc -o pnohang pnohang.c");
 }
 
 sub listJails {
