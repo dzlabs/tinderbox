@@ -10,6 +10,6 @@ $errorlogdir = $rootdir."/errors";
 $errorloguri = "/tb/errors";
 
 $tinderbox_name = "Marcuscom Tinderbox";
-$tinderbox_title = "Pav's Testbuilds";
+$tinderbox_title = "GNOME 2 Packages for i386";
 
 ?>
