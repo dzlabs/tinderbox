@@ -1,3 +1,4 @@
 body { background-color: white }
 table { border: 2px solid black; border-collapse: collapse }
+th { background-color: rgb(255,238,238) }
 td { border: 1px solid gray; padding-left: 3px; padding-right: 3px }
