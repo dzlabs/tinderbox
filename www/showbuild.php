@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showbuild.php,v 1.14 2004/03/07 11:10:23 pav Exp $
+# $Id: showbuild.php,v 1.15 2004/03/09 11:33:13 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -53,7 +53,7 @@
 	echo "System: FreeBSD " . $jail->getName() . " (" . $jail->getTag() . ") updated on " . $ds->prettyDatetime($jail->getLastBuilt()) . "<br />\n";
 
 	$ports_tree = $ds->getPortsTreeById($build->getPortsTreeId());
-	echo "Ports Tree: " . $ports_tree->getDescription() . "<br />\n";
+	echo "Ports Tree: " . $ports_tree->getDescription() . " updated on " . $ds->prettyDatetime($ports_tree->getLastBuilt()) . "<br />\n";
 	echo "</p>\n";
 
 	echo "<p><a href=\"lastbuilds.php?showbuild=" . $build->getName() . "\">Current and latest builds in this build</a></p>\n";
