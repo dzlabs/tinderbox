@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id$
+# $Id: TinderboxDS.pm,v 1.20 2004/04/08 07:51:04 marcus Exp $
 #
 
 package TinderboxDS;
@@ -108,7 +108,7 @@ sub getPortById {
 
         my @results = $self->getPorts({Port_Id => $id});
 
-        if (!defined(@results)) {
+        if (!@results) {
                 return undef;
         }
 
@@ -121,7 +121,7 @@ sub getPortByDirectory {
 
         my @results = $self->getPorts({Port_Directory => $dir});
 
-        if (!defined(@results)) {
+        if (!@results) {
                 return undef;
         }
 
@@ -218,7 +218,7 @@ sub getJailByName {
 
         my @results = $self->getJails({Jail_Name => $name});
 
-        if (!defined(@results)) {
+        if (!@results) {
                 return undef;
         }
 
@@ -231,7 +231,7 @@ sub getBuildById {
 
         my @results = $self->getBuilds({Build_Id => $id});
 
-        if (!defined(@results)) {
+        if (!@results) {
                 return undef;
         }
 
@@ -244,7 +244,7 @@ sub getBuildByName {
 
         my @results = $self->getBuilds({Build_Name => $name});
 
-        if (!defined(@results)) {
+        if (!@results) {
                 return undef;
         }
 
@@ -257,7 +257,7 @@ sub getJailById {
 
         my @results = $self->getJails({Jail_Id => $id});
 
-        if (!defined(@results)) {
+        if (!@results) {
                 return undef;
         }
 
@@ -289,7 +289,7 @@ sub getPortsTreeById {
 
         my @results = $self->getPortsTrees({Ports_Tree_Id => $id});
 
-        if (!defined(@results)) {
+        if (!@results) {
                 return undef;
         }
 
@@ -302,7 +302,7 @@ sub getPortsTreeByName {
 
         my @results = $self->getPortsTrees({Ports_Tree_Name => $name});
 
-        if (!defined(@results)) {
+        if (!@results) {
                 return undef;
         }
 
@@ -777,7 +777,7 @@ sub getUserByName {
 
         my @results = $self->getUsers({User_Name => $username});
 
-        if (!defined(@results)) {
+        if (!@results) {
                 return undef;
         }
 
@@ -1026,7 +1026,7 @@ sub isValidBuild {
 
         my @results = $self->getBuilds({Build_Name => $buildName});
 
-        if (!defined(@results)) {
+        if (!@results) {
                 return 0;
         }
 
@@ -1043,7 +1043,7 @@ sub isValidJail {
 
         my @results = $self->getJails({Jail_Name => $jailName});
 
-        if (!defined(@results)) {
+        if (!@results) {
                 return 0;
         }
 
@@ -1060,7 +1060,7 @@ sub isValidPortsTree {
 
         my @results = $self->getPortsTrees({Ports_Tree_Name => $portsTreeName});
 
-        if (!defined(@results)) {
+        if (!@results) {
                 return 0;
         }
 
@@ -1344,6 +1344,33 @@ sub getTime {
         my $mon  = $time[4] + 1;
 
         return "$year-$mon-$time[3] $time[2]:$time[1]:$time[0]";
+}
+
+sub getPackageSuffix {
+        my $self = shift;
+        my $jail = shift;
+        croak "ERROR: Argument not of type Jail\n" if (ref($jail) ne "Jail");
+
+        if (substr($jail->getName(), 0, 1) == "4") {
+                return ".tgz";
+        }
+
+        return ".tbz";
+}
+
+sub isLogCurrent {
+        my $self  = shift;
+        my $build = shift;
+        my $log   = shift;
+        croak "ERROR: Argument not of type Build\n" if (ref($build) ne "Build");
+
+        my $rc = $self->_doQueryNumRows(
+                "SELECT Build_Port_Id FROM build_ports WHERE Build_Id=? AND Last_Built_Version=?",
+                $build->getId(),
+                substr($log, 0, -4)
+        );
+
+        return ($rc > 0) ? 1 : 0;
 }
 
 1;

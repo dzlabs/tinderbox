@@ -24,14 +24,14 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id$
+# $Id: tc,v 1.28 2004/07/17 15:39:35 marcus Exp $
 #
 
 # This is a hack to make sure we can always find our modules.
 BEGIN {
         my $pb = "/space";
         push @INC, "$pb/scripts";
-        use lib "$pb/scripts";
+        use lib "/space/scripts";
 }
 
 use strict;
@@ -280,6 +280,12 @@ require "tinderlib.pl";
                 usage  => "-b <build name>",
                 optstr => 'b:',
         },
+        "cleanup" => {
+                func => \&cleanup,
+                help =>
+                    "Cleanup old build logs, and prune old database entries for which no package exists",
+                usage => "",
+        },
 );
 
 if (!scalar(@ARGV)) {
@@ -321,7 +327,7 @@ sub init {
 sub listJails {
         my @jails = $ds->getAllJails();
 
-        if (defined(@jails)) {
+        if (@jails) {
                 map { print $_->getName() . "\n" } @jails;
         } elsif (defined($ds->getError())) {
                 cleanup($ds, 1,
@@ -335,7 +341,7 @@ sub listJails {
 sub listBuilds {
         my @builds = $ds->getAllBuilds();
 
-        if (defined(@builds)) {
+        if (@builds) {
                 map { print $_->getName() . "\n" } @builds;
         } elsif (defined($ds->getError())) {
                 cleanup($ds, 1,
@@ -349,7 +355,7 @@ sub listBuilds {
 sub listPortsTrees {
         my @portstrees = $ds->getAllPortsTrees();
 
-        if (defined(@portstrees)) {
+        if (@portstrees) {
                 map { print $_->getName() . "\n" } @portstrees;
         } elsif (defined($ds->getError())) {
                 cleanup($ds, 1,
@@ -713,7 +719,7 @@ sub rmJail {
         my @builds = $ds->findBuildsForJail($jail);
 
         unless ($opts->{'f'}) {
-                if (defined(@builds)) {
+                if (@builds) {
                         print
                             "Removing this jail will also remove the following builds:\n";
                         foreach my $build (@builds) {
@@ -761,7 +767,7 @@ sub rmPortsTree {
         my @builds    = $ds->findBuildsForPortsTree($portstree);
 
         unless ($opts->{'f'}) {
-                if (defined(@builds)) {
+                if (@builds) {
                         print
                             "Removing this portstree will also remove the following builds:\n";
                         foreach my $build (@builds) {
@@ -1281,7 +1287,7 @@ sub updateBuildUser {
 sub listUsers {
         my @users = $ds->getAllUsers();
 
-        if (defined(@users)) {
+        if (@users) {
                 map { print $_->getName() . "\n" } @users;
         } elsif (defined($ds->getError())) {
                 cleanup($ds, 1,
@@ -1304,7 +1310,7 @@ sub listBuildUsers {
         my $build = $ds->getBuildByName($opts->{'b'});
         my @users = $ds->getUsersForBuild($build);
 
-        if (defined(@users)) {
+        if (@users) {
                 map { print $_->getName() . "\n" } @users;
         } elsif (defined($ds->getError())) {
                 cleanup($ds, 1,
@@ -1447,6 +1453,54 @@ sub addPorts {
                                 warn "WARN: Failed to add port for build, "
                                     . $build->getName() . ": "
                                     . $ds->getError() . "\n";
+                        }
+                }
+        }
+}
+
+sub cleanup {
+        my @builds = $ds->getAllBuilds();
+
+        foreach my $build (@builds) {
+                print $build->getName() . "\n";
+                my $package_suffix = $ds->getPackageSuffix($build->getJailId());
+
+                # Delete unreferenced log files.
+                my $dir = join("/", $LOG_DIR, $build->getName());
+                opendir(DIR, $dir) || die "Failed to open $dir: $!\n";
+
+                while (my $file_name = readdir(DIR)) {
+                        if ($file_name =~ /\.log$/) {
+                                my $result =
+                                    $ds->isLogCurrent($build, $file_name);
+                                if (!$result) {
+                                        print
+                                            "Deleting stale $dir/$file_name\n";
+                                        unlink "$dir/$file_name";
+                                }
+                        }
+                }
+
+                closedir(DIR);
+
+                # Delete database records for nonexistent packages.
+                my $ports = $ds->getPortsForBuild($build);
+                foreach my $port ($ports) {
+                        if ($port->getLastBuiltVersion()) {
+                                my $path = join("/",
+                                        $PKGS_DIR,
+                                        $build->getName(),
+                                        "All",
+                                        $port->getLastBuiltVersion()
+                                            . $package_suffix);
+                                if (!-e $path) {
+                                        print
+                                            "Removing database entry for nonexistent package "
+                                            . $build->getName() . "/"
+                                            . $port->getLastBuiltVersion()
+                                            . "\n";
+                                        $ds->removePortForBuild($port, $build);
+                                }
                         }
                 }
         }
