@@ -19,7 +19,6 @@ jail_name=""
 jail_tag=""
 descr=""
 update_cmd=""
-uc=""
 
 set -- $args
 
@@ -52,24 +51,15 @@ if echo ${_jails} | grep -qw ${jail_name}; then
     exit 1
 fi
 
-if [ -z "${update_cmd}" ]; then
-    update_cmd="/usr/local/bin/cvsup -g ${pb}/jails/${jail_name}/src-supfile"
-elif [ "${update_cmd}" = "NONE" ]; then
-    update_cmd=""
-    uc="-u NONE"
-else
-    uc="-u ${update_cmd}"
-fi
-
 echo -n "INFO: Creating directories and supfile for new jail..."
 rm -rf ${pb}/jails/${jail_name}
 
 mkdir -p ${pb}/jails/${jail_name}/src
 
-cat > ${pb}/${jail_name}/src-supfile << EOSF
+cat > ${pb}/jails/${jail_name}/src-supfile << EOSF
 *default host=${suphost}
-*default base=${pb}/${jail_name}
-*default prefix=${pb}/${jail_name}
+*default base=${pb}/jails/${jail_name}
+*default prefix=${pb}/jails/${jail_name}
 *default release=cvs tag=${jail_tag}
 *default delete use-rel-suffix
 ${cvsup_compress}
@@ -83,7 +73,7 @@ echo -n "INFO: Adding jail to datastore..."
 if [ ! -z "${descr}" ]; then
     descr="-d ${descr}"
 fi
-${pb}/scripts/tc addJail -n ${jail_name} -t ${jail_tag} ${descr} ${uc}
+${pb}/scripts/tc addJail -n ${jail_name} -t ${jail_tag} ${descr} ${update_cmd}
 
 if [ $? != 0 ]; then
     echo "FAILED."

@@ -20,7 +20,7 @@ buildenv ${pb} "NULL" ${jail} "NULL" "NULL"
 
 update_cmd=`${pb}/scripts/tc getSrcUpdateCmd -j ${jail}`
 if [ ! -z "${update_cmd}" ]; then
-    ${update_cmd} > /dev/null 2>&1
+    eval ${update_cmd} > /dev/null 2>&1
 fi
 
 D=${pb}/jails/${jail}/tmp
@@ -59,8 +59,8 @@ mkdir -p ${D}/var/run
 rm -f ${D}/usr/lib/aout/lib*_p.a
 
 cd ${D}
-tar cf ${pb}/jails/${jail}.tar.new .
-mv -f ${pb}/jails/${jail}.tar.new ${pb}/jails/${jail}.tar
+tar cf ${pb}/jails/${jail}/${jail}.tar.new .
+mv -f ${pb}/jails/${jail}/${jail}.tar.new ${pb}/jails/${jail}/${jail}.tar
 
 rm -rf ${D} 2> /dev/null
 if [ -d ${D} ]; then

@@ -48,7 +48,7 @@ if echo ${_portstrees} | grep -qw ${portstree}; then
     exit 1
 fi
 
-if [ -z "${update_cmd}" ]; then
+if [ -z "${update_cmd}" -o "${update_cmd}" = "CVSUP" ]; then
     update_cmd="/usr/local/bin/cvsup -g ${pb}/portstrees/${portstree}/ports-supfile"
 elif [ "${update_cmd}" = "NONE" ]; then
     update_cmd=""
@@ -76,7 +76,7 @@ echo "DONE."
 
 if [ ! -z "${update_cmd}" ]; then
     echo -n "INFO: Updating portstree with ${update_cmd}..."
-    ${update_cmd} > /dev/null 2>&1
+    eval ${update_cmd} > /dev/null 2>&1
     if [ $? != 0 ]; then
 	echo "FAILED."
 	exit 1

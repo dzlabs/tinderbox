@@ -47,10 +47,11 @@ init () {
 	esac
     done
     mkdir -p ${pb}/jails
+    mkdir -p ${pb}/builds
+    mkdir -p ${pb}/portstrees
     mkdir -p ${pb}/errors
     mkdir -p ${pb}/logs
     mkdir -p ${pb}/packages
-    mkdir -p ${pb}/repo
     cat > ${pb}/make.conf << EOMC
 XFREE86_VERSION?=4
 USA_RESIDENT?=${USA_RESIDENT}

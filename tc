@@ -67,9 +67,34 @@ require "tinderlib.pl";
                 usage => "-j <jail name>",
         },
         "getSrcUpdateCmd" => {
-                func  => \&getSRcUpdateCmd,
+                func  => \&getSrcUpdateCmd,
                 help  => "Get the update command for the given jail",
                 usage => "-j <jail name>",
+        },
+        "getPortsUpdateCmd" => {
+                func  => \&getPortsUpdateCmd,
+                help  => "Get the update command for the given portstree",
+                usage => "-p <portstree name>",
+        },
+        "rmPort" => {
+                func  => \&rmPort,
+                help  => "Remove a port from the datastore",
+                usage => "-d <port directory> [-b <build name>] [-f]",
+        },
+        "rmBuild" => {
+                func  => \&rmBuild,
+                help  => "Remove a build from the datastore",
+                usage => "-b <build name> [-f]",
+        },
+        "rmPortsTree" => {
+                func  => \&rmPortsTree,
+                help  => "Remove a portstree from the datastore",
+                usage => "-p <portstree name> [-f]",
+        },
+        "rmJail" => {
+                func  => \&rmJail,
+                help  => "Remove a jail from the datastore",
+                usage => "-j <jail name> [-f]",
         },
 );
 
@@ -357,13 +382,234 @@ sub getSrcUpdateCmd {
                 usage("getSrcUpdateCmd");
         }
 
-        if (!$ds->isValidJail($opts->{'j'})) {
-                cleanup($ds, 1, "Unknown jail, " . $opts->{'j'} . "\n");
+        my $jail_name = $opts->{'j'};
+
+        if (!$ds->isValidJail($jail_name)) {
+                cleanup($ds, 1, "Unknown jail, $jail_name\n");
         }
 
-        my $jail = $ds->getJailByName($opts->{'j'});
+        my $jail = $ds->getJailByName($jail_name);
 
-        print $jail->getUpdateCmd() . "\n";
+        my $update_cmd = $jail->getUpdateCmd();
+
+        if ($update_cmd eq "CVSUP") {
+                $update_cmd =
+                    "/usr/local/bin/cvsup -g $BUILD_ROOT/jails/$jail_name/src-supfile";
+        } elsif ($update_cmd eq "NONE") {
+                $update_cmd = "";
+        }
+
+        print $update_cmd . "\n";
+}
+
+sub getPortsUpdateCmd {
+        my $opts = {};
+
+        getopts('p:', $opts);
+
+        if (!$opts->{'p'}) {
+                usage("getPortsUpdateCmd");
+        }
+
+        my $portstree_name = $opts->{'p'};
+
+        if (!$ds->isValidPortsTree($portstree_name)) {
+                cleanup($ds, 1, "Unknown portstree, $portstree_name\n");
+        }
+
+        my $portstree = $ds->getPortsTreeByName($portstree_name);
+
+        my $update_cmd = $portstree->getUpdateCmd();
+
+        if ($update_cmd eq "CVSUP") {
+                $update_cmd =
+                    "/usr/local/bin/cvsup -g $BUILD_ROOT/portstrees/$portstree_name/ports-supfile";
+        } elsif ($update_cmd eq "NONE") {
+                $update_cmd = "";
+        }
+
+        print $update_cmd . "\n";
+}
+
+sub rmPort {
+        my $opts = {};
+
+        getopts('fb:d:', $opts);
+
+        if (!$opts->{'d'}) {
+                usage("rmPort");
+        }
+
+        if ($opts->{'b'}) {
+                if (!$ds->isValidBuild($opts->{'b'})) {
+                        cleanup($ds, 1,
+                                "Unknown build, " . $opts->{'b'} . "\n");
+                }
+        }
+
+        my $port = $ds->getPortByDirectory($opts->{'d'});
+
+        if (!defined($port)) {
+                cleanup($ds, 1, "Unknown port, " . $opts->{'d'} . "\n");
+        }
+
+        unless ($opts->{'f'}) {
+                if ($opts->{'b'}) {
+                        print "Really remove port "
+                            . $opts->{'d'}
+                            . " for build "
+                            . $opts->{'d'} . "? ";
+                } else {
+                        print "Really remove port " . $opts->{'d'} . "? ";
+                }
+                my $response = <STDIN>;
+                print "\n";
+                cleanup($ds, 0, undef) unless ($response =~ /^y/i);
+        }
+
+        my $rc;
+        if ($opts->{'b'}) {
+                $rc =
+                    $ds->removePortForBuild($port,
+                        $ds->getBuildByName($opts->{'b'}));
+        } else {
+                $rc = $ds->removePort($port);
+        }
+
+        if (!$rc) {
+                cleanup($ds, 1, "Failed to remove port: " . $ds->getError());
+        }
+}
+
+sub rmBuild {
+        my $opts = {};
+
+        getopts('b:f', $opts);
+
+        if (!$opts->{'b'}) {
+                usage("rmBuild");
+        }
+
+        if (!$ds->isValidBuild($opts->{'b'})) {
+                cleanup($ds, 1, "Unknown build " . $opts->{'b'} . "\n");
+        }
+
+        unless ($opts->{'f'}) {
+                print "Really remove build " . $opts->{'b'} . "? ";
+                my $response = <STDIN>;
+                cleanup($ds, 0, undef) unless ($response =~ /^y/i);
+        }
+
+        my $rc = $ds->removeBuild($ds->getBuildByName($opts->{'b'}));
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to remove build "
+                            . $opts->{'b'} . ": "
+                            . $ds->getError());
+        }
+}
+
+sub rmJail {
+        my $opts = {};
+
+        getopts('j:f', $opts);
+
+        if (!$opts->{'j'}) {
+                usage("rmJail");
+        }
+
+        if (!$ds->isValidJail($opts->{'j'})) {
+                cleanup($ds, 1, "Unknown jail " . $opts->{'j'} . "\n");
+        }
+
+        my $jail   = $ds->getJailByName($opts->{'j'});
+        my @builds = $ds->findBuildsForJail($jail);
+
+        unless ($opts->{'f'}) {
+                if (defined(@builds)) {
+                        print
+                            "Removing this jail will also remove the following builds:\n";
+                        foreach my $build (@builds) {
+                                print "\t" . $build->getName() . "\n";
+                        }
+                }
+                print "Really remove jail " . $opts->{'j'} . "? ";
+                my $response = <STDIN>;
+                cleanup($ds, 0, undef) unless ($response =~ /^y/i);
+        }
+
+        my $rc;
+        foreach my $build (@builds) {
+                $rc = $ds->removeBuild($build);
+                if (!$rc) {
+                        cleanup($ds, 1,
+                                "Failed to remove build $build as part of removing jail "
+                                    . $opts->{'j'} . ": "
+                                    . $ds->getError()
+                                    . "\n");
+                }
+        }
+
+        $rc = $ds->removeJail($jail);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to remove jail "
+                            . $opts->{'j'} . ": "
+                            . $ds->getError());
+        }
+}
+
+sub rmPortsTree {
+        my $opts = {};
+
+        getopts('p:f', $opts);
+
+        if (!$opts->{'p'}) {
+                usage("rmPortsTree");
+        }
+
+        if (!$ds->isValidPortsTree($opts->{'p'})) {
+                cleanup($ds, 1, "Unknown portstree " . $opts->{'p'} . "\n");
+        }
+
+        my $portstree = $ds->getPortsTreeByName($opts->{'p'});
+        my @builds    = $ds->findBuildsForPortsTree($portstree);
+
+        unless ($opts->{'f'}) {
+                if (defined(@builds)) {
+                        print
+                            "Removing this portstree will also remove the following builds:\n";
+                        foreach my $build (@builds) {
+                                print "\t" . $build->getName() . "\n";
+                        }
+                }
+                print "Really remove portstree " . $opts->{'p'} . "? ";
+                my $response = <STDIN>;
+                cleanup($ds, 0, undef) unless ($response =~ /^y/i);
+        }
+
+        my $rc;
+        foreach my $build (@builds) {
+                $rc = $ds->removeBuild($build);
+                if (!$rc) {
+                        cleanup($ds, 1,
+                                "Failed to remove build $build as part of removing portstree "
+                                    . $opts->{'p'} . ": "
+                                    . $ds->getError()
+                                    . "\n");
+                }
+        }
+
+        $rc = $ds->removePortsTree($portstree);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to remove portstree "
+                            . $opts->{'p'} . ": "
+                            . $ds->getError());
+        }
 }
 
 sub usage {
@@ -429,6 +675,8 @@ sub addPorts {
                                     . $pCls->getDirectory() . ": "
                                     . $ds->getError() . "\n";
                         }
+                } else {
+                        $pCls = $ds->getPortByDirectory($portdir);
                 }
 
                 $rc = $ds->addPortForBuild($pCls, $build);

@@ -382,6 +382,112 @@ sub addPortForBuild {
         return $rc;
 }
 
+sub removePort {
+        my $self = shift;
+        my $port = shift;
+
+        my $rc;
+        $rc = $self->_doQuery("DELETE FROM build_ports WHERE Port_Id=?",
+                [$port->getId()]);
+
+        if (!$rc) {
+                return $rc;
+        }
+
+        $rc = $self->_doQuery("DELETE FROM ports WHERE Port_Id=?",
+                [$port->getId()]);
+
+        return $rc;
+}
+
+sub removePortForBuild {
+        my $self  = shift;
+        my $port  = shift;
+        my $build = shift;
+
+        my $rc =
+            $self->_doQuery(
+                "DELETE FROM build_ports WHERE Port_Id=? AND Build_Id=?",
+                [$port->getId(), $build->getId()]);
+
+        return $rc;
+}
+
+sub removeJail {
+        my $self = shift;
+        my $jail = shift;
+
+        my $rc = $self->_doQuery("DELETE FROM jails WHERE Jail_Id=?",
+                [$jail->getId()]);
+
+        return $rc;
+}
+
+sub removePortsTree {
+        my $self      = shift;
+        my $portstree = shift;
+
+        my $rc = $self->_doQuery("DELETE FROM portstrees WHERE Ports_Tree_Id=?",
+                [$portstree->getId()]);
+
+        return $rc;
+}
+
+sub removeBuild {
+        my $self  = shift;
+        my $build = shift;
+
+        my $rc;
+        $rc = $self->_doQuery("DELETE FROM build_ports WHERE Build_Id=?",
+                [$build->getId()]);
+
+        if (!$rc) {
+                return $rc;
+        }
+
+        $rc = $self->_doQuery("DELETE FROM builds WHERE Build_Id=?",
+                [$build->getId()]);
+
+        return $rc;
+}
+
+sub findBuildsForJail {
+        my $self  = shift;
+        my $jail  = shift;
+        my @jails = ();
+
+        my @results;
+        my $rc = $self->_doQueryHashRef("SELECT * FROM builds WHERE Jail_Id=?",
+                \@results, $jail->getId());
+
+        if (!$rc) {
+                return undef;
+        }
+
+        @jails = $self->_newFromArray("Jail", @results);
+
+        return @jails;
+}
+
+sub findBuildsForPortsTree {
+        my $self       = shift;
+        my $portstree  = shift;
+        my @portstrees = ();
+
+        my @results;
+        my $rc =
+            $self->_doQueryHashRef("SELECT * FROM builds WHERE Ports_Tree_Id=?",
+                \@results, $portstree->getId());
+
+        if (!$rc) {
+                return undef;
+        }
+
+        @portstrees = $self->_newFromArray("PortsTree", @results);
+
+        return @portstrees;
+}
+
 sub isPortInDS {
         my $self = shift;
         my $port = shift;
@@ -597,8 +703,8 @@ sub _doQuery {
 
         my $_sth;              # This is the real statement handler.
 
-	print STDERR "XXX: query = $query\n";
-	print STDERR "XXX: values = " . (join(", ", @{$params})) . "\n";
+	#print STDERR "XXX: query = $query\n";
+	#print STDERR "XXX: values = " . (join(", ", @{$params})) . "\n";
 
         $_sth = $self->{'dbh'}->prepare($query);
 

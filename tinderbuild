@@ -3,7 +3,7 @@
 pb=/space
 
 usage () {
-    echo "usage: $0 -b <build name> [portdir/portname [...]]"
+    echo "usage: $0 -b <build name> [-init] [-cleanpackages] [-updateports] [portdir/portname [...]]"
 }
 
 . ${pb}/scripts/buildenv
@@ -14,6 +14,7 @@ ports=""
 
 init=0
 cleanpackages=0
+updateports=0
 
 while [ $# -gt 0 ]; do
     case "x$1" in
@@ -28,6 +29,9 @@ while [ $# -gt 0 ]; do
 	;;
       x-init)
         init=1
+	;;
+      x-updateports)
+        updateports=1
 	;;
       x-cleanpackages)
         cleanpackages=1
@@ -54,7 +58,7 @@ portstree=$(${pb}/scripts/tc getPortsTreeForBuild -b ${build})
 buildenv ${pb} ${build} ${jail} ${portstree}
 
 # Remove the make logs.
-rm -f ${pb}/${build}/make.*
+rm -f ${pb}/builds/${build}/make.*
 
 # First we check to see if we need to clean out old packages.
 if [ "$cleanpackages" = "1" ]; then
@@ -62,6 +66,14 @@ if [ "$cleanpackages" = "1" ]; then
 fi
 
 mkdir -p ${PACKAGES}
+
+if [ "$updateports" = "1" ]; then
+    update_cmd=$(${pb}/scripts/tc getPortsUpdateCmd -p ${portstree})
+    if [ ! -z "${update_cmd}" ]; then
+	echo "INFO: Running ${update_cmd} to update the ports tree"
+	eval ${update_cmd} >/dev/null 2>&1
+    fi
+fi
 
 # Next, we build a Makefile for each jail.
 ${pb}/scripts/makemake ${build} ${ports}
