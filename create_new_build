@@ -7,36 +7,30 @@ usage () {
 
 pb=/space
 
-args=$(getopt n:j:p:d: $*)
-
-if [ $? != 0 ]; then
-    usage
-fi
-
 buil_name=""
 jail=""
 portstree=""
 descr=""
 
-set -- $args
-
-for i; do
-    case "$i" in
-	-n)
+while [ $# -gt 0 ]; do
+    case "x$1" in
+	x-n)
 	  build_name="$2"; shift;
-	  shift;;
-	-j)
+	  ;;
+	x-j)
 	  jail="$2"; shift;
-	  shift;;
-	-p)
+	  ;;
+	x-p)
 	  portstree="$2"; shift;
-	  shift;;
-	-d)
+	  ;;
+	x-d)
 	  descr="$2"; shift;
-	  shift;;
-	--)
-	  shift; break;;
+	  ;;
+	*)
+	  usage
+	  ;;
     esac
+    shift
 done
 
 if [ -z "${build_name}" -o -z "${jail}" -o -z "${portstree}" ]; then
@@ -63,7 +57,7 @@ echo -n "INFO: Adding build to datastore..."
 if [ ! -z "${descr}" ]; then
     descr="-d ${descr}"
 fi
-${pb}/scripts/tc addBuild -n ${build_name} -j ${jail} -p ${portstree} ${descr}
+${pb}/scripts/tc addBuild -n ${build_name} -j ${jail} -p ${portstree} "${descr}"
 
 if [ $? != 0 ]; then
     echo "FAILED."

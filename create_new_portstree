@@ -9,33 +9,27 @@ pb=/space
 suphost=cvsup12.FreeBSD.org
 cvsup_compress= #*default compress
 
-args=$(getopt n:d:u: $*)
-
-if [ $? != 0 ]; then
-    usage
-fi
-
 portstree=""
 descr=""
 update_cmd=""
 uc=""
 
-set -- $args
-
-for i; do
-    case "$i" in
-	-n)
+while [ $# -gt 0 ]; do
+    case "x$1" in
+	x-n)
 	  portstree="$2"; shift;
-	  shift;;
-	-d)
+	  ;;
+	x-d)
 	  descr="$2"; shift;
-	  shift;;
-	-u)
+	  ;;
+	x-u)
 	  update_cmd="$2"; shift;
-	  shift;;
-	--)
-	  shift; break;;
+	  ;;
+	*)
+	  usage
+	  ;;
     esac
+    shift
 done
 
 if [ -z "${portstree}" ]; then
@@ -88,7 +82,7 @@ echo -n "INFO: Adding portstree to datastore..."
 if [ ! -z "${descr}" ]; then
     descr="-d ${descr}"
 fi
-${pb}/scripts/tc addPortsTree -n ${portstree} ${descr} ${uc}
+${pb}/scripts/tc addPortsTree -n ${portstree} ${uc} "${descr}"
 
 if [ $? != 0 ]; then
     echo "FAILED."
