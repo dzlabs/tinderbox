@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: lastbuilds.php,v 1.6 2004/03/07 08:13:58 pav Exp $
+# $Id: lastbuilds.php,v 1.7 2004/03/07 11:10:23 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -46,7 +46,7 @@
 	$activeBuilds = array();
 	if ($builds) {
 		foreach ($builds as $build) {
-			if ($build->getBuildStatus() == "PORTBUILD" && $build->getBuildCurrentPort()) {
+			if ($build->getBuildStatus() == "PORTBUILD") {
 				$activeBuilds[] = $build;
 			}
 		}
@@ -64,7 +64,11 @@
 		foreach ($activeBuilds as $build) {
 			echo "<tr>\n";
 			echo "<td><a href=\"showbuild.php?name=" . $build->getName() . "\">" . $build->getName() . "</a></td>\n";
-			echo "<td>" . $build->getBuildCurrentPort() . "</td>\n";
+			if ($build->getBuildCurrentPort()) {
+				echo "<td>" . $build->getBuildCurrentPort() . "</td>\n";
+			} else {
+				echo "<td><i>preparing next build...</i></td>\n";
+			}
 			echo "</tr>\n";
 		}
 		?>
