@@ -187,7 +187,7 @@ cd ${PACKAGES}/All && make -k -j1 all > ${pb}/builds/${build}/make.0 2>&1 </dev/
 echo "ended at $(date)"
 phase1end=$(date +%s)
 echo "phase 1 took $(date -u -j -r $(($phase1end - $phase1start)) | awk '{print $4}')"
-echo $(echo $(ls -1 ${PACKAGES}/All/*${PKGSUFFIX} | wc -l) | bc) "packages built"
+echo $(echo $(ls -1 ${PACKAGES}/All | wc -l) - 2 | bc) "packages built"
 echo $(echo $(du -sh ${PACKAGES} | awk '{print $1}')) " of packages"
 
 echo "================================================"
@@ -199,7 +199,7 @@ cd ${PACKAGES}/All && make -k -j1 all > ${pb}/builds/${build}/make.1 2>&1 </dev/
 echo "ended at $(date)"
 phase2end=$(date +%s)
 echo "phase 2 took $(date -u -j -r $(($phase2end - $phase2start)) | awk '{print $4}')"
-echo $(echo $(ls -1 ${PACKAGES}/All/*${PKGSUFFIX} | wc -l) | bc) "packages built"
+echo $(echo $(ls -1 ${PACKAGES}/All | wc -l) - 2 | bc) "packages built"
 echo $(echo $(du -sh ${PACKAGES} | awk '{print $1}')) " of packages"
 
 cleanup ${pb} ${build} ${lock} 0
