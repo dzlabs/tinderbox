@@ -1,0 +1,85 @@
+#!/bin/sh
+
+pb=/space
+
+usage () {
+    echo "usage: $0 -j <jail type> [portdir/portname [...]]"
+}
+
+. ${pb}/scripts/buildenv
+
+_jails=$(${pb}/scripts/list_jails)
+jail=""
+ports=""
+
+init=0
+
+while [ $# -gt 0 ]; do
+    case "x$1" in
+      x-j)
+        shift
+        if echo ${_jails} | grep -qw "$1"; then
+	    jail=$1
+	else
+	    echo "Jail $1 is not a valid jail."
+	    exit 1
+	fi
+	;;
+      x-init)
+        init=1
+	;;
+      -*)
+        usage
+	;;
+      *)
+        ports="${ports} $1"
+	;;
+    esac
+    shift
+done
+
+if [ "x${jail}" = "x" ]; then
+    usage
+    exit 1
+fi
+
+buildenv ${pb} ${jail}
+# Fist we build a Makefile for each jail.
+${pb}/scripts/makemake ${jail} ${ports}
+
+# Then we check to see if we need to create our jail directory.
+if [ "$init" = "1" -o \( ! -d ${pb}/jails/${jail} -a ! -f ${pb}/repo/${jail}.tar \) ]; then
+    echo "Initializing a new jail directory for ${jail}..."
+    ${pb}/scripts/mkjail ${jail}
+elif [ ! -d ${pb}/jails/${jail} -a -f ${pb}/repo/${jail}.tar ]; then
+    echo "Creating jail directory for ${jail} from repository..."
+    ${pb}/scripts/mkjailfromrepo ${jail}
+fi
+    
+# Finally, we can start our make.  We'll background each make job (not
+# sure how nice this will be).  We do this in two phases to make sure we
+# get everything.
+echo "================================================"
+echo "building packages (phase 1)"
+echo "================================================"
+echo "started at $(date)"
+phase1start=$(date +%s)
+cd ${PACKAGES}/All && make -k -j1 all > ${pb}/${jail}/make.0 2>&1 </dev/null
+echo "ended at $(date)"
+phase1end=$(date +%s)
+echo "phase 1 took $(date -u -j -r $(($phase1end - $phase1start)) | awk '{print $4}')" 
+echo $(echo $(ls -1 ${PACKAGES}/All/*${PKGSUFFIX} | wc -l) | bc) "packages built"
+echo $(echo $(du -sh ${PACKAGES} | awk '{print $1}')) " of packages"
+
+echo "================================================"
+echo "building packages (phase 2)"
+echo "================================================"
+echo "started at $(date)"
+phase2start=$(date +%s)
+cd ${PACKAGES}/All && make -k -j1 all > ${pb}/${jail}/make.1 2>&1 </dev/null
+echo "ended at $(date)"
+phase2end=$(date +%s)
+echo "phase 2 took $(date -u -j -r $(($phase2end - $phase2start)) | awk '{print $4}')"
+echo $(echo $(ls -1 ${PACKAGES}/All/*${PKGSUFFIX} | wc -l) | bc) "packages built"
+echo $(echo $(du -sh ${PACKAGES} | awk '{print $1}')) " of packages"
+
