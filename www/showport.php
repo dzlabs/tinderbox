@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showport.php,v 1.13 2004/12/28 14:57:01 pav Exp $
+# $Id: showport.php,v 1.14 2005/01/21 06:24:36 marcus Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -85,7 +85,7 @@
 			if ($build["Last_Status"] == "SUCCESS") {
 				$logfilename = $logdir . "/". $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log";
 				if (file_exists($logfilename)) {
-					$leftovers = `grep -A 1 '=== Checking filesystem state' $logfilename | grep -c '^===='`;
+					$leftovers = `grep -A 1 '^=== Checking filesystem state' $logfilename | grep -c '^===='`;
 				} else {
 					$leftovers = 1;
 				}
