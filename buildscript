@@ -71,7 +71,7 @@ EOF
 	echo "================================================================"
 	echo "checking installed files"
 	find ${prefix} \( \( -perm -4000 -o -perm -2000 -a \! -type d \) -o \( -perm -0002 -o -perm -0020 \) \) -a \! -type l -ls | sort > /tmp/list1
-	echo "pkg_delete ${pkgname}"
+	echo "pkg_delete -f ${pkgname}"
 	pkg_delete -f ${pkgname}
 	find ${prefix} \( \( -perm -4000 -o -perm -2000 -a \! -type d \) -o \( -perm -0002 -o -perm -0020 \) \) -a \! -type l -ls | sort > /tmp/list2
 	if ! diff -qb /tmp/list1 /tmp/list2 2>/dev/null; then
