@@ -15,7 +15,7 @@ cleanup() {
 pb=/space
 
 usage () {
-    echo "usage: $0 -b <build name> [-init] [-cleanpackages] [-updateports] [portdir/portname [...]]"
+    echo "usage: $0 -b <build name> [-init] [-cleanpackages] [-updateports] [-skipmake] [portdir/portname [...]]"
 }
 
 . ${pb}/scripts/buildenv
@@ -27,6 +27,8 @@ ports=""
 init=0
 cleanpackages=0
 updateports=0
+skipmake=0
+skipmake=0
 error=2
 
 while [ $# -gt 0 ]; do
@@ -48,6 +50,9 @@ while [ $# -gt 0 ]; do
 	;;
       x-cleanpackages)
         cleanpackages=1
+	;;
+      x-skipmake)
+        skipmake=1
 	;;
       -*)
         usage
@@ -74,7 +79,7 @@ fi
 touch ${lock}
 
 # Let the datastore known what we're doing.
-${pb}/scripts/tc updateBuildStatus -b ${build} -s PORTBUILD
+${pb}/scripts/tc updateBuildStatus -b ${build} -s PREPARE
 
 trap "cleanup ${pb} ${build} ${lock} ${error}" 1 2 3 9 10 11 15
 
@@ -105,16 +110,18 @@ if [ "$updateports" = "1" ]; then
     update_cmd=$(${pb}/scripts/tc getPortsUpdateCmd -p ${portstree})
     if [ ! -z "${update_cmd}" ]; then
 	echo "INFO: Running ${update_cmd} to update the ports tree"
-	eval ${update_cmd} ${portstree} >/dev/null 2>&1
+	eval ${update_cmd} >/dev/null 2>&1
     fi
 fi
 
-# Next, we build a Makefile for each jail.
-${pb}/scripts/makemake ${build} ${ports}
+if [ "$skipmake" = "0" ]; then
+    # Next, we build a Makefile for each jail.
+    ${pb}/scripts/makemake ${build} ${ports}
 
-if [ $? != 0 ]; then
-    echo "ERROR: Failed to generate Makefile for ${build}"
-    cleanup ${pb} ${build} ${lock} 1
+    if [ $? != 0 ]; then
+        echo "ERROR: Failed to generate Makefile for ${build}"
+        cleanup ${pb} ${build} ${lock} 1
+    fi
 fi
 
 # Then we check to see if we need to create our jail directory.
@@ -126,6 +133,8 @@ else
     echo "INFO: Creating build directory for ${build} from repository..."
     ${pb}/scripts/mkbuild ${build}
 fi
+
+${pb}/scripts/tc updateBuildStatus -b ${build} -s PORTBUILD
 
 # We do this in two phases to make sure we get everything.
 echo "================================================"
