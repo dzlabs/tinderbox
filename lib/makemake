@@ -91,9 +91,10 @@ delete $ENV{'DISPLAY'};
 
 # Set LOCALBASE, X11BASE, and PKGDB_DIR to bogus values to prevent system
 # installed packages from affecting the tinderbox.
-$ENV{'LOCALBASE'} = "/nonexistentlocal";
-$ENV{'X11BASE'}   = "/nonexistentx";
-$ENV{'PKG_DBDIR'} = "/nonexistentdb";
+$ENV{'LOCALBASE'}  = "/nonexistentlocal";
+$ENV{'X11BASE'}    = "/nonexistentx";
+$ENV{'PKG_DBDIR'}  = "/nonexistentdb";
+$ENV{'PORT_DBDIR'} = "/nonexistentportdb";
 
 if (!scalar(@ARGV)) {
         my @dsPorts = $ds->getPortsForBuild($BUILD);

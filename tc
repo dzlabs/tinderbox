@@ -514,9 +514,10 @@ sub addPort {
                         $BUILD_ROOT,      $build->getName(),
                         $jail->getName(), $portstree->getName()
                 );
-                $ENV{'LOCALBASE'} = "/nonexistentlocal";
-                $ENV{'X11BASE'}   = "/nonexistentx";
-                $ENV{'PKG_DBDIR'} = "/nonexistentdb";
+                $ENV{'LOCALBASE'}  = "/nonexistentlocal";
+                $ENV{'X11BASE'}    = "/nonexistentx";
+                $ENV{'PKG_DBDIR'}  = "/nonexistentdb";
+                $ENV{'PORT_DBDIR'} = "/nonexistentportdb";
 
                 if ($opts->{'r'}) {
                         my @deps = ();
