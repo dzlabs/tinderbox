@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.18 2004/03/05 07:51:23 pav Exp $
+# $Id: TinderboxDS.php,v 1.19 2004/03/07 11:10:22 pav Exp $
 #
 
     require_once 'DB.php';
@@ -111,10 +111,13 @@
 	    $query.= "WHERE build_ports.Build_Id = builds.Build_Id AND builds.Ports_Tree_Id = ports_trees.Ports_Tree_Id AND build_ports.Port_Id = ports.Port_Id ";
 	    if (is_array($params)) {
 		foreach ($params as $key => $param) {
-		    switch ($key) {
-			case "Port_Id": $query.= "AND build_ports.Port_Id = '" . $param . "' "; break;
-			case "Last_Status": $query.= "AND Last_Status = '" . $param . "' "; break;
-			case "Last_Built": $query.= "ORDER BY Last_Built DESC LIMIT " . (int)$param; break;
+		    if (!empty($param)) {
+			switch ($key) {
+				case "Build_Name": $query.= "AND Build_Name = '" . $param . "' "; break;
+				case "Port_Id": $query.= "AND build_ports.Port_Id = '" . $param . "' "; break;
+				case "Last_Status": $query.= "AND Last_Status = '" . $param . "' "; break;
+				case "Last_Built": $query.= "ORDER BY Last_Built DESC LIMIT " . (int)$param; break;
+			}
 		    }
 		}
 	    }

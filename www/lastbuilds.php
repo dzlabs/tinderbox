@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: lastbuilds.php,v 1.7 2004/03/07 11:10:23 pav Exp $
+# $Id: lastbuilds.php,v 1.8 2004/03/07 20:35:18 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -46,15 +46,17 @@
 	$activeBuilds = array();
 	if ($builds) {
 		foreach ($builds as $build) {
-			if ($build->getBuildStatus() == "PORTBUILD") {
-				$activeBuilds[] = $build;
+			if (empty($showbuild) || $build->getName() == $showbuild) {
+				if ($build->getBuildStatus() == "PORTBUILD") {
+					$activeBuilds[] = $build;
+				}
 			}
 		}
 	}
 
 	if (sizeof($activeBuilds) > 0) {
 		?>
-		<h1>Current Builds</h1>
+		<h1>Current Builds<?= ($showbuild ? " in $showbuild" : "" ) ?></h1>
 		<table>
 		<tr>
 		<th>Build</th>
@@ -77,9 +79,9 @@
 	}
 
 	?>
-	<h1>Latest Builds</h1>
+	<h1>Latest Builds<?= ($showbuild ? " in $showbuild" : "" ) ?></h1>
 	<?php
-	$builds = $ds->getBuildsDetailed(array("Last_Built" => 20));
+	$builds = $ds->getBuildsDetailed(array("Build_Name" => $showbuild, "Last_Built" => 20));
 
 	if ($builds) {
 
