@@ -109,12 +109,12 @@ export PORTOBJFORMAT=elf
 
 export USA_RESIDENT=yes
 
-export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/X11R6/bin:.
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/X11R6/bin
 
 # Use the *.env file to specify per-jail, per-portstree, and per-build
 # environment variables.
 [ -f ${pb}/jails/${jail}/jail.env ] && . ${pb}/jails/${jail}/jail.env
-[ -f ${pb}/portstrees/${portstree}/jail.env ] && \
+[ -f ${pb}/portstrees/${portstree}/portstree.env ] && \
 	. ${pb}/portstrees/${portstree}/portstree.env
 [ -f ${pb}/builds/${branch}/build.env ] && . ${pb}/builds/${branch}/build.env
 
