@@ -29,7 +29,12 @@ if [ $phase = 1 ]; then
 	done
     fi
 
-    mtree -xcn -k uid,gid,mode -p / > /tmp/mtree
+    cat > /tmp/mtree.exclude <<EOF
+./var/*
+./tmp/*
+EOF
+
+    mtree -X /tmp/mtree.exclude -xcn -k uid,gid,mode -p / > /tmp/mtree
 
     cd $dir || exit 1
     pkgname=$(make package-name)
