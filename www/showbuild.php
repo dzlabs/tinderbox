@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showbuild.php,v 1.17 2004/12/28 14:39:47 pav Exp $
+# $Id: showbuild.php,v 1.18 2004/12/28 14:57:01 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -82,11 +82,11 @@
 			if ($port->getLastStatus() == "SUCCESS") {
 				$logfilename = $logdir . "/". $build->getName() . "/" . $port->getLastBuiltVersion() . ".log";
 				if (file_exists($logfilename)) {
-					$leftovers = `grep -c extra.files $logfilename`;
+					$leftovers = `grep -A 1 '=== Checking filesystem state' $logfilename | grep -c '^===='`;
 				} else {
-					$leftovers = "";
+					$leftovers = 1;
 				}
-				if ($leftovers == 1) {
+				if ($leftovers == 0) {
 					echo "<td style=\"background-color: rgb(255,255,216); color: red; font-weight: bold; text-align: center\">L</td>\n";
 				} else {
 					echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
