@@ -844,6 +844,15 @@ sub getAllJails {
         return @jails;
 }
 
+sub getAllPortsTrees {
+        my $self       = shift;
+        my @portstrees = ();
+
+        @portstrees = $self->getPortsTrees();
+
+        return @portstrees;
+}
+
 sub getError {
         my $self = shift;
 
