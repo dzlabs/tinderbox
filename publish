@@ -1,0 +1,45 @@
+#!/bin/sh
+
+pb=/space
+
+_builds=$(${pb}/scripts/tc listBuilds)
+
+if [ -z "$1" ]; then
+    echo "Please specify a build name."
+    echo "Current build names are:"
+    for i in ${_builds}; do
+	echo "	${i}"
+    done
+    exit 1
+fi
+
+. ${pb}/scripts/buildenv
+
+build=$1
+
+if ! echo ${_builds} | grep -qw ${build}; then
+    echo "ERROR: Unknown build, \"${build}\"."
+    exit 1
+fi
+
+jail=$(${pb}/scripts/tc getJailForBuild -b ${build})
+
+buildenv ${pb} ${build} ${jail} "NULL"
+
+if [ ! -d ${PACKAGES} ]; then
+    echo "ERROR: There are no packages to publish for this build."
+    exit 1
+fi
+
+rm -rf ${pb}/published/${build}
+mkdir -p ${pb}/published/${build}
+
+echo -n "INFO: Publishing packages..."
+tar -C ${PACKAGES} -cf - . | tar -C ${pb}/published/${build} -xf -
+
+if [ $? != 0 ]; then
+    echo "FAILED."
+    exit 1
+fi
+
+echo "DONE."
