@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: tc,v 1.31 2005/02/12 21:09:53 marcus Exp $
+# $Id: tc,v 1.32 2005/02/13 07:08:33 marcus Exp $
 #
 
 # This is a hack to make sure we can always find our modules.
@@ -141,10 +141,11 @@ require "tinderlib.pl";
                 optstr => 'p:',
         },
         "rmPort" => {
-                func   => \&rmPort,
-                help   => "Remove a port from the datastore",
-                usage  => "-d <port directory> [-b <build name>] [-f]",
-                optstr => 'fb:d:',
+                func => \&rmPort,
+                help =>
+                    "Remove a port from the datastore, and optionally its package and logs from the file system",
+                usage  => "-d <port directory> [-b <build name>] [-f] [-c]",
+                optstr => 'fb:d:c',
         },
         "rmBuild" => {
                 func   => \&rmBuild,
@@ -281,8 +282,8 @@ require "tinderlib.pl";
                 usage  => "-b <build name>",
                 optstr => 'b:',
         },
-        "cleanup" => {
-                func => \&cleanup,
+        "tbcleanup" => {
+                func => \&tbcleanup,
                 help =>
                     "Cleanup old build logs, and prune old database entries for which no package exists",
                 usage => "",
@@ -683,6 +684,42 @@ sub rmPort {
         if (!$rc) {
                 cleanup($ds, 1,
                         "Failed to remove port: " . $ds->getError() . "\n");
+        }
+
+        if ($opts->{'c'} && !$opts->{'b'}) {
+                my @builds = $ds->getAllBuilds();
+                foreach my $build (@builds) {
+                        if (my $version =
+                                $ds->getPortLastBuiltVersion($port, $build))
+                        {
+                                my $sufx =
+                                    $ds->getPackageSuffix($build->getJailId());
+                                my $pkgdir =
+                                    join("/", $PKGS_DIR, $build->getName());
+                                my $logpath = join("/",
+                                        $LOG_DIR, $build->getName(), $version);
+                                my $errpath = join("/",
+                                        $ERROR_DIR, $build->getName(),
+                                        $version);
+                                if (-d $pkgdir) {
+                                        print
+                                            "Removing all packages matching ${version}${sufx} starting from $pkgdir.\n";
+                                        system(
+                                                "/usr/bin/find -H $pkgdir -name ${version}${sufx} -delete"
+                                        );
+                                }
+                                if (-f $logpath . ".log") {
+                                        print "Removing ${logpath}.log.\n";
+                                        unlink($logpath . ".log");
+                                }
+                                if (-f $errpath . ".log") {
+                                        print "Removing ${errpath}.log.\n";
+                                        unlink($errpath . ".log");
+                                }
+                        }
+                }
+        } elsif ($opts->{'c'} && $opts->{'b'}) {
+                warn "WARN: Flags -b and -c cannot be used together.\n";
         }
 }
 
@@ -1474,12 +1511,13 @@ sub addPorts {
         }
 }
 
-sub cleanup {
+sub tbcleanup {
         my @builds = $ds->getAllBuilds();
 
         foreach my $build (@builds) {
                 print $build->getName() . "\n";
-                my $package_suffix = $ds->getPackageSuffix($build->getJailId());
+                my $jail           = $ds->getJailById($build->getJailId());
+                my $package_suffix = $ds->getPackageSuffix($jail);
 
                 # Delete unreferenced log files.
                 my $dir = join("/", $LOG_DIR, $build->getName());
@@ -1491,7 +1529,7 @@ sub cleanup {
                                     $ds->isLogCurrent($build, $file_name);
                                 if (!$result) {
                                         print
-                                            "Deleting stale $dir/$file_name\n";
+                                            "Deleting stale log $dir/$file_name\n";
                                         unlink "$dir/$file_name";
                                 }
                         }
@@ -1500,20 +1538,24 @@ sub cleanup {
                 closedir(DIR);
 
                 # Delete database records for nonexistent packages.
-                my $ports = $ds->getPortsForBuild($build);
-                foreach my $port ($ports) {
-                        if ($port->getLastBuiltVersion()) {
-                                my $path = join("/",
+                my @ports = $ds->getPortsForBuild($build);
+                foreach my $port (@ports) {
+                        if ($ds->getPortLastBuiltVersion($port, $build)) {
+                                my $path = join(
+                                        "/",
                                         $PKGS_DIR,
                                         $build->getName(),
                                         "All",
-                                        $port->getLastBuiltVersion()
-                                            . $package_suffix);
+                                        $ds->getPortLastBuiltVersion($port,
+                                                $build)
+                                            . $package_suffix
+                                );
                                 if (!-e $path) {
                                         print
                                             "Removing database entry for nonexistent package "
                                             . $build->getName() . "/"
-                                            . $port->getLastBuiltVersion()
+                                            . $ds->getPortLastBuiltVersion(
+                                                $port, $build)
                                             . "\n";
                                         $ds->removePortForBuild($port, $build);
                                 }
