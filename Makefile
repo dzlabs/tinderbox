@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2005/02/01 17:21:19 marcus Exp $
+# $Id: Makefile,v 1.2 2005/02/01 17:38:52 marcus Exp $
 
 VERSION=	1.0
 
@@ -14,7 +14,7 @@ WWWDATA=	Build.php Jail.php Port.php PortsTree.php TinderObject.php \
 
 release:
 	-rm -rf ${.CURDIR}/tinderbox-${VERSION} \
-		${.CURDIR}/tinderbox-${VERSION}.tar.bz2
+		${.CURDIR}/tinderbox-${VERSION}.tar.gz
 	mkdir -p ${.CURDIR}/tinderbox-${VERSION}
 .for f in ${DATA}
 	cp ${f} ${.CURDIR}/tinderbox-${VERSION}
@@ -23,5 +23,5 @@ release:
 .for wf in ${WWWDATA}
 	cp ${.CURDIR}/www/${wf} ${.CURDIR}/tinderbox-${VERSION}/www
 .endfor
-	tar cvzf ${.CURDIR}/tinderbox-${VERSION}.tar.gz \
-		${.CURDIR}/tinderbox-${VERSION}
+	cd ${.CURDIR} && \
+		tar cvzf tinderbox-${VERSION}.tar.gz tinderbox-${VERSION}
