@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: mkjail,v 1.15 2004/08/18 21:05:38 marcus Exp $
+# $Id: mkjail,v 1.16 2005/02/13 07:08:33 marcus Exp $
 #
 
 
@@ -84,7 +84,9 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
-cd etc
+if ! make -n distribution; then
+    cd etc
+fi
 make distribution DESTDIR=${D}
 
 if [ $? != 0 ]; then
