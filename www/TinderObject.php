@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id$
+# $Id: TinderObject.php,v 1.2 2004/03/02 19:51:43 marcus Exp $
 #
 
     class TinderObject {
@@ -49,5 +49,18 @@
 
 	    return $hashref;
 	}
+
+	function prettyDatetime($input) {
+		if (ereg("[0-9]{14}", $input)) {
+			/* timestamp */
+			return substr($input,0,4)."-".substr($input,4,2)."-".substr($input,6,2)." ".substr($input,8,2).":".substr($input,10,2).":".substr($input,12,2);
+		} elseif (ereg("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}", $input)) {
+			/* datetime */
+			return $input;
+		} else {
+			return $input;
+		}
+	}
+
     }
 ?>
