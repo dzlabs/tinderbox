@@ -33,6 +33,7 @@ use Port;
 use Jail;
 use PortsTree;
 use Build;
+use User;
 use DBI;
 use Carp;
 use vars qw(
@@ -49,6 +50,7 @@ use vars qw(
         "Jail"      => "jails",
         "Build"     => "builds",
         "PortsTree" => "ports_trees",
+        "User"      => "users",
 );
 
 require "ds.ph";
@@ -65,7 +67,7 @@ sub new {
         my $dsn = "DBI:$DB_DRIVER:database=$DB_NAME;host=$DB_HOST";
 
         $self->{'dbh'} = DBI->connect($dsn, $DB_USER, $DB_PASS)
-            or croak "Tinderbox DS: Unable to initialize datasource.";
+            or croak "ERROR: Tinderbox DS: Unable to initialize datasource.";
 
         bless($self, $class);
         $self;
@@ -166,6 +168,48 @@ sub getPorts {
         @ports = $self->_newFromArray("Port", @results);
 
         return @ports;
+}
+
+sub getUsers {
+        my $self      = shift;
+        my @params    = @_;
+        my $condition = "";
+        my @users     = ();
+
+        my @values = ();
+        my @conds  = ();
+        foreach my $param (@params) {
+
+                # Each parameter makes up and OR portion of a query.  Within
+                # each parameter is a hash reference that make up the AND
+                # portion of the query.
+                my @ands = ();
+                foreach my $andcond (keys %{$param}) {
+                        push @ands,   "$andcond=?";
+                        push @values, $param->{$andcond};
+                }
+                push @conds, "(" . (join(" AND ", @ands)) . ")";
+        }
+
+        $condition = join(" OR ", @conds);
+
+        my @results;
+        my $query;
+        if ($condition ne "") {
+                $query = "SELECT * FROM users WHERE $condition";
+        } else {
+                $query = "SELECT * FROM users";
+        }
+
+        my $rc = $self->_doQueryHashRef($query, \@results, @values);
+
+        if (!$rc) {
+                return undef;
+        }
+
+        @users = $self->_newFromArray("User", @results);
+
+        return @users;
 }
 
 sub getJailByName {
@@ -391,6 +435,49 @@ sub addPort {
         return $rc;
 }
 
+sub updateBuildUser {
+        my $self         = shift;
+        my $build        = shift;
+        my $user         = shift;
+        my $onCompletion = shift;
+        my $onError      = shift;
+        croak "ERROR: Argument 1 is not of type build\n"
+            if (ref($build) ne "Build");
+        croak "ERROR: Argument 2 is not of type user\n"
+            if (ref($user) ne "User");
+
+        if (!defined($onCompletion)) {
+                $onCompletion = 0;
+        }
+
+        if (!defined($onError)) {
+                $onError = 0;
+        }
+
+        my $rc = $self->_doQuery(
+                "UPDATE build_users SET Email_On_Completion=?, Email_On_Error=? WHERE Build_Id=? AND User_Id=?",
+                [$onCompletion, $onError, $build->getId(), $user->getId()]
+        );
+
+        return $rc;
+}
+
+sub updateUser {
+        my $self = shift;
+        my $user = shift;
+        my $uCls = (ref($user) eq "REF") ? $$user : $user;
+
+        my $rc =
+            $self->_doQuery("UPDATE users SET User_Email=? WHERE User_Id=?",
+                [$uCls->getEmail(), $uCls->getId()]);
+
+        if (ref($user) eq "REF") {
+                $$user = $self->getUserByName($uCls->getName());
+        }
+
+        return $rc;
+}
+
 sub updatePort {
         my $self = shift;
         my $port = shift;
@@ -606,6 +693,130 @@ sub updateBuildCurrentPort {
         return $rc;
 }
 
+sub getBuildCompletionUsers {
+        my $self  = shift;
+        my $build = shift;
+        croak "ERROR: Argument not of type build\n" if (ref($build) ne "Build");
+
+        my @users = $self->_getBuildUsers($build, "Email_On_Completion");
+
+        return @users;
+}
+
+sub getBuildErrorUsers {
+        my $self  = shift;
+        my $build = shift;
+        croak "ERROR: Argument not of type build\n" if (ref($build) ne "Build");
+
+        my @addrs = $self->_getBuildUsers($build, "Email_On_Error");
+
+        return @addrs;
+}
+
+sub _getBuildUsers {
+        my $self  = shift;
+        my $build = shift;
+        my $field = shift;
+        my @users;
+
+        my @results = ();
+        my $rc      = $self->_doQueryHashRef(
+                "SELECT * FROM  users WHERE User_Id IN (SELECT User_Id FROM build_users WHERE Build_Id=? AND $field=1)",
+                \@results, $build->getId()
+        );
+
+        if (!$rc) {
+                return undef;
+        }
+
+        @users = $self->_newFromArray("User", @results);
+
+        return @users;
+
+}
+
+sub isValidUser {
+        my $self     = shift;
+        my $username = shift;
+
+        my $rc =
+            $self->_doQueryNumRows(
+                "SELECT User_Id FROM users WHERE User_Name=?", $username);
+
+        return ($rc > 0) ? 1 : 0;
+}
+
+sub isUserForBuild {
+        my $self  = shift;
+        my $user  = shift;
+        my $build = shift;
+        croak "ERROR: Argument 1 is not of type user\n"
+            if (ref($user) ne "User");
+        croak "ERROR: Argument 2 is not of type build\n"
+            if (ref($build) ne "Build");
+
+        my $rc = $self->_doQueryNumRows(
+                "SELECT Build_User_Id FROM build_users WHERE Build_Id=? AND User_Id=?",
+                $build->getId(), $user->getId()
+        );
+
+        return ($rc > 0) ? 1 : 0;
+}
+
+sub getUserByName {
+        my $self     = shift;
+        my $username = shift;
+
+        my @results = $self->getUsers({User_Name => $username});
+
+        if (!defined(@results)) {
+                return undef;
+        }
+
+        return $results[0];
+}
+
+sub addUser {
+        my $self = shift;
+        my $user = shift;
+        my $uCls = (ref($user) eq "REF") ? $$user : $user;
+
+        my $rc = $self->_addObject($uCls);
+
+        if (ref($user) eq "REF") {
+                $$user = $self->getUserByName($uCls->getName());
+        }
+
+        return $rc;
+}
+
+sub addUserForBuild {
+        my $self         = shift;
+        my $user         = shift;
+        my $build        = shift;
+        my $onCompletion = shift;
+        my $onError      = shift;
+        croak "ERROR: Argument 1 is not of type user\n"
+            if (ref($user) ne "User");
+        croak "ERROR: Argument 2 is not of type build\n"
+            if (ref($build) ne "Build");
+
+        if (!defined($onCompletion)) {
+                $onCompletion = 0;
+        }
+
+        if (!defined($onError)) {
+                $onError = 0;
+        }
+
+        my $rc = $self->_doQuery(
+                "INSERT into build_users (Build_Id, User_Id, Email_On_Completion, Email_On_Error) VALUES (?, ?, ?, ?)",
+                [$build->getId(), $user->getId(), $onCompletion, $onError]
+        );
+
+        return $rc;
+}
+
 sub addPortForBuild {
         my $self  = shift;
         my $port  = shift;
@@ -646,6 +857,42 @@ sub removePortForBuild {
             $self->_doQuery(
                 "DELETE FROM build_ports WHERE Port_Id=? AND Build_Id=?",
                 [$port->getId(), $build->getId()]);
+
+        return $rc;
+}
+
+sub removeUser {
+        my $self = shift;
+        my $user = shift;
+        croak "ERROR: Argument 1 is not of type user\n"
+            if (ref($user) ne "User");
+
+        my $rc = $self->_doQuery("DELETE FROM build_users WHERE User_Id=?",
+                [$user->getId()]);
+
+        if (!$rc) {
+                return $rc;
+        }
+
+        $rc = $self->_doQuery("DELETE FROM users WHERE User_Id=?",
+                [$user->getId()]);
+
+        return $rc;
+}
+
+sub removeUserForBuild {
+        my $self  = shift;
+        my $user  = shift;
+        my $build = shift;
+        croak "ERROR: Argument 1 is not of type user\n"
+            if (ref($user) ne "User");
+        croak "ERROR: Argument 2 is not nof type build\n"
+            if (ref($build) ne "Build");
+
+        my $rc =
+            $self->_doQuery(
+                "DELETE FROM build_users WHERE Build_Id=? AND User_Id=?",
+                [$build->getId(), $user->getId()]);
 
         return $rc;
 }
@@ -903,7 +1150,8 @@ sub getError {
 sub _doQueryNumRows {
         my $self  = shift;
         my $class = ref $self;
-        croak "Attempt to call private method" if ($class ne __PACKAGE__);
+        croak "ERROR: Attempt to call private method"
+            if ($class ne __PACKAGE__);
         my $query  = shift;
         my @params = @_;
         my $rows;
@@ -930,7 +1178,8 @@ sub _doQueryNumRows {
 sub _doQueryHashRef {
         my $self  = shift;
         my $class = ref $self;
-        croak "Attempt to call private method" if ($class ne __PACKAGE__);
+        croak "ERROR: Attempt to call private method"
+            if ($class ne __PACKAGE__);
         my $query  = shift;
         my $result = shift;
         my @params = @_;
@@ -956,7 +1205,8 @@ sub _doQueryHashRef {
 sub _doQuery {
         my $self  = shift;
         my $class = ref $self;
-        croak "Attempt to call private method" if ($class ne __PACKAGE__);
+        croak "ERROR: Attempt to call private method"
+            if ($class ne __PACKAGE__);
         my $query  = shift;
         my $params = shift;
         my $sth    = shift;    # Optional
@@ -998,7 +1248,8 @@ sub _doQuery {
 sub _newFromArray {
         my $self  = shift;
         my $class = ref $self;
-        croak "Attempt to call private method" if ($class ne __PACKAGE__);
+        croak "ERROR: Attempt to call private method"
+            if ($class ne __PACKAGE__);
         my $type    = shift;
         my @array   = @_;
         my @objects = ();
@@ -1019,7 +1270,7 @@ sub _addObject {
         my $object    = shift;
         my $objectRef = ref($object);
 
-        croak "Unknown object type, $objectRef\n"
+        croak "ERROR: Unknown object type, $objectRef\n"
             unless defined($OBJECT_MAP{$objectRef});
 
         my $table      = $OBJECT_MAP{$objectRef};

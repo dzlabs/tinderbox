@@ -40,6 +40,20 @@ use Getopt::Std;
 use vars qw(
     %COMMANDS
     $BUILD_ROOT
+    $TINDER_BIN
+    $ERROR_DIR
+    $LOG_DIR
+    $BUILDS_DIR
+    $JAILS_DIR
+    $PKGS_DIR
+    $PORTSTREES_DIR
+    $SUBJECT
+    $SMTP_HOST
+    $SERVER_HOST
+    $SERVER_PROTOCOL
+    $SENDER
+    $SHOWBUILD_URI
+    $SHOWPORT_URI
 );
 
 require "tinderbox.ph";
@@ -71,80 +85,95 @@ require "tinderlib.pl";
                 help  => "Add a build to the datastore",
                 usage =>
                     "-n <build name> -j <jail name> -p <portstree name> [-d <build description>]",
+                optstr => 'n:j:p:d:',
         },
         "addJail" => {
                 func  => \&addJail,
                 help  => "Add a jail to the datastore",
                 usage =>
                     "-n <jail name> -t <jail tag> [-d <jail description>] [-u <jail update command|CVSUP|NONE>]",
+                optstr => 'n:t:u:d:',
         },
         "addPortsTree" => {
                 func  => \&addPortsTree,
                 help  => "Add a portstree to the datastore",
                 usage =>
                     "-n <portstree name> [-d <portstree description>] [-u <portstree update command|NONE|CVSUP>] [-w <CVSweb URL>]",
+                optstr => 'n:u:d:w:',
         },
         "addPort" => {
                 func => \&addPort,
                 help =>
                     "Add a port, and optionally, its dependencies, to the datastore",
-                usage => "{-b <build name> | -a} -d <port directory> [-r]",
+                usage  => "{-b <build name> | -a} -d <port directory> [-r]",
+                optstr => 'ab:d:r',
         },
         "getJailForBuild" => {
-                func  => \&getJailForBuild,
-                help  => "Get the jail name associated with a given build",
-                usage => "-b <build name>",
+                func   => \&getJailForBuild,
+                help   => "Get the jail name associated with a given build",
+                usage  => "-b <build name>",
+                optstr => 'b:',
         },
         "getPortsTreeForBuild" => {
                 func  => \&getPortsTreeForBuild,
                 help  => "Get the portstree name assoicated with a given build",
                 usage => "-b <build name>",
+                optstr => 'b:',
         },
         "getTagForJail" => {
-                func  => \&getTagForJail,
-                help  => "Get the tag for a given jail",
-                usage => "-j <jail name>",
+                func   => \&getTagForJail,
+                help   => "Get the tag for a given jail",
+                usage  => "-j <jail name>",
+                optstr => 'j:',
         },
         "getSrcUpdateCmd" => {
-                func  => \&getSrcUpdateCmd,
-                help  => "Get the update command for the given jail",
-                usage => "-j <jail name>",
+                func   => \&getSrcUpdateCmd,
+                help   => "Get the update command for the given jail",
+                usage  => "-j <jail name>",
+                optstr => 'j:',
         },
         "getPortsUpdateCmd" => {
-                func  => \&getPortsUpdateCmd,
-                help  => "Get the update command for the given portstree",
-                usage => "-p <portstree name>",
+                func   => \&getPortsUpdateCmd,
+                help   => "Get the update command for the given portstree",
+                usage  => "-p <portstree name>",
+                optstr => 'p:',
         },
         "rmPort" => {
-                func  => \&rmPort,
-                help  => "Remove a port from the datastore",
-                usage => "-d <port directory> [-b <build name>] [-f]",
+                func   => \&rmPort,
+                help   => "Remove a port from the datastore",
+                usage  => "-d <port directory> [-b <build name>] [-f]",
+                optstr => 'fb:d:',
         },
         "rmBuild" => {
-                func  => \&rmBuild,
-                help  => "Remove a build from the datastore",
-                usage => "-b <build name> [-f]",
+                func   => \&rmBuild,
+                help   => "Remove a build from the datastore",
+                usage  => "-b <build name> [-f]",
+                optstr => 'b:f',
         },
         "rmPortsTree" => {
-                func  => \&rmPortsTree,
-                help  => "Remove a portstree from the datastore",
-                usage => "-p <portstree name> [-f]",
+                func   => \&rmPortsTree,
+                help   => "Remove a portstree from the datastore",
+                usage  => "-p <portstree name> [-f]",
+                optstr => 'p:f',
         },
         "rmJail" => {
-                func  => \&rmJail,
-                help  => "Remove a jail from the datastore",
-                usage => "-j <jail name> [-f]",
+                func   => \&rmJail,
+                help   => "Remove a jail from the datastore",
+                usage  => "-j <jail name> [-f]",
+                optstr => 'j:f',
         },
         "updatePortsTree" => {
                 func => \&updatePortsTree,
                 help =>
                     "Run the configured update command on the specified portstree",
-                usage => "-p <portstree name> [-l <last built timestamp>]",
+                usage  => "-p <portstree name> [-l <last built timestamp>]",
+                optstr => 'p:l:',
         },
         "updateJailLastBuilt" => {
-                func  => \&updateJailLastBuilt,
-                help  => "Update the specified jail's last built time",
-                usage => "-j <jail name> [-l <last built timestamp>]",
+                func   => \&updateJailLastBuilt,
+                help   => "Update the specified jail's last built time",
+                usage  => "-j <jail name> [-l <last built timestamp>]",
+                optstr => 'j:l:',
         },
         "updatePortLastBuilt" => {
                 func => \&updatePortLastBuilt,
@@ -152,6 +181,7 @@ require "tinderlib.pl";
                     "Update the specified port's last built time for the specified build",
                 usage =>
                     "-d <port directory> -b <build name> [-l <last built timestamp>]",
+                optstr => 'd:b:l:',
         },
         "updatePortLastSuccessfulBuilt" => {
                 func => \&updatePortLastSuccessfulBuilt,
@@ -159,6 +189,7 @@ require "tinderlib.pl";
                     "Update the specified port's last successful built time for the specified build",
                 usage =>
                     "-d <port directory> -b <build name> [-l <last built timestamp>]",
+                optstr => 'd:b:l:',
         },
         "updatePortLastStatus" => {
                 func => \&updatePortLastStatus,
@@ -166,6 +197,7 @@ require "tinderlib.pl";
                     "Update the specified port's last build status for the specified build",
                 usage =>
                     "-d <port directory> -b <build name> -s <UNKNOWN|SUCCESS|FAIL>",
+                optstr => 'd:b:s:',
         },
         "updatePortLastBuiltVersion" => {
                 func => \&updatePortLastBuiltVersion,
@@ -173,23 +205,67 @@ require "tinderlib.pl";
                     "Update the specified port's last built version for the specified build",
                 usage =>
                     "-d <port directory> -b <build name> -v <last built version>",
+                optstr => 'd:b:v:',
         },
         "updateBuildStatus" => {
-                func  => \&updateBuildStatus,
-                help  => "Update the current status for the specific build",
-                usage => "-b <build name> -s <IDLE|PORTBUILD>",
+                func   => \&updateBuildStatus,
+                help   => "Update the current status for the specific build",
+                usage  => "-b <build name> -s <IDLE|PORTBUILD>",
+                optstr => 'b:s:',
         },
         "getPortLastBuiltVersion" => {
                 func => \&getPortLastBuiltVersion,
                 help =>
                     "Get the last built version for the specified port and build",
-                usage => "-d <port directory> -b <build name>",
+                usage  => "-d <port directory> -b <build name>",
+                optstr => 'd:b:',
         },
         "updateBuildCurrentPort" => {
                 func => \&updateBuildCurrentPort,
                 help =>
                     "Update the port currently being built for the specify build",
-                usage => "-b <build name> [-n <package name>]",
+                usage  => "-b <build name> [-n <package name>]",
+                optstr => 'b:n:',
+        },
+        "sendBuildCompletionMail" => {
+                func => \&sendBuildCompletionMail,
+                help =>
+                    "Send email to the build interest list when a build completes",
+                usage  => "-b <build name>",
+                optstr => 'b:',
+        },
+        "addBuildUser" => {
+                func   => \&addBuildUser,
+                help   => "Add a user to a given build's interest list",
+                usage  => "{-b <build name> | -a} -u <user name> [-c] [-e]",
+                optstr => 'ab:ceu:',
+                ,
+        },
+        "addUser" => {
+                func   => \&addUser,
+                help   => "Add a user to the datastore",
+                usage  => "-n <user name> [-e <user email>]",
+                optstr => 'n:e:',
+        },
+        "updateBuildUser" => {
+                func => \&updateBuildUser,
+                help =>
+                    "Update email preferences for the given user for the given build",
+                usage  => "{-b <build name> | -a} -u <user name> [-c] [-e]",
+                optstr => 'ab:u:ce',
+        },
+        "rmUser" => {
+                func   => \&rmUser,
+                help   => "Remove a user from the datastore",
+                usage  => "[-b <build name>] -u <user name> [-f]",
+                optstr => 'fb:u:',
+        },
+        "sendBuildErrorMail" => {
+                func => \&sendBuildErrorMail,
+                help =>
+                    "Send email to the build interest list when a port fails to build",
+                usage  => "-b <build name> -d <port directory>",
+                optstr => 'b:d:',
         },
 );
 
@@ -202,8 +278,14 @@ my $ds = new TinderboxDS();
 my $command = $ARGV[0];
 shift;
 
+my $opts = {};
+
 if (defined($COMMANDS{$command})) {
-        &{$COMMANDS{$command}->{'func'}}(@ARGV);
+        if ($COMMANDS{$command}->{'optstr'}) {
+                getopts($COMMANDS{$command}->{'optstr'}, $opts)
+                    or usage($command);
+        }
+        &{$COMMANDS{$command}->{'func'}}();
 } else {
         usage();
 }
@@ -211,15 +293,15 @@ if (defined($COMMANDS{$command})) {
 cleanup($ds, 0, undef);
 
 sub init {
-        system("mkdir -p $BUILD_ROOT/jails");
-        system("mkdir -p $BUILD_ROOT/builds");
-        system("mkdir -p $BUILD_ROOT/portstrees");
-        system("mkdir -p $BUILD_ROOT/errors");
-        system("mkdir -p $BUILD_ROOT/logs");
-        system("mkdir -p $BUILD_ROOT/packages");
+        system("mkdir -p $JAILS_DIR");
+        system("mkdir -p $BUILDS_DIR");
+        system("mkdir -p $PORTSTREES_DIR");
+        system("mkdir -p $ERROR_DIR");
+        system("mkdir -p $LOG_DIR");
+        system("mkdir -p $PKGS_DIR");
 
         # Compile pnohang.c
-        system("cd $BUILD_ROOT/scripts && cc -o pnohang -static pnohang.c");
+        system("cd $TINDER_BIN && cc -o pnohang -static pnohang.c");
 }
 
 sub listJails {
@@ -266,10 +348,6 @@ sub listPortsTrees {
 }
 
 sub addBuild {
-        my $opts = {};
-
-        getopts('n:j:p:d:', $opts);
-
         if (!$opts->{'n'} || !$opts->{'j'} || !$opts->{'p'}) {
                 usage("addBuild");
         }
@@ -313,10 +391,6 @@ sub addBuild {
 }
 
 sub addJail {
-        my $opts = {};
-
-        getopts('n:t:u:d:', $opts);
-
         if (!$opts->{'n'} || !$opts->{'t'}) {
                 usage("addJail");
         }
@@ -352,10 +426,6 @@ sub addJail {
 }
 
 sub addPortsTree {
-        my $opts = {};
-
-        getopts('n:u:d:w:', $opts);
-
         if (!$opts->{'n'}) {
                 usage("addPortsTree");
         }
@@ -392,10 +462,6 @@ sub addPortsTree {
 }
 
 sub addPort {
-        my $opts = {};
-
-        getopts('ab:d:r', $opts);
-
         if (       (!$opts->{'b'} && !$opts->{'a'})
                 || ($opts->{'b'} && $opts->{'a'})
                 || !$opts->{'d'})
@@ -442,10 +508,6 @@ sub addPort {
 }
 
 sub getJailForBuild {
-        my $opts = {};
-
-        getopts('b:', $opts);
-
         if (!$opts->{'b'}) {
                 usage("getJailForBuild");
         }
@@ -461,10 +523,6 @@ sub getJailForBuild {
 }
 
 sub getPortsTreeForBuild {
-        my $opts = {};
-
-        getopts('b:', $opts);
-
         if (!$opts->{'b'}) {
                 usage("getPortsTreeForBuild");
         }
@@ -480,10 +538,6 @@ sub getPortsTreeForBuild {
 }
 
 sub getTagForJail {
-        my $opts = {};
-
-        getopts('j:', $opts);
-
         if (!$opts->{'j'}) {
                 usage("getTagForJail");
         }
@@ -498,10 +552,6 @@ sub getTagForJail {
 }
 
 sub getSrcUpdateCmd {
-        my $opts = {};
-
-        getopts('j:', $opts);
-
         if (!$opts->{'j'}) {
                 usage("getSrcUpdateCmd");
         }
@@ -529,10 +579,6 @@ sub getSrcUpdateCmd {
 }
 
 sub getPortsUpdateCmd {
-        my $opts = {};
-
-        getopts('p:', $opts);
-
         if (!$opts->{'p'}) {
                 usage("getPortsUpdateCmd");
         }
@@ -560,10 +606,6 @@ sub getPortsUpdateCmd {
 }
 
 sub rmPort {
-        my $opts = {};
-
-        getopts('fb:d:', $opts);
-
         if (!$opts->{'d'}) {
                 usage("rmPort");
         }
@@ -611,10 +653,6 @@ sub rmPort {
 }
 
 sub rmBuild {
-        my $opts = {};
-
-        getopts('b:f', $opts);
-
         if (!$opts->{'b'}) {
                 usage("rmBuild");
         }
@@ -641,10 +679,6 @@ sub rmBuild {
 }
 
 sub rmJail {
-        my $opts = {};
-
-        getopts('j:f', $opts);
-
         if (!$opts->{'j'}) {
                 usage("rmJail");
         }
@@ -693,10 +727,6 @@ sub rmJail {
 }
 
 sub rmPortsTree {
-        my $opts = {};
-
-        getopts('p:f', $opts);
-
         if (!$opts->{'p'}) {
                 usage("rmPortsTree");
         }
@@ -744,11 +774,54 @@ sub rmPortsTree {
         }
 }
 
+sub rmUser {
+        if (!$opts->{'u'}) {
+                usage("rmUser");
+        }
+
+        if ($opts->{'b'}) {
+                if (!$ds->isValidBuild($opts->{'b'})) {
+                        cleanup($ds, 1,
+                                "Unknown build, " . $opts->{'b'} . "\n");
+                }
+        }
+
+        my $user = $ds->getUserByName($opts->{'u'});
+
+        if (!defined($user)) {
+                cleanup($ds, 1, "Unknown user, " . $opts->{'u'} . "\n");
+        }
+
+        unless ($opts->{'f'}) {
+                if ($opts->{'b'}) {
+                        print "Really remove user "
+                            . $opts->{'u'}
+                            . " for build "
+                            . $opts->{'b'} . "? ";
+                } else {
+                        print "Really remove user " . $opts->{'u'} . "? ";
+                }
+                my $response = <STDIN>;
+                print "\n";
+                cleanup($ds, 0, undef) unless ($response =~ /^y/i);
+        }
+
+        my $rc;
+        if ($opts->{'b'}) {
+                $rc =
+                    $ds->removeUserForBuild($user,
+                        $ds->getBuildByName($opts->{'b'}));
+        } else {
+                $rc = $ds->removeUser($user);
+        }
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                        "Failed to remove user: " . $ds->getError() . "\n");
+        }
+}
+
 sub updatePortsTree {
-        my $opts = {};
-
-        getopts('p:l:', $opts);
-
         if (!$opts->{'p'}) {
                 usage("updatePortsTree");
         }
@@ -799,10 +872,6 @@ sub updatePortsTree {
 }
 
 sub updateJailLastBuilt {
-        my $opts = {};
-
-        getopts('j:l:', $opts);
-
         if (!$opts->{'j'}) {
                 usage("updateJailLastBuilt");
         }
@@ -823,10 +892,6 @@ sub updateJailLastBuilt {
 }
 
 sub updatePortLastBuilt {
-        my $opts = {};
-
-        getopts('d:b:l:', $opts);
-
         if (!$opts->{'d'} || !$opts->{'b'}) {
                 usage("updatePortLastBuilt");
         }
@@ -862,10 +927,6 @@ sub updatePortLastBuilt {
 }
 
 sub updatePortLastSuccessfulBuilt {
-        my $opts = {};
-
-        getopts('d:b:l:', $opts);
-
         if (!$opts->{'d'} || !$opts->{'b'}) {
                 usage("updatePortLastSuccessfulBuilt");
         }
@@ -903,10 +964,6 @@ sub updatePortLastSuccessfulBuilt {
 }
 
 sub updatePortLastStatus {
-        my $opts = {};
-
-        getopts('d:b:s:', $opts);
-
         if (!$opts->{'d'} || !$opts->{'b'} || !$opts->{'s'}) {
                 usage("updatePortLastStatus");
         }
@@ -944,10 +1001,6 @@ sub updatePortLastStatus {
 }
 
 sub updatePortLastBuiltVersion {
-        my $opts = {};
-
-        getopts('d:b:v:', $opts);
-
         if (!$opts->{'d'} || !$opts->{'b'} || !$opts->{'v'}) {
                 usage("updatePortLastBuiltVersion");
         }
@@ -985,10 +1038,6 @@ sub updatePortLastBuiltVersion {
 }
 
 sub updateBuildStatus {
-        my $opts = {};
-
-        getopts('b:s:', $opts);
-
         my %status_hash = (
                 IDLE      => 0,
                 PREPARE   => 1,
@@ -1021,10 +1070,6 @@ sub updateBuildStatus {
 }
 
 sub getPortLastBuiltVersion {
-        my $opts = {};
-
-        getopts('d:b:', $opts);
-
         if (!$opts->{'d'} || !$opts->{'b'}) {
                 usage("getPortLastBuiltVersion");
         }
@@ -1067,10 +1112,6 @@ sub getPortLastBuiltVersion {
 }
 
 sub updateBuildCurrentPort {
-        my $opts = {};
-
-        getopts('b:n:', $opts);
-
         if (!$opts->{'b'}) {
                 usage("updateBuildCurrentPort");
         }
@@ -1089,17 +1130,190 @@ sub updateBuildCurrentPort {
                     . "\n");
 }
 
+sub sendBuildErrorMail {
+        if (!$opts->{'b'} || !$opts->{'d'}) {
+                usage("sendBuildErrorMail");
+        }
+
+        my $buildname = $opts->{'b'};
+        my $portdir   = $opts->{'d'};
+
+        if (!$ds->isValidBuild($buildname)) {
+                cleanup($ds, 1, "Unknown build, $buildname\n");
+        }
+
+        my $build = $ds->getBuildByName($buildname);
+        my $port  = $ds->getPortByDirectory($portdir);
+
+        my $subject = $SUBJECT . " Port $portdir failed for build $buildname";
+        my $now     = scalar localtime;
+        my $data    = <<EOD;
+Port $portdir failed for build $buildname on $now.
+
+EOD
+        if (defined($port)) {
+                my $portid = $port->getId();
+                $data .= <<EOD;
+More details can be found at:
+
+${SERVER_PROTOCOL}://${SERVER_HOST}${SHOWPORT_URI}?id=$portid
+
+EOD
+        }
+
+        $data .= <<EOD;
+Please do not reply to this email.
+EOD
+
+        my @users = $ds->getBuildCompletionUsers($build);
+
+        if (scalar(@users)) {
+
+                my @addrs = ();
+                foreach my $user (@users) {
+                        push @addrs, $user->getEmail();
+                }
+
+                my $rc =
+                    sendMail($SENDER, \@addrs, $subject, $data, $SMTP_HOST);
+
+                if (!$rc) {
+                        cleanup($ds, 1, "Failed to send email.");
+                }
+        }
+}
+
+sub sendBuildCompletionMail {
+        if (!$opts->{'b'}) {
+                usage("sendBuildCompletionMail");
+        }
+
+        my $buildname = $opts->{'b'};
+
+        if (!$ds->isValidBuild($buildname)) {
+                cleanup($ds, 1, "Unknown build, $buildname\n");
+        }
+
+        my $build = $ds->getBuildByName($buildname);
+
+        my $subject = $SUBJECT . " Build $buildname completed";
+        my $now     = scalar localtime;
+        my $data    = <<EOD;
+Build $buildname completed on $now.  Details can be found at:
+
+${SERVER_PROTOCOL}://${SERVER_HOST}${SHOWBUILD_URI}?name=$buildname
+
+Please do not reply to this email.
+EOD
+        my @users = $ds->getBuildCompletionUsers($build);
+
+        if (scalar(@users)) {
+
+                my @addrs = ();
+                foreach my $user (@users) {
+                        push @addrs, $user->getEmail();
+                }
+
+                my $rc =
+                    sendMail($SENDER, \@addrs, $subject, $data, $SMTP_HOST);
+
+                if (!$rc) {
+                        cleanup($ds, 1, "Failed to send email.");
+                }
+        }
+}
+
+sub addUser {
+        if (!$opts->{'n'}) {
+                usage("addUser");
+        }
+
+        my $user = new User();
+
+        $user->setName($opts->{'n'});
+        $user->setEmail($opts->{'e'}) if ($opts->{'e'});
+
+        my $rc = $ds->addUser($user);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to add user to the datastore: "
+                            . $ds->getError()
+                            . "\n");
+        }
+}
+
+sub addBuildUser {
+        return _updateBuildUser($opts, "addBuildUser");
+}
+
+sub updateBuildUser {
+        return _updateBuildUser($opts, "updateBuildUser");
+}
+
+sub _updateBuildUser {
+        my $opts     = shift;
+        my $function = shift;
+
+        if (       (!$opts->{'b'} && !$opts->{'a'})
+                || ($opts->{'b'} && $opts->{'a'})
+                || !$opts->{'u'})
+        {
+                usage($function);
+        }
+
+        my $buildname = $opts->{'b'};
+        if ($buildname && !$ds->isValidBuild($buildname)) {
+                cleanup($ds, 1, "Unknown build, $buildname\n");
+        }
+
+        my $username = $opts->{'u'};
+        if (!$ds->isValidUser($username)) {
+                cleanup($ds, 1, "Unknown user, $username\n");
+        }
+
+        my $user = $ds->getUserByName($username);
+
+        if (!$user->getEmail()) {
+                cleanup($ds, 1,
+                        "User, $username, does not have an email address\n");
+        }
+
+        my @builds = ();
+        if ($opts->{'a'}) {
+                @builds = $ds->getAllBuilds();
+        } else {
+                push @builds, $ds->getBuildByName($buildname);
+        }
+
+        foreach my $build (@builds) {
+                if ($ds->isUserForBuild($user, $build)) {
+                        $ds->updateBuildUser($build, $user, $opts->{'c'},
+                                $opts->{'e'});
+                } else {
+                        $ds->addUserForBuild($user, $build, $opts->{'c'},
+                                $opts->{'e'});
+                }
+        }
+}
+
 sub usage {
         my $cmd = shift;
 
         print STDERR "usage: $0 ";
 
         if (!defined($cmd)) {
+                my $max = 0;
+                foreach (keys %COMMANDS) {
+                        if ((length $_) > $max) {
+                                $max = length $_;
+                        }
+                }
                 print STDERR "<command>\n";
                 print STDERR "Where <command> is one of:\n";
                 foreach my $key (sort keys %COMMANDS) {
-                        print STDERR "  $key:\t"
-                            . $COMMANDS{$key}->{'help'} . "\n";
+                        printf STDERR "  %-${max}s: %s\n", $key,
+                            $COMMANDS{$key}->{'help'};
                 }
         } else {
                 print STDERR "$cmd " . $COMMANDS{$cmd}->{'usage'} . "\n";
