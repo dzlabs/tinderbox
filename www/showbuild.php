@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showbuild.php,v 1.4 2004/03/03 16:39:21 pav Exp $
+# $Id: showbuild.php,v 1.5 2004/03/03 17:16:38 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -82,7 +82,7 @@
 				echo "<td><a href=\"" . $pkgdir . "/" . $build->getName() . "/All/" . $port->getLastBuiltVersion() . ".tbz" . "\">package</a></td>\n";
 			} elseif ($port->getLastStatus() == "FAIL") {
 				echo "<td style=\"background-color: red\">&nbsp;</td>\n";
-				echo "<td>log</td>\n";
+				echo "<td><a href=\"" . $errorlogdir . "/" . $build->getName() . "/" . $port->getLastBuiltVersion() . ".log\">log</a></td>\n";
 			} else { /* UNKNOWN */
 				echo "<td style=\"background-color: grey\">&nbsp;</td>\n";
 				echo "<td>&nbsp;</td>\n";
