@@ -63,6 +63,8 @@ else
 ./tmp/*
 ./etc/make.conf.bak
 ./etc/make.conf
+./work/*
+./compat/linux/proc
 EOF
     mtree -X /tmp/mtree.exclude -xcn -k uid,gid,mode -p / > /tmp/mtree
     cd $dir || exit 1
