@@ -4,5 +4,6 @@ DESTDIR?=	/www/data/tinderbox
 
 install:
 .for f in ${SRCS}
+	rm -f ${DESTDIR}/${f}
 	cp ${f} ${DESTDIR}
 .endfor
