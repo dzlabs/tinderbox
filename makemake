@@ -77,10 +77,13 @@ $PORTSTREE_NAME = $PORTSTREE->getName();
 
 buildenv($BUILD_ROOT, $BUILD_NAME, $JAIL_NAME, $PORTSTREE_NAME);
 
-# Set LOCALBASE and X11BASE to bogus values to prevent system installed
-# packages from affecting the tinderbox.
+delete $ENV{'DISPLAY'};
+
+# Set LOCALBASE, X11BASE, and PKGDB_DIR to bogus values to prevent system
+# installed packages from affecting the tinderbox.
 $ENV{'LOCALBASE'} = "/nonexistentlocal";
 $ENV{'X11BASE'}   = "/nonexistentx";
+$ENV{'PKG_DBDIR'} = "/nonexistentdb";
 
 if (!scalar(@ARGV)) {
         my @dsPorts = $ds->getPortsForBuild($BUILD);
@@ -110,7 +113,7 @@ if (!scalar(@ARGV)) {
                 }
         }
 }
-my (%pkgdir, %pkgdeps, %rundepscache);
+my (%pkgdir, %pkgdeps, %rundepscache, @duds);
 while (scalar(@PORTS)) {
         my $port    = shift @PORTS;
         my $portdir = $port->getDirectory();
@@ -131,6 +134,14 @@ while (scalar(@PORTS)) {
         }
         $pkgname = `cd $tportdir && make -V PKGNAME`;
         chomp $pkgname;
+
+        # Create a list of duds (ports that will not be attempted because they
+        # are marked IGNORE or FORBIDDEN).
+        my $dudpkg = `cd $tportdir && make ignorelist ECHO_MSG=true`;
+        if ($dudpkg) {
+                chomp $dudpkg;
+                push @duds, $dudpkg;
+        }
 
         $pkgdeps{$portdir} = [];
         $pkgdir{$portdir}  = $pkgname;
@@ -175,6 +186,16 @@ foreach my $key (keys %pkgdir) {
             . join(" ", @deppkgnames) . "\n";
 }
 close(MK);
+
+my $dudsfile = join("/", $BUILD_ROOT, "builds", $BUILD_NAME, "duds");
+unless (open(DUDS, ">" . $dudsfile)) {
+        cleanup($ds, 1, "Failed to open $dudsfile for writing: $!\n");
+}
+foreach my $dud (sort @duds) {
+        print DUDS $dud . "\n";
+}
+
+close(DUDS);
 
 # Now, symlink the Makefile to the correct All directory.
 system("mkdir -p $BUILD_ROOT/packages/$BUILD_NAME/All");

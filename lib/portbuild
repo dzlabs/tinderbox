@@ -70,8 +70,15 @@ fi
 args="$*"
 
 buildenv ${pb} ${branch} ${jail} ${portstree}
+unset DISPLAY
 
 pkgname=$(basename $1 ${PKGSUFFIX})
+
+if grep -qxF ${pkgname} ${pb}/builds/${branch}/duds; then
+    echo "skipping ${pkgname} (found in duds)"
+    exit 1
+fi
+
 dirname=$2
 shift 2
 
@@ -102,7 +109,7 @@ export PORTOBJFORMAT=elf
 
 export USA_RESIDENT=yes
 
-export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/X11R6/bin
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/X11R6/bin:.
 
 echo "building $pkgname"
 

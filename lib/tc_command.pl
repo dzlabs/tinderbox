@@ -514,6 +514,7 @@ sub addPort {
                 );
                 $ENV{'LOCALBASE'} = "/nonexistentlocal";
                 $ENV{'X11BASE'}   = "/nonexistentx";
+                $ENV{'PKG_DBDIR'} = "/nonexistentdb";
 
                 if ($opts->{'r'}) {
                         my @deps = ();
