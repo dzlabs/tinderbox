@@ -664,7 +664,7 @@ sub removePortsTree {
         my $self      = shift;
         my $portstree = shift;
 
-        my $rc = $self->_doQuery("DELETE FROM portstrees WHERE Ports_Tree_Id=?",
+        my $rc = $self->_doQuery("DELETE FROM ports_trees WHERE Ports_Tree_Id=?",
                 [$portstree->getId()]);
 
         return $rc;
@@ -1040,7 +1040,10 @@ sub getTime {
                 @time = localtime($localtime);
         }
 
-        return "$time[5]-$time[4]-$time[3] $time[2]:$time[1]:$time[0]";
+	my $year = $time[5] + 1900;
+	my $mon = $time[4] + 1;
+
+        return "$year-$mon-$time[3] $time[2]:$time[1]:$time[0]";
 }
 
 1;
