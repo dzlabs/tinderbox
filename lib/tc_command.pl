@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: tc,v 1.33 2005/03/05 23:52:30 marcus Exp $
+# $Id: tc,v 1.34 2005/03/05 23:57:07 marcus Exp $
 #
 
 # This is a hack to make sure we can always find our modules.
@@ -672,21 +672,8 @@ sub rmPort {
                 cleanup($ds, 0, undef) unless ($response =~ /^y/i);
         }
 
-        my $rc;
-        if ($opts->{'b'}) {
-                $rc =
-                    $ds->removePortForBuild($port,
-                        $ds->getBuildByName($opts->{'b'}));
-        } else {
-                $rc = $ds->removePort($port);
-        }
-
-        if (!$rc) {
-                cleanup($ds, 1,
-                        "Failed to remove port: " . $ds->getError() . "\n");
-        }
-
         my @builds = ();
+        my $rc;
         if ($opts->{'c'} && !$opts->{'b'}) {
                 @builds = $ds->getAllBuilds();
         } elsif ($opts->{'c'} && $opts->{'b'}) {
@@ -694,8 +681,9 @@ sub rmPort {
         }
         foreach my $build (@builds) {
                 if (my $version = $ds->getPortLastBuiltVersion($port, $build)) {
-                        my $sufx = $ds->getPackageSuffix($build->getJailId());
-                        my $pkgdir = join("/", $PKGS_DIR, $build->getName());
+                        my $jail    = $ds->getJailById($build->getJailId());
+                        my $sufx    = $ds->getPackageSuffix($jail);
+                        my $pkgdir  = join("/", $PKGS_DIR, $build->getName());
                         my $logpath =
                             join("/", $LOG_DIR, $build->getName(), $version);
                         my $errpath =
@@ -716,6 +704,19 @@ sub rmPort {
                                 unlink($errpath . ".log");
                         }
                 }
+        }
+
+        if ($opts->{'b'}) {
+                $rc =
+                    $ds->removePortForBuild($port,
+                        $ds->getBuildByName($opts->{'b'}));
+        } else {
+                $rc = $ds->removePort($port);
+        }
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                        "Failed to remove port: " . $ds->getError() . "\n");
         }
 }
 
