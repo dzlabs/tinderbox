@@ -107,11 +107,8 @@ mkdir -p ${pb}/logs/${build}
 mkdir -p ${pb}/errors/${build}
 
 if [ "$updateports" = "1" ]; then
-    update_cmd=$(${pb}/scripts/tc getPortsUpdateCmd -p ${portstree})
-    if [ ! -z "${update_cmd}" ]; then
-	echo "INFO: Running ${update_cmd} to update the ports tree"
-	eval ${update_cmd} >/dev/null 2>&1
-    fi
+    echo "INFO: Running ${update_cmd} to update the ports tree"
+    ${pb}/scripts/tc updatePortsTree -p ${portstree}
 fi
 
 if [ "$skipmake" = "0" ]; then
