@@ -102,7 +102,7 @@ while (scalar(@PORTS)) {
                 push @PORTS, (new Port({Directory => $dep}));
         }
 }
-my $makefile = join("/", $BUILD_ROOT, "Makefile." . $JAIL);
+my $makefile = join("/", $BUILD_ROOT, "Makefile." . $JAIL_NAME);
 unless (open(MK, ">" . $makefile)) {
         cleanup($ds, 1, "Failed to open $makefile for writing: $!\n");
 }

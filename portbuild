@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# usage: $0 <jail name> [-init] [-noclean] [-plistcheck] pkgname dirname
+# usage: $0 <jail name> [-noclean] [-plistcheck] pkgname dirname
 
 cleanup()
 {
@@ -47,11 +47,6 @@ shift
 nice=0
 
 . ${pb}/scripts/buildenv
-
-if [ "x$1" = "x-init" ]; then
-    init=1
-    shift
-fi
 
 if [ "x$1" = "x-noclean" ]; then
     noclean=1
