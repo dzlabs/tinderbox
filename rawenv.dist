@@ -9,8 +9,8 @@
 #6PKGZIPCMD=bzip2
 #6INDEXFILE=INDEX-5
 #6X_WINDOW_SYSTEM=xorg
-ARCH=i386
-MACHINE_ARCH=i386
+##ARCH=i386
+##MACHINE_ARCH=i386
 PORTSDIR=`realpath ##PB##/portstrees/##PORTSTREE##/ports`
 SRCBASE=`realpath ##PB##/jails/##JAIL##/src`
 SRCPREFIX=`realpath ##PB##/jails/##JAIL##/src`
@@ -20,9 +20,9 @@ BRANCH=`awk 'BEGIN {FS="\""}; /^BRANCH/ {print $2}' < ^^SRCBASE^^/sys/conf/newve
 __MAKE_CONF=##PB##/jails/##JAIL##/make.conf
 DISTDIR=##PB##/distfiles/##BUILD##
 PACKAGES=##PB##/packages/##BUILD##
-UNAME_m=i386
+##UNAME_m=i386
 UNAME_n=marcuscom.com
-UNAME_p=i386
+##UNAME_p=i386
 UNAME_r=^^OSREL^^-^^BRANCH^^
 UNAME_s=FreeBSD
 UNAME_v="FreeBSD ^^OSREL^^-^^BRANCH^^ #0: `date`    marcus@marcuscom.com:/usr/src/sys/magic/kernel/path"

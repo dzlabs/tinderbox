@@ -99,6 +99,9 @@ shift 2
 
 portdir=$(echo ${dirname} | sed -e 's|^/usr/ports/||')
 
+# Want to use the /etc/make.conf in the chroot (Jail)
+unset __MAKE_CONF
+
 export WRKDIRPREFIX=/tmp
 export DISTDIR=/tmp/distfiles
 export PACKAGES=/tmp/packages
