@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: tc,v 1.32 2005/02/13 07:08:33 marcus Exp $
+# $Id: tc,v 1.33 2005/03/05 23:52:30 marcus Exp $
 #
 
 # This is a hack to make sure we can always find our modules.
@@ -686,40 +686,36 @@ sub rmPort {
                         "Failed to remove port: " . $ds->getError() . "\n");
         }
 
+        my @builds = ();
         if ($opts->{'c'} && !$opts->{'b'}) {
-                my @builds = $ds->getAllBuilds();
-                foreach my $build (@builds) {
-                        if (my $version =
-                                $ds->getPortLastBuiltVersion($port, $build))
-                        {
-                                my $sufx =
-                                    $ds->getPackageSuffix($build->getJailId());
-                                my $pkgdir =
-                                    join("/", $PKGS_DIR, $build->getName());
-                                my $logpath = join("/",
-                                        $LOG_DIR, $build->getName(), $version);
-                                my $errpath = join("/",
-                                        $ERROR_DIR, $build->getName(),
-                                        $version);
-                                if (-d $pkgdir) {
-                                        print
-                                            "Removing all packages matching ${version}${sufx} starting from $pkgdir.\n";
-                                        system(
-                                                "/usr/bin/find -H $pkgdir -name ${version}${sufx} -delete"
-                                        );
-                                }
-                                if (-f $logpath . ".log") {
-                                        print "Removing ${logpath}.log.\n";
-                                        unlink($logpath . ".log");
-                                }
-                                if (-f $errpath . ".log") {
-                                        print "Removing ${errpath}.log.\n";
-                                        unlink($errpath . ".log");
-                                }
+                @builds = $ds->getAllBuilds();
+        } elsif ($opts->{'c'} && $opts->{'b'}) {
+                push @builds, $ds->getBuildByName($opts->{'b'});
+        }
+        foreach my $build (@builds) {
+                if (my $version = $ds->getPortLastBuiltVersion($port, $build)) {
+                        my $sufx = $ds->getPackageSuffix($build->getJailId());
+                        my $pkgdir = join("/", $PKGS_DIR, $build->getName());
+                        my $logpath =
+                            join("/", $LOG_DIR, $build->getName(), $version);
+                        my $errpath =
+                            join("/", $ERROR_DIR, $build->getName(), $version);
+                        if (-d $pkgdir) {
+                                print
+                                    "Removing all packages matching ${version}${sufx} starting from $pkgdir.\n";
+                                system(
+                                        "/usr/bin/find -H $pkgdir -name ${version}${sufx} -delete"
+                                );
+                        }
+                        if (-f $logpath . ".log") {
+                                print "Removing ${logpath}.log.\n";
+                                unlink($logpath . ".log");
+                        }
+                        if (-f $errpath . ".log") {
+                                print "Removing ${errpath}.log.\n";
+                                unlink($errpath . ".log");
                         }
                 }
-        } elsif ($opts->{'c'} && $opts->{'b'}) {
-                warn "WARN: Flags -b and -c cannot be used together.\n";
         }
 }
 
