@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id$
+# $Id: Build.php,v 1.2 2004/03/02 19:51:43 marcus Exp $
 #
 
     require_once 'TinderObject.php';
@@ -37,7 +37,8 @@
 		Build_Name => "",
 		Jail_Id => "",
 		Ports_Tree_Id => "",
-		Build_Description => ""
+		Build_Description => "",
+		Build_Status => ""
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
@@ -63,6 +64,10 @@
 	    return $this->Build_Description;
 	}
 
+	function getBuildStatus() {
+	    return $this->Build_Status;
+	}
+
 	function setName($name) {
 	    $this->Build_Name = $name;
 	}
@@ -78,5 +83,10 @@
 	function setDescription($descr) {
 	    $this->Build_Description = $descr;
 	}
+
+	function setBuildStatus($status) {
+	    $this->Build_Status = $status;
+	}
+
     }
 ?>

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: index.php,v 1.8 2004/03/03 09:00:24 marcus Exp $
+# $Id: index.php,v 1.9 2004/03/03 09:04:03 marcus Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -48,6 +48,7 @@
 ?>
 <table>
 <tr>
+<th style="width: 20px">&nbsp;</th>
 <th>Build Name</th>
 <th>Build Description</th>
 <th>Build Packages</th>
@@ -55,6 +56,11 @@
 <?php
 	foreach ($builds as $build) {
 	    echo "<tr>\n";
+	    if ($build->getBuildStatus() == "PORTBUILD") {
+		echo "<td style=\"background-color: green\">&nbsp;</td>\n";
+	    } else {
+		echo "<td>&nbsp;</td>\n";
+	    }
 	    echo "<td><a href=\"showbuild.php?name=" . $build->getName() . "\">" . $build->getName() . "</a></td>\n";
 	    echo "<td>" . $build->getDescription() . "</td>\n";
 	    echo "<td>";
