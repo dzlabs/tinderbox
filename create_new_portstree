@@ -1,7 +1,7 @@
 #!/bin/sh
 
 usage () {
-    echo "usage: $0 -n <portstree name> [-d <description>] [-u <update command|CVSUP|NONE>]"
+    echo "usage: $0 -n <portstree name> [-d <description>] [-u <update command|CVSUP|NONE>] [-w <CVSweb URL>]"
     exit 1
 }
 
@@ -13,6 +13,7 @@ portstree=""
 descr=""
 update_cmd=""
 uc=""
+url=""
 
 while [ $# -gt 0 ]; do
     case "x$1" in
@@ -24,6 +25,9 @@ while [ $# -gt 0 ]; do
 	  ;;
 	x-u)
 	  update_cmd="$2"; shift;
+	  ;;
+	x-w)
+	  url="$2"; shift;
 	  ;;
 	*)
 	  usage
@@ -48,7 +52,7 @@ elif [ "${update_cmd}" = "NONE" ]; then
     update_cmd=""
     uc="-u NONE"
 else
-    update_cmd="${pb}/scripts/${update_cmd}"
+    update_cmd="${pb}/scripts/${update_cmd} ${portstree}"
     uc="-u ${update_cmd}"
 fi
 
@@ -71,7 +75,7 @@ echo "DONE."
 
 if [ ! -z "${update_cmd}" ]; then
     echo -n "INFO: Updating portstree with ${update_cmd}..."
-    eval ${update_cmd} ${portstree} > /dev/null 2>&1
+    eval ${update_cmd} > /dev/null 2>&1
     if [ $? != 0 ]; then
 	echo "FAILED."
 	exit 1
@@ -83,7 +87,10 @@ echo -n "INFO: Adding portstree to datastore..."
 if [ ! -z "${descr}" ]; then
     descr="-d ${descr}"
 fi
-${pb}/scripts/tc addPortsTree -n ${portstree} ${uc} "${descr}"
+if [ ! -z "${url}" ]; then
+    url="-w ${url}"
+fi
+${pb}/scripts/tc addPortsTree -n ${portstree} ${uc} ${url} "${descr}"
 
 if [ $? != 0 ]; then
     echo "FAILED."
