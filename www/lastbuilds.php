@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: lastbuilds.php,v 1.4 2004/03/04 23:49:03 pav Exp $
+# $Id: lastbuilds.php,v 1.5 2004/03/04 23:49:31 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -99,7 +99,10 @@
 			if ($build["Last_Status"] == "SUCCESS") {
 				echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
 				if ($build["Last_Built_Version"]) {
-					echo "<td><a href=\"" . $pkgdir . "/" . $build["Build_Name"] . "/All/" . $build["Last_Built_Version"] . $ds->getPackageSuffix($build["Jail_Id"]) . "\">package</a></td>\n";
+					echo "<td>";
+					echo "<a href=\"" . $logdir . "/" . $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log\">log</a> ";
+					echo "<a href=\"" . $pkgdir . "/" . $build["Build_Name"] . "/All/" . $build["Last_Built_Version"] . $ds->getPackageSuffix($build["Jail_Id"]) . "\">package</a>";
+					echo "</td>\n";
 				} else {
 					echo "<td>&nbsp;</td>\n";
 				}
