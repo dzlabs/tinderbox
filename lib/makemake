@@ -162,8 +162,10 @@ unless (open(MK, ">" . $makefile)) {
         cleanup($ds, 1, "Failed to open $makefile for writing: $!\n");
 }
 foreach my $key (keys %pkgdir) {
-        my @depsarr = @{$pkgdeps{$key}};
-        my @deppkgnames = map { $pkgdir{$_} . $ENV{'PKGSUFFIX'} } @depsarr;
+        my @depsarr      = @{$pkgdeps{$key}};
+        my %seen         = ();
+        my @depsarrclean = grep { !$seen{$_}++ } @depsarr;
+        my @deppkgnames = map { $pkgdir{$_} . $ENV{'PKGSUFFIX'} } @depsarrclean;
         print MK "all: $pkgdir{$key}$ENV{'PKGSUFFIX'}\n";
         print MK "$pkgdir{$key}: $pkgdir{$key}$ENV{'PKGSUFFIX'}\n";
         print MK "$pkgdir{$key}$ENV{'PKGSUFFIX'}: "
