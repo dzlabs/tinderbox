@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.8 2004/03/03 17:06:28 pav Exp $
+# $Id: TinderboxDS.php,v 1.9 2004/03/03 18:15:02 pav Exp $
 #
 
     require_once 'DB.php';
@@ -78,6 +78,13 @@
 	    $ports = $this->_newFromArray("Port", $results);
 
 	    return $ports;
+	}
+
+	function getBuildStats($build_id) {
+	    $query = "SELECT SUM(IF(Last_Status = \"FAIL\", 1, 0)) AS fails FROM build_ports WHERE Build_Id = ?";
+	    $rc = $this->_doQueryHashRef($query, $results, $build_id);
+	    if (!$rc) return null;
+	    return $results[0];
 	}
 
 	function getPortById($id) {
