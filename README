@@ -1,4 +1,4 @@
-$Id: README,v 1.6 2004/12/31 12:46:00 pav Exp $
+$Id: README,v 1.7 2005/01/03 02:20:41 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -17,7 +17,7 @@ Requirements: perl, DBD::Mysql perl module, MySQL 4.1 or newer.
   /space  -ro -alldirs -maproot=0:0 localhost
   If your /space is a symlink, export real filesystem's mount point
 - Create new jail using create_new_jail
-- Create new ports tree using create_portstree
+- Create new ports tree using create_new_portstree
 - Create new build using create_new_build
 
 To update an existing jail:
