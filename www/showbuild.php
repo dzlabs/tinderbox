@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showbuild.php,v 1.10 2004/03/03 20:36:49 pav Exp $
+# $Id: showbuild.php,v 1.11 2004/03/04 08:30:37 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -115,6 +115,8 @@
 
     $ds->destroy();
 ?>
+
+<p>Local time: <?= $ds->prettyDatetime(date("Y-m-d H:i:s")) ?></p>
 
 <p><a href="index.php">Back to homepage</a></p>
 
