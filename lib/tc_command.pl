@@ -586,7 +586,7 @@ sub rmPort {
                         print "Really remove port "
                             . $opts->{'d'}
                             . " for build "
-                            . $opts->{'d'} . "? ";
+                            . $opts->{'b'} . "? ";
                 } else {
                         print "Really remove port " . $opts->{'d'} . "? ";
                 }
