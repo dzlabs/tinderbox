@@ -120,7 +120,7 @@ build () {
     jail=""
     init=""
     clean=""
-    
+
     for i; do
 	case "$i" in
 	    -j)
@@ -172,7 +172,7 @@ buildAll () {
 }
 
 ## MAIN starts here
-	      
+
 optstring=""
 command=$1
 
