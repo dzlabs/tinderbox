@@ -145,6 +145,17 @@ export PACKAGES=/tmp/packages
 unset MAKEFLAGS
 unset PORTSDIR
 
+# Unset all of the locale variables to ensure C/POSIX is used to build
+# everything.
+unset LC_ALL
+unset LC_TIME
+unset LC_CTYPE
+unset LC_MONETARY
+unset LC_COLLATE
+unset LC_MESSAGES
+unset LC_NUMERIC
+unset LANG
+
 export TIMEOUT=7200
 
 ulimit -f 524288
