@@ -146,7 +146,7 @@ while (scalar(@PORTS)) {
                         chomp $rundep;
                         next if (defined($seen{$rundep}));
                         push @rundeps, getRunDepends($rundep, \%rundepscache);
-                        $seen{$rundep} = 1;
+                        $seen{$rundep}++;
                         $rundep =~ s|^$ENV{'PORTSDIR'}/||;
                         push @{$pkgdeps{$portdir}}, $rundep;
                 }
