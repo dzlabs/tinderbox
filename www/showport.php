@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showport.php,v 1.5 2004/03/03 20:24:23 pav Exp $
+# $Id: showport.php,v 1.6 2004/03/03 20:27:33 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -112,6 +112,8 @@
 
     $ds->destroy();
 ?>
+
+<p><a href="index.php">Back to homepage</a></p>
 
 </body>
 </html>
