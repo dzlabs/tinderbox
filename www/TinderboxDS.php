@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.15 2004/03/03 20:24:23 pav Exp $
+# $Id: TinderboxDS.php,v 1.16 2004/03/03 20:27:33 pav Exp $
 #
 
     require_once 'DB.php';
@@ -109,9 +109,9 @@
 	}
 
 	function getBuildsDetailed($params) {
-	    $query = "SELECT build_ports.*,builds.Build_Name,builds.Jail_Id,ports_trees.Ports_Tree_Name,ports_trees.Ports_Tree_CVSweb_URL ";
-	    $query.= "FROM build_ports,builds,ports_trees ";
-	    $query.= "WHERE build_ports.Build_Id = builds.Build_Id AND builds.Ports_Tree_Id = ports_trees.Ports_Tree_Id ";
+	    $query = "SELECT build_ports.*,builds.Build_Name,builds.Jail_Id,ports.Port_Directory,ports_trees.Ports_Tree_Name,ports_trees.Ports_Tree_CVSweb_URL ";
+	    $query.= "FROM build_ports,builds,ports_trees,ports ";
+	    $query.= "WHERE build_ports.Build_Id = builds.Build_Id AND builds.Ports_Tree_Id = ports_trees.Ports_Tree_Id AND build_ports.Port_Id = ports.Port_Id ";
 	    if (is_array($params)) {
 		foreach ($params as $key => $param) {
 		    switch ($key) {

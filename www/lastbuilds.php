@@ -24,75 +24,71 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: index.php,v 1.12 2004/03/03 18:40:57 pav Exp $
+# $Id$
 #
 
     require_once 'TinderboxDS.php';
 
     $ds = new TinderboxDS();
 
-    $builds = $ds->getAllBuilds();
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>GNOME 2 Packages For i386</title>
+<title>MarcusCom Tinderbox - Latest Builds</title>
 <link href="tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-<h1>GNOME 2 Packages for i386</h1>
+<h1>Latest Builds</h1>
 <?php
-    if (is_array($builds)) {
-?>
-<table>
-<tr>
-<th style="width: 20px">&nbsp;</th>
-<th>Build Name</th>
-<th>Build Description</th>
-<th>Failures</th>
-<th>Build Packages</th>
-</tr>
-<?php
-	foreach ($builds as $build) {
-	    $stats = $ds->getBuildStats($build->getId());
+	$builds = $ds->getBuildsDetailed(array("Last_Built" => 20));
 
-	    echo "<tr>\n";
-	    if ($build->getBuildStatus() == "PORTBUILD") {
-		echo "<td style=\"background-color: green\">&nbsp;</td>\n";
-	    } else {
-		echo "<td>&nbsp;</td>\n";
-	    }
-	    echo "<td><a href=\"showbuild.php?name=" . $build->getName() . "\">" . $build->getName() . "</a></td>\n";
-	    echo "<td>" . $build->getDescription() . "</td>\n";
-	    if ($stats["fails"] > 0) {
-		echo "<td align=\"center\">" . $stats["fails"] . "</td>\n";
-	    } else {
-		echo "<td>&nbsp;</td>\n";
-	    }
-	    echo "<td>";
-	    if (is_dir($pkgdir . "/" . $build->getName())) {
-		echo "<a href=\"$pkgdir/" . $build->getName() . "\">Package Directory</a>";
-	    }
-	    else {
-		echo "<i>No packages for this build</i>";
-	    }
-	    echo "</td>\n";
-	    echo "</tr>\n";
+	if ($builds) {
+
+		?>
+		<table>
+		<tr>
+		<th>Build</th>
+		<th>Port Directory</th>
+		<th>Version</th>
+		<th style="width: 20px">&nbsp;</th>
+		<th>&nbsp;</th>
+		<th>Last Build Attempt</th>
+		<th>Last Successfull Build</th>
+		</tr>
+		<?php
+		foreach ($builds as $build) {
+			echo "<tr>\n";
+			echo "<td><a href=\"showbuild.php?name=" . $build["Build_Name"] . "\">" . $build["Build_Name"] . "</a></td>\n";
+			echo "<td><a href=\"showport.php?id=" . $build["Port_Id"] . " \">" . $build["Port_Directory"] . "</a></td>\n";
+			echo "<td>" . $build["Last_Built_Version"] . "</td>\n";
+			if ($build["Last_Status"] == "SUCCESS") {
+				echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
+				echo "<td><a href=\"" . $pkgdir . "/" . $build["Build_Name"] . "/All/" . $build["Last_Built_Version"] . $ds->getPackageSuffix($build["Jail_Id"]) . "\">package</a></td>\n";
+			} elseif ($build["Last_Status"] == "FAIL") {
+				echo "<td style=\"background-color: red\">&nbsp;</td>\n";
+				echo "<td><a href=\"" . $errorlogdir . "/" . $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log\">log</a></td>\n";
+			} else { /* UNKNOWN */
+				echo "<td style=\"background-color: grey\">&nbsp;</td>\n";
+				echo "<td>&nbsp;</td>\n";
+			}
+			echo "<td>" . $ds->prettyDatetime($build["Last_Built"]) . "</td>\n";
+			echo "<td>" . $ds->prettyDatetime($build["Last_Successful_Built"]) . "</td>\n";
+			echo "</tr>\n";
+		}
+		echo "</table>\n";
+
+	} else {
+
+		echo "<p>This port is not being built.</p>\n";
+
 	}
-
-	echo "</table>\n";
-
-    } else {
-	echo "<p>There are no builds configured.</p>\n";
-    }
 
     $ds->destroy();
 ?>
 
-<p>
-<a href="lastbuilds.php">Latest Builds</a><br />
-</p>
+<p><a href="index.php">Back to homepage</a></p>
 
 </body>
 </html>
