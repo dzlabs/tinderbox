@@ -415,6 +415,10 @@ sub addJail {
                         "A jail named $name is already in the datastore.\n");
         }
 
+	if ($name !~ /^\d/) {
+	    cleanup($ds, 1, "The first character in a jail name must be a FreeBSD major version number.\n");
+	}
+
         my $update_cmd = "CVSUP";
         if ($opts->{'u'}) {
                 $update_cmd = $opts->{'u'};
