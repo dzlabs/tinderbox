@@ -24,6 +24,9 @@ rm -rf ${pb}/${jail_name}
 mkdir -p ${pb}/${jail_name}/ports
 mkdir -p ${pb}/${jail_name}/src
 
+mkdir -p ${pb}/logs/${jail_name}
+mkdir -p ${pb}/errors/${jail_name}
+
 cat > ${pb}/${jail_name}/ports-supfile << EOSF
 *default host=${suphost}
 *default base=${pb}/${jail_name}
