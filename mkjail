@@ -4,6 +4,11 @@ pb=/space
 
 _jails=$(${pb}/scripts/tc listJails)
 
+if [ `id -u` != 0 ]; then
+    echo "ERROR: You must be root to run $0."
+    exit 1
+fi
+
 if [ -z "$1" ]; then
     echo "Please specify a jail name."
     echo "Current jails are:"
@@ -65,12 +70,7 @@ ln -sf aj ${D}/etc/malloc.conf
 
 touch -f ${D}/etc/fstab
 touch -f ${D}/etc/wall_cmos_clock
-echo "portmap_enable=\"NO\"" > ${D}/etc/rc.conf
-echo "network_interfaces=\"\"" >> ${D}/etc/rc.conf
-cp ${D}/usr/share/zoneinfo/EST5EDT ${D}/etc/localtime
-chmod 0444 ${D}/etc/localtime
-echo "domain marcuscom.com" > ${D}/etc/resolv.conf
-echo "nameserver 192.168.1.1" >> ${D}/etc/resolv.conf
+cp -f /etc/resolv.conf ${D}/etc
 
 mtree -deU -f ${SRCBASE}/etc/mtree/BSD.root.dist -p ${D}/
 mtree -deU -f ${SRCBASE}/etc/mtree/BSD.var.dist -p ${D}/var
