@@ -134,13 +134,21 @@ while (scalar(@PORTS)) {
 
         $pkgdeps{$portdir} = [];
         $pkgdir{$portdir}  = $pkgname;
-        my $deplist = "";
-        foreach my $deptarget ("build-depends-list", "run-depends-list") {
-                $deplist .= `cd $tportdir && make $deptarget`;
-        }
-        chomp $deplist;
-        @deps = split(/\n/, $deplist);
+        my @deps = ();
+        push @deps, getBuildDepends($tportdir);
+        push @deps, getRunDepends($tportdir);
         foreach my $dep (@deps) {
+                chomp $dep;
+                my @rundeps = getRunDepends($dep);
+                while (scalar(@rundeps)) {
+                        my $rundep = shift @rundeps;
+                        chomp $rundep;
+                        push @rundeps, getRunDepends($rundep);
+                        $rundep =~ s|^$ENV{'PORTSDIR'}/||;
+                        push @{$pkgdeps{$portdir}}, $rundep;
+                }
+
+                #push @{$pkgdeps{$portdir}}, map { $_ =~ s|^$ENV{'PORTSDIR'}/|| } getRunDepends($dep);
                 $dep =~ s|^$ENV{'PORTSDIR'}/||;
                 push @{$pkgdeps{$portdir}}, $dep;
                 my $p = new Port();
@@ -170,3 +178,24 @@ system("mkdir -p $BUILD_ROOT/packages/$BUILD_NAME/All");
 symlink $makefile, "$BUILD_ROOT/packages/$BUILD_NAME/All/Makefile";
 
 cleanup($ds, 0, undef);
+
+sub getBuildDepends {
+        my $portdir = shift;
+
+        return _getDepends($portdir, "build-depends-list");
+}
+
+sub getRunDepends {
+        my $portdir = shift;
+
+        return _getDepends($portdir, "run-depends-list");
+}
+
+sub _getDepends {
+        my $portdir = shift;
+        my $target  = shift;
+
+        my @deplist = `cd $portdir && make $target`;
+
+        return @deplist;
+}

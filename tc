@@ -1115,12 +1115,7 @@ sub addPorts {
                         # We need to add all ports on which this port depends
                         # recursively.
 
-                        my @deplist = ();
-                        foreach my $deptarget ("build-depends-list",
-                                "run-depends-list")
-                        {
-                                push @deplist, `cd $portdir && make $deptarget`;
-                        }
+                        my @deplist, `cd $portdir && make all-depends-list`;
                         foreach my $dep (@deplist) {
                                 chomp $dep;
                                 $dep =~ s|^$ENV{'PORTSDIR'}/||;
