@@ -12,9 +12,9 @@ cleanup()
     pb=$6
     branch=$7
 
-    umount -f ${chroot}/a/ports
-    umount -f ${chroot}/usr/src
-    umount -f ${chroot}/dev
+    umount -f ${chroot}/a/ports >/dev/null 2>&1
+    umount -f ${chroot}/usr/src >/dev/null 2>&1
+    umount -f ${chroot}/dev >/dev/null 2>&1
 
     if [ $noclean = 0 ]; then
 	rm -rf ${chroot}/tmp/*

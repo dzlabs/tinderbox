@@ -31,9 +31,9 @@ fi
 D=${pb}/${build}
 
 chflags -R noschg ${D}
-umount -f ${D}/a/ports
-umount -f ${D}/usr/src
-umount -f ${D}/dev
+umount -f ${D}/a/ports >/dev/null 2>&1
+umount -f ${D}/usr/src >/dev/null 2>&1
+umount -f ${D}/dev >/dev/null 2>&1
 rm -rf ${D}
 mkdir -p ${D}
 
