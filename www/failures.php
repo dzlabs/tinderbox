@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: failures.php,v 1.2 2004/03/07 11:10:23 pav Exp $
+# $Id: failures.php,v 1.3 2004/12/28 14:39:47 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -63,24 +63,8 @@
 			echo "<td><a href=\"showbuild.php?name=" . $build["Build_Name"] . "\">" . $build["Build_Name"] . "</a></td>\n";
 			echo "<td><a href=\"showport.php?id=" . $build["Port_Id"] . " \">" . $build["Port_Directory"] . "</a></td>\n";
 			echo "<td>" . $build["Last_Built_Version"] . "</td>\n";
-			if ($build["Last_Status"] == "SUCCESS") {
-				echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
-				if ($build["Last_Built_Version"]) {
-					echo "<td><a href=\"" . $pkguri . "/" . $build["Build_Name"] . "/All/" . $build["Last_Built_Version"] . $ds->getPackageSuffix($build["Jail_Id"]) . "\">package</a></td>\n";
-				} else {
-					echo "<td>&nbsp;</td>\n";
-				}
-			} elseif ($build["Last_Status"] == "FAIL") {
-				echo "<td style=\"background-color: red\">&nbsp;</td>\n";
-				if ($build["Last_Built_Version"]) {
-					echo "<td><a href=\"" . $errorloguri . "/" . $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log\">log</a></td>\n";
-				} else {
-					echo "<td>&nbsp;</td>\n";
-				}
-			} else { /* UNKNOWN */
-				echo "<td style=\"background-color: grey\">&nbsp;</td>\n";
-				echo "<td>&nbsp;</td>\n";
-			}
+			echo "<td style=\"background-color: red\">&nbsp;</td>\n";
+			echo "<td><a href=\"" . $errorloguri . "/" . $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log\">log</a></td>\n";
 			echo "<td>" . $ds->prettyDatetime($build["Last_Built"]) . "</td>\n";
 			echo "<td>" . $ds->prettyDatetime($build["Last_Successful_Built"]) . "</td>\n";
 			echo "</tr>\n";
