@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.13 2004/03/03 19:54:10 pav Exp $
+# $Id: TinderboxDS.php,v 1.14 2004/03/03 20:13:54 pav Exp $
 #
 
     require_once 'DB.php';
@@ -108,7 +108,7 @@
 	    return $results[0];
 	}
 
-	function getBuildsOfPort($params) {
+	function getBuildsDetailed($params) {
 	    $query = "SELECT build_ports.*,builds.Build_Name,builds.Jail_Id,ports_trees.Ports_Tree_Name,ports_trees.Ports_Tree_CVSweb_URL ";
 	    $query.= "FROM build_ports,builds,ports_trees ";
 	    $query.= "WHERE build_ports.Build_Id = builds.Build_Id AND builds.Ports_Tree_Id = ports_trees.Ports_Tree_Id ";
@@ -116,6 +116,7 @@
 		foreach ($params as $key => $param) {
 		    switch ($key) {
 			case "Port_Id": $query.= "AND build_ports.Port_Id = '" . $param . "' "; break;
+			case "Last_Built": $query.= "ORDER BY Last_Built DESC LIMIT " . (int)$param; break;
 		    }
 		}
 	    }
