@@ -99,7 +99,7 @@ fi
 
 echo "DONE."
 
-echo "INFO: Initializing new build..."
+echo -n "INFO: Initializing new build..."
 ${pb}/scripts/mkbuild ${build_name}
 
 if [ $? != 0 ]; then
