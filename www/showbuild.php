@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id$
+# $Id: build.php,v 1.1 2004/03/02 21:53:09 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -47,6 +47,16 @@
 ?>
 <h1>GNOME 2 Packages for i386 - <?= $build->getName() ?></h1>
 <?php
+	echo "<p>\n";
+	echo "Description: " . $build->getDescription() . "<br />\n";
+
+	$jail = $ds->getJailById($build->getJailId());
+	echo "System: FreeBSD " . $jail->getName() . " (" . $jail->getTag() . ") updated on " . $jail->prettyDatetime($jail->getLastBuilt()) . "<br />\n";
+
+	$ports_tree = $ds->getPortsTreeById($build->getPortsTreeId());
+	echo "Ports Tree: " . $ports_tree->getDescription() . "<br />\n";
+	echo "</p>\n";
+
 	$ports = $ds->getPortsForBuild($build);
 
 	if ($ports) {
@@ -62,6 +72,7 @@
 			echo "<tr>\n";
 			echo "<td>" . $port->getDirectory() . "</td>\n";
 			echo "<td>" . $port->prettyDatetime($port->getLastBuilt()) . "</td>\n";
+			echo "</tr>\n";
 		}
 		echo "</table>\n";
 

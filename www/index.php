@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: index.php,v 1.5 2004/03/02 20:27:16 pav Exp $
+# $Id: index.php,v 1.6 2004/03/02 21:53:09 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -55,7 +55,7 @@
 <?php
 	foreach ($builds as $build) {
 	    echo "<tr>\n";
-	    echo "<td><a href=\"build.php?name=" . $build->getName() . "\">" . $build->getName() . "</a></td>\n";
+	    echo "<td><a href=\"showbuild.php?name=" . $build->getName() . "\">" . $build->getName() . "</a></td>\n";
 	    echo "<td>" . $build->getDescription() . "</td>\n";
 	    echo "<td>";
 	    if (is_dir($pkgdir . "/" . $build->getName())) {
