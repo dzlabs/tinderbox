@@ -720,10 +720,18 @@ sub _getBuildUsers {
         my @users;
 
         my @results = ();
-        my $rc      = $self->_doQueryHashRef(
-                "SELECT * FROM  users WHERE User_Id IN (SELECT User_Id FROM build_users WHERE Build_Id=? AND $field=1)",
-                \@results, $build->getId()
-        );
+        my $rc;
+        if (defined($field)) {
+                $rc = $self->_doQueryHashRef(
+                        "SELECT * FROM  users WHERE User_Id IN (SELECT User_Id FROM build_users WHERE Build_Id=? AND $field=1)",
+                        \@results, $build->getId()
+                );
+        } else {
+                $rc = $self->_doQueryHashRef(
+                        "SELECT * FROM  users WHERE User_Id IN (SELECT User_Id FROM build_users WHERE Build_Id=?)",
+                        \@results, $build->getId()
+                );
+        }
 
         if (!$rc) {
                 return undef;
@@ -774,6 +782,26 @@ sub getUserByName {
         }
 
         return $results[0];
+}
+
+sub getAllUsers {
+        my $self  = shift;
+        my @users = ();
+
+        @users = $self->getUsers();
+
+        return @users;
+}
+
+sub getUsersForBuild {
+        my $self  = shift;
+        my $build = shift;
+        croak "Argument is not of type build\n" if (ref($build) ne "Build");
+        my @users = ();
+
+        @users = $self->_getBuildUsers($build, undef);
+
+        return @users;
 }
 
 sub addUser {

@@ -6,9 +6,11 @@ $SMTP_HOST       = 'custard.marcuscom.com';
 $SERVER_PROTOCOL = 'http';
 $SERVER_HOST     = 'www.marcuscom.com';
 
-$TINDERBOX_URI = '/tinderbox';
-$SHOWBUILD_URI = $TINDERBOX_URI . '/showbuild.php';
-$SHOWPORT_URI  = $TINDERBOX_URI . '/showport.php';
+$TINDERBOX_URI      = '/tinderbox';
+$TINDERBOX_DATA_URI = '/tb';
+$SHOWBUILD_URI      = $TINDERBOX_URI . '/showbuild.php';
+$SHOWPORT_URI       = $TINDERBOX_URI . '/showport.php';
+$LOG_URI            = $TINDERBOX_DATA_URI . '/logs';
 
 $ERROR_DIR      = $BUILD_ROOT . '/errors';
 $LOG_DIR        = $BUILD_ROOT . '/logs';

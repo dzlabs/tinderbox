@@ -54,6 +54,7 @@ use vars qw(
     $SENDER
     $SHOWBUILD_URI
     $SHOWPORT_URI
+    $LOG_URI
 );
 
 require "tinderbox.ph";
@@ -266,6 +267,17 @@ require "tinderlib.pl";
                     "Send email to the build interest list when a port fails to build",
                 usage  => "-b <build name> -d <port directory>",
                 optstr => 'b:d:',
+        },
+        "listUsers" => {
+                func  => \&listUsers,
+                help  => "List all users in the datastore",
+                usage => "",
+        },
+        "listBuildUsers" => {
+                func   => \&listBuildUsers,
+                help   => "List all users in the interest list for a build",
+                usage  => "-b <build name>",
+                optstr => 'b:',
         },
 );
 
@@ -1145,10 +1157,15 @@ sub sendBuildErrorMail {
         my $build = $ds->getBuildByName($buildname);
         my $port  = $ds->getPortByDirectory($portdir);
 
+        my $version = $ds->getPortLastBuiltVersion($port, $build);
+
         my $subject = $SUBJECT . " Port $portdir failed for build $buildname";
         my $now     = scalar localtime;
         my $data    = <<EOD;
-Port $portdir failed for build $buildname on $now.
+Port $portdir failed for build $buildname on $now.  The error log can be
+found at:
+
+${SERVER_PROTOCOL}://${SERVER_HOST}${LOG_URI}/$buildname/${version}.log
 
 EOD
         if (defined($port)) {
@@ -1249,6 +1266,43 @@ sub addBuildUser {
 
 sub updateBuildUser {
         return _updateBuildUser($opts, "updateBuildUser");
+}
+
+sub listUsers {
+        my @users = $ds->getAllUsers();
+
+        if (defined(@users)) {
+                map { print $_->getName() . "\n" } @users;
+        } elsif (defined($ds->getError())) {
+                cleanup($ds, 1,
+                        "Failed to list users: " . $ds->getError() . "\n");
+        } else {
+                cleanup($ds, 1,
+                        "There are no users configured in the datastore.\n");
+        }
+}
+
+sub listBuildUsers {
+        if (!$opts->{'b'}) {
+                usage("listBuildUsers");
+        }
+
+        if (!$ds->isValidBuild($opts->{'b'})) {
+                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
+        }
+
+        my $build = $ds->getBuildByName($opts->{'b'});
+        my @users = $ds->getUsersForBuild($build);
+
+        if (defined(@users)) {
+                map { print $_->getName() . "\n" } @users;
+        } elsif (defined($ds->getError())) {
+                cleanup($ds, 1,
+                        "Failed to list users: " . $ds->getError() . "\n");
+        } else {
+                cleanup($ds, 1,
+                        "There are no users configured for this build.\n");
+        }
 }
 
 sub _updateBuildUser {
