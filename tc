@@ -1,5 +1,12 @@
 #!/usr/bin/perl
 
+# This is a hack to make sure we can always find our modules.
+BEGIN {
+        my $pb = "/space";
+        push @INC, "$pb/scripts";
+        use lib "$pb/sctips";
+}
+
 use strict;
 use TinderboxDS;
 use Getopt::Std;
@@ -48,7 +55,7 @@ require "tinderlib.pl";
                 func  => \&addPortsTree,
                 help  => "Add a portstree to the datastore",
                 usage =>
-                    "-n <portstree name> [-d <portstree description>] [-u <portstree update command|NONE|CVSUP>]",
+                    "-n <portstree name> [-d <portstree description>] [-u <portstree update command|NONE|CVSUP>] [-w <CVSweb URL>]",
         },
         "addPort" => {
                 func => \&addPort,
@@ -139,6 +146,11 @@ require "tinderlib.pl";
                     "Update the specified port's last built version for the specified build",
                 usage =>
                     "-d <port directory> -b <build name> -v <last built version>",
+        },
+        "updateBuildStatus" => {
+                func  => \&updateBuildStatus,
+                help  => "Update the current status for the specific build",
+                usage => "-b <build name> -s <IDLE|PORTBUILD>",
         },
         "getPortLastBuiltVersion" => {
                 func => \&getPortLastBuiltVersion,
@@ -326,7 +338,7 @@ sub addJail {
 sub addPortsTree {
         my $opts = {};
 
-        getopts('n:u:d:', $opts);
+        getopts('n:u:d:w:', $opts);
 
         if (!$opts->{'n'}) {
                 usage("addPortsTree");
@@ -350,6 +362,7 @@ sub addPortsTree {
         $portstree->setName($name);
         $portstree->setUpdateCmd($update_cmd);
         $portstree->setDescription($opts->{'d'}) if ($opts->{'d'});
+        $portstree->setCVSwebURL($opts->{'w'})   if ($opts->{'w'});
 
         my $rc = $ds->addPortsTree($portstree);
 
@@ -477,7 +490,7 @@ sub getSrcUpdateCmd {
         } elsif ($update_cmd eq "NONE") {
                 $update_cmd = "";
         } else {
-                $update_cmd = "$BUILD_ROOT/scripts/$update_cmd";
+                $update_cmd = "$BUILD_ROOT/scripts/$update_cmd $jail_name";
         }
 
         print $update_cmd . "\n";
@@ -508,7 +521,7 @@ sub getPortsUpdateCmd {
         } elsif ($update_cmd eq "NONE") {
                 $update_cmd = "";
         } else {
-                $update_cmd = "$BUILD_ROOT/scripts/$update_cmd";
+                $update_cmd = "$BUILD_ROOT/scripts/$update_cmd $portstree_name";
         }
 
         print $update_cmd . "\n";
@@ -717,13 +730,15 @@ sub updatePortsTree {
         my $portstree  = $ds->getPortsTreeByName($name);
         my $update_cmd = $portstree->getUpdateCmd();
 
-        $portstree->setLastBuilt($opts->{'l'}) if ($opts->{'l'});
+        $portstree->setLastBuilt($opts->{'l'});
 
         if ($update_cmd eq "CVSUP") {
                 $update_cmd =
                     "/usr/local/bin/cvsup -g $BUILD_ROOT/portstrees/$name/ports-supfile";
         } elsif ($update_cmd eq "NONE") {
                 $update_cmd = "";
+        } else {
+                $update_cmd .= " $name";
         }
 
         my $rc = 0;    # Allow null update commands to succeed.
@@ -761,7 +776,7 @@ sub updateJailLastBuilt {
 
         my $jail = $ds->getJailByName($opts->{'j'});
 
-        $jail->setLastBuilt($opts->{'l'}) if ($opts->{'l'});
+        $jail->setLastBuilt($opts->{'l'});
 
         $ds->updateJailLastBuilt($jail)
             or cleanup($ds, 1,
@@ -932,6 +947,41 @@ sub updatePortLastBuiltVersion {
             );
 }
 
+sub updateBuildStatus {
+        my $opts = {};
+
+        getopts('b:s:', $opts);
+
+        my %status_hash = (
+                IDLE      => 0,
+                PORTBUILD => 1,
+        );
+
+        if (!$opts->{'b'}) {
+                usage("updateBuildStatus");
+        }
+
+        if (!$ds->isValidBuild($opts->{'b'})) {
+                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
+        }
+
+        my $build = $ds->getBuildByName($opts->{'b'});
+
+        my $build_status;
+        if (!defined($status_hash{$opts->{'s'}})) {
+                $build_status = "IDLE";
+        } else {
+                $build_status = $opts->{'s'};
+        }
+        $build->setStatus($build_status);
+
+        $ds->updateBuildStatus($build)
+            or cleanup($ds, 1,
+                "Failed to update last build status value in the datastore: "
+                    . $ds->getError()
+                    . "\n");
+}
+
 sub getPortLastBuiltVersion {
         my $opts = {};
 
@@ -1044,7 +1094,12 @@ sub addPorts {
                                     . $ds->getError() . "\n";
                         }
                 } else {
-                        $pCls = $ds->getPortByDirectory($portdir);
+                        $rc = $ds->updatePort(\$pCls);
+                        if (!$rc) {
+                                warn "WARN: Failed to update port "
+                                    . $pCls->getDirectory() . ": "
+                                    . $ds->getError() . "\n";
+                        }
                 }
 
                 $rc = $ds->addPortForBuild($pCls, $build);

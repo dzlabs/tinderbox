@@ -1,5 +1,17 @@
 #!/bin/sh
 
+cleanup() {
+    pb=$1
+    build=$2
+    lock=$3
+    error=$4
+
+    rm -f ${lock}
+    ${pb}/scripts/tc updateBuildStatus -b ${build} -s IDLE
+
+    exit ${error}
+}
+
 pb=/space
 
 usage () {
@@ -15,6 +27,7 @@ ports=""
 init=0
 cleanpackages=0
 updateports=0
+error=2
 
 while [ $# -gt 0 ]; do
     case "x$1" in
@@ -60,6 +73,11 @@ fi
 
 touch ${lock}
 
+# Let the datastore known what we're doing.
+${pb}/scripts/tc updateBuildStatus -b ${build} -s PORTBUILD
+
+trap "cleanup ${pb} ${build} ${lock} ${error}" 1 2 3 9 10 11 15
+
 # XXX This is a crude hack to normalize ${ports}
 ports=$(echo ${ports})
 
@@ -96,8 +114,7 @@ ${pb}/scripts/makemake ${build} ${ports}
 
 if [ $? != 0 ]; then
     echo "ERROR: Failed to generate Makefile for ${build}"
-    rm -f ${lock}
-    exit 1
+    cleanup ${pb} ${build} ${lock} 1
 fi
 
 # Then we check to see if we need to create our jail directory.
@@ -119,7 +136,7 @@ phase1start=$(date +%s)
 cd ${PACKAGES}/All && make -k -j1 all > ${pb}/builds/${build}/make.0 2>&1 </dev/null
 echo "ended at $(date)"
 phase1end=$(date +%s)
-echo "phase 1 took $(date -u -j -r $(($phase1end - $phase1start)) | awk '{print $4}')" 
+echo "phase 1 took $(date -u -j -r $(($phase1end - $phase1start)) | awk '{print $4}')"
 echo $(echo $(ls -1 ${PACKAGES}/All/*${PKGSUFFIX} | wc -l) | bc) "packages built"
 echo $(echo $(du -sh ${PACKAGES} | awk '{print $1}')) " of packages"
 
@@ -140,5 +157,4 @@ echo "phase 2 took $(date -u -j -r $(($phase2end - $phase2start)) | awk '{print 
 echo $(echo $(ls -1 ${PACKAGES}/All/*${PKGSUFFIX} | wc -l) | bc) "packages built"
 echo $(echo $(du -sh ${PACKAGES} | awk '{print $1}')) " of packages"
 
-rm -r ${lock}
-exit 0
+cleanup ${pb} ${build} ${lock} 0

@@ -14,12 +14,12 @@ cleanup()
     umount -f ${chroot}/usr/src
     umount -f ${chroot}/dev
 
-    if [ $noclean = 0 -o $error = 0 ]; then
+    if [ $noclean = 0 ]; then
 	rm -rf ${chroot}/tmp/*
 	for dir in ${cleandirs}; do
 	    if ! rm -rf ${chroot}${dir} >/dev/null 2>&1; then
-		chflags -R noschg ${chroot}${dir}
-		rm -rf ${chroot}${dir} >/dev/null 2>&1
+		chflags -R noschg ${chroot}${dir} >/dev/null 2>&1
+		rm -rf ${chroot}${dir}
 	    fi
 	done
 	chroot ${chroot} /sbin/ldconfig -R
@@ -143,8 +143,8 @@ mount -t devfs foo ${chroot}/dev
 
 for dir in ${cleandirs}; do
     if ! rm -rf ${chroot}${dir} >/dev/null 2>&1; then
-	chflags -R noschg ${chroot}${dir}
-	rm -rf ${chroot}${dir} >/dev/null 2>&1
+	chflags -R noschg ${chroot}${dir} >/dev/null 2>&1
+	rm -rf ${chroot}${dir}
     fi
 done
 
@@ -194,6 +194,9 @@ else
     error=255
 fi
 
+portdir=$(echo ${dirname} | sed -e 's|^/usr/ports/||')
+last_version=$(${pb}/scripts/tc getPortLastBuiltVersion -d ${portdir} -b ${branch})
+
 if [ "${error}" = 0 ]; then
     ln -sf ${pkgname}.log2 ${chroot}/tmp/make.log
 
@@ -210,9 +213,14 @@ if [ "${error}" = 0 ]; then
 	cp ${chroot}/tmp/work.tbz ${pb}/wrkdirs/${branch}/${pkgname}.tbz
     fi
 
-    portdir=$(echo ${dirname} | sed -e 's|^/usr/ports/||')
-
     if [ "${error}" = 0 ]; then
+        if [ ! -z "${last_version}" ]; then
+	    oldpkgs=$(find ${packages} -name "${last_version}${PKGSUFFIX}")
+	    for _pkg in ${oldpkgs}; do
+	        echo "INFO: Removing old package ${_pkg}."
+	        rm -f ${_pkg}
+	    done
+        fi
 	tar -C ${chroot}/tmp/packages -cf - . | \
 		tar --unlink -C ${packages} -xvf -
 	[ -f ${packages}/All/${pkgname}${PKGSUFFIX} ] && \
@@ -222,20 +230,17 @@ if [ "${error}" = 0 ]; then
 	cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${branch}/${pkgname}.log
     fi
 # Now update the datastore with our results.
-    last_version=$(${pb}/scripts/tc getPortLastBuiltVersion -d ${portdir} -b ${branch})
-    if [ ! -z "${last_version}" ]; then
-	find ${packages} -name "${last_version}${PKGSUFFIX}" | xargs rm -f
-    fi
     ${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${branch}
     ${pb}/scripts/tc updatePortLastSuccessfulBuilt -d ${portdir} -b ${branch}
     ${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${branch} -s SUCCESS
-    ${pb}/scripts/tc updatePortLastBuiltVersion -d ${portname} -b ${branch} -v ${pkgname}
+    ${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${branch} -v ${pkgname}
 else
     cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${branch}/${pkgname}.log
     cp ${chroot}/tmp/${pkgname}.log ${pb}/logs/${branch}/${pkgname}.log
 
     ${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${branch}
     ${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${branch} -s FAIL
+    ${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${branch} -v ${pkgname}
 fi
 
 cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname}
