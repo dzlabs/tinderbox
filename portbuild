@@ -138,7 +138,7 @@ portdir=$(echo ${dirname} | sed -e 's|^/usr/ports/||')
 # Want to use the /etc/make.conf in the chroot (Jail)
 unset __MAKE_CONF
 
-export WRKDIRPREFIX=/tmp
+export WRKDIRPREFIX=/work
 export DISTDIR=/tmp/distfiles
 export PACKAGES=/tmp/packages
 
@@ -251,6 +251,11 @@ else
     mount -o nfsv3,intr -r localhost:${pb}/portstrees/${portstree}/ports ${chroot}/a/ports
 fi
 ln -sf ../a/ports ${chroot}/usr/ports
+
+# Don't build in a world-writable directory because some ports hardcode
+# this path and try to load things from it at runtime, which is bad for
+# user security
+mkdir ${chroot}/work
 
 mkdir -p ${chroot}/usr/src
 
