@@ -5,6 +5,38 @@ usage () {
     exit 1
 }
 
+kill_procs()
+{
+    dir=$1
+
+    pids="XXX"
+    while [ ! -z "${pids}" ]; do
+	pids=$(fstat -f "$dir" | tail +2 | awk '{print $3}' | sort -u)
+	if [ ! -z "${pids}" ]; then
+	    echo "Killing off pids in ${dir}"
+	    ps -p $pids
+	    kill -KILL ${pids} 2> /dev/null
+	    sleep 2
+	fi
+    done
+}
+
+cleanup_mount() {
+    chroot=$1
+    mount=$2
+
+    if [ -d ${chroot}${mount} ]; then
+	mdir=$(fstat -f ${chroot}${mount} | head -2 | tail -1 | awk '{print $5}')
+	if [ "${mdir}" = "MOUNT" ]; then
+	    umount ${chroot}${mount} || echo "Cleanup of ${chroot}${mount} failed!"
+	fi
+	if [ "${mdir}" = "${chroot}${mount}" ]; then
+	    kill_procs ${chroot}${mount}
+	    umount ${chroot}${mount} || echo "Cleanup of ${chroot}${mount} failed!"
+	fi
+    fi
+}
+
 cleanup()
 {
     chroot=$1
@@ -15,10 +47,10 @@ cleanup()
     pb=$6
     branch=$7
 
-    umount -f ${chroot}/a/ports >/dev/null 2>&1
-    umount -f ${chroot}/usr/src >/dev/null 2>&1
-    umount -f ${chroot}/dev >/dev/null 2>&1
-    umount -f ${chroot}/ccache >/dev/null 2>&1
+    cleanup_mount ${chroot} /a/ports
+    cleanup_mount ${chroot} /usr/src
+    cleanup_mount ${chroot} /dev
+    test -d ${chroot}/ccache && cleanup_mount ${chroot} /ccache
 
     if [ $noclean = 0 ]; then
 	rm -rf ${chroot}/tmp/*
