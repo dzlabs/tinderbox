@@ -123,6 +123,14 @@ buildenv ${pb} ${build} ${jail} ${portstree}
 # Remove the make logs.
 rm -f ${pb}/builds/${build}/make.*
 
+# Clean up packages if specific ports dirs were specified on the command line.
+for port in ${ports}; do
+    pkgname=$(${pb}/scripts/tc getPortLastBuiltVersion -b ${build} -d ${port})
+    if [ ! -z "${pkgname}" ]; then
+	find ${PACKAGES} -name ${pkgname}${PKGSUFFIX} -delete
+    fi
+done
+
 # First we check to see if we need to clean out old packages.
 if [ "$cleanpackages" = "1" ]; then
     rm -rf ${PACKAGES}
