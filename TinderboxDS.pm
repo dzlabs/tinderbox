@@ -366,7 +366,9 @@ sub addPort {
 sub updatePort {
         my $self = shift;
         my $port = shift;
-        croak "ERROR: Argument is not of type port\n" if (ref($port) ne "Port");
+        croak "ERROR: Argument is not of type port\n"
+            if (ref($port) ne "Port"
+                || (ref($port) eq "REF" && ref($$port) ne "Port"));
         my $pCls = (ref($port) eq "REF") ? $$port : $port;
 
         my $rc = $self->_doQuery(
