@@ -146,11 +146,6 @@ echo "phase 1 took $(date -u -j -r $(($phase1end - $phase1start)) | awk '{print 
 echo $(echo $(ls -1 ${PACKAGES}/All/*${PKGSUFFIX} | wc -l) | bc) "packages built"
 echo $(echo $(du -sh ${PACKAGES} | awk '{print $1}')) " of packages"
 
-# Reinitialize the build from the tarfile before starting phase 2.  This helps
-# to reduce some errors related to stale files.
-echo "INFO: Creating build directory for ${build} from repository..."
-${pb}/scripts/mkbuild ${build}
-
 echo "================================================"
 echo "building packages (phase 2)"
 echo "================================================"
