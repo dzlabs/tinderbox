@@ -158,6 +158,12 @@ require "tinderlib.pl";
                     "Get the last built version for the specified port and build",
                 usage => "-d <port directory> -b <build name>",
         },
+        "updateBuildCurrentPort" => {
+                func => \&updateBuildCurrentPort,
+                help =>
+                    "Update the port currently being built for the specify build",
+                usage => "-b <build name> [-n <package name>]",
+        },
 );
 
 if (!scalar(@ARGV)) {
@@ -954,7 +960,8 @@ sub updateBuildStatus {
 
         my %status_hash = (
                 IDLE      => 0,
-                PORTBUILD => 1,
+                PREPARE   => 1,
+                PORTBUILD => 2,
         );
 
         if (!$opts->{'b'}) {
@@ -1026,6 +1033,29 @@ sub getPortLastBuiltVersion {
         }
 
         print $version . "\n";
+}
+
+sub updateBuildCurrentPort {
+        my $opts = {};
+
+        getopts('b:n:', $opts);
+
+        if (!$opts->{'b'}) {
+                usage("updateBuildCurrentPort");
+        }
+
+        if (!$ds->isValidBuild($opts->{'b'})) {
+                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
+        }
+
+        my $build = $ds->getBuildByName($opts->{'b'});
+
+        $ds->updateBuildCurrentPort($build, $opts->{'n'})
+            or cleanup($ds, 1,
+                      "Failed to get last update build current port for build "
+                    . $opts->{'b'} . ": "
+                    . $ds->getError()
+                    . "\n");
 }
 
 sub usage {
