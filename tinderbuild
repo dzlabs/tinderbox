@@ -36,6 +36,7 @@ cleanup() {
 
     rm -f ${lock}
     ${pb}/scripts/tc updateBuildStatus -b ${build} -s IDLE
+    ${pb}/scripts/tc sendBuildCompletionMail -b ${build}
 
     exit ${error}
 }

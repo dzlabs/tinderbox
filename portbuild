@@ -242,6 +242,7 @@ if [ "${error}" = 0 ]; then
 	${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${branch}
 	${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${branch} -s FAIL
 	${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${branch} -v ${pkgname}
+        ${pb}/scripts/tc sendBuildErrorMail -d ${portdir} -b ${branch}
     fi
 else
     cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${branch}/${pkgname}.log
@@ -250,6 +251,7 @@ else
     ${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${branch}
     ${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${branch} -s FAIL
     ${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${branch} -v ${pkgname}
+    ${pb}/scripts/tc sendBuildErrorMail -d ${portdir} -b ${branch}
 fi
 
 cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${pb} ${branch}
