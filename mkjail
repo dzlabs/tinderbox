@@ -73,7 +73,7 @@ D=${pb}/jails/${jail}/tmp
 chflags -R noschg ${D}
 rm -rf ${D}
 
-export __MAKE_CONF=${pb}/jails/${jail}/make.conf
+export __MAKE_CONF=/dev/null
 
 cd ${SRCBASE}
 mkdir -p ${D}
