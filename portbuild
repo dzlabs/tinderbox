@@ -116,6 +116,11 @@ if [ -n "${CCACHE_ENABLED}" ]; then
     # XXX We need to do this since certain ports (e.g. cdrtools) don't
     # respect CC the way they should (thanks for the tip, Adam).
     export PATH=/opt:${PATH}
+if [ -n "${CCACHE_MAX_SIZE}" ]; then
+    # Example: CCACHE_MAX_SIZE=2G (2 GB)
+    # G=GB, M=MB, K=KB
+    ccache -M ${CCACHE_MAX_SIZE}
+fi
 fi
 
 # Use the *.env file to specify per-jail, per-portstree, and per-build
