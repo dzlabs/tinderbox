@@ -271,7 +271,6 @@ for dir in ${cleandirs}; do
 done
 
 rm -rf ${chroot}/var/db/pkg/*
-mkdir -p ${chroot}/usr/X11R6
 
 mtree -deU -f ${chroot}/etc/mtree/BSD.root.dist -p ${chroot} \
   >/dev/null 2>&1
@@ -281,8 +280,23 @@ mtree -deU -f ${chroot}/etc/mtree/BSD.usr.dist -p ${chroot}/usr \
   >/dev/null 2>&1
 mtree -deU -f ${chroot}/etc/mtree/BSD.local.dist -p ${chroot}/usr/local \
   >/dev/null 2>&1
-mtree -deU -f ${chroot}/etc/mtree/BSD.x11-4.dist -p ${chroot}/usr/X11R6 \
-  >/dev/null 2>&1
+
+mkdir ${chroot}/usr/X11R6
+if [ $X_WINDOW_SYSTEM = "xfree86-3" ]; then
+    mtree -deU -f ${chroot}/usr/src/etc/mtree/BSD.x11.dist -p ${chroot}/usr/X11R6 >/dev/null 2>&1
+elif [ $X_WINDOW_SYSTEM = "xorg" ]; then
+    mtree -deU -f ${chroot}/a/ports/x11-servers/xorg-server/files/BSD.x11-xorg.dist -p ${chroot}/usr/X11R6 \
+    >/dev/null 2>&1
+else
+    mtree -deU -f ${chroot}/usr/src/etc/mtree/BSD.x11-4.dist -p ${chroot}/usr/X11R6 \
+    >/dev/null 2>&1
+fi
+
+if [ ${arch} = "i386" ]; then
+    # JDK ports need linprocfs :(
+    mkdir -p ${chroot}/compat/linux/proc
+    chroot ${chroot} mount_linprocfs linprocfs /compat/linux/proc
+fi
 
 _ldconfig_dirs="/lib /usr/lib /usr/lib/compat"
 ldconfig_dirs=""
@@ -292,7 +306,9 @@ for i in ${_ldconfig_dirs}; do
     fi
 done
 chroot ${chroot} /sbin/ldconfig ${ldconfig_dirs}
-chroot ${chroot} /sbin/ldconfig -aout /usr/lib/aout /usr/lib/compat/aout
+if [ ${arch} = "i386" ]; then
+    chroot ${chroot} /sbin/ldconfig -aout /usr/lib/aout /usr/lib/compat/aout
+fi
 
 while [ $# -gt 0 ]; do
     if [ -f ${packages}/All/$1 ]; then
