@@ -1115,11 +1115,13 @@ sub addPorts {
                         }
                 }
 
-                $rc = $ds->addPortForBuild($pCls, $build);
-                if (!$rc) {
-                        warn "WARN: Failed to add port for build, "
-                            . $build->getName() . ": "
-                            . $ds->getError() . "\n";
+                if (!$ds->isPortForBuild($pCls, $build)) {
+                        $rc = $ds->addPortForBuild($pCls, $build);
+                        if (!$rc) {
+                                warn "WARN: Failed to add port for build, "
+                                    . $build->getName() . ": "
+                                    . $ds->getError() . "\n";
+                        }
                 }
         }
 }

@@ -791,7 +791,7 @@ sub isValidPortsTree {
 sub isPortForBuild {
         my $self  = shift;
         my $port  = shift;
-        my $jail  = shift;
+        my $build = shift;
         my $valid = 1;
 
         my @result;
@@ -801,7 +801,7 @@ sub isPortForBuild {
         );
 
         foreach (@result) {
-                if ($jail->getName() eq $_->{'Build_Name'}) {
+                if ($build->getName() eq $_->{'Build_Name'}) {
                         $valid = 1;
                         last;
                 }
