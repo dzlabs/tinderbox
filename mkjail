@@ -87,7 +87,7 @@ fi
 cd etc
 make distribution DESTDIR=${D}
 
-if [ $? != 0]; then
+if [ $? != 0 ]; then
     echo "ERROR: make distribution failed.  See above output."
     exit 1
 fi
