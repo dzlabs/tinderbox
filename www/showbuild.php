@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showbuild.php,v 1.16 2004/03/10 18:54:53 marcus Exp $
+# $Id: showbuild.php,v 1.17 2004/12/28 14:39:47 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -80,7 +80,17 @@
 			echo "<td>" . $ds->prettyEmail($port->getMaintainer()) . "</td>\n";
 			echo "<td>" . $port->getLastBuiltVersion() . "</td>\n";
 			if ($port->getLastStatus() == "SUCCESS") {
-				echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
+				$logfilename = $logdir . "/". $build->getName() . "/" . $port->getLastBuiltVersion() . ".log";
+				if (file_exists($logfilename)) {
+					$leftovers = `grep -c extra.files $logfilename`;
+				} else {
+					$leftovers = "";
+				}
+				if ($leftovers == 1) {
+					echo "<td style=\"background-color: rgb(255,255,216); color: red; font-weight: bold; text-align: center\">L</td>\n";
+				} else {
+					echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
+				}
 				if ($port->getLastBuiltVersion()) {
 					echo "<td>";
 					echo "<a href=\"" . $loguri . "/" . $build->getName() . "/" . $port->getLastBuiltVersion() . ".log\">log</a> ";

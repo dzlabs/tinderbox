@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showport.php,v 1.11 2004/03/07 11:10:22 pav Exp $
+# $Id: showport.php,v 1.12 2004/12/28 14:39:47 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -83,7 +83,17 @@
 			echo "<td><a href=\"showbuild.php?name=" . $build["Build_Name"] . "\">" . $build["Build_Name"] . "</a></td>\n";
 			echo "<td>" . $build["Last_Built_Version"] . "</td>\n";
 			if ($build["Last_Status"] == "SUCCESS") {
-				echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
+				$logfilename = $logdir . "/". $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log";
+				if (file_exists($logfilename)) {
+					$leftovers = `grep -c extra.files $logfilename`;
+				} else {
+					$leftovers = "";
+				}
+				if ($leftovers == 1) {
+					echo "<td style=\"background-color: rgb(255,255,216); color: red; font-weight: bold; text-align: center\">L</td>\n";
+				} else {
+					echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
+				}
 				if ($build["Last_Built_Version"]) {
 					echo "<td>";
 					echo "<a href=\"" . $loguri . "/" . $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log\">log</a> ";
