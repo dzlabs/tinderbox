@@ -1,7 +1,7 @@
 #!/bin/sh
 
 usage () {
-    echo "usage: $0 <build name> <jail name> <portstree name> [-noclean] [-plistcheck] pkgname dirname"
+    echo "usage: $0 <build name> <jail name> <portstree name> [-noclean] [-plistcheck] [-nullfs] pkgname dirname"
     exit 1
 }
 
@@ -47,9 +47,10 @@ pb=/space
 error=0
 init=0
 noclean=0
+nullfs=0
 
 # check parameter count
-if [ $# -lt 5 -o $# -gt 7 ]; then
+if [ $# -lt 5 -o $# -gt 8 ]; then
     usage
 fi
 
@@ -74,6 +75,11 @@ plistcheck=0
 if [ "x$1" = "x-plistcheck" ]; then
     plistcheck=1
     export PLISTCHECK=1
+    shift
+fi
+
+if [ "x$1" = "x-nullfs" ]; then
+    nullfs=1
     shift
 fi
 args="$*"
@@ -187,12 +193,20 @@ echo "with arguments: ${args}" | tee -a ${chroot}/tmp/${pkgname}.log
 
 mkdir -p ${chroot}/a/ports
 rm -rf ${chroot}/usr/ports
-mount -o nfsv3,intr -r localhost:${pb}/portstrees/${portstree}/ports ${chroot}/a/ports
+if [ $nullfs -eq 1 ]; then
+    mount -t nullfs ${pb}/portstrees/${portstree}/ports ${chroot}/a/ports
+else
+    mount -o nfsv3,intr -r localhost:${pb}/portstrees/${portstree}/ports ${chroot}/a/ports
+fi
 ln -sf ../a/ports ${chroot}/usr/ports
 
 mkdir -p ${chroot}/usr/src
 
-mount -o nfsv3,intr -r localhost:${pb}/jails/${jail}/src ${chroot}/usr/src
+if [ $nullfs -eq 1 ]; then
+    mount -t nullfs ${pb}/jails/${jail}/src ${chroot}/usr/src
+else
+    mount -o nfsv3,intr -r localhost:${pb}/jails/${jail}/src ${chroot}/usr/src
+fi
 
 mount -t devfs foo ${chroot}/dev
 
@@ -200,9 +214,17 @@ if [ -n "${CCACHE_ENABLED}" ]; then
     mkdir -p ${pb}/ccache/${branch}
     mkdir -p ${chroot}/ccache
     if [ -n "${CCACHE_JAIL}" ]; then
-	mount -o rw,nfsv3,intr localhost:${pb}/ccache/${jail} ${chroot}/ccache
+	if [ $nullfs -eq 1 ]; then
+	    mount -t nullfs ${pb}/ccache/${jail} ${chroot}/ccache
+	else
+	    mount -o rw,nfsv3,intr localhost:${pb}/ccache/${jail} ${chroot}/ccache
+	fi
     else
-        mount -o rw,nfsv3,intr localhost:${pb}/ccache/${branch} ${chroot}/ccache
+	if [ $nullfs -eq 1 ]; then
+	    mount -t nullfs ${pb}/ccache/${branch} ${chroot}/ccache
+	else
+	    mount -o rw,nfsv3,intr localhost:${pb}/ccache/${branch} ${chroot}/ccache
+	fi
     fi
 fi
 
