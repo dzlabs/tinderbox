@@ -1,6 +1,6 @@
 #!/bin/sh
 #-
-# Copyright (c) 2004 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2004-2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: mkjail,v 1.14 2004/05/17 23:33:59 marcus Exp $
+# $Id: mkjail,v 1.15 2004/08/18 21:05:38 marcus Exp $
 #
 
 

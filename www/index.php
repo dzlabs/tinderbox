@@ -1,6 +1,6 @@
 <?php
 #-
-# Copyright (c) 2004 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2004-2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: index.php,v 1.18 2004/03/07 11:10:23 pav Exp $
+# $Id: index.php,v 1.19 2004/12/28 14:39:47 pav Exp $
 #
 
     require_once 'TinderboxDS.php';

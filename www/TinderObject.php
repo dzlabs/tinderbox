@@ -1,6 +1,6 @@
 <?php
 #-
-# Copyright (c) 2004 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2004-2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderObject.php,v 1.5 2004/03/03 17:13:57 pav Exp $
+# $Id: TinderObject.php,v 1.6 2004/03/03 20:27:33 pav Exp $
 #
 
     class TinderObject {

@@ -1,6 +1,6 @@
 <?php
 #-
-# Copyright (c) 2004 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2004-2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: Port.php,v 1.4 2004/03/03 16:39:21 pav Exp $
+# $Id: Port.php,v 1.5 2004/03/03 16:56:33 pav Exp $
 #
 
     require_once 'TinderObject.php';

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #-
-# Copyright (c) 2004 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2004-2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: tc,v 1.28 2004/07/17 15:39:35 marcus Exp $
+# $Id: tc,v 1.31 2005/02/12 21:09:53 marcus Exp $
 #
 
 # This is a hack to make sure we can always find our modules.
