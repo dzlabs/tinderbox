@@ -27,7 +27,13 @@ buildenv ${pb} "NULL" ${jail} "NULL"
 
 update_cmd=$(${pb}/scripts/tc getSrcUpdateCmd -j ${jail})
 if [ ! -z "${update_cmd}" ]; then
+    echo "INFO: Updating jail with command ${update_cmd}"
     eval ${update_cmd} > /dev/null 2>&1
+
+    if [ $? != 0 ]; then
+	echo "ERROR: Jail update failed."
+	exit 1
+    fi
 fi
 
 D=${pb}/jails/${jail}/tmp
@@ -39,8 +45,19 @@ export __MAKE_CONF=${pb}/jails/${jail}/make.conf
 cd ${SRCBASE}
 mkdir -p ${D}
 make world DESTDIR=${D}
+
+if [ $? != 0 ]; then
+    echo "ERROR: make world failed.  See above output."
+    exit 1
+fi
+
 cd etc
 make distribution DESTDIR=${D}
+
+if [ $? != 0]; then
+    echo "ERROR: make distribution failed.  See above output."
+    exit 1
+fi
 
 cd ${D}
 ln -sf dev/null kernel
