@@ -35,6 +35,8 @@
 	echo "</td>\n";
 	echo "</tr>\n";
     }
+
+    $ds->destroy();
 ?>
 </table>
 
