@@ -105,6 +105,7 @@ else
 	    echo "================================================================"
 	    echo "list of extra files and directories in /"
 	    cat /tmp/list3
+	    cat /tmp/list3 | grep extra | awk '{ print "/" $1 }' | xargs ls -lR
 	    if [ "x${PLISTCHECK}" != "x" ]; then
 		echo "1" > /tmp/status
 	    fi
