@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: tinderbuild,v 1.20 2004/12/31 22:21:52 marcus Exp $
+# $Id: tinderbuild,v 1.21 2005/01/03 03:24:06 marcus Exp $
 #
 
 
@@ -147,7 +147,7 @@ rm -f ${pb}/builds/${build}/make.*
 for port in ${ports}; do
     pkgname=$(${pb}/scripts/tc getPortLastBuiltVersion -b ${build} -d ${port})
     if [ ! -z "${pkgname}" ]; then
-	find ${PACKAGES} -name ${pkgname}${PKGSUFFIX} -delete
+	find -H ${PACKAGES} -name ${pkgname}${PKGSUFFIX} -delete
     fi
 done
 
