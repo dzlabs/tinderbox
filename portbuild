@@ -111,6 +111,10 @@ export USA_RESIDENT=yes
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/X11R6/bin:.
 
+# Use the *.env file to specify per-jail and per-build environment variables.
+[ -f ${pb}/jails/${jail}/jail.env ] && . ${pb}/jails/${jail}/jail.env
+[ -f ${pb}/builds/${branch}/build.env ] && . ${pb}/builds/${branch}/build.env
+
 echo "building $pkgname"
 
 ${pb}/scripts/tc updateBuildCurrentPort -b ${branch} -n ${pkgname}
