@@ -1,9 +1,10 @@
-$Id: README,v 1.4 2004/11/29 22:37:17 ahze Exp $
+$Id: README,v 1.5 2004/12/08 23:34:16 pav Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
 Requirements: perl, DBD::Mysql perl module, MySQL 4.1 or newer.
   php4, php4-mysql extension, PEAR::DB() for web frontend
+  Make sure you have register_globals=on in your php.ini
 
 - Create /space, put scripts under /space/scripts, edit ds.pm, tinderbox.ph,
   setup MySQL database
