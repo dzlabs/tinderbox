@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id$
+# $Id: makemake,v 1.17 2004/07/17 15:39:35 marcus Exp $
 #
 
 use strict;
@@ -216,6 +216,7 @@ if (!$noduds) {
 
 # Now, symlink the Makefile to the correct All directory.
 system("mkdir -p $BUILD_ROOT/packages/$BUILD_NAME/All");
+unlink "$BUILD_ROOT/packages/$BUILD_NAME/All/Makefile";
 symlink $makefile, "$BUILD_ROOT/packages/$BUILD_NAME/All/Makefile";
 
 cleanup($ds, 0, undef);
