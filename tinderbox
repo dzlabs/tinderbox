@@ -1,0 +1,211 @@
+#!/bin/sh
+
+pb=/space
+
+usage () {
+    commands="init createJail addPort build buildAll"
+    case "$1" in
+        init)
+          echo "usage: $0 init [-u] [-c]"
+	  ;;
+        createJail)
+          echo "usage: $0 createJail -n <jail name> -t <jail tag>"
+	  ;;
+        addPort)
+          echo "usage: $0 addPort -j <jail name> [-o] [-r] <port directory> ..."
+	  ;;
+        build)
+          echo "usage: $0 build -j <jail name> [-c] [-i] [port directory ...]"
+	  ;;
+        buildAll)
+          echo "usage: $0 buildAll [port directory ...]"
+	  ;;
+        *)
+          echo "usage: $0 <command> [options]"
+          echo "<command> must be one of:"
+          for c in ${commands}; do
+	      echo "	${c}"
+          done
+	  ;;
+    esac
+    exit 1
+}
+
+init () {
+    USA_RESIDENT=YES
+    CPUTYPE=p3
+    for i; do
+	case "$i" in
+	    -c)
+	      CPUTYPE="$2"; shift;
+	      shift;;
+	    -r)
+	      USA_RESIDENT="$2"; shift;
+	      shift;;
+	    --)
+	      shift; break;;
+	esac
+    done
+    mkdir -p ${pb}/jails
+    mkdir -p ${pb}/errors
+    mkdir -p ${pb}/logs
+    mkdir -p ${pb}/packages
+    mkdir -p ${pb}/repo
+    cat > ${pb}/make.conf << EOMC
+XFREE86_VERSION?=4
+USA_RESIDENT?=${USA_RESIDENT}
+CPUTYPE?=${CPUTYPE}
+NO_LPR=true
+NOPROFILE=true
+MAKE_KERBEROS5= yes
+NO_MODULES=damnit
+EOMC
+}
+
+createJail () {
+    name=""
+    tag=""
+    for i; do
+	case "$i" in
+	    -n)
+	      name="$2"; shift;
+	      shift;;
+	    -t)
+	      tag="$2"; shift;
+	      shift;;
+	    --)
+	      shift; break;;
+	esac
+    done
+
+    if [ -z "${name}" -o -z "${tag}" ]; then
+	usage "createJail"
+    fi
+
+    ${pb}/scripts/create_new_jail ${name} ${tag}
+}
+
+addPort () {
+    jail=""
+    port_dirs=""
+    only=""
+    recurse=""
+
+    for i; do
+	case "$i" in
+	    -j)
+	      jail="$2"; shift;
+	      shift;;
+	    -o)
+	      only="-o"; shift;
+	      shift;;
+	    -r)
+	      recurse="-r"; shift;
+	      shift;;
+	    --)
+	      shift; break;;
+	esac
+    done
+
+    port_dirs="$*"
+
+    if [ -z "$jail" -o -z "${port_dirs}" ]; then
+	usage "addPort"
+    fi
+
+    ${pb}/scripts/add_port -j ${jail} ${only} ${recurse} ${port_dirs}
+}
+
+build () {
+    jail=""
+    init=""
+    clean=""
+    
+    for i; do
+	case "$i" in
+	    -j)
+	      jail="$2"; shift;
+	      shift;;
+	    -c)
+	      clean="-cleanpackages"
+	      shift;;
+	    -i)
+	      init="-init"
+	      shift;;
+	    --)
+	      shift; break;;
+	esac
+    done
+
+    if [ -z "${jail}" ]; then
+	usage "build"
+    fi
+
+    _jails=`${pb}/scripts/list_jails`
+    if ! echo ${_jails} | grep -qw "${jail}"; then
+	echo "ERROR: Jail, \"${jail}\" is not a valid jail."
+	exit 1
+    fi
+
+    ${pb}/scripts/tinderbuild -j ${jail} ${clean} ${init} $* > ${pb}/${jail}/build.log 2>&1
+}
+
+buildAll () {
+    clean=""
+    init=""
+
+    for i; do
+	case "$i" in
+	    -c)
+	      clean="-c"
+	      shift;;
+	    -i)
+	      init="-i"
+	      shift;;
+	    --)
+	      shift; break;;
+	esac
+    done
+    for j in `${pb}/scripts/list_jails`; do
+	build -j ${j} ${clean} ${init} -- $* &
+    done
+}
+
+## MAIN starts here
+	      
+optstring=""
+command=$1
+
+# Parse the command.
+case $command in
+  init)
+    optstring="c:u:"
+    ;;
+  createJail)
+    optstring="n:t:"
+    ;;
+  addPort)
+    optstring="j:or"
+    ;;
+  build)
+    optstring="j:ci"
+    ;;
+  buildAll)
+    optstring="ci"
+    ;;
+  *)
+    usage
+    ;;
+esac
+
+shift
+
+args=`getopt ${optstring} $*`
+
+if [ $? != 0 ]; then
+    usage ${command}
+fi
+
+eval "${command} ${args}"
+
+exit $?
