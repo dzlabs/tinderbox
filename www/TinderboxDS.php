@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id$
+# $Id: TinderboxDS.php,v 1.3 2004/03/02 19:51:43 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -111,16 +111,21 @@
 
 	    $values = array();
 	    $conds = array();
-	    foreach ($params as $param) {
+	    foreach ($params as $field => $param) {
 		# Each parameter makes up and OR portion of a query.  Within
-		# each parameter is a hash reference that make up the AND
+		# each parameter can be a hash reference that make up the AND
 		# portion of the query.
-		$ands = array();
-		foreach ($param as $andcond => $value) {
-		    array_push($ands, "$andcond=?");
-		    array_push($values, $value);
+		if (is_array($param)) {
+			$ands = array();
+			foreach ($param as $andcond => $value) {
+			    array_push($ands, "$andcond=?");
+			    array_push($values, $value);
+			}
+			array_push($conds, "(" . (implode(" AND ", $ands)) . ")");
+		} else {
+			array_push($conds, "(" . $field . "=?)");
+			array_push($values, $param);
 		}
-		array_push($conds, "(" . (implode(" AND ", $ands)) . ")");
 	    }
 
 	    $condition = implode(" OR ", $conds);
