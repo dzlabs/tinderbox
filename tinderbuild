@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id$
+# $Id: tinderbuild,v 1.19 2004/06/22 21:56:21 marcus Exp $
 #
 
 
@@ -64,9 +64,13 @@ while [ $# -gt 0 ]; do
     case "x$1" in
       x-b)
         shift
-        if echo ${_builds} | grep -qw "$1"; then
-	    build=$1
-	else
+	for _build in ${_builds}; do
+	    if [ "${_build}" = "$1" ]; then
+		build=$1
+		break
+	    fi
+	done
+	if [ "x${build}" = "x" ]; then
 	    echo "ERROR: Build, \"$1\" is not a valid build."
 	    exit 1
 	fi
@@ -199,7 +203,7 @@ cd ${PACKAGES}/All && make -k -j1 all > ${pb}/builds/${build}/make.1 2>&1 </dev/
 echo "ended at $(date)"
 phase2end=$(date +%s)
 echo "phase 2 took $(date -u -j -r $(($phase2end - $phase2start)) | awk '{print $4}')"
-echo $(echo $(ls -1 ${PACKAGES}/All | wc -l) - 2 | bc) "packages built"
+echo $(echo $(ls -1 ${PACKAGES}/All | wc -l) - 1 | bc) "packages built"
 echo $(echo $(du -sh ${PACKAGES} | awk '{print $1}')) " of packages"
 
 cleanup ${pb} ${build} ${lock} 0

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id$
+# $Id: create_new_build,v 1.5 2004/03/26 05:10:33 marcus Exp $
 #
 
 
@@ -71,7 +71,14 @@ if [ -z "${build_name}" -o -z "${jail}" -o -z "${portstree}" ]; then
 fi
 
 _builds=$(${pb}/scripts/tc listBuilds 2> /dev/null)
-if echo ${_builds} | grep -qw ${build_name}; then
+found=0
+for _build in ${_builds}; do
+    if [ "${_build}" = "${build_name}" ]; then
+	found=1
+	break
+    fi
+done
+if [ ${found} = 0 ]; then
     echo "ERROR: Build, \"${build_name}\" already exists."
     exit 1
 fi
