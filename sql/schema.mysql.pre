@@ -11,10 +11,10 @@ CREATE TABLE ports (
 DROP TABLE IF EXISTS jails;
 CREATE TABLE jails (
   Jail_Id int NOT NULL auto_increment,
-  Jail_Type varchar(32) NOT NULL,
+  Jail_Name varchar(32) NOT NULL,
   Jail_Tag varchar(32),
   PRIMARY KEY (Jail_Id),
-  UNIQUE (Jail_Type),
+  UNIQUE (Jail_Name),
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS jail_ports;

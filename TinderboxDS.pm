@@ -1,6 +1,8 @@
 package TinderboxDS;
 
 use strict;
+use Port;
+use Jail;
 use DBI;
 use Carp;
 use vars qw(
@@ -31,65 +33,235 @@ sub new {
         $self;
 }
 
-sub getPorts {
-        my $self   = shift;
-        my @fields = @_;
+sub getAllPorts {
+        my $self  = shift;
+        my @ports = ();
 
-        my $fieldString = "*";
         my @result;
-        if (defined(@fields)) {
-                $fieldString = join(",", @fields);
-        }
 
-        my $rc =
-            $self->_doQueryHashRef("SELECT $fieldString FROM ports", \@result);
+        my $rc = $self->_doQueryHashRef("SELECT * FROM ports", \@result);
 
         if (!$rc) {
                 return undef;
         }
 
-        return @result;
+        foreach (@result) {
+                my $port = new Port(
+                        {
+                                Id        => $_->{'Port_Id'},
+                                Name      => $_->{'Port_Name'},
+                                Directory => $_->{'Port_Directory'},
+                                Comment   => $_->{'Port_Comment'}
+                        }
+                );
+                push @ports, $port;
+        }
+
+        return @ports;
+}
+
+sub getPortById {
+        my $self = shift;
+        my $id   = shift;
+
+        my @results = $self->getPorts({Id => $id});
+
+        if (!defined(@results)) {
+                return undef;
+        }
+
+        return $results[0];
+}
+
+sub getPortByDirectory {
+        my $self = shift;
+        my $dir  = shift;
+
+        my @results = $self->getPorts({Directory => $dir});
+
+        if (!defined(@results)) {
+                return undef;
+        }
+
+        return $results[0];
+}
+
+sub getPorts {
+        my $self      = shift;
+        my @params    = @_;
+        my $condition = "";
+        my @ports     = ();
+
+        my @values = ();
+        my @conds  = ();
+        foreach my $param (@params) {
+
+                # Each parameter makes up and OR portion of a query.  Within
+                # each parameter is a hash reference that make up the AND
+                # portion of the query.
+                my @ands = ();
+                foreach my $andcond (keys %{$param}) {
+                        push @ands,   "Port_$andcond=?";
+                        push @values, $param->{$andcond};
+                }
+                push @conds, "(" . (join(" AND ", @ands)) . ")";
+        }
+
+        $condition = join(" OR ", @conds);
+
+        my @results;
+        my $query;
+        if ($condition ne "") {
+                $query = "SELECT * FROM ports WHERE $condition";
+        } else {
+                $query = "SELECT * FROM ports";
+        }
+
+        my $rc = $self->_doQueryHashRef($query, \@results, @values);
+
+        if (!$rc) {
+                return undef;
+        }
+
+        foreach (@results) {
+                my $port = new Port(
+                        {
+                                Id        => $_->{'Port_Id'},
+                                Name      => $_->{'Port_Name'},
+                                Directory => $_->{'Port_Directory'},
+                                Comment   => $_->{'Port_Comment'}
+                        }
+                );
+                push @ports, $port;
+        }
+
+        return @ports;
+}
+
+sub getJails {
+        my $self      = shift;
+        my @params    = @_;
+        my $condition = "";
+        my @jails     = ();
+
+        my @values = ();
+        my @conds  = ();
+        foreach my $param (@params) {
+
+                # Each parameter makes up and OR portion of a query.  Within
+                # each parameter is a hash reference that make up the AND
+                # portion of the query.
+                my @ands = ();
+                foreach my $andcond (keys %{$param}) {
+                        push @ands,   "Port_$andcond=?";
+                        push @values, $param->{$andcond};
+                }
+                push @conds, "(" . (join(" AND ", @ands)) . ")";
+        }
+
+        $condition = join(" OR ", @conds);
+
+        my @results;
+        my $query;
+        if ($condition ne "") {
+                $query = "SELECT * FROM jails WHERE $condition";
+        } else {
+                $query = "SELECT * FROM jails";
+        }
+
+        my $rc = $self->_doQueryHashRef($query, \@results, @values);
+
+        if (!$rc) {
+                return undef;
+        }
+
+        foreach (@results) {
+                my $jail = new Port(
+                        {
+                                Id   => $_->{'Jail_Id'},
+                                Name => $_->{'Jail_Name'},
+                                Tag  => $_->{'Jail_Tag'}
+                        }
+                );
+                push @jails, $jail;
+        }
+
+        return @jails;
 }
 
 sub addPort {
-        my $self        = shift;
-        my $portdir     = shift;
-        my $portname    = shift;
-        my $portcomment = shift;
+        my $self = shift;
+        my $port = shift;
+        my $pCls = ref($port) ? $$port : $port;
+
+        my $rc = $self->_doQuery(
+                "INSERT INTO ports (Port_Directory, Port_Name, Port_Comment) VALUES (?, ?, ?)",
+                [$pCls->getDirectory(), $pCls->getName(), $pCls->getComment()]
+        );
+
+        if (ref($port)) {
+                $$port = $self->getPortByDirectory($pCls->getDirectory());
+        }
+
+        return $rc;
+}
+
+sub addPortForJail {
+        my $self = shift;
+        my $port = shift;
+        my $jail = shift;
 
         my $rc =
             $self->_doQuery(
-                "INSERT INTO ports (Port_Directory, Port_Name, Port_Comment) VALUES (?, ?, ?)",
-                $portdir, $portname, $portcomment);
+                "INSERT INTO jail_ports (Jail_Id, Port_Id) VALUES (?, ?)",
+                [$jail->getId(), $port->getId()]);
 
         return $rc;
 }
 
 sub isPortInDS {
-        my $self    = shift;
-        my $portdir = shift;
+        my $self = shift;
+        my $port = shift;
 
         my $rc =
             $self->_doQueryNumRows(
-                "SELECT Port_Id FROM ports WHERE Port_Directory=?", $portdir);
+                "SELECT Port_Id FROM ports WHERE Port_Directory=?",
+                $port->getDirectory());
 
         return ($rc > 0) ? 1 : 0;
 }
 
-sub isPortForJail {
+sub isValidJail {
         my $self     = shift;
-        my $portId   = shift;
-        my $jailType = shift;
-        my $valid    = 1;
+        my $jailName = shift;
+
+        my @results = $self->getJails({Name => $jailName});
+
+        if (!defined(@results)) {
+                return 0;
+        }
+
+        if (scalar(@results)) {
+                return 1;
+        }
+
+        return 0;
+}
+
+sub isPortForJail {
+        my $self  = shift;
+        my $port  = shift;
+        my $jail  = shift;
+        my $valid = 1;
 
         my @result;
         my $rc = $self->_doQueryHashRef(
-                "SELECT Jail_Type FROM jails WHERE Jail_Id IN (SELECT Jail_Id FROM jail_ports WHERE Port_Id=?)",
-                \@result, $portId
+                "SELECT Jail_Name FROM jails WHERE Jail_Id IN (SELECT Jail_Id FROM jail_ports WHERE Port_Id=?)",
+                \@result, $port->getId()
         );
 
         foreach (@result) {
-                if ($jailType eq $_->{'Jail_Type'}) {
+                if ($jail->getName() eq $_->{'Jail_Name'}) {
                         $valid = 1;
                         last;
                 }
@@ -99,23 +271,29 @@ sub isPortForJail {
         return $valid;
 }
 
-sub getJailTypes {
+sub getAllJails {
         my $self = shift;
-        my (@jailTypes);
+        my (@jails);
 
         my @result;
-        my $rc =
-            $self->_doQueryHashRef("SELECT Jail_Type FROM jails", \@result);
+        my $rc = $self->_doQueryHashRef("SELECT * FROM jails", \@result);
 
         if (!$rc) {
                 return undef;
         }
 
         foreach (@result) {
-                push @jailTypes, $_->{'Jail_Type'};
+                my $jail = new Jail(
+                        {
+                                Id   => $_->{'Id'},
+                                Name => $_->{'Name'},
+                                Tag  => $_->{'Tag'}
+                        }
+                );
+                push @jails, $jail;
         }
 
-        return @jailTypes;
+        return @jails;
 }
 
 sub getError {

@@ -3,8 +3,8 @@
 pb=/space
 
 if [ -z "$1" ]; then
-    echo "Please specify a jail type."
-    echo "Current jail types are:"
+    echo "Please specify a jail name."
+    echo "Current jails are:"
     for i in `${pb}/scripts/list_jails`; do
 	echo "	${i}"
     done

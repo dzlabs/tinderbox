@@ -31,8 +31,8 @@ if (!defined(@jail_types)) {
 }
 if (scalar(@ARGV) < 1) {
         print STDERR
-            "usage: tinderbuild <jail type> [<portname> <port directory> ...]\n";
-        print STDERR "Current jail types are:\n";
+            "usage: tinderbuild <jail name> [<portname> <port directory> ...]\n";
+        print STDERR "Current jails are:\n";
         foreach (@jail_types) {
                 print STDERR "\t$_\n";
         }

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# usage: $0 <jail type> [-init] [-noclean] [-plistcheck] pkgname dirname
+# usage: $0 <jail name> [-init] [-noclean] [-plistcheck] pkgname dirname
 
 cleanup()
 {

@@ -2,6 +2,7 @@
 
 use strict;
 use TinderboxDS;
+use Getopt::Std;
 use vars qw(
     $PORTS_DIR
 );
@@ -10,29 +11,67 @@ require "tinderbox.ph";
 
 $PORTS_DIR = '/usr/ports';
 
+my $opts = {};
+
+getopts('j:', $opts);
+
 if (!(scalar @ARGV)) {
-        die "usage: builddb <category/port> ...\n";
+        die "usage: $0 [-j jails] <category/port> ...\n";
 }
 if ($ENV{'PORTSDIR'}) {
         $PORTS_DIR = $ENV{'PORTSDIR'};
 }
 
-my $ds = TinderboxDS->new();
+my $ds = new TinderboxDS();
+
+my @jails = ();
+if ($opts->{'j'}) {
+        my @_jails = split(/\s+/, $opts->{'j'});
+        foreach (@_jails) {
+                if (!$ds->isValidJail($_)) {
+                        die "Unknown jail, $_\n";
+                }
+                push @jails, $ds->getJailByName($_);
+        }
+}
 
 foreach my $port (@ARGV) {
         my $portdir = $PORTS_DIR . "/" . $port;
         next if (!-d $portdir);
-        next if ($ds->isPortInDS($portdir));
 
         my $portname = `cd $portdir && make -V PORTNAME`;
         chomp $portname;
         my $portcomment = `cd $portdir && make -V COMMENT`;
         chomp $portcomment;
 
-        my $rc = $ds->addPort($portdir, $portname, $portcomment);
+        $portdir =~ s|^$PORTS_DIR||;
+
+        my $pCls = new Port(
+                {
+                        Directory => $portdir,
+                        Name      => $portname,
+                        Comment   => $portcomment
+                }
+        );
+
+        next if ($ds->isPortInDS($pCls));
+
+        my $rc = $ds->addPort(\$pCls);
         if (!$rc) {
-                warn "Failed to add port $portdir: " . $ds->getError() . "\n";
+                warn "Failed to add port "
+                    . $pCls->getDirectory() . ": "
+                    . $ds->getError() . "\n";
         }
+
+        foreach my $jail (@jails) {
+                $rc = $ds->addPortForJail($pCls, $jail);
+                if (!$rc) {
+                        warn "Failed to add port for jail, "
+                            . $jail->getName() . ": "
+                            . $ds->getError() . "\n";
+                }
+        }
+
 }
 
 $ds->destroy();
