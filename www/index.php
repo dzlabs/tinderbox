@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: index.php,v 1.10 2004/03/03 16:25:22 pav Exp $
+# $Id: index.php,v 1.11 2004/03/03 17:06:28 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -50,10 +50,13 @@
 <th style="width: 20px">&nbsp;</th>
 <th>Build Name</th>
 <th>Build Description</th>
+<th>Failures</th>
 <th>Build Packages</th>
 </tr>
 <?php
 	foreach ($builds as $build) {
+	    $stats = $ds->getBuildStats($build->getId());
+
 	    echo "<tr>\n";
 	    if ($build->getBuildStatus() == "PORTBUILD") {
 		echo "<td style=\"background-color: green\">&nbsp;</td>\n";
@@ -62,6 +65,11 @@
 	    }
 	    echo "<td><a href=\"showbuild.php?name=" . $build->getName() . "\">" . $build->getName() . "</a></td>\n";
 	    echo "<td>" . $build->getDescription() . "</td>\n";
+	    if ($stats["fails"] > 0) {
+		echo "<td align=\"center\">" . $stats["fails"] . "</td>\n";
+	    } else {
+		echo "<td>&nbsp;</td>\n";
+	    }
 	    echo "<td>";
 	    if (is_dir($pkgdir . "/" . $build->getName())) {
 		echo "<a href=\"$pkgdir/" . $build->getName() . "\">Package Directory</a>";
