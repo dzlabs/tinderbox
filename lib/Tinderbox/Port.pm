@@ -8,10 +8,11 @@ use vars qw(@ISA);
 sub new {
         my $that        = shift;
         my $object_hash = {
-                Port_Id        => "",
-                Port_Name      => "",
-                Port_Directory => "",
-                Port_Comment   => "",
+                Port_Id         => "",
+                Port_Name       => "",
+                Port_Directory  => "",
+                Port_Maintainer => "",
+                Port_Comment    => "",
         };
 
         my @args = ();
@@ -38,6 +39,12 @@ sub getDirectory {
         return $self->{Port_Directory};
 }
 
+sub getMaintainer {
+        my $self = shift;
+
+        return $self->{Port_Maintainer};
+}
+
 sub getComment {
         my $self = shift;
 
@@ -56,6 +63,13 @@ sub setDirectory {
         my $dir  = shift;
 
         $self->{Port_Directory} = $dir;
+}
+
+sub setMaintainer {
+        my $self  = shift;
+        my $maint = shift;
+
+        $self->{Port_Maintainer} = $maint;
 }
 
 sub setComment {

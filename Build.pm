@@ -2,8 +2,13 @@ package Build;
 
 use strict;
 use TinderObject;
-use vars qw(@ISA);
+use vars qw(@ISA %STATUS_HASH);
 @ISA = qw(TinderObject);
+
+%STATUS_HASH = (
+        IDLE      => 0,
+        PORTBUILD => 1,
+);
 
 sub new {
         my $that        = shift;
@@ -12,6 +17,7 @@ sub new {
                 Build_Name        => "",
                 Jail_Id           => "",
                 Ports_Tree_Id     => "",
+                Build_Status      => "",
                 Build_Description => "",
         };
 
@@ -45,6 +51,12 @@ sub getPortsTreeId {
         return $self->{Ports_Tree_Id};
 }
 
+sub getStatus {
+        my $self = shift;
+
+        return $self->{Build_Status};
+}
+
 sub getDescription {
         my $self = shift;
 
@@ -70,6 +82,15 @@ sub setPortsTreeId {
         my $id   = shift;
 
         $self->{Ports_Tree_Id} = $id;
+}
+
+sub setStatus {
+        my $self   = shift;
+        my $status = shift;
+
+        if ($STATUS_HASH{$status}) {
+                $self->{Build_Status} = $status;
+        }
 }
 
 sub setDescription {
