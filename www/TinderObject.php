@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderObject.php,v 1.3 2004/03/02 21:48:58 pav Exp $
+# $Id: TinderObject.php,v 1.4 2004/03/03 16:39:21 pav Exp $
 #
 
     class TinderObject {
@@ -56,7 +56,11 @@
 			return substr($input,0,4)."-".substr($input,4,2)."-".substr($input,6,2)." ".substr($input,8,2).":".substr($input,10,2).":".substr($input,12,2);
 		} elseif (ereg("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}", $input)) {
 			/* datetime */
-			return $input;
+			if ($input == "0000-00-00 00:00:00") {
+				return "";
+			} else {
+				return $input;
+			}
 		} else {
 			return $input;
 		}
