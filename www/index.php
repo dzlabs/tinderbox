@@ -24,12 +24,11 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: index.php,v 1.9 2004/03/03 09:04:03 marcus Exp $
+# $Id: index.php,v 1.10 2004/03/03 16:25:22 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
 
-    $pkgdir = '/tb/packages';
     $ds = new TinderboxDS();
 
     $builds = $ds->getAllBuilds();
