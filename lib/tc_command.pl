@@ -527,11 +527,16 @@ sub addPort {
                 $ENV{'PORT_DBDIR'} = "/nonexistentportdb";
 
                 if ($opts->{'r'}) {
-                        my @deps = ();
-                        addPorts([$opts->{'d'}], $build, \@deps);
-                        addPorts(\@deps, $build, undef);
+                        my @deps = ($opts->{'d'});
+                        my %seen = ();
+                        while (my $port = shift @deps) {
+                                if (!$seen{$port}) {
+                                        addPorts($port, $build, \@deps);
+                                        $seen{$port} = 1;
+                                }
+                        }
                 } else {
-                        addPorts([$opts->{'d'}], $build, undef);
+                        addPorts($opts->{'d'}, $build, undef);
                 }
         }
 }
@@ -1397,67 +1402,74 @@ sub usage {
 }
 
 sub addPorts {
-        my $ports = shift;
+        my $port  = shift;
         my $build = shift;
         my $deps  = shift;
 
-        foreach my $port (@{$ports}) {
-                my $portdir = $ENV{'PORTSDIR'} . "/" . $port;
-                next if (!-d $portdir);
+        my ($portname, $portmaintainer, $portcomment);
 
-                my ($portname, $portmaintainer, $portcomment) =
+        my $portdir = $ENV{'PORTSDIR'} . "/" . $port;
+        next if (!-d $portdir);
+
+        if (defined($deps)) {
+
+                # We need to add all ports on which this port depends
+                # recursively.
+
+                my $descr = `cd $portdir && make describe`;
+                chomp $descr;
+                my @f = split(/\|/, $descr);
+                $f[0] =~ s/\-[^\-]+$//;
+                $portname       = $f[0];
+                $portcomment    = $f[3];
+                $portmaintainer = $f[5];
+                my @deplist =
+                    split(/ /, join(" ", $f[7], $f[8], $f[9], $f[10], $f[11]));
+
+                foreach my $dep (@deplist) {
+                        next unless $dep;
+                        $dep =~ s|^$ENV{'PORTSDIR'}/||;
+                        push @{$deps}, $dep;
+                }
+        } else {
+                ($portname, $portmaintainer, $portcomment) =
                     `cd $portdir && make -V PORTNAME -V MAINTAINER -V COMMENT`;
                 chomp $portname;
                 chomp $portmaintainer;
                 chomp $portcomment;
+        }
 
-                if (defined($deps)) {
+        my $pCls = new Port();
 
-                        # We need to add all ports on which this port depends
-                        # recursively.
+        $pCls->setDirectory($port);
+        $pCls->setName($portname);
+        $pCls->setMaintainer($portmaintainer);
+        $pCls->setComment($portcomment);
 
-                        my @deplist = `cd $portdir && make all-depends-list`;
-                        foreach my $dep (@deplist) {
-                                chomp $dep;
-                                $dep =~ s|^$ENV{'PORTSDIR'}/||;
-                                push @{$deps}, $dep;
-                        }
+        # Only add the port if it isn't already in the datastore.
+        my $rc;
+        if (!$ds->isPortInDS($pCls)) {
+                $rc = $ds->addPort(\$pCls);
+                if (!$rc) {
+                        warn "WARN: Failed to add port "
+                            . $pCls->getDirectory() . ": "
+                            . $ds->getError() . "\n";
                 }
-
-                $portdir =~ s|^$ENV{'PORTSDIR'}/||;
-
-                my $pCls = new Port();
-
-                $pCls->setDirectory($portdir);
-                $pCls->setName($portname);
-                $pCls->setMaintainer($portmaintainer);
-                $pCls->setComment($portcomment);
-
-                # Only add the port if it isn't already in the datastore.
-                my $rc;
-                if (!$ds->isPortInDS($pCls)) {
-                        $rc = $ds->addPort(\$pCls);
-                        if (!$rc) {
-                                warn "WARN: Failed to add port "
-                                    . $pCls->getDirectory() . ": "
-                                    . $ds->getError() . "\n";
-                        }
-                } else {
-                        $rc = $ds->updatePort(\$pCls);
-                        if (!$rc) {
-                                warn "WARN: Failed to update port "
-                                    . $pCls->getDirectory() . ": "
-                                    . $ds->getError() . "\n";
-                        }
+        } else {
+                $rc = $ds->updatePort(\$pCls);
+                if (!$rc) {
+                        warn "WARN: Failed to update port "
+                            . $pCls->getDirectory() . ": "
+                            . $ds->getError() . "\n";
                 }
+        }
 
-                if (!$ds->isPortInBuild($pCls, $build)) {
-                        $rc = $ds->addPortForBuild($pCls, $build);
-                        if (!$rc) {
-                                warn "WARN: Failed to add port for build, "
-                                    . $build->getName() . ": "
-                                    . $ds->getError() . "\n";
-                        }
+        if (!$ds->isPortInBuild($pCls, $build)) {
+                $rc = $ds->addPortForBuild($pCls, $build);
+                if (!$rc) {
+                        warn "WARN: Failed to add port for build, "
+                            . $build->getName() . ": "
+                            . $ds->getError() . "\n";
                 }
         }
 }
