@@ -47,6 +47,7 @@ use vars qw(
     $JAILS_DIR
     $PKGS_DIR
     $PORTSTREES_DIR
+    $WRKDIRS_DIR
     $SUBJECT
     $SMTP_HOST
     $SERVER_HOST
@@ -311,6 +312,7 @@ sub init {
         system("mkdir -p $ERROR_DIR");
         system("mkdir -p $LOG_DIR");
         system("mkdir -p $PKGS_DIR");
+        system("mkdir -p $WRKDIRS_DIR");
 
         # Compile pnohang.c
         system("cd $TINDER_BIN && cc -o pnohang -static pnohang.c");

@@ -17,6 +17,7 @@ $LOG_DIR        = $BUILD_ROOT . '/logs';
 $BUILDS_DIR     = $BUILD_ROOT . '/builds';
 $JAILS_DIR      = $BUILD_ROOT . '/jails';
 $PKGS_DIR       = $BUILD_ROOT . '/packages';
+$WRKDIRS_DIR    = $BUILD_ROOT . '/wrkdirs';
 $PORTSTREES_DIR = $BUILD_ROOT . '/portstrees';
 
 $MKJAIL    = $TINDER_BIN . '/mkjail';
