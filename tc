@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: tc,v 1.35 2005/03/07 08:35:47 marcus Exp $
+# $Id: tc,v 1.36 2005/04/02 07:37:33 marcus Exp $
 #
 
 # This is a hack to make sure we can always find our modules.
