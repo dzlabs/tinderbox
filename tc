@@ -22,7 +22,7 @@ require "tinderlib.pl";
         "init" => {
                 func  => \&init,
                 help  => "Initialize a tinderbox environment",
-                usage => "[-u <USA_RESIDENT value>] [-c <CPUTYPE value>]",
+                usage => "",
         },
         "listJails" => {
                 func  => \&listJails,
@@ -184,32 +184,12 @@ if (defined($COMMANDS{$command})) {
 cleanup($ds, 0, undef);
 
 sub init {
-        my $usa_resident = "YES";
-        my $cputype      = "p3";
-        my $opts         = {};
-
-        getopts('u:c:', $opts);
-
-        $usa_resident = $opts->{'u'} if ($opts->{'u'});
-        $cputype      = $opts->{'c'} if ($opts->{'c'});
-
         system("mkdir -p $BUILD_ROOT/jails");
         system("mkdir -p $BUILD_ROOT/builds");
         system("mkdir -p $BUILD_ROOT/portstrees");
         system("mkdir -p $BUILD_ROOT/errors");
         system("mkdir -p $BUILD_ROOT/logs");
         system("mkdir -p $BUILD_ROOT/packages");
-        open(MC, ">$BUILD_ROOT/make.conf");
-
-        print MC <<"EOMC";
-XFREE86_VERSION?=4
-USA_RESIDENT?=$usa_resident
-CPUTYPE?=$cputype
-NO_LPR=true
-NOPROFILE=true
-MAKE_KERBEROS5= yes
-NO_MODULES=damnit
-EOMC
 
         # Compile pnohang.c
         system("cd $BUILD_ROOT/scripts && cc -o pnohang pnohang.c");
