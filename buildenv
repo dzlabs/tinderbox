@@ -7,6 +7,7 @@ buildenv () {
 
     major_version=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
 
+    save_IFS=${IFS}
     IFS='
 '
     for _tb_var in `cat ${pb}/scripts/rawenv`; do
@@ -18,4 +19,6 @@ buildenv () {
 	var=$(echo ${var} | sed -E -e 's|\^\^([^\^]+)\^\^|${\1}|g')
 	eval "export ${var}" > /dev/null 2>&1
     done
+
+    IFS=${save_IFS}
 }
