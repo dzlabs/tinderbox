@@ -58,18 +58,31 @@ CREATE TABLE builds (
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) TYPE=INNODB;
 
-DROP TABLE IF EXISTS build_email;
-CREATE TABLE build_email (
-  Build_Email_Id int NOT NULL auto_increment,
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
+  User_Id int NOT NULL auto_increment,
+  User_Name varchar(16) NOT NULL,
+  User_Email varchar(255),
+  PRIMARY KEY (User_Id),
+  UNIQUE (User_Name),
+  INDEX User_Name_Idx (User_Name)
+) TYPE=INNODB;
+
+DROP TABLE IF EXISTS build_users;
+CREATE TABLE build_users (
+  Build_User_Id int NOT NULL auto_increment,
   Build_Id int NOT NULL,
-  Email_Address varchar(255) NOT NULL,
+  User_Id int NOT NULL,
   Email_On_Completion tinyint(1) DEFAULT 1,
   Email_On_Error tinyint(1) DEFAULT 1,
-  PRIMARY KEY (Build_Email_Id),
-  INDEX Email_Address_Idx (Email_Address),
+  PRIMARY KEY (Build_User_Id),
   INDEX (Build_Id),
   FOREIGN KEY (Build_Id)
     REFERENCES builds(Build_Id)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  INDEX (User_Id),
+  FOREIGN KEY (User_Id)
+    REFERENCES users(User_Id)
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) TYPE=INNODB;
 
