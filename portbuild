@@ -102,7 +102,7 @@ export PORTOBJFORMAT=elf
 
 export USA_RESIDENT=yes
 
-export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/X11R6/bin:.
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/X11R6/bin
 
 echo "building $pkgname"
 
