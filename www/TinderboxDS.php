@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.7 2004/03/03 16:56:33 pav Exp $
+# $Id: TinderboxDS.php,v 1.8 2004/03/03 17:06:28 pav Exp $
 #
 
     require_once 'DB.php';
@@ -42,6 +42,8 @@
     );
 
     $pkgdir = "/tb/packages";
+    $logdir = "/tb/logs";
+    $errorlogdir = "/tb/errors";
 
     class TinderboxDS {
 	var $db;
