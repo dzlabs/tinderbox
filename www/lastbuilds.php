@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: lastbuilds.php,v 1.8 2004/03/07 20:35:18 pav Exp $
+# $Id: lastbuilds.php,v 1.9 2004/03/09 11:33:13 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -106,8 +106,8 @@
 				echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
 				if ($build["Last_Built_Version"]) {
 					echo "<td>";
-					echo "<a href=\"" . $logdir . "/" . $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log\">log</a> ";
-					echo "<a href=\"" . $pkgdir . "/" . $build["Build_Name"] . "/All/" . $build["Last_Built_Version"] . $ds->getPackageSuffix($build["Jail_Id"]) . "\">package</a>";
+					echo "<a href=\"" . $loguri . "/" . $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log\">log</a> ";
+					echo "<a href=\"" . $pkguri . "/" . $build["Build_Name"] . "/All/" . $build["Last_Built_Version"] . $ds->getPackageSuffix($build["Jail_Id"]) . "\">package</a>";
 					echo "</td>\n";
 				} else {
 					echo "<td>&nbsp;</td>\n";
@@ -115,7 +115,7 @@
 			} elseif ($build["Last_Status"] == "FAIL") {
 				echo "<td style=\"background-color: red\">&nbsp;</td>\n";
 				if ($build["Last_Built_Version"]) {
-					echo "<td><a href=\"" . $errorlogdir . "/" . $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log\">log</a></td>\n";
+					echo "<td><a href=\"" . $errorloguri . "/" . $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log\">log</a></td>\n";
 				} else {
 					echo "<td>&nbsp;</td>\n";
 				}

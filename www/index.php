@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: index.php,v 1.17 2004/03/06 21:25:22 pav Exp $
+# $Id: index.php,v 1.18 2004/03/07 11:10:23 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -74,7 +74,7 @@
 	    }
 	    echo "<td>";
 	    if (is_dir($pkgdir . "/" . $build->getName())) {
-		echo "<a href=\"$pkgdir/" . $build->getName() . "\">Package Directory</a>";
+		echo "<a href=\"$pkguri/" . $build->getName() . "\">Package Directory</a>";
 	    }
 	    else {
 		echo "<i>No packages for this build</i>";
