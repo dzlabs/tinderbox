@@ -24,12 +24,11 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showbuild.php,v 1.3 2004/03/03 09:04:03 marcus Exp $
+# $Id: showbuild.php,v 1.4 2004/03/03 16:39:21 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
 
-    $pkgdir = '/tb/packages';
     $ds = new TinderboxDS();
 
     $build = $ds->getBuildByName($name);
@@ -66,14 +65,30 @@
 		<tr>
 		<th>Port Directory</th>
 		<th>Maintainer</th>
-		<th>Last Built</th>
+		<th>Version</th>
+		<th style="width: 20px">&nbsp;</th>
+		<th>&nbsp;</th>
+		<th>Last Build Attempt</th>
+		<th>Last Successfull Build</th>
 		</tr>
 		<?php
 		foreach ($ports as $port) {
 			echo "<tr>\n";
 			echo "<td>" . $port->getDirectory() . "</td>\n";
 			echo "<td>" . $port->prettyEmail($port->getMaintainer()) . "</td>\n";
+			echo "<td>" . $port->getLastBuiltVersion() . "</td>\n";
+			if ($port->getLastStatus() == "SUCCESS") {
+				echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
+				echo "<td><a href=\"" . $pkgdir . "/" . $build->getName() . "/All/" . $port->getLastBuiltVersion() . ".tbz" . "\">package</a></td>\n";
+			} elseif ($port->getLastStatus() == "FAIL") {
+				echo "<td style=\"background-color: red\">&nbsp;</td>\n";
+				echo "<td>log</td>\n";
+			} else { /* UNKNOWN */
+				echo "<td style=\"background-color: grey\">&nbsp;</td>\n";
+				echo "<td>&nbsp;</td>\n";
+			}
 			echo "<td>" . $port->prettyDatetime($port->getLastBuilt()) . "</td>\n";
+			echo "<td>" . $port->prettyDatetime($port->getLastSuccessfulBuilt()) . "</td>\n";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
