@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showbuild.php,v 1.9 2004/03/03 20:27:33 pav Exp $
+# $Id: showbuild.php,v 1.10 2004/03/03 20:36:49 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -79,10 +79,18 @@
 			echo "<td>" . $port->getLastBuiltVersion() . "</td>\n";
 			if ($port->getLastStatus() == "SUCCESS") {
 				echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
-				echo "<td><a href=\"" . $pkgdir . "/" . $build->getName() . "/All/" . $port->getLastBuiltVersion() . $ds->getPackageSuffix($build->getJailId()) . "\">package</a></td>\n";
+				if ($port->getLastBuiltVersion()) {
+					echo "<td><a href=\"" . $pkgdir . "/" . $build->getName() . "/All/" . $port->getLastBuiltVersion() . $ds->getPackageSuffix($build->getJailId()) . "\">package</a></td>\n";
+				} else {
+					echo "<td>&nbsp;</td>\n";
+				}
 			} elseif ($port->getLastStatus() == "FAIL") {
 				echo "<td style=\"background-color: red\">&nbsp;</td>\n";
-				echo "<td><a href=\"" . $errorlogdir . "/" . $build->getName() . "/" . $port->getLastBuiltVersion() . ".log\">log</a></td>\n";
+				if ($port->getLastBuiltVersion()) {
+					echo "<td><a href=\"" . $errorlogdir . "/" . $build->getName() . "/" . $port->getLastBuiltVersion() . ".log\">log</a></td>\n";
+				} else {
+					echo "<td>&nbsp;</td>\n";
+				}
 			} else { /* UNKNOWN */
 				echo "<td style=\"background-color: grey\">&nbsp;</td>\n";
 				echo "<td>&nbsp;</td>\n";
