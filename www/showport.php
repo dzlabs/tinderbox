@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showbuild.php,v 1.6 2004/03/03 18:18:00 pav Exp $
+# $Id: showport.php,v 1.1 2004/03/03 19:04:44 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -46,13 +46,24 @@
 ?>
 <h1>GNOME 2 Packages for i386 - <?= $port->getName() ?></h1>
 <?php
-	echo "<p>\n";
-	echo "Directory: " . $port->getDirectory() . "<br />\n";
-	echo "Comment: " . $port->getComment() . "<br />\n";
-	echo "Maintainer: " . $port->getMaintainer() . "<br />\n";
-	echo "</p>\n";
-
 	$builds = $ds->getBuildsOfPort($id);
+
+	foreach ($builds as $build) {
+		$ports_trees[$build["Ports_Tree_Name"]] = $build["Ports_Tree_CVSweb_URL"];
+	}
+
+	echo "<p>\n";
+	if (sizeof($ports_trees) > 1) {
+		foreach ($ports_trees as $pt_name => $pt_url) {
+			$ports_trees_links[] = "<a href=\"" . $pt_url . $port->getDirectory() . "\">" . $pt_name . "</a>";
+		}
+		echo "Directory: " . $port->getDirectory() . " (" . implode($ports_trees_links, ", ") . ")<br />\n";
+	} else {
+		echo "Directory: <a href=\"" . array_pop($ports_trees) . $port->getDirectory() . "\">" . $port->getDirectory() . "</a><br />\n";
+	}
+	echo "Comment: " . $port->getComment() . "<br />\n";
+	echo "Maintainer: <a href=\"mailto:" . $port->getMaintainer() . "\">" . $port->getMaintainer() . "</a><br />\n";
+	echo "</p>\n";
 
 	if ($builds) {
 
