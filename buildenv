@@ -1,16 +1,20 @@
 
 buildenv () {
     pb=$1
-    jail=$2
+    build=$2
+    jail=$3
+    portstree=$4
 
-    major_version=$(echo ${jail} | cut -d'-' -f1 | cut -d'.' -f1)
+    major_version=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
 
     IFS='
 '
     for _tb_var in `cat ${pb}/scripts/rawenv`; do
 	var=$(echo ${_tb_var} | sed -e "s|^#${major_version}||")
 	var=$(echo ${var} | sed -e 's|##PB##|${pb}|g')
+	var=$(echo ${var} | sed -e 's|##BUILD##|${build}|g')
 	var=$(echo ${var} | sed -e 's|##JAIL##|${jail}|g')
+	var=$(echo ${var} | sed -e 's|##PORTSTREE##|${portstree}|g')
 	var=$(echo ${var} | sed -E -e 's|\^\^([^\^]+)\^\^|${\1}|g')
 	eval "export ${var}" > /dev/null 2>&1
     done

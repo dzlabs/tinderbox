@@ -3,13 +3,13 @@
 pb=/space
 
 usage () {
-    echo "usage: $0 -j <jail name> [portdir/portname [...]]"
+    echo "usage: $0 -b <build name> [portdir/portname [...]]"
 }
 
 . ${pb}/scripts/buildenv
 
-_jails=$(${pb}/scripts/list_jails)
-jail=""
+_builds=$(${pb}/scripts/tc listBuilds)
+build=""
 ports=""
 
 init=0
@@ -17,12 +17,12 @@ cleanpackages=0
 
 while [ $# -gt 0 ]; do
     case "x$1" in
-      x-j)
+      x-b)
         shift
-        if echo ${_jails} | grep -qw "$1"; then
-	    jail=$1
+        if echo ${_builds} | grep -qw "$1"; then
+	    build=$1
 	else
-	    echo "ERROR: Jail, \"$1\" is not a valid jail."
+	    echo "ERROR: Build, \"$1\" is not a valid build."
 	    exit 1
 	fi
 	;;
@@ -42,16 +42,19 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-if [ "x${jail}" = "x" ]; then
+if [ "x${build}" = "x" ]; then
     usage
     exit 1
 fi
 
+jail=$(${pb}/scripts/tc getJailForBuild -b ${build})
+portstree=$(${pb}/scripts/tc getPortsTreeForBuild -b ${build})
+
 # Setup the environment for this jail.
-buildenv ${pb} ${jail}
+buildenv ${pb} ${build} ${jail} ${portstree}
 
 # Remove the make logs.
-rm -f ${pb}/${jail}/make.*
+rm -f ${pb}/${build}/make.*
 
 # First we check to see if we need to clean out old packages.
 if [ "$cleanpackages" = "1" ]; then
@@ -61,15 +64,21 @@ fi
 mkdir -p ${PACKAGES}
 
 # Next, we build a Makefile for each jail.
-${pb}/scripts/makemake ${jail} ${ports}
+${pb}/scripts/makemake ${build} ${ports}
+
+if [ $? != 0 ]; then
+    echo "ERROR: Failed to generate Makefile for ${build}"
+    exit 1
+fi
 
 # Then we check to see if we need to create our jail directory.
-if [ "$init" = "1" -o \( ! -d ${pb}/jails/${jail} -a ! -f ${pb}/repo/${jail}.tar \) ]; then
-    echo "INFO: Initializing a new jail directory for ${jail}..."
+if [ "$init" = "1" -o \( ! -d ${pb}/${build} -a ! -f ${pb}/jails/${jail}/${jail}.tar \) ]; then
+    echo "INFO: Initializing a new build directory for ${build}..."
     ${pb}/scripts/mkjail ${jail}
-elif [ ! -d ${pb}/jails/${jail} -a -f ${pb}/repo/${jail}.tar ]; then
-    echo "INFO: Creating jail directory for ${jail} from repository..."
-    ${pb}/scripts/mkjailfromrepo ${jail}
+    ${pb}/scripts/mkbuild ${build}
+elif [ ! -d ${pb}/${build} -a -f ${pb}/jails/${jail}/${jail}.tar ]; then
+    echo "INFO: Creating build directory for ${build} from repository..."
+    ${pb}/scripts/mkbuild ${build}
 fi
 
 # We do this in two phases to make sure we get everything.
@@ -78,7 +87,7 @@ echo "building packages (phase 1)"
 echo "================================================"
 echo "started at $(date)"
 phase1start=$(date +%s)
-cd ${PACKAGES}/All && make -k -j1 all > ${pb}/${jail}/make.0 2>&1 </dev/null
+cd ${PACKAGES}/All && make -k -j1 all > ${pb}/builds/${build}/make.0 2>&1 </dev/null
 echo "ended at $(date)"
 phase1end=$(date +%s)
 echo "phase 1 took $(date -u -j -r $(($phase1end - $phase1start)) | awk '{print $4}')" 
@@ -90,7 +99,7 @@ echo "building packages (phase 2)"
 echo "================================================"
 echo "started at $(date)"
 phase2start=$(date +%s)
-cd ${PACKAGES}/All && make -k -j1 all > ${pb}/${jail}/make.1 2>&1 </dev/null
+cd ${PACKAGES}/All && make -k -j1 all > ${pb}/builds/${build}/make.1 2>&1 </dev/null
 echo "ended at $(date)"
 phase2end=$(date +%s)
 echo "phase 2 took $(date -u -j -r $(($phase2end - $phase2start)) | awk '{print $4}')"

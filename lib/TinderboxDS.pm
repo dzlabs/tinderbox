@@ -3,6 +3,8 @@ package TinderboxDS;
 use strict;
 use Port;
 use Jail;
+use PortsTree;
+use Build;
 use DBI;
 use Carp;
 use vars qw(
@@ -42,11 +44,31 @@ sub getAllPorts {
         return @ports;
 }
 
+sub getPortsForBuild {
+        my $self  = shift;
+        my $build = shift;
+        my @ports;
+
+        my @results;
+        my $rc = $self->_doQueryHashRef(
+                "SELECT * FROM ports WHERE Port_Id IN (SELECT Port_Id FROM build_ports WHERE Build_Id=?)",
+                \@results, $build->getId()
+        );
+
+        if (!$rc) {
+                return undef;
+        }
+
+        @ports = $self->_newFromArray("Port", @results);
+
+        return @ports;
+}
+
 sub getPortById {
         my $self = shift;
         my $id   = shift;
 
-        my @results = $self->getPorts({Id => $id});
+        my @results = $self->getPorts({Port_Id => $id});
 
         if (!defined(@results)) {
                 return undef;
@@ -59,7 +81,7 @@ sub getPortByDirectory {
         my $self = shift;
         my $dir  = shift;
 
-        my @results = $self->getPorts({Directory => $dir});
+        my @results = $self->getPorts({Port_Directory => $dir});
 
         if (!defined(@results)) {
                 return undef;
@@ -83,7 +105,7 @@ sub getPorts {
                 # portion of the query.
                 my @ands = ();
                 foreach my $andcond (keys %{$param}) {
-                        push @ands,   "Port_$andcond=?";
+                        push @ands,   "$andcond=?";
                         push @values, $param->{$andcond};
                 }
                 push @conds, "(" . (join(" AND ", @ands)) . ")";
@@ -105,17 +127,7 @@ sub getPorts {
                 return undef;
         }
 
-        foreach (@results) {
-                my $port = new Port(
-                        {
-                                Id        => $_->{'Port_Id'},
-                                Name      => $_->{'Port_Name'},
-                                Directory => $_->{'Port_Directory'},
-                                Comment   => $_->{'Port_Comment'}
-                        }
-                );
-                push @ports, $port;
-        }
+        @ports = $self->_newFromArray("Port", @results);
 
         return @ports;
 }
@@ -124,7 +136,33 @@ sub getJailByName {
         my $self = shift;
         my $name = shift;
 
-        my @results = $self->getJails({Name => $name});
+        my @results = $self->getJails({Jail_Name => $name});
+
+        if (!defined(@results)) {
+                return undef;
+        }
+
+        return $results[0];
+}
+
+sub getBuildById {
+        my $self = shift;
+        my $id   = shift;
+
+        my @results = $self->getBuilds({Build_Id => $id});
+
+        if (!defined(@results)) {
+                return undef;
+        }
+
+        return $results[0];
+}
+
+sub getBuildByName {
+        my $self = shift;
+        my $name = shift;
+
+        my @results = $self->getBuilds({Build_Name => $name});
 
         if (!defined(@results)) {
                 return undef;
@@ -137,13 +175,100 @@ sub getJailById {
         my $self = shift;
         my $id   = shift;
 
-        my @results = $self->getJails({Id => $id});
+        my @results = $self->getJails({Jail_Id => $id});
 
         if (!defined(@results)) {
                 return undef;
         }
 
         return $results[0];
+}
+
+sub getJailForBuild {
+        my $self  = shift;
+        my $build = shift;
+        my $jail;
+
+        $jail = $self->getJailById($build->getJailId());
+
+        return $jail;
+}
+
+sub getPortsTreeForBuild {
+        my $self  = shift;
+        my $build = shift;
+
+        my $portstree;
+        $portstree = $self->getPortsTreeById($build->getPortsTreeId());
+        return $portstree;
+}
+
+sub getPortsTreeById {
+        my $self = shift;
+        my $id   = shift;
+
+        my @results = $self->getPortsTrees({Ports_Tree_Id => $id});
+
+        if (!defined(@results)) {
+                return undef;
+        }
+
+        return $results[0];
+}
+
+sub getPortsTreeByName {
+        my $self = shift;
+        my $name = shift;
+
+        my @results = $self->getPortsTrees({Ports_Tree_Name => $name});
+
+        if (!defined(@results)) {
+                return undef;
+        }
+
+        return $results[0];
+}
+
+sub getBuilds {
+        my $self      = shift;
+        my @params    = @_;
+        my $condition = "";
+        my @builds    = ();
+
+        my @values = ();
+        my @conds  = ();
+        foreach my $param (@params) {
+
+                # Each parameter makes up and OR portion of a query.  Within
+                # each parameter is a hash reference that make up the AND
+                # portion of the query.
+                my @ands = ();
+                foreach my $andcond (keys %{$param}) {
+                        push @ands,   "$andcond=?";
+                        push @values, $param->{$andcond};
+                }
+                push @conds, "(" . (join(" AND ", @ands)) . ")";
+        }
+
+        $condition = join(" OR ", @conds);
+
+        my @results;
+        my $query;
+        if ($condition ne "") {
+                $query = "SELECT * FROM builds WHERE $condition";
+        } else {
+                $query = "SELECT * FROM builds";
+        }
+
+        my $rc = $self->_doQueryHashRef($query, \@results, @values);
+
+        if (!$rc) {
+                return undef;
+        }
+
+        @builds = $self->_newFromArray("Build", @results);
+
+        return @builds;
 }
 
 sub getJails {
@@ -161,7 +286,7 @@ sub getJails {
                 # portion of the query.
                 my @ands = ();
                 foreach my $andcond (keys %{$param}) {
-                        push @ands,   "Jail_$andcond=?";
+                        push @ands,   "$andcond=?";
                         push @values, $param->{$andcond};
                 }
                 push @conds, "(" . (join(" AND ", @ands)) . ")";
@@ -183,18 +308,23 @@ sub getJails {
                 return undef;
         }
 
-        foreach (@results) {
-                my $jail = new Port(
-                        {
-                                Id   => $_->{'Jail_Id'},
-                                Name => $_->{'Jail_Name'},
-                                Tag  => $_->{'Jail_Tag'}
-                        }
-                );
-                push @jails, $jail;
-        }
+        @jails = $self->_newFromArray("Jail", @results);
 
         return @jails;
+}
+
+sub addBuild {
+        my $self  = shift;
+        my $build = shift;
+        my $bCls  = (ref($build) eq "REF") ? $$build : $build;
+
+        my $rc = $self->_addObject($bCls);
+
+        if (ref($build) eq "REF") {
+                $$build = $self->getBuildByName($bCls->getName());
+        }
+
+        return $rc;
 }
 
 sub addJail {
@@ -202,10 +332,7 @@ sub addJail {
         my $jail = shift;
         my $jCls = (ref($jail) eq "REF") ? $$jail : $jail;
 
-        my $rc =
-            $self->_doQuery(
-                "INSERT INTO jails (Jail_Name, Jail_Tag) VALUES (?, ?)",
-                [$jCls->getName(), $jCls->getTag()]);
+        my $rc = $self->_addObject($jCls);
 
         if (ref($jail) eq "REF") {
                 $$jail = $self->getJailByName($jCls->getName());
@@ -219,10 +346,7 @@ sub addPort {
         my $port = shift;
         my $pCls = (ref($port) eq "REF") ? $$port : $port;
 
-        my $rc = $self->_doQuery(
-                "INSERT INTO ports (Port_Directory, Port_Name, Port_Comment) VALUES (?, ?, ?)",
-                [$pCls->getDirectory(), $pCls->getName(), $pCls->getComment()]
-        );
+        my $rc = $self->_addObject($pCls);
 
         if (ref($port) eq "REF") {
                 $$port = $self->getPortByDirectory($pCls->getDirectory());
@@ -231,15 +355,29 @@ sub addPort {
         return $rc;
 }
 
-sub addPortForJail {
-        my $self = shift;
-        my $port = shift;
-        my $jail = shift;
+sub addPortsTree {
+        my $self      = shift;
+        my $portstree = shift;
+        my $pCls      = (ref($portstree) eq "REF") ? $$portstree : $portstree;
+
+        my $rc = $self->_addObject($pCls);
+
+        if (ref($portstree) eq "REF") {
+                $$portstree = $self->getPortsTreeByName($pCls->getName());
+        }
+
+        return $rc;
+}
+
+sub addPortForBuild {
+        my $self  = shift;
+        my $port  = shift;
+        my $build = shift;
 
         my $rc =
             $self->_doQuery(
-                "INSERT INTO jail_ports (Jail_Id, Port_Id) VALUES (?, ?)",
-                [$jail->getId(), $port->getId()]);
+                "INSERT INTO build_ports (Build_Id, Port_Id) VALUES (?, ?)",
+                [$build->getId(), $port->getId()]);
 
         return $rc;
 }
@@ -256,11 +394,11 @@ sub isPortInDS {
         return (($rc > 0) ? 1 : 0);
 }
 
-sub isValidJail {
-        my $self     = shift;
-        my $jailName = shift;
+sub isValidBuild {
+        my $self      = shift;
+        my $buildName = shift;
 
-        my @results = $self->getJails({Name => $jailName});
+        my @results = $self->getBuilds({Build_Name => $buildName});
 
         if (!defined(@results)) {
                 return 0;
@@ -273,7 +411,41 @@ sub isValidJail {
         return 0;
 }
 
-sub isPortForJail {
+sub isValidJail {
+        my $self     = shift;
+        my $jailName = shift;
+
+        my @results = $self->getJails({Jail_Name => $jailName});
+
+        if (!defined(@results)) {
+                return 0;
+        }
+
+        if (scalar(@results)) {
+                return 1;
+        }
+
+        return 0;
+}
+
+sub isValidPortsTree {
+        my $self          = shift;
+        my $portsTreeName = shift;
+
+        my @results = $self->getPortsTrees({Ports_Tree_Name => $portsTreeName});
+
+        if (!defined(@results)) {
+                return 0;
+        }
+
+        if (scalar(@results)) {
+                return 1;
+        }
+
+        return 0;
+}
+
+sub isPortForBuild {
         my $self  = shift;
         my $port  = shift;
         my $jail  = shift;
@@ -281,12 +453,12 @@ sub isPortForJail {
 
         my @result;
         my $rc = $self->_doQueryHashRef(
-                "SELECT Jail_Name FROM jails WHERE Jail_Id IN (SELECT Jail_Id FROM jail_ports WHERE Port_Id=?)",
+                "SELECT Build_Name FROM builds WHERE Build_Id IN (SELECT Build_Id FROM build_ports WHERE Port_Id=?)",
                 \@result, $port->getId()
         );
 
         foreach (@result) {
-                if ($jail->getName() eq $_->{'Jail_Name'}) {
+                if ($jail->getName() eq $_->{'Build_Name'}) {
                         $valid = 1;
                         last;
                 }
@@ -294,6 +466,57 @@ sub isPortForJail {
         }
 
         return $valid;
+}
+
+sub getPortsTrees {
+        my $self       = shift;
+        my @params     = @_;
+        my $condition  = "";
+        my @portstrees = ();
+
+        my @values = ();
+        my @conds  = ();
+        foreach my $param (@params) {
+
+                # Each parameter makes up and OR portion of a query.  Within
+                # each parameter is a hash reference that make up the AND
+                # portion of the query.
+                my @ands = ();
+                foreach my $andcond (keys %{$param}) {
+                        push @ands,   "$andcond=?";
+                        push @values, $param->{$andcond};
+                }
+                push @conds, "(" . (join(" AND ", @ands)) . ")";
+        }
+
+        $condition = join(" OR ", @conds);
+
+        my @results;
+        my $query;
+        if ($condition ne "") {
+                $query = "SELECT * FROM ports_trees WHERE $condition";
+        } else {
+                $query = "SELECT * FROM ports_trees";
+        }
+
+        my $rc = $self->_doQueryHashRef($query, \@results, @values);
+
+        if (!$rc) {
+                return undef;
+        }
+
+        @portstrees = $self->_newFromArray("PortsTree", @results);
+
+        return @portstrees;
+}
+
+sub getAllBuilds {
+        my $self   = shift;
+        my @builds = ();
+
+        @builds = $self->getBuilds();
+
+        return @builds;
 }
 
 sub getAllJails {
@@ -374,6 +597,9 @@ sub _doQuery {
 
         my $_sth;              # This is the real statement handler.
 
+	print STDERR "XXX: query = $query\n";
+	print STDERR "XXX: values = " . (join(", ", @{$params})) . "\n";
+
         $_sth = $self->{'dbh'}->prepare($query);
 
         if (!$_sth) {
@@ -401,6 +627,54 @@ sub _doQuery {
         $self->{'error'} = undef;
 
         1;
+}
+
+sub _newFromArray {
+        my $self  = shift;
+        my $class = ref $self;
+        croak "Attempt to call private method" if ($class ne __PACKAGE__);
+        my $type    = shift;
+        my @array   = @_;
+        my @objects = ();
+
+        foreach (@array) {
+                my $obj = eval "new $type(\$_)";
+                if (ref($obj) ne $type) {
+                        return undef;
+                }
+                push @objects, $obj;
+        }
+
+        return @objects;
+}
+
+sub _addObject {
+        my $self      = shift;
+        my $object    = shift;
+        my $objectRef = ref($object);
+
+        my $objectMap = {
+                "Port"      => "ports",
+                "Jail"      => "jails",
+                "Build"     => "builds",
+                "PortsTree" => "ports_trees",
+        };
+
+        croak "Unknown object type, $objectRef\n"
+            unless defined($objectMap->{$objectRef});
+
+        my $table      = $objectMap->{$objectRef};
+        my $objectHash = $object->toHashRef();
+
+        my $names    = join(",", keys(%{$objectHash}));
+        my @values   = values(%{$objectHash});
+        my $valueStr = join(",", (map { '?' } @values));
+
+        my $rc =
+            $self->_doQuery("INSERT INTO $table ($names) VALUES ($valueStr)",
+                \@values);
+
+        return $rc;
 }
 
 sub destroy {

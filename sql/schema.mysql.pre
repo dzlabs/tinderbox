@@ -6,6 +6,7 @@ CREATE TABLE ports (
   Port_Comment varchar(255),
   PRIMARY KEY (Port_Id),
   UNIQUE (Port_Directory),
+  INDEX Port_Directory_Idx (Port_Directory),
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS jails;
@@ -13,19 +14,56 @@ CREATE TABLE jails (
   Jail_Id int NOT NULL auto_increment,
   Jail_Name varchar(32) NOT NULL,
   Jail_Tag varchar(32),
+  Jail_Last_Built timestamp,
+  Jail_Update_Cmd varchar(255) DEFAULT 'CVSUP',
+  Jail_Description text,
   PRIMARY KEY (Jail_Id),
   UNIQUE (Jail_Name),
+  INDEX Jail_Name_Idx (Jail_Name),
 ) TYPE=INNODB;
 
-DROP TABLE IF EXISTS jail_ports;
-CREATE TABLE jail_ports (
-  Jail_Port_Id int NOT NULL auto_increment,
+DROP TABLE IF EXISTS ports_trees;
+CREATE TABLE ports_trees (
+  Ports_Tree_Id int NOT NULL auto_increment,
+  Ports_Tree_Name varchar(32) NOT NULL,
+  Ports_Tree_Description text,
+  Ports_Tree_Last_Built timestamp,
+  Ports_Tree_Update_Cmd varchar(255) DEFAULT 'CVSUP',
+  PRIMARY KEY (Ports_Tree_Id),
+  UNIQUE (Ports_Tree_Name),
+  INDEX Ports_Tree_Name_Idx (Ports_Tree_Name),
+) TYPE=INNODB;
+
+DROP TABLE IF EXISTS builds;
+CREATE TABLE builds (
+  Build_Id int NOT NULL auto_increment,
+  Build_Name varchar(32) NOT NULL,
   Jail_Id int NOT NULL,
-  Port_Id int NOT NULL,
-  PRIMARY KEY (Jail_Port_Id),
+  Ports_Tree_Id int NOT NULL,
+  Build_Description text,
+  PRIMARY KEY (Build_Id),
+  UNIQUE (Build_Name),
+  INDEX Build_Name_Idx (Build_Name),
   INDEX (Jail_Id),
   FOREIGN KEY (Jail_Id)
     REFERENCES jails(Jail_Id)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  INDEX (Ports_Tree_Id),
+  FOREIGN KEY (Ports_Tree_Id)
+    REFERENCES ports_trees(Ports_Tree_Id)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+) TYPE=INNODB;
+
+DROP TABLE IF EXISTS build_ports;
+CREATE TABLE build_ports (
+  Build_Port_Id int NOT NULL auto_increment,
+  Build_Id int NOT NULL,
+  Port_Id int NOT NULL,
+  Last_Built timestamp,
+  PRIMARY KEY (Build_Port_Id),
+  INDEX (Build_Id),
+  FOREIGN KEY (Build_Id)
+    REFERENCES builds(Build_Id)
     ON UPDATE CASCADE ON DELETE RESTRICT,
   INDEX (Port_Id),
   FOREIGN KEY (Port_Id)

@@ -5,7 +5,7 @@ pb=/space
 if [ -z "$1" ]; then
     echo "Please specify a jail name."
     echo "Current jails are:"
-    for i in `${pb}/scripts/list_jails`; do
+    for i in `${pb}/scripts/tc listJails`; do
 	echo "	${i}"
     done
     exit 1
@@ -15,18 +15,19 @@ fi
 
 jail=$1
 
-buildenv ${pb} ${jail}
+# We only care about SRCBASE, so the other parameters can be anything.
+buildenv ${pb} "NULL" ${jail} "NULL" "NULL"
 
-/usr/local/bin/cvsup -L 2 -g ${pb}/${jail}/src-supfile > /dev/null 2>&1
+update_cmd=`${pb}/scripts/tc getSrcUpdateCmd -j ${jail}`
+if [ ! -z "${update_cmd}" ]; then
+    ${update_cmd} > /dev/null 2>&1
+fi
 
-D=${pb}/jails/${jail}
-umount -f ${D}/a/ports > /dev/null 2>&1
-umount -f ${D}/usr/src > /dev/null 2>&1
-umount -f ${D}/dev > /dev/null 2>&1
+D=${pb}/jails/${jail}/tmp
 chflags -R noschg ${D}
 rm -rf ${D}
 
-export __MAKE_CONF=${pb}/${jail}/make.conf
+export __MAKE_CONF=${pb}/jails/${jail}/make.conf
 
 cd ${SRCBASE}
 mkdir -p ${D}
@@ -57,7 +58,12 @@ mkdir -p ${D}/var/run
 
 rm -f ${D}/usr/lib/aout/lib*_p.a
 
-mkdir -p ${pb}/repo
 cd ${D}
-tar cf ${pb}/repo/${jail}.tar.new .
-mv -f ${pb}/repo/${jail}.tar.new ${pb}/repo/${jail}.tar
+tar cf ${pb}/jails/${jail}.tar.new .
+mv -f ${pb}/jails/${jail}.tar.new ${pb}/jails/${jail}.tar
+
+rm -rf ${D} 2> /dev/null
+if [ -d ${D} ]; then
+    chflags -R noschg ${D}
+    rm -rf ${D}
+fi

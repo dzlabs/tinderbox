@@ -3,67 +3,64 @@
 use strict;
 use TinderboxDS;
 use vars qw(
+    $BUILD
+    $BUILD_NAME
     $JAIL
     $JAIL_NAME
+    $PORTSTREE
+    $PORTSTREE_NAME
     @PORTS
-    $JAIL_REPO
     $BUILD_ROOT
     $PORTBUILD
-    $ERROR_DIR
-    $LOG_DIR
-    $SERVER_PROTOCOL
-    $SERVER_HOST
-    $SERVER_DIR
-    $SENDMAIL
-    $SENDER
-    $SUBJECT
-    $TINDER_STOP
 );
 
 require "tinderbox.ph";    # Setup the tinderbox config.
-require "buildenv.pl";
+require "tinderlib.pl";
 
 # Get a database handle for obtaining the ports.
-my $ds         = new TinderboxDS();
-my @jail_names = $ds->getAllJails();
-if (!defined(@jail_names) && defined($ds->getError())) {
+my $ds          = new TinderboxDS();
+my @build_names = $ds->getAllBuilds();
+if (!defined(@build_names) && defined($ds->getError())) {
         cleanup($ds, 1,
                 "Failed to get list of jails: " . $ds->getError() . "\n");
-} elsif (!defined(@jail_names)) {
-        cleanup($ds, 1, "There are no jails configured in this tinderbox\n");
+} elsif (!defined(@build_names)) {
+        cleanup($ds, 1, "There are no builds configured in this tinderbox\n");
 }
 if (scalar(@ARGV) < 1) {
-        print STDERR
-            "usage: tinderbuild <jail name> [<portname> <port directory> ...]\n";
-        print STDERR "Current jails are:\n";
-        foreach (@jail_names) {
+        print STDERR "usage: $0 <build name> [<port directory> ...]\n";
+        print STDERR "Current builds are:\n";
+        foreach (@build_names) {
                 print STDERR "\t" . $_->getName() . "\n";
         }
         cleanup($ds, 1, undef);
 }
 
 @PORTS = ();
-$JAIL  = $ds->getJailByName($ARGV[0]);
-if (!$JAIL) {
-        cleanup($ds, 1, "Unknown jail $ARGV[0]\n");
+$BUILD = $ds->getBuildByName($ARGV[0]);
+if (!$BUILD) {
+        cleanup($ds, 1, "Unknown build, \"$ARGV[0]\"\n");
 }
-$JAIL_NAME = $JAIL->getName();
+$BUILD_NAME = $BUILD->getName();
 shift @ARGV;
 
-buildenv($BUILD_ROOT, $JAIL_NAME);
+$JAIL           = $ds->getJailForBuild($BUILD);
+$JAIL_NAME      = $JAIL->getName();
+$PORTSTREE      = $ds->getPortsTreeForBuild($BUILD);
+$PORTSTREE_NAME = $PORTSTREE->getName();
+
+buildenv($BUILD_ROOT, $BUILD_NAME, $JAIL_NAME, $PORTSTREE_NAME);
 
 if (!scalar(@ARGV)) {
-        my @dsPorts = $ds->getAllPorts();
+        my @dsPorts = $ds->getPortsForBuild($BUILD);
         if (!defined(@dsPorts)) {
                 cleanup($ds, 1,
                               "Failed to get port information: "
                             . $ds->getError()
                             . "\n");
         }
-        foreach my $port (@dsPorts) {
-                push @PORTS, $port
-                    if $ds->isPortForJail($port, $JAIL);
-        }
+
+        push @PORTS, @dsPorts;
+
 } else {
         foreach my $arg (@ARGV) {
                 my $port = $ds->getPortByDirectory($arg);
@@ -72,10 +69,12 @@ if (!scalar(@ARGV)) {
                         # Simply create a sparse port with just a directory.
                         # If the port doesn't exist in the datastore, that's
                         # okay.
-                        $port = new Port({Directory => $arg});
+                        $port = new Port();
+                        $port->setDirectory($arg);
                         push @PORTS, $port;
                 } else {
-                        push @PORTS, $port if $ds->isPortForJail($port, $JAIL);
+                        push @PORTS, $port
+                            if $ds->isPortForBuild($port, $BUILD);
                 }
         }
 }
@@ -88,7 +87,15 @@ while (scalar(@PORTS)) {
         next if (defined($pkgdir{$portdir}));
 
         $tportdir = $ENV{'PORTSDIR'} . "/" . $portdir;
-        $pkgname  = `cd $tportdir && make -V PKGNAME`;
+        if (!-d $tportdir) {
+                print STDERR "ERROR: Directory $tportdir does not exist.\n";
+                if (scalar(@{$pkgdeps{$portdir}})) {
+                        print STDERR "ERROR: It is referenced by "
+                            . (join(" ", @{$pkgdeps{$portdir}})) . "\n";
+                }
+                cleanup($ds, 1, undef);
+        }
+        $pkgname = `cd $tportdir && make -V PKGNAME`;
         chomp $pkgname;
 
         $pkgdeps{$portdir} = [];
@@ -99,10 +106,12 @@ while (scalar(@PORTS)) {
         foreach my $dep (@deps) {
                 $dep =~ s|^$ENV{'PORTSDIR'}/||;
                 push @{$pkgdeps{$portdir}}, $dep;
-                push @PORTS, (new Port({Directory => $dep}));
+                my $p = new Port();
+                $p->setDirectory($dep);
+                push @PORTS, $p;
         }
 }
-my $makefile = join("/", $BUILD_ROOT, "Makefile." . $JAIL_NAME);
+my $makefile = join("/", $BUILD_ROOT, "builds", $BUILD_NAME, "Makefile");
 unless (open(MK, ">" . $makefile)) {
         cleanup($ds, 1, "Failed to open $makefile for writing: $!\n");
 }
@@ -114,28 +123,13 @@ foreach my $key (keys %pkgdir) {
         print MK "$pkgdir{$key}$ENV{'PKGSUFFIX'}: "
             . join(" ", @deppkgnames) . "\n";
         print MK
-            "\t\@$PORTBUILD $JAIL_NAME $pkgdir{$key}$ENV{'PKGSUFFIX'} /usr/ports/$key "
+            "\t\@$PORTBUILD $BUILD_NAME $JAIL_NAME $PORTSTREE_NAME $pkgdir{$key}$ENV{'PKGSUFFIX'} /usr/ports/$key "
             . join(" ", @deppkgnames) . "\n";
 }
 close(MK);
 
 # Now, symlink the Makefile to the correct All directory.
-system("mkdir -p $BUILD_ROOT/packages/$JAIL_NAME/All");
-symlink $makefile, "$BUILD_ROOT/packages/$JAIL_NAME/All/Makefile";
+system("mkdir -p $BUILD_ROOT/packages/$BUILD_NAME/All");
+symlink $makefile, "$BUILD_ROOT/packages/$BUILD_NAME/All/Makefile";
 
 cleanup($ds, 0, undef);
-
-sub cleanup {
-        my ($ds, $code, $msg) = @_;
-
-        if ($code && defined($msg)) {
-                $msg = "ERROR: " . $msg;
-        } elsif (defined($msg)) {
-                $msg = "INFO: " . $msg;
-        }
-
-        $ds->destroy()    if (defined($ds));
-        print STDERR $msg if (defined($msg));
-
-        exit($code);
-}

@@ -12,13 +12,13 @@ usage () {
           echo "usage: $0 createJail -n <jail name> -t <jail tag>"
 	  ;;
         addPort)
-          echo "usage: $0 addPort -j <jail name> [-o] [-r] <port directory> ..."
+          echo "usage: $0 addPort {-j <jail name> | -a} [-r] <port directory> ..."
 	  ;;
         build)
-          echo "usage: $0 build -j <jail name> [-c] [-i] [port directory ...]"
+          echo "usage: $0 build -j <jail name> [-c] [-i] [-n] [port directory ...]"
 	  ;;
         buildAll)
-          echo "usage: $0 buildAll [port directory ...]"
+          echo "usage: $0 buildAll [-c] [-i] [-n] [port directory ...]"
 	  ;;
         *)
           echo "usage: $0 <command> [options]"
@@ -88,19 +88,19 @@ createJail () {
 addPort () {
     jail=""
     port_dirs=""
-    only=""
     recurse=""
+    all=0
 
     for i; do
 	case "$i" in
 	    -j)
 	      jail="$2"; shift;
 	      shift;;
-	    -o)
-	      only="-o"; shift;
+	    -a)
+	      all=1
 	      shift;;
 	    -r)
-	      recurse="-r"; shift;
+	      recurse="-r"
 	      shift;;
 	    --)
 	      shift; break;;
@@ -109,7 +109,7 @@ addPort () {
 
     port_dirs="$*"
 
-    if [ -z "$jail" -o -z "${port_dirs}" ]; then
+    if [ -z "${jail}" -o -z "${port_dirs}" ]; then
 	usage "addPort"
     fi
 
@@ -120,6 +120,7 @@ build () {
     jail=""
     init=""
     clean=""
+    update=1
 
     for i; do
 	case "$i" in
@@ -131,6 +132,9 @@ build () {
 	      shift;;
 	    -i)
 	      init="-init"
+	      shift;;
+	    -n)
+	      update=0
 	      shift;;
 	    --)
 	      shift; break;;
@@ -147,12 +151,17 @@ build () {
 	exit 1
     fi
 
-    ${pb}/scripts/tinderbuild -j ${jail} ${clean} ${init} $* > ${pb}/${jail}/build.log 2>&1
+    if [ "${update}" = "1" ]; then
+	${pb}/scripts/update_ports -j ${jail} >> ${pb}/${jail}/build.log 2>&1
+    fi
+
+    ${pb}/scripts/tinderbuild -j ${jail} ${clean} ${init} $* >> ${pb}/${jail}/build.log 2>&1
 }
 
 buildAll () {
     clean=""
     init=""
+    update=""
 
     for i; do
 	case "$i" in
@@ -162,12 +171,15 @@ buildAll () {
 	    -i)
 	      init="-i"
 	      shift;;
+	    -n)
+	      update="-n"
+	      shift;;
 	    --)
 	      shift; break;;
 	esac
     done
     for j in `${pb}/scripts/list_jails`; do
-	build -j ${j} ${clean} ${init} -- $* &
+	build -j ${j} ${clean} ${init} ${update} -- $* &
     done
 }
 
@@ -185,13 +197,13 @@ case $command in
     optstring="n:t:"
     ;;
   addPort)
-    optstring="j:or"
+    optstring="j:ar"
     ;;
   build)
-    optstring="j:ci"
+    optstring="j:cin"
     ;;
   buildAll)
-    optstring="ci"
+    optstring="cin"
     ;;
   *)
     usage

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# usage: $0 <jail name> [-noclean] [-plistcheck] pkgname dirname
+# usage: $0 <build name> <jail name> <portstree name> [-noclean] [-plistcheck] pkgname dirname
 
 cleanup()
 {
@@ -42,6 +42,10 @@ noclean=0
 
 branch=$1
 shift
+jail=$1
+shift
+portstree=$1
+shift
 
 # Default niceness value
 nice=0
@@ -61,7 +65,7 @@ if [ "x$1" = "x-plistcheck" ]; then
 fi
 args="$*"
 
-buildenv ${pb} ${branch}
+buildenv ${pb} ${branch} ${jail} ${portstree}
 
 pkgname=$(basename $1 ${PKGSUFFIX})
 dirname=$2
@@ -96,10 +100,10 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/X11R6/bin:.
 
 echo "building $pkgname"
 
-chroot=${pb}/jails/${branch}
+chroot=${pb}/${branch}
 packages=${pb}/packages/${branch}
 
-major_version=$(echo ${jail} | cut -d'-' -f1 | cut -d'.' -f1)
+major_version=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
 
 if [ "${major_version}" = "4" ]; then
     mkdir -p ${chroot}/libexec
@@ -123,12 +127,12 @@ echo "with arguments: ${args}" | tee -a ${chroot}/tmp/${pkgname}.log
 
 mkdir -p ${chroot}/a/ports
 rm -rf ${chroot}/usr/ports
-mount -o nfsv3,intr -r localhost:${pb}/${branch}/ports ${chroot}/a/ports
+mount -o nfsv3,intr -r localhost:${pb}/portstrees/${portstree}/ports ${chroot}/a/ports
 ln -sf ../a/ports ${chroot}/usr/ports
 
 mkdir -p ${chroot}/usr/src
 
-mount -o nfsv3,intr -r localhost:${pb}/${branch}/src ${chroot}/usr/src
+mount -o nfsv3,intr -r localhost:${pb}/jails/${jail}/src ${chroot}/usr/src
 
 mount -t devfs foo ${chroot}/dev
 

@@ -7,15 +7,15 @@
 ARCH=i386
 MACHINE_ARCH=i386
 XFREE86_VERSION=4
-PORTSDIR=`realpath ##PB##/##JAIL##/ports`
-SRCBASE=`realpath ##PB##/##JAIL##/src`
-SRCPREFIX=`realpath ##PB##/##JAIL##/src`
+PORTSDIR=`realpath ##PB##/portstrees/##PORTSTREE##/ports`
+SRCBASE=`realpath ##PB##/jails/##JAIL##/src`
+SRCPREFIX=`realpath ##PB##/jails/##JAIL##/src`
 OSVERSION=`awk '/^#define __FreeBSD_version/ {print $3}' < ^^SRCBASE^^/sys/sys/param.h`
 OSREL=`awk 'BEGIN {FS="\""}; /^REVISION/ {print $2}' < ^^SRCBASE^^/sys/conf/newvers.sh`
 BRANCH=`awk 'BEGIN {FS="\""}; /^BRANCH/ {print $2}' < ^^SRCBASE^^/sys/conf/newvers.sh`
 __MAKE_CONF=##PB##/make.conf
-DISTDIR=##PB##/distfiles/##JAIL##
-PACKAGES=##PB##/packages/##JAIL##
+DISTDIR=##PB##/distfiles/##BUILD##
+PACKAGES=##PB##/packages/##BUILD##
 UNAME_m=i386
 UNAME_n=marcuscom.com
 UNAME_p=i386
