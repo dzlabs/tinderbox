@@ -1,6 +1,9 @@
 #!/bin/sh
 
-# usage: $0 <build name> <jail name> <portstree name> [-noclean] [-plistcheck] pkgname dirname
+usage () {
+    echo "usage: $0 <build name> <jail name> <portstree name> [-noclean] [-plistcheck] pkgname dirname"
+    exit 1
+}
 
 cleanup()
 {
@@ -44,6 +47,11 @@ pb=/space
 error=0
 init=0
 noclean=0
+
+# check parameter count
+if [ $# -lt 5 -o $# -gt 7 ]; then
+    usage
+fi
 
 branch=$1
 shift
