@@ -88,7 +88,7 @@ sub setStatus {
         my $self   = shift;
         my $status = shift;
 
-        if ($STATUS_HASH{$status}) {
+        if (defined($STATUS_HASH{$status})) {
                 $self->{Build_Status} = $status;
         }
 }
