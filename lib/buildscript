@@ -29,13 +29,6 @@ if [ $phase = 1 ]; then
 	done
     fi
 
-    cat > /tmp/mtree.exclude <<EOF
-./var/*
-./tmp/*
-EOF
-
-    mtree -X /tmp/mtree.exclude -xcn -k uid,gid,mode -p / > /tmp/mtree
-
     cd $dir || exit 1
     pkgname=$(make package-name)
     echo "================================================================"
@@ -53,7 +46,6 @@ echo "0" > /tmp/status
     fi
 else
 
-    echo "====================<phase 2: make package>====================="
     xvfb=0
     if which -s Xvfb; then
 	xvfb=1
@@ -64,6 +56,12 @@ else
 	export DISPLAY
     fi
 
+    echo "====================<phase 2: make package>====================="
+    cat > /tmp/mtree.exclude <<EOF
+./var/*
+./tmp/*
+EOF
+    mtree -X /tmp/mtree.exclude -xcn -k uid,gid,mode -p / > /tmp/mtree
     cd $dir || exit 1
     pkgname=$(make package-name)
     if /pnohang $TIMEOUT /tmp/make.log2 ${pkgname} make package; then
@@ -74,7 +72,7 @@ else
 	echo "checking installed files"
 	find ${prefix} \( \( -perm -4000 -o -perm -2000 -a \! -type d \) -o \( -perm -0002 -o -perm -0020 \) \) -a \! -type l -ls | sort > /tmp/list1
 	echo "pkg_delete ${pkgname}"
-	pkg_delete ${pkgname}
+	pkg_delete -f ${pkgname}
 	find ${prefix} \( \( -perm -4000 -o -perm -2000 -a \! -type d \) -o \( -perm -0002 -o -perm -0020 \) \) -a \! -type l -ls | sort > /tmp/list2
 	if ! diff -qb /tmp/list1 /tmp/list2 2>/dev/null; then
 	    echo "================================================================"
@@ -82,29 +80,7 @@ else
 	    diff -b /tmp/list2 /tmp/list1 | grep '^>'
 	fi
 
-	if [ -e /tmp/packages/All/${pkgname}.tgz ]; then
-	    echo "Testing package ${pkgname}"
-	    (gzip -t /tmp/packages/All/${pkgname}.tgz && echo "Package ${pkgname} OK!") || echo "Package ${pkgname} corrupted!"
-	fi
-
 	mtree -X /tmp/mtree.exclude -x -f /tmp/mtree -p / | egrep -v '^(usr/local/share/nls/POSIX|usr/local/share/nls/en_US.US-ASCII|etc/shells.bak|etc/services|compat |usr/X11R6 |etc/manpath.config|usr/local/info/dir)' > /tmp/list3
-
-	cd /var/db/pkg
-	if [ $(echo $(echo * | wc -c)) != 2 ]; then
-	    echo "================================================================"
-	    echo "deleting dependencies"
-	    prevlist=""
-	    count=1
-	    while [ $(echo $(echo * | wc -c)) != 2 -a $(echo $(echo * | wc -c)) != $(echo $(echo $prevlist | wc -c)) ]; do
-		echo "== phase $count =="
-		prevlist="$(echo *)"
-		for i in *; do
-		    echo "pkg_delete -r $i"
-		    pkg_delete -r $i
-		done
-		count=$(($count + 1))
-	    done
-	fi
 
 	if [ -s /tmp/list3 ]; then
 	    cd /
@@ -115,6 +91,22 @@ else
 		echo "1" > /tmp/status
 	    fi
 	    echo "================================================================"
+	fi
+
+	cd /var/db/pkg
+	if [ $(echo $(echo * | wc -c)) != 2 ]; then
+	    echo "deleting dependencies"
+	    prevlist=""
+	    count=1
+	    while [ $(echo $(echo * | wc -c)) != 2 -a $(echo $(echo * | wc -c)) != $(echo $(echo $prevlist | wc -c)) ]; do
+		echo "== phase $count =="
+		prevlist="$(echo *)"
+		for i in *; do
+		    echo "pkg_delete -rf ${i}"
+		    pkg_delete -rf ${i}
+		done
+		count=$(($count + 1))
+	    done
 	fi
 
 	if [ -s /tmp/list4 ]; then
@@ -145,7 +137,7 @@ else
     if [ -e ${dir}/.keep ]; then
 	cd ${dir}
 	objdir=$(make -V WRKDIR)
-	tar cvfjC /tmp/work.tbz ${objdir}/.. work
+	tar cfjC /tmp/work.tbz ${objdir}/.. work
     fi
 
     echo "================================================================"
