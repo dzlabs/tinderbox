@@ -1,0 +1,76 @@
+$Id$
+
+BASIC INSTALLATION AND USAGE INSTRUCTIONS
+
+Requirements: perl, DBD::Mysql perl module, MySQL 4.1 or newer.
+  php4+PEAR::DB() for web frontend
+
+- Create /space, put scripts under /space/scripts, edit ds.pm, tinderbox.ph,
+  setup MySQL database
+- Compile pnohang under /space/scripts: gcc -o pnohang pnohang.c -static
+- Setup NFS server with this in /etc/exports:
+  /space  -ro -alldirs -maproot=0:0 localhost
+  If your /space is a symlink, export real filesystem's mount point
+- Create new jail using create_new_jail
+- Create new ports tree using create_portstree
+- Create new build using create_new_build
+
+To update an existing jail:
+- mkjail
+
+To run a build of a port:
+- tc addPort -b <buildname> -d <port directory> -r
+- tinderbuild -b <buildname> <port directory>
+
+tinderbuild options:
+-init will call mkjail then mkbuild
+-cleanpackages will remove all packages already built for the given build.
+-updateports will update the build's portstree (dangerous if doing multiple
+  parallel runs)
+-skipmake skips the Makefile generation stage if a good Makefile already exists
+-noduds skip duds file generation (packages which are forbidden or ignored will
+  be built)
+
+Getting a copy of work directory for failed build:
+- touch .keep file into port directory
+- make sure directory /space/wrkdirs/<build_name> exists
+  Tarred work directory for the build will appear there.
+
+===================================================================
+
+USING CCACHE WITH TINDERBOX BUILDS
+
+To use ccache support, you must first create a tar file with ccache and various
+symlinks within a /opt directory.  Your tarball contents should be:
+
+opt
+opt/ccache
+opt/gcc -> ccache
+opt/cc -> ccache
+opt/g++ -> ccache
+opt/c++ -> ccache
+
+This tarball must be called ccache.tar, and be placed in the jail directory
+for each jail that will use ccache (e.g. /space/jails/5-STABLE).
+
+Once the tarball is created, add:
+
+CCACHE_ENABLED=1
+CCACHE_DIR=/ccache
+CCACHE_NOLINK=1
+
+To your rawenv file.  Then run your builds as you normally would.  To debug
+ccache, add the following to rawenv:
+
+CCACHE_LOGFILE=/ccache.log
+
+Then, in the root of each build directory, there will be a ccache.log that
+will let you know if the cache is working.
+
+===================================================================
+
+GETTING TINDERBOX
+
+Tinderbox lives in Marcuscom CVS repository under portstools module.
+
+http://www.marcuscom.com:8080/cgi-bin/cvsweb.cgi/
