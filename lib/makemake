@@ -89,7 +89,9 @@ while (scalar(@PORTS)) {
         $tportdir = $ENV{'PORTSDIR'} . "/" . $portdir;
         if (!-d $tportdir) {
                 print STDERR "ERROR: Directory $tportdir does not exist.\n";
-                if (scalar(@{$pkgdeps{$portdir}})) {
+                if (defined($pkgdeps{$portdir})
+                        && scalar(@{$pkgdeps{$portdir}}))
+                {
                         print STDERR "ERROR: It is referenced by "
                             . (join(" ", @{$pkgdeps{$portdir}})) . "\n";
                 }

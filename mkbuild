@@ -2,16 +2,23 @@
 
 pb=/space
 
+_builds=$(${pb}/scripts/tc listBuilds)
+
 if [ -z "$1" ]; then
     echo "Please specify a build name."
     echo "Current build names are:"
-    for i in `${pb}/scripts/tc listBuilds`; do
+    for i in ${_builds}; do
 	echo "	${i}"
     done
     exit 1
 fi
 
 build=$1
+
+if ! echo ${_builds} | grep -qw ${build}; then
+    echo "ERROR: Unknown build, \"${build}\"."
+    exit 1
+fi
 
 jail=$(${pb}/scripts/tc getJailForBuild -b ${build})
 

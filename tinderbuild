@@ -51,6 +51,18 @@ if [ "x${build}" = "x" ]; then
     exit 1
 fi
 
+lock=${pb}/builds/${build}/lock
+
+if [ -e ${lock} ]; then
+    echo "ERROR: Lock file ${lock} exists; exiting."
+    exit 1
+fi
+
+touch ${lock}
+
+# XXX This is a crude hack to normalize ${ports}
+ports=$(echo ${ports})
+
 jail=$(${pb}/scripts/tc getJailForBuild -b ${build})
 portstree=$(${pb}/scripts/tc getPortsTreeForBuild -b ${build})
 

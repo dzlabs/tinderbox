@@ -114,6 +114,11 @@ fi
 cp -p /bin/ps ${chroot}/bin
 cp -p /usr/bin/killall ${chroot}/usr/bin
 
+# XXX This is a hack to fix some recent pkg_add problems in some releases.
+if [ -f ${pb}/jails/${jail}/pkg_install.tar ]; then
+    tar -C ${chroot} -xf ${pb}/jails/${jail}/pkg_install.tar
+fi
+
 echo ${OSREL}-${BRANCH} > ${chroot}/usr/bin/UNAME_VERSION
 
 trap  "cleanup ${chroot} ${noclean} ${error} \"${cleandirs}\" ${pkgname}" 1 2 3 9 10 11 15

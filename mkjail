@@ -2,10 +2,12 @@
 
 pb=/space
 
+_jails=$(${pb}/scripts/tc listJails)
+
 if [ -z "$1" ]; then
     echo "Please specify a jail name."
     echo "Current jails are:"
-    for i in `${pb}/scripts/tc listJails`; do
+    for i in ${_jails}; do
 	echo "	${i}"
     done
     exit 1
@@ -15,10 +17,15 @@ fi
 
 jail=$1
 
-# We only care about SRCBASE, so the other parameters can be anything.
-buildenv ${pb} "NULL" ${jail} "NULL" "NULL"
+if ! echo ${_jails} | grep -qw ${jail}; then
+    echo "ERROR: Unknown jail, \"${jail}\"."
+    exit 1
+fi
 
-update_cmd=`${pb}/scripts/tc getSrcUpdateCmd -j ${jail}`
+# We only care about SRCBASE, so the other parameters can be anything.
+buildenv ${pb} "NULL" ${jail} "NULL"
+
+update_cmd=$(${pb}/scripts/tc getSrcUpdateCmd -j ${jail})
 if [ ! -z "${update_cmd}" ]; then
     eval ${update_cmd} > /dev/null 2>&1
 fi
