@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.12 2004/03/03 19:37:25 pav Exp $
+# $Id: TinderboxDS.php,v 1.13 2004/03/03 19:54:10 pav Exp $
 #
 
     require_once 'DB.php';
@@ -48,6 +48,7 @@
     class TinderboxDS {
 	var $db;
 	var $error;
+	var $packageSuffixCache; /* in use by getPackageSuffix() */
 
 	function TinderboxDS() {
 	    global $DB_HOST, $DB_NAME, $DB_USER, $DB_PASS;
@@ -108,7 +109,7 @@
 	}
 
 	function getBuildsOfPort($params) {
-	    $query = "SELECT build_ports.*,builds.Build_Name,ports_trees.Ports_Tree_Name,ports_trees.Ports_Tree_CVSweb_URL ";
+	    $query = "SELECT build_ports.*,builds.Build_Name,builds.Jail_Id,ports_trees.Ports_Tree_Name,ports_trees.Ports_Tree_CVSweb_URL ";
 	    $query.= "FROM build_ports,builds,ports_trees ";
 	    $query.= "WHERE build_ports.Build_Id = builds.Build_Id AND builds.Ports_Tree_Id = ports_trees.Ports_Tree_Id ";
 	    if (is_array($params)) {
@@ -357,6 +358,23 @@
 	function destroy() {
 	    $this->db->disconnect();
 	    $this->error = null;
+	}
+
+	function getPackageSuffix($jail_id) {
+	    if (empty($jail_id)) return "";
+	    /* Use caching to avoid a lot of SQL queries */
+	    if ($this->packageSuffixCache[$jail_id]) {
+		return $this->packageSuffixCache[$jail_id];
+	    } else {
+		$jail = $this->getJailById($jail_id);
+		if (substr($jail->getName(), 0, 1) == "4") {
+			$this->packageSuffixCache[$jail_id] = ".tgz";
+			return ".tgz";
+		} elseif (substr($jail->getName(), 0, 1) == "5") {
+			$this->packageSuffixCache[$jail_id] = ".tbz";
+			return ".tbz";
+		}
+	    }
 	}
     }
 ?>
