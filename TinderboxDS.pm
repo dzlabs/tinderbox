@@ -13,6 +13,14 @@ use vars qw(
     $DB_NAME
     $DB_USER
     $DB_PASS
+    %OBJECT_MAP
+);
+
+%OBJECT_MAP = (
+        "Port"      => "ports",
+        "Jail"      => "jails",
+        "Build"     => "builds",
+        "PortsTree" => "ports_trees",
 );
 
 require "ds.ph";
@@ -355,6 +363,27 @@ sub addPort {
         return $rc;
 }
 
+sub updatePort {
+        my $self = shift;
+        my $port = shift;
+        croak "ERROR: Argument is not of type port\n" if (ref($port) ne "Port");
+        my $pCls = (ref($port) eq "REF") ? $$port : $port;
+
+        my $rc = $self->_doQuery(
+                "UPDATE ports SET Port_Name=?, Port_Comment=?, Port_Maintainer=? WHERE Port_Id=?",
+                [
+                        $pCls->getName(),       $pCls->getComment(),
+                        $pCls->getMaintainer(), $pCls->getId()
+                ]
+        );
+
+        if (ref($port) eq "REF") {
+                $$port = $self->getPortByDirectory($pCls->getDirectory());
+        }
+
+        return $rc;
+}
+
 sub addPortsTree {
         my $self      = shift;
         my $portstree = shift;
@@ -511,6 +540,18 @@ sub updatePortsTreeLastBuilt {
                         [$portstree->getId()]
                 );
         }
+
+        return $rc;
+}
+
+sub updateBuildStatus {
+        my $self  = shift;
+        my $build = shift;
+        croak "ERROR: Argument not of type build\n" if (ref($build) ne "Build");
+
+        my $rc =
+            $self->_doQuery("UPDATE builds SET Build_Status=? WHERE Build_Id=?",
+                [$build->getStatus(), $build->getId()]);
 
         return $rc;
 }
@@ -849,8 +890,8 @@ sub _doQuery {
 
         my $_sth;              # This is the real statement handler.
 
-        #print STDERR "XXX: query = $query\n";
-        #print STDERR "XXX: values = " . (join(", ", @{$params})) . "\n";
+	#print STDERR "XXX: query = $query\n";
+	#print STDERR "XXX: values = " . (join(", ", @{$params})) . "\n";
 
         $_sth = $self->{'dbh'}->prepare($query);
 
@@ -905,17 +946,10 @@ sub _addObject {
         my $object    = shift;
         my $objectRef = ref($object);
 
-        my $objectMap = {
-                "Port"      => "ports",
-                "Jail"      => "jails",
-                "Build"     => "builds",
-                "PortsTree" => "ports_trees",
-        };
-
         croak "Unknown object type, $objectRef\n"
-            unless defined($objectMap->{$objectRef});
+            unless defined($OBJECT_MAP{$objectRef});
 
-        my $table      = $objectMap->{$objectRef};
+        my $table      = $OBJECT_MAP{$objectRef};
         my $objectHash = $object->toHashRef();
 
         my $names    = join(",", keys(%{$objectHash}));
