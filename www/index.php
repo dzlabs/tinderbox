@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id$
+# $Id: index.php,v 1.3 2004/03/02 19:51:43 marcus Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -41,6 +41,9 @@
 </head>
 <body bgcolor="#FFFFFF">
 <h1>GNOME 2 Packages for i386</h1>
+<?php
+    if (is_array($builds)) {
+?>
 <table border="1" cellpadding="1" cellspacing="1">
 <tr>
 <th>Build Name</th>
@@ -48,24 +51,29 @@
 <th>Build Packages</th>
 </tr>
 <?php
-    foreach ($builds as $build) {
-	echo "<tr>\n";
-	echo "<td>" . $build->getName() . "</td>\n";
-	echo "<td>" . $build->getDescription() . "</td>\n";
-	echo "<td>";
-	if (is_dir($pkgdir . "/" . $build->getName())) {
-	    echo "<a href=\"$pkgdir/" . $build->getName() . "\">Package Directory</a>";
+	foreach ($builds as $build) {
+	    echo "<tr>\n";
+	    echo "<td>" . $build->getName() . "</td>\n";
+	    echo "<td>" . $build->getDescription() . "</td>\n";
+	    echo "<td>";
+	    if (is_dir($pkgdir . "/" . $build->getName())) {
+		echo "<a href=\"$pkgdir/" . $build->getName() . "\">Package Directory</a>";
+	    }
+	    else {
+		echo "<i>No packages for this build</i>";
+	    }
+	    echo "</td>\n";
+	    echo "</tr>\n";
 	}
-	else {
-	    echo "<i>No packages for this build</i>";
-	}
-	echo "</td>\n";
-	echo "</tr>\n";
+
+	echo "</table>\n";
+
+    } else {
+	echo "<p>There are no builds configured.</p>\n";
     }
 
     $ds->destroy();
 ?>
-</table>
 
 </body>
 </html>
