@@ -58,6 +58,7 @@ else
 
     echo "====================<phase 2: make package>====================="
     cat > /tmp/mtree.exclude <<EOF
+./root/*
 ./var/*
 ./tmp/*
 EOF
@@ -80,7 +81,7 @@ EOF
 	    diff -b /tmp/list2 /tmp/list1 | grep '^>'
 	fi
 
-	mtree -X /tmp/mtree.exclude -x -f /tmp/mtree -p / | egrep -v '^(usr/local/share/nls/POSIX|usr/local/share/nls/en_US.US-ASCII|etc/shells.bak|etc/services|compat |usr/X11R6 |etc/manpath.config|usr/local/info/dir)' > /tmp/list3
+	mtree -X /tmp/mtree.exclude -x -f /tmp/mtree -p / | egrep -v '^(usr/local/var|usr/local/www/|usr/X11R6/lib/X11/xserver/SecurityPolicy|usr/local/share/nls/POSIX|usr/local/share/nls/en_US.US-ASCII|etc/shells.bak|etc/services|compat |usr/X11R6 |etc/manpath.config|usr/local/info/dir)' > /tmp/list3
 
 	if [ -s /tmp/list3 ]; then
 	    cd /
@@ -88,7 +89,9 @@ EOF
 	    grep ' missing$' /tmp/list3 > /tmp/list5
 	    grep -vE ' (extra|missing)$' /tmp/list3 > /tmp/list6
 	    if [ "x${PLISTCHECK}" != "x" ]; then
-		echo "1" > /tmp/status
+		if grep -qE 'usr/(local|X11R6)/(bin|sbin|share/doc|share/locale/|lib/lib)' /tmp/list4; then
+		    echo "1" > /tmp/status
+		fi
 	    fi
 	    echo "================================================================"
 	fi
@@ -109,6 +112,9 @@ EOF
 	    done
 	fi
 
+	echo
+	echo "=== Checking filesystem state"
+
 	if [ -s /tmp/list4 ]; then
 	    echo "list of extra files and directories in / (not present before this port was installed but present after it was deinstalled)"
 	    cat /tmp/list4
@@ -120,6 +126,9 @@ EOF
 	if [ -s /tmp/list6 ]; then
 	    echo "list of filesystem changes from before and after port installation and deinstallation"
 	    cat /tmp/list6
+	    if [ "x${PLISTCHECK}" != "x" ]; then
+		echo "1" > /tmp/status
+	    fi
 	fi
 
 	if grep -q PORT_TRIES_TO_WRITE_TO_HOME /tmp/make.log2; then
