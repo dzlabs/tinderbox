@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: index.php,v 1.5 2004/03/02 20:27:16 pav Exp $
+# $Id$
 #
 
     require_once 'TinderboxDS.php';
@@ -32,7 +32,7 @@
     $pkgdir = '/packages';
     $ds = new TinderboxDS();
 
-    $builds = $ds->getAllBuilds();
+    $build = $ds->getBuildByName($name);
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -42,36 +42,39 @@
 <link href="tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-<h1>GNOME 2 Packages for i386</h1>
 <?php
-    if (is_array($builds)) {
+    if ($build) {
 ?>
-<table>
-<tr>
-<th>Build Name</th>
-<th>Build Description</th>
-<th>Build Packages</th>
-</tr>
+<h1>GNOME 2 Packages for i386 - <?= $build->getName() ?></h1>
 <?php
-	foreach ($builds as $build) {
-	    echo "<tr>\n";
-	    echo "<td><a href=\"build.php?name=" . $build->getName() . "\">" . $build->getName() . "</a></td>\n";
-	    echo "<td>" . $build->getDescription() . "</td>\n";
-	    echo "<td>";
-	    if (is_dir($pkgdir . "/" . $build->getName())) {
-		echo "<a href=\"$pkgdir/" . $build->getName() . "\">Package Directory</a>";
-	    }
-	    else {
-		echo "<i>No packages for this build</i>";
-	    }
-	    echo "</td>\n";
-	    echo "</tr>\n";
+	$ports = $ds->getPortsForBuild($build);
+
+	if ($ports) {
+
+		?>
+		<table>
+		<tr>
+		<th>Port Directory</th>
+		<th>Last Built</th>
+		</tr>
+		<?php
+		foreach ($ports as $port) {
+			echo "<tr>\n";
+			echo "<td>" . $port->getDirectory() . "</td>\n";
+			echo "<td>" . $port->prettyDatetime($port->getLastBuilt()) . "</td>\n";
+		}
+		echo "</table>\n";
+
+	} else {
+
+		echo "<p>No ports are being build.</p>\n";
+
 	}
 
-	echo "</table>\n";
-
     } else {
-	echo "<p>There are no builds configured.</p>\n";
+
+	echo "<p>Invalid build name.</p>\n";
+
     }
 
     $ds->destroy();
