@@ -47,6 +47,10 @@ cleanup()
     pb=$6
     branch=$7
 
+    if [ ${ARCH} = "i386" ]; then
+	cleanup_mount ${chroot} /compat/linux/proc
+    fi
+
     cleanup_mount ${chroot} /a/ports
     cleanup_mount ${chroot} /usr/src
     cleanup_mount ${chroot} /dev
