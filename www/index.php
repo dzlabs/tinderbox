@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: index.php,v 1.12 2004/03/03 18:40:57 pav Exp $
+# $Id: index.php,v 1.13 2004/03/03 20:35:20 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -60,6 +60,8 @@
 	    echo "<tr>\n";
 	    if ($build->getBuildStatus() == "PORTBUILD") {
 		echo "<td style=\"background-color: green\">&nbsp;</td>\n";
+	    } elseif ($build->getBuildStatus() == "PREPARE") {
+		echo "<td style=\"background-color: lightblue\">&nbsp;</td>\n";
 	    } else {
 		echo "<td>&nbsp;</td>\n";
 	    }
