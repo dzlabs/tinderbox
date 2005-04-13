@@ -255,7 +255,8 @@ ln -sf ../a/ports ${chroot}/usr/ports
 # Don't build in a world-writable directory because some ports hardcode
 # this path and try to load things from it at runtime, which is bad for
 # user security
-mkdir ${chroot}/work
+rm -rf ${chroot}/${WRKDIRPREFIX}
+mkdir -p ${chroot}/${WRKDIRPREFIX}
 
 mkdir -p ${chroot}/usr/src
 
@@ -369,6 +370,8 @@ if [ "${error}" = 0 ]; then
 
     cp ${chroot}/tmp/${pkgname}.log ${pb}/logs/${branch}/${pkgname}.log
     error=$(cat ${chroot}/tmp/status)
+
+    rm -rf ${chroot}/${WRKDIRPREFIX}
 
     if [ -e ${chroot}/tmp/work.tbz ]; then
 	mkdir -p ${pb}/wrkdirs/${branch}
