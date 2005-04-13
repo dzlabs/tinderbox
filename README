@@ -1,4 +1,4 @@
-$Id: README,v 1.9 2005/02/01 22:16:46 marcus Exp $
+$Id: README,v 1.10 2005/03/31 05:42:05 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -20,6 +20,8 @@ Requirements: FreeBSD 6-CURRENT (earlier versions should work, but development
 - Create new jail using create_new_jail
 - Create new ports tree using create_new_portstree
 - Create new build using create_new_build
+- If you will be building ports such as linux-jdk* that require linprocfs
+  be sure to kldload linprocfs before starting Tinderbox builds
 
 To update an existing jail:
 - mkjail
