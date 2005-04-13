@@ -54,7 +54,7 @@ cleanup()
     cleanup_mount ${chroot} /a/ports
     cleanup_mount ${chroot} /usr/src
     cleanup_mount ${chroot} /dev
-    test -d ${chroot}/ccache && cleanup_mount ${chroot} /ccache
+    test -d ${chroot}/${CCACHE_DIR} && cleanup_mount ${chroot} ${CCACHE_DIR}
 
     if [ $noclean = 0 ]; then
 	rm -rf ${chroot}/tmp/*
@@ -271,19 +271,19 @@ mount -t devfs foo ${chroot}/dev
 umount -f ${chroot}/compat/linux/proc > /dev/null 2>&1
 
 if [ -n "${CCACHE_ENABLED}" ]; then
-    mkdir -p ${pb}/ccache/${branch}
-    mkdir -p ${chroot}/ccache
+    mkdir -p ${pb}/${CCACHE_DIR}/${branch}
+    mkdir -p ${chroot}/${CCACHE_DIR}
     if [ -n "${CCACHE_JAIL}" ]; then
 	if [ $nullfs -eq 1 ]; then
-	    mount -t nullfs ${pb}/ccache/${jail} ${chroot}/ccache
+	    mount -t nullfs ${pb}/${CCACHE_DIR}/${jail} ${chroot}/${CCACHE_DIR}
 	else
-	    mount -o rw,nfsv3,intr localhost:${pb}/ccache/${jail} ${chroot}/ccache
+	    mount -o rw,nfsv3,intr localhost:${pb}/${CCACHE_DIR}/${jail} ${chroot}/${CCACHE_DIR}
 	fi
     else
 	if [ $nullfs -eq 1 ]; then
-	    mount -t nullfs ${pb}/ccache/${branch} ${chroot}/ccache
+	    mount -t nullfs ${pb}/${CCACHE_DIR}/${branch} ${chroot}/${CCACHE_DIR}
 	else
-	    mount -o rw,nfsv3,intr localhost:${pb}/ccache/${branch} ${chroot}/ccache
+	    mount -o rw,nfsv3,intr localhost:${pb}/${CCACHE_DIR}/${branch} ${chroot}/${CCACHE_DIR}
 	fi
     fi
 fi
