@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: makemake,v 1.19 2005/01/03 03:24:06 marcus Exp $
+# $Id: makemake,v 1.20 2005/02/13 07:08:33 marcus Exp $
 #
 
 use strict;
@@ -103,12 +103,13 @@ buildenv($BUILD_ROOT, $BUILD_NAME, $JAIL_NAME, $PORTSTREE_NAME);
 
 delete $ENV{'DISPLAY'};
 
-# Set LOCALBASE, X11BASE, and PKGDB_DIR to bogus values to prevent system
-# installed packages from affecting the tinderbox.
+# Set LOCALBASE, X11BASE, PKGDB_DIR, and LINUXBASE to bogus values to prevent
+# system installed packages from affecting the tinderbox.
 $ENV{'LOCALBASE'}  = "/nonexistentlocal";
 $ENV{'X11BASE'}    = "/nonexistentx";
 $ENV{'PKG_DBDIR'}  = "/nonexistentdb";
 $ENV{'PORT_DBDIR'} = "/nonexistentportdb";
+$ENV{'LINUXBASE'}  = "/nonexistentlinux";
 
 if (!scalar(@ARGV)) {
         my @dsPorts = $ds->getPortsForBuild($BUILD);

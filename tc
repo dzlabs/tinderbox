@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: tc,v 1.37 2005/04/02 07:39:35 marcus Exp $
+# $Id: tc,v 1.38 2005/04/02 07:41:04 marcus Exp $
 #
 
 # This is a hack to make sure we can always find our modules.
@@ -526,6 +526,7 @@ sub addPort {
                 $ENV{'X11BASE'}    = "/nonexistentx";
                 $ENV{'PKG_DBDIR'}  = "/nonexistentdb";
                 $ENV{'PORT_DBDIR'} = "/nonexistentportdb";
+                $ENV{'LINUXBASE'}  = "/nonexistentlinux";
 
                 if ($opts->{'r'}) {
                         my @deps = ($opts->{'d'});
