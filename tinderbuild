@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: tinderbuild,v 1.22 2005/01/25 00:45:50 pav Exp $
+# $Id: tinderbuild,v 1.23 2005/02/13 07:08:33 marcus Exp $
 #
 
 
@@ -44,7 +44,7 @@ cleanup() {
 pb=/space
 
 usage () {
-    echo "usage: $0 -b <build name> [-init] [-cleanpackages] [-updateports] [-skipmake] [-noclean] [-noduds] [-plistcheck] [-nullfs] [portdir/portname [...]]"
+    echo "usage: $0 -b <build name> [-init] [-cleanpackages] [-updateports] [-skipmake] [-noclean] [-noduds] [-plistcheck] [-nullfs] [-cleandistfiles] [portdir/portname [...]]"
 }
 
 . ${pb}/scripts/buildenv
@@ -60,6 +60,7 @@ noduds=0
 noclean=0
 plistcheck=0
 nullfs=0
+cleandistfiles=0
 skipmake=0
 error=2
 
@@ -101,6 +102,9 @@ while [ $# -gt 0 ]; do
 	;;
       x-nullfs)
         nullfs=1
+	;;
+      x-cleandistfiles)
+      	cleandistfiles=1
 	;;
       -*)
         usage
@@ -181,6 +185,9 @@ if [ "$skipmake" = "0" ]; then
     fi
     if [ "$nullfs" = "1" ]; then
 	export NULLFS=1
+    fi
+    if [ "$cleandistfiles" = "1" ]; then
+	export CLEANDISTFILES=1
     fi
     ${pb}/scripts/makemake ${duds} ${build} ${ports}
 
