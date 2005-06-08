@@ -268,7 +268,7 @@ if [ -n "${DISTFILE_CACHE}" ]; then
     fi
 fi
 
-if [ ${clean_distfiles} -eq 1 ]; then
+if [ ${cleandistfiles} -eq 1 ]; then
     rm -rf ${DISTDIR}/*
 fi
 
