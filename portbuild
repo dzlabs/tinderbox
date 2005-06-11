@@ -434,7 +434,7 @@ if [ "${error}" = 0 ]; then
 	    fi
 	    lcounter=0
 	    lcounter_max=200
-	    while [ -f ${chroot}${DISTCACHE}/.lock -a ${lcounter} -lt ${lcounter_max} ]; then
+	    while [ -f ${chroot}${DISTCACHE}/.lock -a ${lcounter} -lt ${lcounter_max} ]; do
 		echo "INFO: Waiting for DISTCACHE lock..."
 		lcounter=$(expr ${lcounter} + 1)
 		sleep 3
@@ -445,7 +445,7 @@ if [ "${error}" = 0 ]; then
 	            tar --unlink -C ${chroot}${DISTCACHE} -xvf -
 	        rm -f ${chroot}${DISTCACHE}/.lock
 	    fi
-	fi
+	done
 	if grep -q "${pkgname} is marked as broken: " ${pb}/logs/${branch}/${pkgname}.log ; then
 	    status="BROKEN"
 	else
