@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: tinderbuild,v 1.23 2005/02/13 07:08:33 marcus Exp $
+# $Id: tinderbuild,v 1.24 2005/06/08 02:25:55 marcus Exp $
 #
 
 
@@ -162,6 +162,11 @@ if [ "$cleanpackages" = "1" ]; then
     rm -rf ${pb}/errors/${build}
 fi
 
+if [ -n "${DISTFILE_CACHE}" -a "$cleandistfiles" = "1" ]; then
+    rm -rf ${DISTFILE_CACHE}
+    mkdir -p ${DISTFILE_CACHE}
+fi
+
 mkdir -p ${PACKAGES}
 mkdir -p ${pb}/logs/${build}
 mkdir -p ${pb}/errors/${build}
@@ -185,9 +190,6 @@ if [ "$skipmake" = "0" ]; then
     fi
     if [ "$nullfs" = "1" ]; then
 	export NULLFS=1
-    fi
-    if [ "$cleandistfiles" = "1" ]; then
-	export CLEANDISTFILES=1
     fi
     ${pb}/scripts/makemake ${duds} ${build} ${ports}
 

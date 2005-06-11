@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.pm,v 1.21 2004/11/08 00:45:31 marcus Exp $
+# $Id: TinderboxDS.pm,v 1.22 2005/02/13 07:08:33 marcus Exp $
 #
 
 package TinderboxDS;
@@ -582,6 +582,7 @@ sub updatePortLastStatus {
         my %status_hash = (
                 UNKNOWN => 0,
                 SUCCESS => 1,
+                BROKEN  => 1,
                 FAIL    => 1,
         );
 

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showport.php,v 1.16 2005/02/08 19:44:04 pav Exp $
+# $Id: showport.php,v 1.17 2005/02/13 07:08:34 marcus Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -102,8 +102,11 @@
 				} else {
 					echo "<td>&nbsp;</td>\n";
 				}
-			} elseif ($build["Last_Status"] == "FAIL") {
-				echo "<td style=\"background-color: red\">&nbsp;</td>\n";
+			} elseif ($build["Last_Status"] == "FAIL" || $build["Last_Status"] == "BROKEN") {
+				if ($build["Last_Status"] == "FAIL")
+					echo "<td style=\"background-color: red\">&nbsp;</td>\n";
+				else
+					echo "<td style=\"background-color: rgb(224,255,224); color: red; font-weight: bold; text-align: center\">B</td>\n";
 				if ($build["Last_Built_Version"]) {
 					echo "<td><a href=\"" . $errorloguri . "/" . $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log\">log</a></td>\n";
 				} else {
