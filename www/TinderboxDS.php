@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.22 2004/11/24 02:32:01 marcus Exp $
+# $Id: TinderboxDS.php,v 1.23 2005/02/13 07:08:34 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -34,6 +34,7 @@
     require_once 'PortsTree.php';
     require_once 'ds.inc';
     require_once 'tinderbox.inc';
+    require_once 'common.inc';
 
     $objectMap = array(
 	"Port" => "ports",
