@@ -445,7 +445,7 @@ if [ "${error}" = 0 ]; then
 	            tar --unlink -C ${chroot}${DISTCACHE} -xvf -
 	        rm -f ${chroot}${DISTCACHE}/.lock
 	    fi
-	done
+	fi
 	if grep -q "${pkgname} is marked as broken: " ${pb}/logs/${branch}/${pkgname}.log ; then
 	    status="BROKEN"
 	else
