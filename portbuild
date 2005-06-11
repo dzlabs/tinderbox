@@ -54,7 +54,7 @@ cleanup()
     cleanup_mount ${chroot} /a/ports
     cleanup_mount ${chroot} /usr/src
     cleanup_mount ${chroot} /dev
-    test -d ${chroot}/${CCACHE_DIR} && cleanup_mount ${chroot} ${CCACHE_DIR}
+    test -n "${CCACHE_DIR}" && test -d ${chroot}/${CCACHE_DIR} && cleanup_mount ${chroot} ${CCACHE_DIR}
     if [ -n "${DISTFILE_CACHE}" ]; then
 	if [ -f ${chroot}${DISTCACHE}/.lock ]; then
 	    lpid=$(echo ${chroot}${DISTCACHE}/.lock)
