@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showbuild.php,v 1.22 2005/02/13 07:08:34 marcus Exp $
+# $Id: showbuild.php,v 1.23 2005/06/11 19:17:40 marcus Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -99,11 +99,15 @@
 				} else {
 					echo "<td>&nbsp;</td>\n";
 				}
-			} elseif ($port->getLastStatus() == "FAIL" || $port->getLastStatus() == "BROKEN") {
-				if ($port->getLastStatus() == "FAIL" )
-					echo "<td style=\"background-color: red\">&nbsp;</td>\n";
-				else
-					echo "<td style=\"background-color: rgb(224,255,224); color: red; font-weight: bold; text-align: center\">B</td>\n";
+			} elseif ($port->getLastStatus() == "BROKEN") {
+				echo "<td style=\"background-color: rgb(224,255,224); color: red; font-weight: bold; text-align: center\">B</td>\n";
+				if ($port->getLastBuiltVersion()) {
+					echo "<td><a href=\"" . $loguri . "/" . $build->getName() . "/" . $port->getLastBuiltVersion() . ".log\">log</a></td>\n";
+				} else {
+					echo "<td>&nbsp;</td>\n";
+				}
+			} elseif ($port->getLastStatus() == "FAIL") {
+				echo "<td style=\"background-color: red\">&nbsp;</td>\n";
 				if ($port->getLastBuiltVersion()) {
 					echo "<td><a href=\"" . $errorloguri . "/" . $build->getName() . "/" . $port->getLastBuiltVersion() . ".log\">log</a></td>\n";
 				} else {

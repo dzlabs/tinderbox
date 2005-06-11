@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showport.php,v 1.17 2005/02/13 07:08:34 marcus Exp $
+# $Id: showport.php,v 1.18 2005/06/11 19:17:40 marcus Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -102,11 +102,15 @@
 				} else {
 					echo "<td>&nbsp;</td>\n";
 				}
-			} elseif ($build["Last_Status"] == "FAIL" || $build["Last_Status"] == "BROKEN") {
-				if ($build["Last_Status"] == "FAIL")
-					echo "<td style=\"background-color: red\">&nbsp;</td>\n";
-				else
-					echo "<td style=\"background-color: rgb(224,255,224); color: red; font-weight: bold; text-align: center\">B</td>\n";
+			} elseif ($build["Last_Status"] == "BROKEN") {
+				echo "<td style=\"background-color: rgb(224,255,224); color: red; font-weight: bold; text-align: center\">B</td>\n";
+				if ($build["Last_Built_Version"]) {
+					echo "<td><a href=\"" . $loguri . "/" . $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log\">log</a></td>\n";
+				} else {
+					echo "<td>&nbsp;</td>\n";
+				}
+			} elseif ($build["Last_Status"] == "FAIL") {
+				echo "<td style=\"background-color: red\">&nbsp;</td>\n";
 				if ($build["Last_Built_Version"]) {
 					echo "<td><a href=\"" . $errorloguri . "/" . $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log\">log</a></td>\n";
 				} else {
