@@ -251,6 +251,8 @@ trap  "cleanup ${chroot} ${noclean} ${error} \"${cleandirs}\" ${pkgname} ${pb} $
 if [ -n "${DISTFILE_CACHE}" ]; then
     export DISTCACHE=/distcache
     mkdir -p ${chroot}${DISTCACHE}
+    _MASTER_SITE_OVERRIDE='file:///distcache/${DIST_SUBDIR}/'
+    export MASTER_SITE_OVERRIDE="${_MASTER_SITE_OVERRIDE} ${MASTER_SITE_OVERRIDE}"
 fi
 
 rm -rf ${chroot}/tmp/*
