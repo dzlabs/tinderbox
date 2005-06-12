@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.26 2005/06/12 17:02:41 pav Exp $
+# $Id: TinderboxDS.php,v 1.27 2005/06/12 17:36:04 pav Exp $
 #
 
     require_once 'DB.php';
@@ -406,35 +406,13 @@
 		return str_replace("@FreeBSD.org", "", $input);
 	}
 
-	function checkLeftovers($logfile) {
-		$searchstring = "=== Checking filesystem state";
-
-		if (filesize($logfile) > 5000000) {
-			$errco = `grep -A 1 '^=== Checking filesystem state' $logfile | grep -c '^===='`;
-			if ($errco == 0) {
-				return 1;
-			} else {
-				return 0;
-			}
-		} else {
-			if (substr(strstr(file_get_contents($logfile), $searchstring), strlen($searchstring) + 1, 10) != "==========") {
-				return 1;
-			} else {
-				return 0;
-			}
-		}
-	}
-
 	function getStatusCell($status, $build_name, $version) {
 		global $logdir;
 
 		if ($status == "SUCCESS") {
-			$logfilename = $logdir . "/". $build_name . "/" . $version . ".log";
-			if ($this->checkLeftovers($logfilename)) {
-				echo "<td style=\"background-color: rgb(255,255,216); color: red; font-weight: bold; text-align: center\">L</td>\n";
-			} else {
-				echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
-			}
+			echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
+		} elseif ($status == "LEFTOVERS") {
+			echo "<td style=\"background-color: rgb(255,255,216); color: red; font-weight: bold; text-align: center\">L</td>\n";
 		} elseif ($status == "BROKEN") {
 			echo "<td style=\"background-color: rgb(224,255,224); color: red; font-weight: bold; text-align: center\">B</td>\n";
 		} elseif ($status == "FAIL") {
@@ -446,7 +424,7 @@
 
 	function getLinksCell($status, $build_name, $version, $package_extension) {
 		global $loguri, $pkguri, $errorloguri;
-		if ($status == "SUCCESS") {
+		if ($status == "SUCCESS" || $status == "LEFTOVERS") {
 			if ($version) {
 				echo "<td>";
 				echo "<a href=\"" . $loguri . "/" . $build_name . "/" . $version . ".log\">log</a> ";
