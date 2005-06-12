@@ -1,4 +1,4 @@
-$Id: README,v 1.11 2005/04/13 05:30:13 marcus Exp $
+$Id: README,v 1.12 2005/06/08 08:04:33 pav Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -45,8 +45,9 @@ Getting a copy of work directory for failed build:
   Tarred work directory for the build will appear there.
 
 Distfile caching:
-- add DISTFILE_CACHE="<nfs mount>" to rawenv, eg.:
+- add DISTFILE_CACHE="<nfs mount>" to rawenv, and tell fetch to look there, eg.:
   DISTFILE_CACHE="localhost:/usr/ports/distfiles"
+  MASTER_SITE_OVERRIDE?=  file:///distcache/${DIST_SUBDIR}/
 
 ===================================================================
 
