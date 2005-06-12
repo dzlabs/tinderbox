@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.25 2005/06/12 16:35:01 pav Exp $
+# $Id: TinderboxDS.php,v 1.26 2005/06/12 17:02:41 pav Exp $
 #
 
     require_once 'DB.php';
@@ -409,11 +409,19 @@
 	function checkLeftovers($logfile) {
 		$searchstring = "=== Checking filesystem state";
 
-		if (!file_exists($logfile)) return 0;
-		if (substr(strstr(file_get_contents($logfile), $searchstring), strlen($searchstring) + 1, 10) != "==========") {
-			return 1;
+		if (filesize($logfile) > 5000000) {
+			$errco = `grep -A 1 '^=== Checking filesystem state' $logfile | grep -c '^===='`;
+			if ($errco == 0) {
+				return 1;
+			} else {
+				return 0;
+			}
 		} else {
-			return 0;
+			if (substr(strstr(file_get_contents($logfile), $searchstring), strlen($searchstring) + 1, 10) != "==========") {
+				return 1;
+			} else {
+				return 0;
+			}
 		}
 	}
 
