@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.24 2005/06/11 23:41:21 marcus Exp $
+# $Id: TinderboxDS.php,v 1.25 2005/06/12 16:35:01 pav Exp $
 #
 
     require_once 'DB.php';
@@ -414,6 +414,53 @@
 			return 1;
 		} else {
 			return 0;
+		}
+	}
+
+	function getStatusCell($status, $build_name, $version) {
+		global $logdir;
+
+		if ($status == "SUCCESS") {
+			$logfilename = $logdir . "/". $build_name . "/" . $version . ".log";
+			if ($this->checkLeftovers($logfilename)) {
+				echo "<td style=\"background-color: rgb(255,255,216); color: red; font-weight: bold; text-align: center\">L</td>\n";
+			} else {
+				echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
+			}
+		} elseif ($status == "BROKEN") {
+			echo "<td style=\"background-color: rgb(224,255,224); color: red; font-weight: bold; text-align: center\">B</td>\n";
+		} elseif ($status == "FAIL") {
+			echo "<td style=\"background-color: red\">&nbsp;</td>\n";
+		} else {
+			echo "<td style=\"background-color: grey\">&nbsp;</td>\n";
+		}
+	}
+
+	function getLinksCell($status, $build_name, $version, $package_extension) {
+		global $loguri, $pkguri, $errorloguri;
+		if ($status == "SUCCESS") {
+			if ($version) {
+				echo "<td>";
+				echo "<a href=\"" . $loguri . "/" . $build_name . "/" . $version . ".log\">log</a> ";
+				echo "<a href=\"" . $pkguri . "/" . $build_name . "/All/" . $version . $package_extension . "\">package</a>";
+				echo "</td>\n";
+			} else {
+				echo "<td>&nbsp;</td>\n";
+			}
+		} elseif ($status == "BROKEN") {
+			if ($version) {
+				echo "<td><a href=\"" . $loguri . "/" . $build_name . "/" . $version . ".log\">log</a></td>\n";
+			} else {
+				echo "<td>&nbsp;</td>\n";
+			}
+		} elseif ($status == "FAIL") {
+			if ($version) {
+				echo "<td><a href=\"" . $errorloguri . "/" . $build_name . "/" . $version . ".log\">log</a></td>\n";
+			} else {
+				echo "<td>&nbsp;</td>\n";
+			}
+		} else {
+			echo "<td>&nbsp;</td>\n";
 		}
 	}
 

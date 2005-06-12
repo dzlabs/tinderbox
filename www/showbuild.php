@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showbuild.php,v 1.25 2005/06/11 23:41:21 marcus Exp $
+# $Id: showbuild.php,v 1.26 2005/06/12 16:35:01 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -62,6 +62,8 @@
 
 	if ($ports) {
 
+		$package_extension = $ds->getPackageSuffix($build->getJailId());
+
 		?>
 		<table>
 		<tr>
@@ -79,39 +81,8 @@
 			echo "<td><a href=\"showport.php?id=" . $port->getId() . "\">" . $port->getDirectory() . "</a></td>\n";
 			echo "<td>" . $ds->prettyEmail($port->getMaintainer()) . "</td>\n";
 			echo "<td>" . $port->getLastBuiltVersion() . "</td>\n";
-			if ($port->getLastStatus() == "SUCCESS") {
-				$logfilename = $logdir . "/". $build->getName() . "/" . $port->getLastBuiltVersion() . ".log";
-				if ($ds->checkLeftovers($logfilename)) {
-					echo "<td style=\"background-color: rgb(255,255,216); color: red; font-weight: bold; text-align: center\">L</td>\n";
-				} else {
-					echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
-				}
-				if ($port->getLastBuiltVersion()) {
-					echo "<td>";
-					echo "<a href=\"" . $loguri . "/" . $build->getName() . "/" . $port->getLastBuiltVersion() . ".log\">log</a> ";
-					echo "<a href=\"" . $pkguri . "/" . $build->getName() . "/All/" . $port->getLastBuiltVersion() . $ds->getPackageSuffix($build->getJailId()) . "\">package</a>";
-					echo "</td>\n";
-				} else {
-					echo "<td>&nbsp;</td>\n";
-				}
-			} elseif ($port->getLastStatus() == "BROKEN") {
-				echo "<td style=\"background-color: rgb(224,255,224); color: red; font-weight: bold; text-align: center\">B</td>\n";
-				if ($port->getLastBuiltVersion()) {
-					echo "<td><a href=\"" . $loguri . "/" . $build->getName() . "/" . $port->getLastBuiltVersion() . ".log\">log</a></td>\n";
-				} else {
-					echo "<td>&nbsp;</td>\n";
-				}
-			} elseif ($port->getLastStatus() == "FAIL") {
-				echo "<td style=\"background-color: red\">&nbsp;</td>\n";
-				if ($port->getLastBuiltVersion()) {
-					echo "<td><a href=\"" . $errorloguri . "/" . $build->getName() . "/" . $port->getLastBuiltVersion() . ".log\">log</a></td>\n";
-				} else {
-					echo "<td>&nbsp;</td>\n";
-				}
-			} else { /* UNKNOWN */
-				echo "<td style=\"background-color: grey\">&nbsp;</td>\n";
-				echo "<td>&nbsp;</td>\n";
-			}
+			echo $ds->getStatusCell($port->getLastStatus(), $build->getName(), $port->getLastBuiltVersion());
+			echo $ds->getLinksCell($port->getLastStatus(), $build->getName(), $port->getLastBuiltVersion(), $package_extension);
 			echo "<td>" . $ds->prettyDatetime($port->getLastBuilt()) . "</td>\n";
 			echo "<td>" . $ds->prettyDatetime($port->getLastSuccessfulBuilt()) . "</td>\n";
 			echo "</tr>\n";
