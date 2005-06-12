@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderboxDS.php,v 1.23 2005/02/13 07:08:34 marcus Exp $
+# $Id: TinderboxDS.php,v 1.24 2005/06/11 23:41:21 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -34,7 +34,6 @@
     require_once 'PortsTree.php';
     require_once 'ds.inc';
     require_once 'tinderbox.inc';
-    require_once 'common.inc';
 
     $objectMap = array(
 	"Port" => "ports",
@@ -405,6 +404,17 @@
 
 	function prettyEmail($input) {
 		return str_replace("@FreeBSD.org", "", $input);
+	}
+
+	function checkLeftovers($logfile) {
+		$searchstring = "=== Checking filesystem state";
+
+		if (!file_exists($logfile)) return 0;
+		if (substr(strstr(file_get_contents($logfile), $searchstring), strlen($searchstring) + 1, 10) != "==========") {
+			return 1;
+		} else {
+			return 0;
+		}
 	}
 
    }

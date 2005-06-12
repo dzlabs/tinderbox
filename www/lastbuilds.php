@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: lastbuilds.php,v 1.16 2005/06/11 19:55:23 marcus Exp $
+# $Id: lastbuilds.php,v 1.17 2005/06/11 23:41:21 marcus Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -104,11 +104,7 @@
 			echo "<td>" . $build["Last_Built_Version"] . "</td>\n";
 			if ($build["Last_Status"] == "SUCCESS") {
 				$logfilename = $logdir . "/". $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log";
-				$leftovers = 0;
-				if (file_exists($logfilename) &&
-				    substr(strstr(file_get_contents($logfilename),$leftovers_searchstring),strlen($leftovers_searchstring)+1,10) != "==========" )
-						$leftovers = 1;
-				if ($leftovers == 1) {
+				if ($ds->checkLeftovers($logfilename)) {
 					echo "<td style=\"background-color: rgb(255,255,216); color: red; font-weight: bold; text-align: center\">L</td>\n";
 				} else {
 					echo "<td style=\"background-color: rgb(224,255,224)\">&nbsp;</td>\n";
