@@ -5,38 +5,6 @@ usage () {
     exit 1
 }
 
-kill_procs()
-{
-    dir=$1
-
-    pids="XXX"
-    while [ ! -z "${pids}" ]; do
-	pids=$(fstat -f "$dir" | tail +2 | awk '{print $3}' | sort -u)
-	if [ ! -z "${pids}" ]; then
-	    echo "Killing off pids in ${dir}"
-	    ps -p $pids
-	    kill -KILL ${pids} 2> /dev/null
-	    sleep 2
-	fi
-    done
-}
-
-cleanup_mount() {
-    chroot=$1
-    mount=$2
-
-    if [ -d ${chroot}${mount} ]; then
-	mdir=$(fstat -f ${chroot}${mount} | head -2 | tail -1 | awk '{print $5}')
-	if [ "${mdir}" = "MOUNT" ]; then
-	    umount ${chroot}${mount} || echo "Cleanup of ${chroot}${mount} failed!"
-	fi
-	if [ "${mdir}" = "${chroot}${mount}" ]; then
-	    kill_procs ${chroot}${mount}
-	    umount ${chroot}${mount} || echo "Cleanup of ${chroot}${mount} failed!"
-	fi
-    fi
-}
-
 cleanup()
 {
     chroot=$1
@@ -47,14 +15,8 @@ cleanup()
     pb=$6
     branch=$7
 
-    if [ ${ARCH} = "i386" ]; then
-	cleanup_mount ${chroot} /compat/linux/proc
-    fi
+    cleanup_mounts -d build -b $(basename $chroot)
 
-    cleanup_mount ${chroot} /a/ports
-    cleanup_mount ${chroot} /usr/src
-    cleanup_mount ${chroot} /dev
-    test -n "${CCACHE_DIR}" && test -d ${chroot}/${CCACHE_DIR} && cleanup_mount ${chroot} ${CCACHE_DIR}
     if [ -n "${DISTFILE_CACHE}" ]; then
 	if [ -f ${chroot}${DISTCACHE}/.lock ]; then
 	    lpid=$(echo ${chroot}${DISTCACHE}/.lock)
@@ -62,7 +24,6 @@ cleanup()
 		rm -f ${chroot}${DISTCACHE}/.lock
 	    fi
 	fi
-        test -d ${chroot}${DISTCACHE} && cleanup_mount ${chroot} ${DISTCACHE}
     fi
 
     if [ $noclean = 0 ]; then
@@ -88,6 +49,8 @@ cleanup()
 
 # Configurable variables
 pb=/space
+
+. ${pb}/scripts/tinderbox_shlib.sh
 
 error=0
 init=0
@@ -186,6 +149,9 @@ export USA_RESIDENT=yes
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/X11R6/bin
 
+# Just to be shure we start in a clean build-tree
+cleanup_mounts -d build -b ${branch}
+
 if [ -n "${CCACHE_ENABLED}" ]; then
     # XXX We need to do this since certain ports (e.g. cdrtools) don't
     # respect CC the way they should (thanks for the tip, Adam).
@@ -263,21 +229,23 @@ echo "building ${pkgname} in directory ${chroot}" | tee ${chroot}/tmp/${pkgname}
 echo "with arguments: ${args}" | tee -a ${chroot}/tmp/${pkgname}.log
 
 # If we're using a central distfile repository, mount it now
-if [ -n "${DISTFILE_CACHE}" ]; then
-    if echo "${DISTFILE_CACHE}" | grep -q '^[a-zA-Z0-9\.-_]*:/' ; then
-	mount -o nfsv3,intr ${DISTFILE_CACHE} ${chroot}/${DISTCACHE}
-    else
-	mount -t nullfs ${DISTFILE_CACHE} ${chroot}/${DISTCACHE}
-    fi
+if [ -n "${DISTFILE_CACHE}" ] ; then
+	if [ $nullfs -eq 1 ] ; then
+		request_mount -n -d distcache  -b ${branch} -s "${DISTFILE_CACHE}"
+	else
+		request_mount -d distcache  -b ${branch} -s "${DISTFILE_CACHE}"
+	fi
 fi
 
 mkdir -p ${chroot}/a/ports
 rm -rf ${chroot}/usr/ports
-if [ $nullfs -eq 1 ]; then
-    mount -t nullfs ${pb}/portstrees/${portstree}/ports ${chroot}/a/ports
+
+if [ ${nullfs} -eq 1 ] ; then
+	request_mount -n -r -d buildports -b ${branch}
 else
-    mount -o nfsv3,intr -r localhost:${pb}/portstrees/${portstree}/ports ${chroot}/a/ports
+	request_mount -r -d buildports -b ${branch}
 fi
+
 ln -sf ../a/ports ${chroot}/usr/ports
 
 # Don't build in a world-writable directory because some ports hardcode
@@ -288,30 +256,28 @@ mkdir -p ${chroot}/${WRKDIRPREFIX}
 
 mkdir -p ${chroot}/usr/src
 
-if [ $nullfs -eq 1 ]; then
-    mount -t nullfs ${pb}/jails/${jail}/src ${chroot}/usr/src
+if [ ${nullfs} -eq 1 ] ; then
+	request_mount -n -r -d buildsrc -b ${branch}
 else
-    mount -o nfsv3,intr -r localhost:${pb}/jails/${jail}/src ${chroot}/usr/src
+	request_mount -r -d buildsrc -b ${branch}
 fi
 
 mount -t devfs foo ${chroot}/dev
-
-umount -f ${chroot}/compat/linux/proc > /dev/null 2>&1
 
 if [ -n "${CCACHE_ENABLED}" ]; then
     mkdir -p ${pb}/${CCACHE_DIR}/${branch}
     mkdir -p ${chroot}/${CCACHE_DIR}
     if [ -n "${CCACHE_JAIL}" ]; then
-	if [ $nullfs -eq 1 ]; then
-	    mount -t nullfs ${pb}/${CCACHE_DIR}/${jail} ${chroot}/${CCACHE_DIR}
+	if [ ${nullfs} -eq 1 ] ; then
+		request_mount -n -d ccache -s ${pb}/${CCACHE_DIR}/${jail} -d ${chroot}/${CCACHE_DIR}
 	else
-	    mount -o rw,nfsv3,intr localhost:${pb}/${CCACHE_DIR}/${jail} ${chroot}/${CCACHE_DIR}
+		request_mount -d ccache -s ${pb}/${CCACHE_DIR}/${jail} -d ${chroot}/${CCACHE_DIR}
 	fi
     else
-	if [ $nullfs -eq 1 ]; then
-	    mount -t nullfs ${pb}/${CCACHE_DIR}/${branch} ${chroot}/${CCACHE_DIR}
+	if [ ${nullfs} -eq 1 ] ; then
+		request_mount -n -d ccache -s ${pb}/${CCACHE_DIR}/${branch} -d ${chroot}/${CCACHE_DIR}
 	else
-	    mount -o rw,nfsv3,intr localhost:${pb}/${CCACHE_DIR}/${branch} ${chroot}/${CCACHE_DIR}
+		request_mount -d ccache -s ${pb}/${CCACHE_DIR}/${branch} -d ${chroot}/${CCACHE_DIR}
 	fi
     fi
 fi

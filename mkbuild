@@ -24,11 +24,13 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: mkbuild,v 1.6 2005/02/13 07:08:33 marcus Exp $
+# $Id: mkbuild,v 1.7 2005/06/13 04:15:44 marcus Exp $
 #
 
 
 pb=/space
+
+. ${pb}/scripts/tinderbox_shlib.sh
 
 _builds=$(${pb}/scripts/tc listBuilds)
 
@@ -65,10 +67,7 @@ fi
 
 D=${pb}/${build}
 
-umount -f ${D}/a/ports >/dev/null 2>&1
-umount -f ${D}/usr/src >/dev/null 2>&1
-umount -f ${D}/dev >/dev/null 2>&1
-umount -f ${D}/distcache >/dev/null 2>&1
+cleanup_mounts -d build -b ${build}
 chflags -R noschg ${D}
 rm -rf ${D}
 mkdir -p ${D}

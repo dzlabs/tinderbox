@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: create_new_portstree,v 1.7 2004/03/10 04:56:12 marcus Exp $
+# $Id: create_new_portstree,v 1.8 2005/02/13 07:08:33 marcus Exp $
 #
 
 
@@ -39,6 +39,9 @@ if [ `id -u` != 0 ]; then
 fi
 
 pb=/space
+
+. ${pb}/scripts/tinderbox_shlib.sh
+
 suphost=cvsup12.FreeBSD.org
 cvsup_compress= #*default compress
 
@@ -90,6 +93,7 @@ else
 fi
 
 echo -n "INFO: Creating directories and supfile for new portstree..."
+cleanup_mounts -d portstree -p ${portstree}
 rm -rf ${pb}/portstrees/${portstree}
 
 mkdir -p ${pb}/portstrees/${portstree}/ports
