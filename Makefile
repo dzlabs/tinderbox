@@ -1,12 +1,12 @@
-# $Id: Makefile,v 1.6 2005/03/24 21:04:33 marcus Exp $
+# $Id: Makefile,v 1.7 2005/04/13 05:25:30 marcus Exp $
 
-VERSION=	1.0.4
+VERSION=	1.1.0
 
 DATA=		Build.pm Jail.pm Port.pm PortsTree.pm README TinderObject.pm \
 		TinderboxDS.pm User.pm buildenv buildscript create_new_build \
 		create_new_jail create_new_portstree ds.ph list_jails makemake \
 		mkbuild mkjail pnohang.c portbuild rawenv tc tinderbox.ph \
-		tinderbox.schema tinderbuild tinderlib.pl
+		tinderbox.schema tinderbuild tinderlib.pl tinderbox_shlib.sh
 WWWDATA=	Build.php Jail.php Port.php PortsTree.php TinderObject.php \
 		TinderboxDS.php cleanup.php ds.inc failures.php index.php \
 		lastbuilds.php showbuild.php showport.php tinderbox.inc \
