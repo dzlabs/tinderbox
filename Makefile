@@ -1,6 +1,6 @@
-# $Id: Makefile,v 1.7 2005/04/13 05:25:30 marcus Exp $
+# $Id: Makefile,v 1.8 2005/06/16 00:02:45 marcus Exp $
 
-VERSION=	1.1.0
+VERSION=	1.1.1
 
 DATA=		Build.pm Jail.pm Port.pm PortsTree.pm README TinderObject.pm \
 		TinderboxDS.pm User.pm buildenv buildscript create_new_build \
