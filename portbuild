@@ -269,15 +269,15 @@ if [ -n "${CCACHE_ENABLED}" ]; then
     mkdir -p ${chroot}/${CCACHE_DIR}
     if [ -n "${CCACHE_JAIL}" ]; then
 	if [ ${nullfs} -eq 1 ] ; then
-		request_mount -n -d ccache -s ${pb}/${CCACHE_DIR}/${jail} -d ${chroot}/${CCACHE_DIR}
+		request_mount -n -d ccache -s ${pb}/${CCACHE_DIR}/${jail} -b ${branch}
 	else
-		request_mount -d ccache -s ${pb}/${CCACHE_DIR}/${jail} -d ${chroot}/${CCACHE_DIR}
+		request_mount -d ccache -s ${pb}/${CCACHE_DIR}/${jail} -b ${branch}
 	fi
     else
 	if [ ${nullfs} -eq 1 ] ; then
-		request_mount -n -d ccache -s ${pb}/${CCACHE_DIR}/${branch} -d ${chroot}/${CCACHE_DIR}
+		request_mount -n -d ccache -s ${pb}/${CCACHE_DIR}/${branch} -b ${branch}
 	else
-		request_mount -d ccache -s ${pb}/${CCACHE_DIR}/${branch} -d ${chroot}/${CCACHE_DIR}
+		request_mount -d ccache -s ${pb}/${CCACHE_DIR}/${branch} -b ${branch}
 	fi
     fi
 fi

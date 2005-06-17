@@ -162,6 +162,7 @@ request_mount() {
 			_destination=${_pb}/${_build}/distcache
 			;;
 		ccache)
+			_destination=${_pb}/${_build}/ccache
 			;;
 		*)	echo "unknown destination type!"
 			return 1
@@ -169,11 +170,11 @@ request_mount() {
 	esac
 
 	if [ -z "${_source}" ] ; then
-		echo "source has to be filed!"
+	    	echo "source has to be filled!"
 		return 1
 	fi
 	if [ -z "${_destination}" ] ; then
-		echo "destination has to be filed!"
+	    	echo "destination has to be filled!"
 		return 1
 	fi
 
