@@ -230,11 +230,7 @@ echo "with arguments: ${args}" | tee -a ${chroot}/tmp/${pkgname}.log
 
 # If we're using a central distfile repository, mount it now
 if [ -n "${DISTFILE_CACHE}" ] ; then
-	if [ $nullfs -eq 1 ] ; then
-		request_mount -n -d distcache  -b ${branch} -s "${DISTFILE_CACHE}"
-	else
-		request_mount -d distcache  -b ${branch} -s "${DISTFILE_CACHE}"
-	fi
+	request_mount -d distcache -b ${branch} -s "${DISTFILE_CACHE}"
 fi
 
 mkdir -p ${chroot}/a/ports
