@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: tc,v 1.38 2005/04/02 07:41:04 marcus Exp $
+# $Id: tc,v 1.39 2005/05/11 17:51:16 marcus Exp $
 #
 
 # This is a hack to make sure we can always find our modules.
@@ -321,9 +321,6 @@ sub init {
         system("mkdir -p $LOG_DIR");
         system("mkdir -p $PKGS_DIR");
         system("mkdir -p $WRKDIRS_DIR");
-
-        # Compile pnohang.c
-        system("cd $TINDER_BIN && cc -o pnohang -static pnohang.c");
 }
 
 sub listJails {

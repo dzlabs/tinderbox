@@ -341,7 +341,7 @@ if ! cp -p ${pb}/scripts/buildscript ${chroot}; then
     error=3
     cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${pb} ${branch}
 fi
-if ! cp -p ${pb}/scripts/pnohang ${chroot}; then
+if ! cc -o ${chroot}/pnohang -static ${pb}/scripts/pnohang.c; then
     error=4
     cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${pb} ${branch}
 fi
