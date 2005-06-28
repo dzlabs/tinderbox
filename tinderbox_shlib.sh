@@ -108,6 +108,7 @@ request_mount() {
 
 	_pb=${pb:=/space}
 	_pb=$(realpath ${_pb})
+	_ccache_dir=${CCACHE_DIR:=/ccache}
 
 	_nullfs=0
 
@@ -164,7 +165,7 @@ request_mount() {
 			_fq_source=1
 			;;
 		ccache)
-			_destination=${_pb}/${_build}/ccache
+			_destination=${_pb}/${_build}/${_ccache_dir}
 			;;
 		*)	echo "unknown destination type!"
 			return 1
