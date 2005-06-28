@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: User.pm,v 1.1 2004/03/16 08:28:17 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/User.pm,v 1.3 2005/06/28 05:47:55 adamw Exp $
 #
 
 package User;

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.8 2005/06/16 00:02:45 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.10 2005/06/28 05:47:55 adamw Exp $
 
 VERSION=	1.1.1
 

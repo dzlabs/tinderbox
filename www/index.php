@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: index.php,v 1.19 2004/12/28 14:39:47 pav Exp $
+# $MCom: portstools/tinderbox/www/index.php,v 1.21 2005/06/28 05:47:56 adamw Exp $
 #
 
     require_once 'TinderboxDS.php';

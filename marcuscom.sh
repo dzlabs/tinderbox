@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: marcuscom.sh,v 1.1 2004/03/16 08:29:15 marcus Exp $
+# $MCom: portstools/tinderbox/marcuscom.sh,v 1.3 2005/06/28 05:47:55 adamw Exp $
 #
 
 

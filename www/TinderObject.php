@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: TinderObject.php,v 1.6 2004/03/03 20:27:33 pav Exp $
+# $MCom: portstools/tinderbox/www/TinderObject.php,v 1.8 2005/06/28 05:47:56 adamw Exp $
 #
 
     class TinderObject {

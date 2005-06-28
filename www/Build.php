@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: Build.php,v 1.4 2004/03/04 23:49:03 pav Exp $
+# $MCom: portstools/tinderbox/www/Build.php,v 1.6 2005/06/28 05:47:56 adamw Exp $
 #
 
     require_once 'TinderObject.php';

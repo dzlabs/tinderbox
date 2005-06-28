@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: showport.php,v 1.21 2005/06/12 16:35:01 pav Exp $
+# $MCom: portstools/tinderbox/www/showport.php,v 1.23 2005/06/28 05:47:56 adamw Exp $
 #
 
     require_once 'TinderboxDS.php';

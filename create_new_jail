@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: create_new_jail,v 1.10 2005/02/13 07:08:33 marcus Exp $
+# $MCom: portstools/tinderbox/create_new_jail,v 1.12 2005/06/28 05:47:55 adamw Exp $
 #
 
 

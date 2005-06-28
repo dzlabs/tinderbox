@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: tinderlib.pl,v 1.4 2004/03/14 21:41:20 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.6 2005/06/28 05:47:55 adamw Exp $
 #
 
 use strict;

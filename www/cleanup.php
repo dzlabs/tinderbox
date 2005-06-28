@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: cleanup.php,v 1.1 2004/11/07 14:08:23 pav Exp $
+# $MCom: portstools/tinderbox/www/cleanup.php,v 1.3 2005/06/28 05:47:56 adamw Exp $
 #
 
 require_once 'TinderboxDS.php';
