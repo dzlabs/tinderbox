@@ -98,9 +98,11 @@ unset DISPLAY
 
 pkgname=$(basename $1 ${PKGSUFFIX})
 
-if grep -qxF ${pkgname} ${pb}/builds/${branch}/duds; then
-    echo "skipping ${pkgname} (found in duds)"
-    exit 1
+if [ -f ${pb}/builds/${branch}/duds ]; then
+    if grep -qxF ${pkgname} ${pb}/builds/${branch}/duds; then
+        echo "skipping ${pkgname} (found in duds)"
+        exit 1
+    fi
 fi
 
 dirname=$2
