@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.15 2005/06/28 05:47:55 adamw Exp $
+$MCom: portstools/tinderbox/README,v 1.16 2005/07/03 07:26:02 oliver Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -22,6 +22,18 @@ Requirements: FreeBSD 6-CURRENT (earlier versions should work, but development
 - Create new build using create_new_build
 - If you will be building ports such as linux-jdk* that require linprocfs
   be sure to kldload linprocfs before starting Tinderbox builds
+
+If you want to mount /ports inside your portstree or /src inside your jail
+via nullfs or nfs from an other location, define
+  #MOUNT_PORTSTREE_<portstreename>="server:/directory"
+  #MOUNT_JAIL_<jailname>="server:/directory"
+for nfs mounts or
+  #MOUNT_PORTSTREE_<portstreename>="/directory"
+  #MOUNT_JAIL_<jailname>="/directory"
+for nullfs mounts in rawenv before you call create_new_portstree or
+create_new_jail. They will automatically utilise this.
+Furthermore, tinderbuild will ensure that these filesystems are correctly
+mounted so you don't need to mount them by your own before calling tinderbuild.
 
 To update an existing jail:
 - mkjail

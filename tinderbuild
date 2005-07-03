@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tinderbuild,v 1.28 2005/06/28 05:47:55 adamw Exp $
+# $MCom: portstools/tinderbox/tinderbuild,v 1.29 2005/07/03 07:26:02 oliver Exp $
 #
 
 
@@ -168,6 +168,9 @@ if [ -n "${DISTFILE_CACHE}" -a "$cleandistfiles" = "1" ]; then
     rm -rf ${pb}/${build}/distcache/*
     cleanup_mounts -d distcache -b ${build}
 fi
+
+request_mount -q -r -d portstree -p ${portstree}
+request_mount -q -r -d jail -j ${jail}
 
 mkdir -p ${PACKAGES}
 mkdir -p ${pb}/logs/${build}

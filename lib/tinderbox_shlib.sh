@@ -25,6 +25,53 @@ cleanup_mount() {
 	fi
 }
 
+parse_rawenv() {
+
+	_argument=
+	_type=
+	_quiet=1
+
+	_pb=${pb:=/space}
+	# Just in case /space is a symlink
+	_pb=$(realpath ${_pb})
+	_rawenv="${_pb}/scripts/rawenv"
+
+	while getopts a:t:q OPT ; do
+		case $OPT in
+			a)	_argument=${OPTARG}
+				;;
+			t)	_type=${OPTARG}
+				;;
+			q)	_quiet=1
+				;;
+		esac
+	done
+
+	if [ -z "${_type}" ] ; then
+		echo "type has to be filled!" >&2
+		return 1
+	fi
+	if [ -z "${_argument}" ] ; then
+		echo "argument has to be filled!" >&2
+		return 1
+	fi
+
+	case ${_type} in
+		mount-portstree)	_var="#MOUNT_PORTSTREE_${_argument}"
+					;;
+		mount-jail)		_var="#MOUNT_JAIL_${_argument}"
+					;;
+		*)			echo "unknown type" >&2
+					return 1
+					;;
+	esac
+
+	if ! grep -m 1 "^${_var}=" ${_rawenv} | sed 's|[^=]*[	 ]*=["	 ]*\([^"]*\).*|\1|' ; then
+		[ ${_quiet} -ne 1 ] && echo "${_var} not found in rawenv" >&2
+		return 1
+	fi
+}
+
 cleanup_mounts() {
 
 	_build=
@@ -54,21 +101,21 @@ cleanup_mounts() {
 	case ${_destination} in
                 jail)
                         if [ -z "${_jail}" ] ; then
-                                echo "jail has to be filled!"
+                                echo "jail has to be filled!" >&2
 				return 1
                         fi
                         _destination=${_pb}/jails/${_jail}
                         ;;
                 portstree)
 			if [ -z "${_portstree}" ] ; then
-				echo "portstree has to be filled!"
+				echo "portstree has to be filled!" >&2
 				return 1
 			fi
                         _destination=${_pb}/portstrees/${_portstree}
                         ;;
                 build)
 			if [ -z "${_build}" ] ; then
-				echo "build has to be filled!"
+				echo "build has to be filled!" >&2
 				return 1
 			fi
                         _destination=${_pb}/${_build}
@@ -78,7 +125,7 @@ cleanup_mounts() {
                         ;;
 		distcache)
 			if [ -z "${_build}" ] ; then
-				echo "build has to be filled!"
+				echo "build has to be filled!" >&2
 				return 1
 			fi
 			_destination=${_pb}/${_build}/distcache
@@ -105,14 +152,16 @@ request_mount() {
 	_jail=
 	_portstree=
 	_fq_source=0
+	_quiet=0
 
 	_pb=${pb:=/space}
+	# Just in case /space is a symlink
 	_pb=$(realpath ${_pb})
 	_ccache_dir=${CCACHE_DIR:=/ccache}
 
 	_nullfs=0
 
-	while getopts nrs:d:b:p:j: OPT ; do
+	while getopts qnrs:d:b:p:j: OPT ; do
 		case ${OPT} in
 			n)	_nullfs=1
 				;;
@@ -128,23 +177,37 @@ request_mount() {
 				;;
 			j)	_jail=${OPTARG}
 				;;
+			q)	_quiet=1
+				;;
 		esac
 	done
 
 	case ${_destination} in
 		jail)
 			if [ -z "${_jail}" ] ; then
-				echo "jail has to be filled!"
+				echo "jail has to be filled!" >&2
 				return 1
 			fi
 			_destination=${_pb}/jails/${_jail}/src
+			if [ -z "${_source}" ] ; then 
+				_source=$(parse_rawenv -q -t mount-jail -a ${_jail})
+			fi
+			_fq_source=1
 			;;
 		portstree)
+			if [ -z "${_portstree}" ] ; then 
+				echo "portstree has to be filled!" >&2
+				return 1
+			fi
 			_destination=${_pb}/portstrees/${_portstree}/ports
+			if [ -z "${_source}" ] ; then 
+				_source=$(parse_rawenv -q -t mount-portstree -a ${_portstree})
+			fi
+			_fq_source=1
 			;;
 		buildsrc)
 			if [ -z "${_build}" ] ; then
-				echo "build has to be filled!"
+				echo "build has to be filled!" >&2
 				return 1
 			fi
 			_jail=$(${_pb}/scripts/tc getJailForBuild -b ${_build})
@@ -153,7 +216,7 @@ request_mount() {
 			;;
 		buildports)
 			if [ -z "${_build}" ] ; then
-				echo "build has to be filled!"
+				echo "build has to be filled!" >&2
 				return 1
 			fi
 			_portstree=$(${_pb}/scripts/tc getPortsTreeForBuild -b ${_build})
@@ -173,18 +236,25 @@ request_mount() {
 	esac
 
 	if [ -z "${_source}" ] ; then
-	    	echo "source has to be filled!"
+	    	[ ${_quiet} -ne 1 ] && echo "source has to be filled!" >&2
 		return 1
 	fi
 	if [ -z "${_destination}" ] ; then
-	    	echo "destination has to be filled!"
+	    	echo "destination has to be filled!" >&2
 		return 1
+	fi
+
+	# is the filesystem already mounted?
+	filesystem=$(df ${_destination} | awk '{a=$1}  END {print a}')
+	mountpoint=$(df ${_destination} | awk '{a=$NF} END {print a}')
+	if [ "${filesystem}" = "${_source}" -a "${mountpoint}" = "${_destination}" ] ; then
+		return 0
 	fi
 
 	# is _nullfs mount specified?
 	if [ ${_nullfs} -eq 1 ] ; then
 		_options="-t nullfs"
-	else # it has to be a nfs mount then
+	else # it probably has to be a nfs mount then
 		# lets check what kind of _source we have. If it is allready in
 		# a nfs format, we don't need to adjust anything
 		case ${_source} in
