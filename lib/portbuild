@@ -186,17 +186,25 @@ if [ "${major_version}" = "4" ]; then
     cp -p /libexec/ld-elf.so.1 ${chroot}/libexec
     cp -p /lib/libkvm.so.2 /lib/libm.so.3 ${chroot}/lib
     if [ -f /lib/libc.so.6 ]; then
-	chflags noschg ${chroot}/lib/libc.so.6
+	if [ -f ${chroot}/lib/libc.so.6 ]; then
+		chflags noschg ${chroot}/lib/libc.so.6
+	fi
 	cp -p /lib/libc.so.6 ${chroot}/lib
     else
-	chflags noschg ${chroot}/lib/libc.so.5
+	if [ -f ${chroot}/lib/libc.so.5 ]; then
+		chflags noschg ${chroot}/lib/libc.so.5
+	fi
 	cp -p /lib/libc.so.5 ${chroot}/lib
     fi
 elif [ "${major_version}" = "6" -a -f /lib/libc.so.5 ]; then
-    chflags noschg ${chroot}/lib/libc.so.5
+    if [ -f ${chroot}/lib/libc.so.5 ]; then
+	chflags noschg ${chroot}/lib/libc.so.5
+    fi
     cp -p /lib/libc.so.5 ${chroot}/lib
 elif [ "${major_version}" = "5" -a -f /lib/libc.so.6 ]; then
-    chflags noschg ${chroot}/lib/libc.so.6
+    if [ -f ${chroot}/lib/libc.so.6 ]; then
+	chflags noschg ${chroot}/lib/libc.so.6
+    fi
     cp -p /lib/libc.so.6 ${chroot}/lib
 fi
 cp -p /rescue/ps ${chroot}/bin
