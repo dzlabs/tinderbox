@@ -1,0 +1,27 @@
+#!/bin/sh
+
+pb=/space
+
+. ${pb}/scripts/tinderbox_shlib.sh
+
+TINDERBUILD_ARGS="$*"
+TINDERD_SLEEPTIME=$(parse_rawenv -t raw -a TINDERD_SLEEPTIME -q)
+TINDERD_SLEEPTIME=${TINDERD_SLEEPTIME:=120}
+
+while true ; do
+	ENTRY=$(${pb}/scripts/tc listBuildPortsQueue -r 2>/dev/null | head -1)
+	ID=${ENTRY%:*}
+	BUILD=${ENTRY#*:}
+	BUILD=${BUILD%:*}
+	PORT=${ENTRY##*:}
+
+	if [ -n "${BUILD}" -a -n "${PORT}" -a -n "${ID}" ] ; then
+		echo "Going to build ${PORT} on ${BUILD}"
+		${pb}/scripts/tc addPort -b ${BUILD} -d ${PORT} -r
+		${pb}/scripts/tinderbuild -b ${BUILD} ${TINDERBUILD_ARGS} ${PORT} >/dev/null
+		${pb}/scripts/tc rmBuildPortsQueueEntry -i ${ID}
+	else
+		echo "INFO: Nothing to do. Sleeping ${TINDERD_SLEEPTIME} seconds."
+		sleep ${TINDERD_SLEEPTIME}
+	fi
+done

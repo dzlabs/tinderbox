@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.16 2005/07/03 07:26:02 oliver Exp $
+$MCom: portstools/tinderbox/README,v 1.17 2005/07/06 18:31:21 oliver Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -94,6 +94,28 @@ CCACHE_LOGFILE=/ccache.log
 
 Then, in the root of each build directory, there will be a ccache.log that
 will let you know if the cache is working.
+
+===================================================================
+  
+USING tinderd FOR AUTOMATING/QUEUEING PORT BUILDS
+
+If you want to use tinderbox to test many different ports after each other
+you probably want "tinderd". tinderd runs as a daemon and looks to see if
+something was added to the "ports to build queue". You can add different
+ports for different builds for different hosts with different priorities.
+tinderd will automaticly pick up the port with the highest priority for its
+host and starts building it. That repeats until the queue is empty. After
+the queue got empty tinderd will sleep for a configurable amount of time
+(default: 120 seconds) thereafter it starts searching for new queue entries
+again.
+
+To set it up you must first add a Tinderbox host to the database:
+  tc addHost
+Right after that you can start tinderd. (it will stay in foreground by default)
+Now use
+  tc addBuildPortsQueueEntry -b <build name> -d <port directory>
+to add a port to the queue. tinderd will automaticly pick it up, run a
+tinderbuild on it, and will delete the entry after tinderbuild completed.
 
 ===================================================================
 

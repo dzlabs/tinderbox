@@ -61,6 +61,8 @@ parse_rawenv() {
 					;;
 		mount-jail)		_var="#MOUNT_JAIL_${_argument}"
 					;;
+		raw)			_var="${_argument}"
+					;;
 		*)			echo "unknown type" >&2
 					return 1
 					;;

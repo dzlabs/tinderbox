@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.26 2005/07/06 05:55:50 marcus Exp $
+# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.27 2005/07/06 18:31:21 oliver Exp $
 #
 
 package TinderboxDS;
@@ -32,8 +32,10 @@ use strict;
 use Port;
 use Jail;
 use PortsTree;
+use BuildPortsQueue;
 use Build;
 use User;
+use Host;
 use DBI;
 use Carp;
 use vars qw(
@@ -46,11 +48,13 @@ use vars qw(
 );
 
 %OBJECT_MAP = (
-        "Port"      => "ports",
-        "Jail"      => "jails",
-        "Build"     => "builds",
-        "PortsTree" => "ports_trees",
-        "User"      => "users",
+        "Port"            => "ports",
+        "Jail"            => "jails",
+        "BuildPortsQueue" => "build_ports_queue",
+        "Build"           => "builds",
+        "PortsTree"       => "ports_trees",
+        "User"            => "users",
+        "Host"            => "hosts",
 );
 
 require "ds.ph";
@@ -80,6 +84,71 @@ sub getAllPorts {
         @ports = $self->getObjects("Port");
 
         return @ports;
+}
+
+sub isValidBuildPortsQueueId {
+        my $self = shift;
+        my $id   = shift;
+
+        my $rc = $self->_doQueryNumRows(
+                "SELECT Build_Ports_Queue_Id FROM build_ports_queue WHERE Build_Ports_Queue_Id=?",
+                $id
+        );
+
+        return ($rc > 0) ? 1 : 0;
+}
+
+sub getBuildPortsQueueById {
+        my $self = shift;
+        my $id   = shift;
+
+        my @results =
+            $self->getObjects("BuildPortsQueue", {Build_Ports_Queue_Id => $id});
+
+        if (!@results) {
+                return undef;
+        }
+
+        return $results[0];
+}
+
+sub getBuildPortsQueueByKeys {
+        my $self      = shift;
+        my $build     = shift;
+        my $directory = shift;
+        my $host      = shift;
+        croak "ERROR: Argument 1 not of type Host\n" if (ref($host) ne "Host");
+        croak "ERROR: Argument 2 not of type Build\n"
+            if (ref($build) ne "Build");
+
+        my @results = $self->getObjects(
+                "BuildPortsQueue",
+                {
+                        Build_Id       => $build->getId(),
+                        Port_Directory => $directory,
+                        Host_Id        => $host->getId()
+                }
+        );
+
+        if (!@results) {
+                return undef;
+        }
+
+        return $results[0];
+}
+
+sub getBuildPortsQueueByHost {
+        my $self = shift;
+        my $host = shift;
+
+        my @results =
+            $self->getObjects("BuildPortsQueue", {Host_Id => $host->getId()});
+
+        if (!@results) {
+                return undef;
+        }
+
+        return @results;
 }
 
 sub getPortsForBuild {
@@ -146,6 +215,19 @@ sub getBuildById {
         my $id   = shift;
 
         my @results = $self->getObjects("Build", {Build_Id => $id});
+
+        if (!@results) {
+                return undef;
+        }
+
+        return $results[0];
+}
+
+sub getHostByName {
+        my $self = shift;
+        my $name = shift;
+
+        my @results = $self->getObjects("Host", {Host_Name => $name});
 
         if (!@results) {
                 return undef;
@@ -272,6 +354,42 @@ sub getObjects {
         @objects = $self->_newFromArray($type, @results);
 
         return @objects;
+}
+
+sub addBuildPortsQueueEntry {
+        my $self      = shift;
+        my $build     = shift;
+        my $directory = shift;
+        my $host      = shift;
+        my $priority  = shift;
+        my $user      = shift;
+        croak "ERROR: Argument 1 not of type Host\n" if (ref($host) ne "Host");
+        croak "ERROR: Argument 2 not of type Build\n"
+            if (ref($build) ne "Build");
+
+        my $rc = $self->_doQuery(
+                "INSERT INTO build_ports_queue
+                    ( Build_Id, User_Id, Port_Directory, Priority, Host_Id )
+                 VALUES
+                     ( ?, ?, ?, ?, ? )",
+                [$build->getId(), $user, $directory, $priority, $host->getId()]
+        );
+
+        return $rc;
+}
+
+sub addHost {
+        my $self = shift;
+        my $host = shift;
+        my $bCls = (ref($host) eq "REF") ? $$host : $host;
+
+        my $rc = $self->_addObject($bCls);
+
+        if (ref($host) eq "REF") {
+                $$host = $self->getHostByName($bCls->getName());
+        }
+
+        return $rc;
 }
 
 sub addBuild {
@@ -741,6 +859,42 @@ sub addPortForBuild {
         return $rc;
 }
 
+sub removeHost {
+        my $self = shift;
+        my $host = shift;
+
+        my $rc;
+        $rc = $self->_doQuery("DELETE FROM hosts WHERE Host_Id=?",
+                [$host->getId()]);
+
+        return $rc;
+}
+
+sub removeBuildPortsQueue {
+        my $self = shift;
+        my $host = shift;
+        croak "ERROR: Argument not of type Host\n" if (ref($host) ne "Host");
+
+        my $rc;
+        $rc = $self->_doQuery("DELETE FROM build_ports_queue WHERE Host_Id=?",
+                [$host->getId()]);
+
+        return $rc;
+}
+
+sub removeBuildPortsQueueEntry {
+        my $self  = shift;
+        my $entry = shift;
+
+        my $rc;
+        $rc =
+            $self->_doQuery(
+                "DELETE FROM build_ports_queue WHERE Build_Ports_Queue_Id=?",
+                [$entry->getId()]);
+
+        return $rc;
+}
+
 sub removePort {
         my $self = shift;
         my $port = shift;
@@ -901,6 +1055,23 @@ sub isPortInDS {
                 $port->getDirectory());
 
         return (($rc > 0) ? 1 : 0);
+}
+
+sub isValidHost {
+        my $self     = shift;
+        my $hostname = shift;
+
+        my @results = $self->getObjects("Host", {Host_Name => $hostname});
+
+        if (!@results) {
+                return 0;
+        }
+
+        if (scalar(@results)) {
+                return 1;
+        }
+
+        return 0;
 }
 
 sub isValidBuild {
