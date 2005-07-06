@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.25 2005/06/28 05:47:55 adamw Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.26 2005/07/06 05:55:50 marcus Exp $
 #
 
 package TinderboxDS;
@@ -77,7 +77,7 @@ sub getAllPorts {
         my $self  = shift;
         my @ports = ();
 
-        @ports = $self->getPorts();
+        @ports = $self->getObjects("Port");
 
         return @ports;
 }
@@ -106,7 +106,7 @@ sub getPortById {
         my $self = shift;
         my $id   = shift;
 
-        my @results = $self->getPorts({Port_Id => $id});
+        my @results = $self->getObjects("Port", {Port_Id => $id});
 
         if (!@results) {
                 return undef;
@@ -119,7 +119,7 @@ sub getPortByDirectory {
         my $self = shift;
         my $dir  = shift;
 
-        my @results = $self->getPorts({Port_Directory => $dir});
+        my @results = $self->getObjects("Port", {Port_Directory => $dir});
 
         if (!@results) {
                 return undef;
@@ -128,95 +128,11 @@ sub getPortByDirectory {
         return $results[0];
 }
 
-sub getPorts {
-        my $self      = shift;
-        my @params    = @_;
-        my $condition = "";
-        my @ports     = ();
-
-        my @values = ();
-        my @conds  = ();
-        foreach my $param (@params) {
-
-                # Each parameter makes up and OR portion of a query.  Within
-                # each parameter is a hash reference that make up the AND
-                # portion of the query.
-                my @ands = ();
-                foreach my $andcond (keys %{$param}) {
-                        push @ands,   "$andcond=?";
-                        push @values, $param->{$andcond};
-                }
-                push @conds, "(" . (join(" AND ", @ands)) . ")";
-        }
-
-        $condition = join(" OR ", @conds);
-
-        my @results;
-        my $query;
-        if ($condition ne "") {
-                $query = "SELECT * FROM ports WHERE $condition";
-        } else {
-                $query = "SELECT * FROM ports";
-        }
-
-        my $rc = $self->_doQueryHashRef($query, \@results, @values);
-
-        if (!$rc) {
-                return undef;
-        }
-
-        @ports = $self->_newFromArray("Port", @results);
-
-        return @ports;
-}
-
-sub getUsers {
-        my $self      = shift;
-        my @params    = @_;
-        my $condition = "";
-        my @users     = ();
-
-        my @values = ();
-        my @conds  = ();
-        foreach my $param (@params) {
-
-                # Each parameter makes up and OR portion of a query.  Within
-                # each parameter is a hash reference that make up the AND
-                # portion of the query.
-                my @ands = ();
-                foreach my $andcond (keys %{$param}) {
-                        push @ands,   "$andcond=?";
-                        push @values, $param->{$andcond};
-                }
-                push @conds, "(" . (join(" AND ", @ands)) . ")";
-        }
-
-        $condition = join(" OR ", @conds);
-
-        my @results;
-        my $query;
-        if ($condition ne "") {
-                $query = "SELECT * FROM users WHERE $condition";
-        } else {
-                $query = "SELECT * FROM users";
-        }
-
-        my $rc = $self->_doQueryHashRef($query, \@results, @values);
-
-        if (!$rc) {
-                return undef;
-        }
-
-        @users = $self->_newFromArray("User", @results);
-
-        return @users;
-}
-
 sub getJailByName {
         my $self = shift;
         my $name = shift;
 
-        my @results = $self->getJails({Jail_Name => $name});
+        my @results = $self->getObjects("Jail", {Jail_Name => $name});
 
         if (!@results) {
                 return undef;
@@ -229,7 +145,7 @@ sub getBuildById {
         my $self = shift;
         my $id   = shift;
 
-        my @results = $self->getBuilds({Build_Id => $id});
+        my @results = $self->getObjects("Build", {Build_Id => $id});
 
         if (!@results) {
                 return undef;
@@ -242,7 +158,7 @@ sub getBuildByName {
         my $self = shift;
         my $name = shift;
 
-        my @results = $self->getBuilds({Build_Name => $name});
+        my @results = $self->getObjects("Build", {Build_Name => $name});
 
         if (!@results) {
                 return undef;
@@ -255,7 +171,7 @@ sub getJailById {
         my $self = shift;
         my $id   = shift;
 
-        my @results = $self->getJails({Jail_Id => $id});
+        my @results = $self->getObjects("Jail", {Jail_Id => $id});
 
         if (!@results) {
                 return undef;
@@ -287,7 +203,7 @@ sub getPortsTreeById {
         my $self = shift;
         my $id   = shift;
 
-        my @results = $self->getPortsTrees({Ports_Tree_Id => $id});
+        my @results = $self->getObjects("PortsTree", {Ports_Tree_Id => $id});
 
         if (!@results) {
                 return undef;
@@ -300,7 +216,8 @@ sub getPortsTreeByName {
         my $self = shift;
         my $name = shift;
 
-        my @results = $self->getPortsTrees({Ports_Tree_Name => $name});
+        my @results =
+            $self->getObjects("PortsTrees", {Ports_Tree_Name => $name});
 
         if (!@results) {
                 return undef;
@@ -309,14 +226,20 @@ sub getPortsTreeByName {
         return $results[0];
 }
 
-sub getBuilds {
+sub getObjects {
         my $self      = shift;
+        my $type      = shift;
         my @params    = @_;
         my $condition = "";
-        my @builds    = ();
+        my @objects   = ();
 
         my @values = ();
         my @conds  = ();
+
+        my $table = $OBJECT_MAP{$type};
+
+        croak "ERROR: Unknown object type, $type\n"
+            unless defined($table);
         foreach my $param (@params) {
 
                 # Each parameter makes up and OR portion of a query.  Within
@@ -335,9 +258,9 @@ sub getBuilds {
         my @results;
         my $query;
         if ($condition ne "") {
-                $query = "SELECT * FROM builds WHERE $condition";
+                $query = "SELECT * FROM $table WHERE $condition";
         } else {
-                $query = "SELECT * FROM builds";
+                $query = "SELECT * FROM $table";
         }
 
         my $rc = $self->_doQueryHashRef($query, \@results, @values);
@@ -346,51 +269,9 @@ sub getBuilds {
                 return undef;
         }
 
-        @builds = $self->_newFromArray("Build", @results);
+        @objects = $self->_newFromArray($type, @results);
 
-        return @builds;
-}
-
-sub getJails {
-        my $self      = shift;
-        my @params    = @_;
-        my $condition = "";
-        my @jails     = ();
-
-        my @values = ();
-        my @conds  = ();
-        foreach my $param (@params) {
-
-                # Each parameter makes up and OR portion of a query.  Within
-                # each parameter is a hash reference that make up the AND
-                # portion of the query.
-                my @ands = ();
-                foreach my $andcond (keys %{$param}) {
-                        push @ands,   "$andcond=?";
-                        push @values, $param->{$andcond};
-                }
-                push @conds, "(" . (join(" AND ", @ands)) . ")";
-        }
-
-        $condition = join(" OR ", @conds);
-
-        my @results;
-        my $query;
-        if ($condition ne "") {
-                $query = "SELECT * FROM jails WHERE $condition";
-        } else {
-                $query = "SELECT * FROM jails";
-        }
-
-        my $rc = $self->_doQueryHashRef($query, \@results, @values);
-
-        if (!$rc) {
-                return undef;
-        }
-
-        @jails = $self->_newFromArray("Jail", @results);
-
-        return @jails;
+        return @objects;
 }
 
 sub addBuild {
@@ -777,7 +658,7 @@ sub getUserByName {
         my $self     = shift;
         my $username = shift;
 
-        my @results = $self->getUsers({User_Name => $username});
+        my @results = $self->getObjects("User", {User_Name => $username});
 
         if (!@results) {
                 return undef;
@@ -790,7 +671,7 @@ sub getAllUsers {
         my $self  = shift;
         my @users = ();
 
-        @users = $self->getUsers();
+        @users = $self->getObjects("User");
 
         return @users;
 }
@@ -1026,7 +907,7 @@ sub isValidBuild {
         my $self      = shift;
         my $buildName = shift;
 
-        my @results = $self->getBuilds({Build_Name => $buildName});
+        my @results = $self->getObjects("Build", {Build_Name => $buildName});
 
         if (!@results) {
                 return 0;
@@ -1043,7 +924,7 @@ sub isValidJail {
         my $self     = shift;
         my $jailName = shift;
 
-        my @results = $self->getJails({Jail_Name => $jailName});
+        my @results = $self->getObjects("Jail", {Jail_Name => $jailName});
 
         if (!@results) {
                 return 0;
@@ -1060,7 +941,8 @@ sub isValidPortsTree {
         my $self          = shift;
         my $portsTreeName = shift;
 
-        my @results = $self->getPortsTrees({Ports_Tree_Name => $portsTreeName});
+        my @results =
+            $self->getObjects("PortsTree", {Ports_Tree_Name => $portsTreeName});
 
         if (!@results) {
                 return 0;
@@ -1109,53 +991,11 @@ sub isPortForBuild {
         return $valid;
 }
 
-sub getPortsTrees {
-        my $self       = shift;
-        my @params     = @_;
-        my $condition  = "";
-        my @portstrees = ();
-
-        my @values = ();
-        my @conds  = ();
-        foreach my $param (@params) {
-
-                # Each parameter makes up and OR portion of a query.  Within
-                # each parameter is a hash reference that make up the AND
-                # portion of the query.
-                my @ands = ();
-                foreach my $andcond (keys %{$param}) {
-                        push @ands,   "$andcond=?";
-                        push @values, $param->{$andcond};
-                }
-                push @conds, "(" . (join(" AND ", @ands)) . ")";
-        }
-
-        $condition = join(" OR ", @conds);
-
-        my @results;
-        my $query;
-        if ($condition ne "") {
-                $query = "SELECT * FROM ports_trees WHERE $condition";
-        } else {
-                $query = "SELECT * FROM ports_trees";
-        }
-
-        my $rc = $self->_doQueryHashRef($query, \@results, @values);
-
-        if (!$rc) {
-                return undef;
-        }
-
-        @portstrees = $self->_newFromArray("PortsTree", @results);
-
-        return @portstrees;
-}
-
 sub getAllBuilds {
         my $self   = shift;
         my @builds = ();
 
-        @builds = $self->getBuilds();
+        @builds = $self->getObjects("Build");
 
         return @builds;
 }
@@ -1164,7 +1004,7 @@ sub getAllJails {
         my $self  = shift;
         my @jails = ();
 
-        @jails = $self->getJails();
+        @jails = $self->getObjects("Jail");
 
         return @jails;
 }
@@ -1173,7 +1013,7 @@ sub getAllPortsTrees {
         my $self       = shift;
         my @portstrees = ();
 
-        @portstrees = $self->getPortsTrees();
+        @portstrees = $self->getObjects("PortsTree");
 
         return @portstrees;
 }
