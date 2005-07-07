@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.42 2005/07/06 18:31:21 oliver Exp $
+# $MCom: portstools/tinderbox/tc,v 1.43 2005/07/07 04:53:22 marcus Exp $
 #
 
 # This is a hack to make sure we can always find our modules.
@@ -89,10 +89,9 @@ require "tinderlib.pl";
                 optstr => 'h:r',
         },
         "addHost" => {
-                func  => \&addHost,
-                help  => "Add a host to the datastore",
-                usage =>
-                    "[-h <hostname>]",
+                func   => \&addHost,
+                help   => "Add a host to the datastore",
+                usage  => "[-h <hostname>]",
                 optstr => 'h:',
         },
         "addBuild" => {
@@ -124,9 +123,10 @@ require "tinderlib.pl";
                 optstr => 'ab:d:r',
         },
         "addBuildPortsQueueEntry" => {
-                func   => \&addBuildPortsQueueEntry,
-                help   => "Adds a Port to the Ports to Build Queue",
-                usage  => "-b <build name> -d <port directory> [-h <hostname>] [-p <priority>]",
+                func  => \&addBuildPortsQueueEntry,
+                help  => "Adds a Port to the Ports to Build Queue",
+                usage =>
+                    "-b <build name> -d <port directory> [-h <hostname>] [-p <priority>]",
                 optstr => 'b:d:h:p:',
         },
         "getJailForBuild" => {
@@ -160,24 +160,25 @@ require "tinderlib.pl";
                 optstr => 'p:',
         },
         "rmHost" => {
-                func  => \&rmHost,
-                help  => "Removes a host from the datastore",
-                usage =>
-                    "[-h <hostname>]",
+                func   => \&rmHost,
+                help   => "Removes a host from the datastore",
+                usage  => "[-h <hostname>]",
                 optstr => 'h:',
         },
         "rmBuildPortsQueue" => {
-                func   => \&rmBuildPortsQueue,
-                help   => "Removes all Ports from the Ports to Build Queue for one host",
+                func => \&rmBuildPortsQueue,
+                help =>
+                    "Removes all Ports from the Ports to Build Queue for one host",
                 usage  => "[-h <hostname>]",
                 optstr => 'h:',
-        }, 
+        },
         "rmBuildPortsQueueEntry" => {
-                func   => \&rmBuildPortsQueueEntry,
-                help   => "Removes a Port from the Ports to Build Queue",
-                usage  => "-i <Build_Ports_Queue_Id> | -b <build name> -d <port directory> [-h <hostname>]",
+                func  => \&rmBuildPortsQueueEntry,
+                help  => "Removes a Port from the Ports to Build Queue",
+                usage =>
+                    "-i <Build_Ports_Queue_Id> | -b <build name> -d <port directory> [-h <hostname>]",
                 optstr => 'i:b:d:h:',
-        }, 
+        },
         "rmPort" => {
                 func => \&rmPort,
                 help =>
@@ -414,7 +415,8 @@ sub addHost {
 
         if ($ds->isValidHost($hostname)) {
                 cleanup($ds, 1,
-                        "A host named $hostname is already in the datastore.\n");
+                        "A host named $hostname is already in the datastore.\n"
+                );
         }
 
         my $host = new Host();
@@ -430,7 +432,6 @@ sub addHost {
         }
 }
 
- 
 sub addBuild {
         if (!$opts->{'n'} || !$opts->{'j'} || !$opts->{'p'}) {
                 usage("addBuild");
@@ -606,11 +607,11 @@ sub addPort {
 }
 
 sub addBuildPortsQueueEntry {
-        if (!$opts->{'b'} || !$opts->{'d'} ) {
+        if (!$opts->{'b'} || !$opts->{'d'}) {
                 usage("addBuildPortsQueueEntry");
         }
 
-	my $priority = $opts->{'p'} ? $opts->{'p'} : 10;
+        my $priority = $opts->{'p'} ? $opts->{'p'} : 10;
 
         my $hostname = `hostname`;
         chomp($hostname);
@@ -619,13 +620,11 @@ sub addBuildPortsQueueEntry {
         }
 
         if (!$ds->isValidHost($hostname)) {
-                cleanup($ds, 1,
-                        "Unknown host, " . $hostname . "\n");
+                cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
         }
 
         if (!$ds->isValidBuild($opts->{'b'})) {
-                cleanup($ds, 1,
-                        "Unknown build, " . $opts->{'b'} . "\n");
+                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
         }
 
         my $build = $ds->getBuildByName($opts->{'b'});
@@ -646,39 +645,55 @@ sub listBuildPortsQueue {
         if ($opts->{'r'}) {
                 $raw = 1
         }
-                
+
         if (!$ds->isValidHost($hostname)) {
                 cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
         }
 
-        my $host  = $ds->getHostByName($hostname);
+        my $host = $ds->getHostByName($hostname);
 
         my @buildportsqueue = $ds->getBuildPortsQueueByHost($host);
 
-        if(@buildportsqueue) {
-                if( $raw ne 1 ) {
-                        print "+=====+===========================+=====================================+=====+\n";
-                        print "|  Id | Build Name                | Port Directory                      | Pri |\n";
-                        print "+=====+===========================+=====================================+=====+\n";
+        if (@buildportsqueue) {
+                if ($raw ne 1) {
+                        print
+                            "+=====+===========================+=====================================+=====+\n";
+                        print
+                            "|  Id | Build Name                | Port Directory                      | Pri |\n";
+                        print
+                            "+=====+===========================+=====================================+=====+\n";
                 }
                 foreach my $buildport (@buildportsqueue) {
                         if ($buildport) {
-                                my $build = $ds->getBuildById($buildport->getBuildId());
-                                if( $raw eq 1 ) {
-                                        print $buildport->getId().":".$build->getName().":".$buildport->getPortDirectory()."\n";
+                                my $build =
+                                    $ds->getBuildById($buildport->getBuildId());
+                                if ($raw eq 1) {
+                                        print $buildport->getId() . ":"
+                                            . $build->getName() . ":"
+                                            . $buildport->getPortDirectory()
+                                            . "\n";
                                 } else {
-                                printf("| %3d | %-25s | %-35s | %3d |\n",
-                                                       $buildport->getId(),$build->getName(),$buildport->getPortDirectory(),$buildport->getPriority());
-                                        print "+-----+---------------------------+-------------------------------------+-----+\n";
+                                        printf(
+                                                "| %3d | %-25s | %-35s | %3d |\n",
+                                                $buildport->getId(),
+                                                $build->getName(),
+                                                $buildport->getPortDirectory(),
+                                                $buildport->getPriority()
+                                        );
+                                        print
+                                            "+-----+---------------------------+-------------------------------------+-----+\n";
                                 }
                         }
                 }
         } elsif (defined($ds->getError())) {
                 cleanup($ds, 1,
-                        "Failed to list BuildPortsQueue: " . $ds->getError() . "\n");
+                              "Failed to list BuildPortsQueue: "
+                            . $ds->getError()
+                            . "\n");
         } else {
                 cleanup($ds, 1,
-                        "There is no BuildPortsQueue configured in the datastore.\n");
+                        "There is no BuildPortsQueue configured in the datastore.\n"
+                );
         }
 }
 
@@ -781,18 +796,17 @@ sub getPortsUpdateCmd {
 }
 
 sub rmBuildPortsQueue {
-                
+
         my $hostname = `hostname`;
         chomp($hostname);
         if ($opts->{'h'}) {
                 $hostname = $opts->{'h'};
         }
         if (!$ds->isValidHost($hostname)) {
-                cleanup($ds, 1,
-                        "Unknown host, " . $hostname . "\n");
+                cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
         }
 
-        my $host  = $ds->getHostByName($hostname);
+        my $host = $ds->getHostByName($hostname);
 
         my $rc = $ds->removeBuildPortsQueue($host);
 
@@ -808,13 +822,16 @@ sub rmBuildPortsQueue {
 sub rmBuildPortsQueueEntry {
         my $buildportsqueue;
 
-        if (!$opts->{'i'} && (!$opts->{'b'} || !$opts->{'d'}) ) {
+        if (!$opts->{'i'} && (!$opts->{'b'} || !$opts->{'d'})) {
                 usage("rmBuildPortsQueueEntry");
         }
 
         if ($opts->{'i'}) {
                 if (!$ds->isValidBuildPortsQueueId($opts->{'i'})) {
-                        cleanup($ds, 1, "Unknown BuildPortsQueueId " . $opts->{'i'} . "\n");
+                        cleanup($ds, 1,
+                                      "Unknown BuildPortsQueueId "
+                                    . $opts->{'i'}
+                                    . "\n");
                 }
 
                 $buildportsqueue = $ds->getBuildPortsQueueById($opts->{'i'});
@@ -825,8 +842,7 @@ sub rmBuildPortsQueueEntry {
                         $hostname = $opts->{'h'};
                 }
                 if (!$ds->isValidHost($hostname)) {
-                        cleanup($ds, 1,
-                                "Unknown host, " . $hostname . "\n");
+                        cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
                 }
 
                 if (!$ds->isValidBuild($opts->{'b'})) {
@@ -834,16 +850,22 @@ sub rmBuildPortsQueueEntry {
                                 "Unknown build, " . $opts->{'b'} . "\n");
                 }
 
-		my $build = $ds->getBuildByName($opts->{'b'});
+                my $build = $ds->getBuildByName($opts->{'b'});
                 my $host  = $ds->getHostByName($hostname);
-                $buildportsqueue = $ds->getBuildPortsQueueByKeys($build, $opts->{'d'}, $host);
-                if(!$buildportsqueue) {
-                        cleanup($ds, 1, "Unknown BuildPortsQueueEntry " . $opts->{'d'} . " " . $opts->{'b'} . " " . $hostname . "\n");
+                $buildportsqueue =
+                    $ds->getBuildPortsQueueByKeys($build, $opts->{'d'}, $host);
+                if (!$buildportsqueue) {
+                        cleanup($ds, 1,
+                                      "Unknown BuildPortsQueueEntry "
+                                    . $opts->{'d'} . " "
+                                    . $opts->{'b'} . " "
+                                    . $hostname
+                                    . "\n");
                 }
         }
 
         my $rc = $ds->removeBuildPortsQueueEntry($buildportsqueue);
-                        
+
         if (!$rc) {
                 cleanup($ds, 1,
                               "Failed to remove BuildPortsQueue Entry "
@@ -855,23 +877,22 @@ sub rmBuildPortsQueueEntry {
 
 sub rmHost {
         my $hostname = `hostname`;
-        chomp($hostname);   
+        chomp($hostname);
 
         if ($opts->{'h'}) {
                 $hostname = $opts->{'h'};
         }
 
         if (!$ds->isValidHost($hostname)) {
-                cleanup($ds, 1,
-                        "Not a valid host: $hostname\n");
+                cleanup($ds, 1, "Not a valid host: $hostname\n");
         }
 
         my $host = $ds->getHostByName($hostname);
-        my $rc = $ds->removeHost($host);
-                
+        my $rc   = $ds->removeHost($host);
+
         if (!$rc) {
                 cleanup($ds, 1,
-                              "Failed to remove host $hostname from the datastore: "
+                        "Failed to remove host $hostname from the datastore: "
                             . $ds->getError()
                             . ".\n");
         }
