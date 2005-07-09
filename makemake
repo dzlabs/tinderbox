@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/makemake,v 1.26 2005/07/09 06:28:20 marcus Exp $
+# $MCom: portstools/tinderbox/makemake,v 1.27 2005/07/09 06:58:41 marcus Exp $
 #
 
 use strict;
@@ -188,33 +188,24 @@ while (scalar(@PORTS)) {
         push @bdeps, getDepends($tportdir, "BUILD");
         push @rdeps, getRunDepends($tportdir, \%rundepscache);
 
-        foreach my $rdep (@rdeps) {
-                my %seen = ();
-                chomp $rdep;
-                my @rundeps = getRunDepends($rdep);
-                while (scalar(@rundeps)) {
-                        my $rundep = shift @rundeps;
-                        chomp $rundep;
-                        next if (defined($seen{$rundep}));
-                        push @rundeps, getRunDepends($rundep, \%rundepscache);
-                        $seen{$rundep}++;
-                        $rundep =~ s|^$ENV{'PORTSDIR'}/||;
-                        push @{$pkgrdeps{$portdir}}, $rundep;
-                }
-                $rdep =~ s|^$ENV{'PORTSDIR'}/||;
-                push @{$pkgrdeps{$portdir}}, $rdep;
-                my $p = new Port();
-                $p->setDirectory($rdep);
-                push @PORTS, $p;
-        }
+        findRunDepends(\@edeps, \%pkgedeps, $portdir, \%rundepscache, \@PORTS);
+        findRunDepends(\@pdeps, \%pkgpdeps, $portdir, \%rundepscache, \@PORTS);
+        findRunDepends(\@fdeps, \%pkgfdeps, $portdir, \%rundepscache, \@PORTS);
+        findRunDepends(\@bdeps, \%pkgbdeps, $portdir, \%rundepscache, \@PORTS);
+        findRunDepends(\@rdeps, \%pkgrdeps, $portdir, \%rundepscache, \@PORTS);
 
         $pkgedeps{$portdir} = \@edeps;
         $pkgpdeps{$portdir} = \@pdeps;
         $pkgfdeps{$portdir} = \@fdeps;
         $pkgbdeps{$portdir} = \@bdeps;
 
-        push @{$pkgdeps{$portdir}}, @edeps, @pdeps, @fdeps, @bdeps,
-            @{$pkgrdeps{$portdir}};
+        foreach
+            my $depport (@edeps, @pdeps, @fdeps, @bdeps, @{$pkgrdeps{$portdir}})
+        {
+                if (defined($depport) && $depport ne "") {
+                        push @{$pkgdeps{$portdir}}, $depport;
+                }
+        }
 }
 my $makefile = join("/", $BUILD_ROOT, "builds", $BUILD_NAME, "Makefile");
 unless (open(MK, ">" . $makefile)) {
@@ -297,3 +288,32 @@ sub _getDepends {
 
         return @deplist;
 }
+
+sub findRunDepends {
+        my $source  = shift;
+        my $dest    = shift;
+        my $portdir = shift;
+        my $cache   = shift;
+        my $ports   = shift;
+
+        foreach my $rdep (@{$source}) {
+                my %seen = ();
+                chomp $rdep;
+                my @rundeps = getRunDepends($rdep);
+                while (scalar(@rundeps)) {
+                        my $rundep = shift @rundeps;
+                        chomp $rundep;
+                        next if (defined($seen{$rundep}));
+                        push @rundeps, getRunDepends($rundep, $cache);
+                        $seen{$rundep}++;
+                        $rundep =~ s|^$ENV{'PORTSDIR'}/||;
+                        push @{$dest->{$portdir}}, $rundep;
+                }
+                $rdep =~ s|^$ENV{'PORTSDIR'}/||;
+                push @{$dest->{$portdir}}, $rdep;
+                my $p = new Port();
+                $p->setDirectory($rdep);
+                push @{$ports}, $p;
+        }
+}
+
