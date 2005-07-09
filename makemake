@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/makemake,v 1.25 2005/07/09 05:37:02 marcus Exp $
+# $MCom: portstools/tinderbox/makemake,v 1.26 2005/07/09 06:28:20 marcus Exp $
 #
 
 use strict;
@@ -182,10 +182,10 @@ while (scalar(@PORTS)) {
         $pkgbdeps{$portdir} = [];
         $pkgrdeps{$portdir} = [];
         $pkgdir{$portdir}   = $pkgname;
-        push @edeps, getDepends($tportdir, "extract");
-        push @pdeps, getDepends($tportdir, "patch");
-        push @fdeps, getDepends($tportdir, "fetch");
-        push @bdeps, getDepends($tportdir, "build");
+        push @edeps, getDepends($tportdir, "EXTRACT");
+        push @pdeps, getDepends($tportdir, "PATCH");
+        push @fdeps, getDepends($tportdir, "FETCH");
+        push @bdeps, getDepends($tportdir, "BUILD");
         push @rdeps, getRunDepends($tportdir, \%rundepscache);
 
         foreach my $rdep (@rdeps) {
@@ -264,7 +264,15 @@ sub getDepends {
         my $portdir = shift;
         my $type    = shift;
 
-        return _getDepends($portdir, "$type-depends-list");
+        my $deps = `cd $portdir && make -V ${type}_DEPENDS`;
+
+        my @deplist = ();
+        foreach my $dep (split(/\s+/, $deps)) {
+                my ($d, $ddir) = split(/:/, $dep);
+                push @deplist, $ddir;
+        }
+
+        return @deplist;
 }
 
 sub getRunDepends {
