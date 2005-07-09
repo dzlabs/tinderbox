@@ -229,6 +229,10 @@ EOF
     tar cfjC /tmp/work.tbz ${objdir}/.. work
   fi
 
+  echo "================================================================"
+  echo -n echo -n "build ended at "
+  date
+
 fi
 
 exit 0
