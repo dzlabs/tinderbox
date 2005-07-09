@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/makemake,v 1.24 2005/06/28 05:47:55 adamw Exp $
+# $MCom: portstools/tinderbox/makemake,v 1.25 2005/07/09 05:37:02 marcus Exp $
 #
 
 use strict;
@@ -48,10 +48,10 @@ require "tinderlib.pl";
 # Get a database handle for obtaining the ports.
 my $ds          = new TinderboxDS();
 my @build_names = $ds->getAllBuilds();
-if (!defined(@build_names) && defined($ds->getError())) {
+if (!@build_names && defined($ds->getError())) {
         cleanup($ds, 1,
                 "Failed to get list of jails: " . $ds->getError() . "\n");
-} elsif (!defined(@build_names)) {
+} elsif (!@build_names) {
         cleanup($ds, 1, "There are no builds configured in this tinderbox\n");
 }
 if (scalar(@ARGV) < 1) {
@@ -113,7 +113,7 @@ $ENV{'LINUXBASE'}  = "/nonexistentlinux";
 
 if (!scalar(@ARGV)) {
         my @dsPorts = $ds->getPortsForBuild($BUILD);
-        if (!defined(@dsPorts)) {
+        if (!@dsPorts) {
                 cleanup($ds, 1,
                               "Failed to get port information: "
                             . $ds->getError()
@@ -139,11 +139,14 @@ if (!scalar(@ARGV)) {
                 }
         }
 }
-my (%pkgdir, %pkgdeps, %rundepscache, @duds);
+my (
+        %pkgdir,   %pkgdeps,  %pkgedeps,     %pkgpdeps, %pkgfdeps,
+        %pkgbdeps, %pkgrdeps, %rundepscache, @duds
+);
 while (scalar(@PORTS)) {
         my $port    = shift @PORTS;
         my $portdir = $port->getDirectory();
-        my ($pkgname, $deplist, $tportdir, @deps);
+        my ($pkgname, $deplist, $tportdir);
 
         next if (defined($pkgdir{$portdir}));
 
@@ -171,15 +174,24 @@ while (scalar(@PORTS)) {
                 }
         }
 
-        $pkgdeps{$portdir} = [];
-        $pkgdir{$portdir}  = $pkgname;
-        my @deps = ();
-        push @deps, getBuildDepends($tportdir);
-        push @deps, getRunDepends($tportdir, \%rundepscache);
-        foreach my $dep (@deps) {
+        my (@edeps, @pdeps, @fdeps, @bdeps, @rdeps) = ();
+        $pkgdeps{$portdir}  = [];
+        $pkgedeps{$portdir} = [];
+        $pkgpdeps{$portdir} = [];
+        $pkgfdeps{$portdir} = [];
+        $pkgbdeps{$portdir} = [];
+        $pkgrdeps{$portdir} = [];
+        $pkgdir{$portdir}   = $pkgname;
+        push @edeps, getDepends($tportdir, "extract");
+        push @pdeps, getDepends($tportdir, "patch");
+        push @fdeps, getDepends($tportdir, "fetch");
+        push @bdeps, getDepends($tportdir, "build");
+        push @rdeps, getRunDepends($tportdir, \%rundepscache);
+
+        foreach my $rdep (@rdeps) {
                 my %seen = ();
-                chomp $dep;
-                my @rundeps = getRunDepends($dep);
+                chomp $rdep;
+                my @rundeps = getRunDepends($rdep);
                 while (scalar(@rundeps)) {
                         my $rundep = shift @rundeps;
                         chomp $rundep;
@@ -187,14 +199,22 @@ while (scalar(@PORTS)) {
                         push @rundeps, getRunDepends($rundep, \%rundepscache);
                         $seen{$rundep}++;
                         $rundep =~ s|^$ENV{'PORTSDIR'}/||;
-                        push @{$pkgdeps{$portdir}}, $rundep;
+                        push @{$pkgrdeps{$portdir}}, $rundep;
                 }
-                $dep =~ s|^$ENV{'PORTSDIR'}/||;
-                push @{$pkgdeps{$portdir}}, $dep;
+                $rdep =~ s|^$ENV{'PORTSDIR'}/||;
+                push @{$pkgrdeps{$portdir}}, $rdep;
                 my $p = new Port();
-                $p->setDirectory($dep);
+                $p->setDirectory($rdep);
                 push @PORTS, $p;
         }
+
+        $pkgedeps{$portdir} = \@edeps;
+        $pkgpdeps{$portdir} = \@pdeps;
+        $pkgfdeps{$portdir} = \@fdeps;
+        $pkgbdeps{$portdir} = \@bdeps;
+
+        push @{$pkgdeps{$portdir}}, @edeps, @pdeps, @fdeps, @bdeps,
+            @{$pkgrdeps{$portdir}};
 }
 my $makefile = join("/", $BUILD_ROOT, "builds", $BUILD_NAME, "Makefile");
 unless (open(MK, ">" . $makefile)) {
@@ -205,13 +225,17 @@ foreach my $key (keys %pkgdir) {
         my %seen         = ();
         my @depsarrclean = grep { !$seen{$_}++ } @depsarr;
         my @deppkgnames = map { $pkgdir{$_} . $ENV{'PKGSUFFIX'} } @depsarrclean;
+        my $edeplst     = "\"" . join(" ", @{$pkgedeps{$key}}) . "\"";
+        my $pdeplst     = "\"" . join(" ", @{$pkgpdeps{$key}}) . "\"";
+        my $fdeplst     = "\"" . join(" ", @{$pkgfdeps{$key}}) . "\"";
+        my $bdeplst     = "\"" . join(" ", @{$pkgbdeps{$key}}) . "\"";
+        my $rdeplst     = "\"" . join(" ", @{$pkgrdeps{$key}}) . "\"";
         print MK "all: $pkgdir{$key}$ENV{'PKGSUFFIX'}\n";
         print MK "$pkgdir{$key}: $pkgdir{$key}$ENV{'PKGSUFFIX'}\n";
         print MK "$pkgdir{$key}$ENV{'PKGSUFFIX'}: "
             . join(" ", @deppkgnames) . "\n";
         print MK
-            "\t\@$PORTBUILD $BUILD_NAME $JAIL_NAME $PORTSTREE_NAME $pbflags $pkgdir{$key}$ENV{'PKGSUFFIX'} /usr/ports/$key "
-            . join(" ", @deppkgnames) . "\n";
+            "\t\@$PORTBUILD $BUILD_NAME $JAIL_NAME $PORTSTREE_NAME $pbflags $edeplst $pdeplst $fdeplst $bdeplst $rdeplst $pkgdir{$key}$ENV{'PKGSUFFIX'} /usr/ports/$key\n";
 }
 close(MK);
 
@@ -236,10 +260,11 @@ symlink $makefile, "$BUILD_ROOT/packages/$BUILD_NAME/All/Makefile";
 
 cleanup($ds, 0, undef);
 
-sub getBuildDepends {
+sub getDepends {
         my $portdir = shift;
+        my $type    = shift;
 
-        return _getDepends($portdir, "build-depends-list");
+        return _getDepends($portdir, "$type-depends-list");
 }
 
 sub getRunDepends {
