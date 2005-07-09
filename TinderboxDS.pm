@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/TinderboxDS.pm,v 1.27 2005/07/06 18:31:21 oliver Exp $
+# $MCom: portstools/tinderbox/TinderboxDS.pm,v 1.28 2005/07/09 03:56:13 marcus Exp $
 #
 
 package TinderboxDS;
@@ -299,7 +299,7 @@ sub getPortsTreeByName {
         my $name = shift;
 
         my @results =
-            $self->getObjects("PortsTrees", {Ports_Tree_Name => $name});
+            $self->getObjects("PortsTree", {Ports_Tree_Name => $name});
 
         if (!@results) {
                 return undef;
