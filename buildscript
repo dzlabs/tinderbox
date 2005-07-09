@@ -230,7 +230,7 @@ EOF
   fi
 
   echo "================================================================"
-  echo -n echo -n "build ended at "
+  echo -n "build ended at "
   date
 
 fi
