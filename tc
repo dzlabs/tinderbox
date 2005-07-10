@@ -24,14 +24,20 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.44 2005/07/10 07:31:23 oliver Exp $
+# $MCom: portstools/tinderbox/tc,v 1.45 2005/07/10 17:07:19 marcus Exp $
 #
 
-# This is a hack to make sure we can always find our modules.
 BEGIN {
-        my $pb = "/space";
-        push @INC, "$pb/scripts";
-        use lib "/space/scripts";
+        my $scripts;
+        if ($0 !~ m|/|) {
+                $scripts = '.';
+        } else {
+                $scripts = $0;
+                $scripts =~ s|/[^/]+$||;
+        }
+        push @INC, $scripts;
+        require lib;
+        import lib $scripts;
 }
 
 use strict;
