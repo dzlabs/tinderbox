@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuilds.php,v 1.2 2005/07/10 07:39:18 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuilds.php,v 1.3 2005/07/10 17:06:25 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -34,13 +34,13 @@ class moduleBuilds extends module {
 	function moduleBuilds() {
 		$this->module();
 	}
-	
+
 	function display_list_builds() {
 		global $pkgdir;
 		global $pkguri;
 
 		$builds = $this->TinderboxDS->getAllBuilds();
-		
+
 		if( is_array( $builds ) && count( $builds ) > 0 ) {
 			$data = $this->get_list_data( $builds );
 			foreach( $data as $res )
@@ -67,7 +67,7 @@ class moduleBuilds extends module {
 			$name        = $build->getName();
 
 			$failures    = $stats['fails'];
-			
+
 			switch( $status ) {
 				case 'PORTBUILD':
 					$status_field_class = 'build_portbuild';
@@ -84,7 +84,7 @@ class moduleBuilds extends module {
 			$data[$i]['name'] = $name;
 			$data[$i]['description'] = $description;
 			if( is_dir( $pkgdir.'/'.$name ) )
-				$data[$i]['packagedir'] = $pkguri.'/'.$name ;
+				$data[$i]['packagedir'] = $pkguri.'/'.$name;
 			if( $failures > 0 )
 				$data[$i]['failures'] = $failures;
 			$i++;
@@ -102,5 +102,5 @@ class moduleBuilds extends module {
 		}
 		return $all_builds;
 	}
-}	
+}
 ?>

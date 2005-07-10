@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleHosts.php,v 1.1 2005/07/10 07:39:18 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleHosts.php,v 1.2 2005/07/10 17:06:25 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -34,7 +34,7 @@ class moduleHosts extends module {
 	function moduleHosts() {
 		$this->module();
 	}
-	
+
 	function get_all_hosts() {
 		$all_hosts_raw = $this->TinderboxDS->getAllHosts();
 		$all_hosts = array();
@@ -43,6 +43,6 @@ class moduleHosts extends module {
 		}
 		return $all_hosts;
 	}
-	
-}	
+
+}
 ?>

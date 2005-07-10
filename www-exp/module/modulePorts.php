@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/module/modulePorts.php,v 1.2 2005/07/10 07:39:18 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/module/modulePorts.php,v 1.3 2005/07/10 17:06:25 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -34,17 +34,17 @@ class modulePorts extends module {
 	function modulePorts() {
 		$this->module();
 	}
-	
+
 	function display_describe_port( $port_id ) {
 
 		$ports = $this->TinderboxDS->getAllPortsByPortID( $port_id );
-			
+
 		if( is_array( $ports ) && count( $ports ) > 0 ) {
 			$this->template_assign( 'data', $this->get_list_data( '', $ports ) );
 		} else {
 			$this->template_assign( 'no_list', 1 );
 		}
-		
+
 		foreach( $ports as $port ) {
 			$build = $this->TinderboxDS->getBuildById( $port->getBuildId() );
 			$ports_tree = $this->TinderboxDS->getPortsTreeForBuild( $build );
@@ -76,7 +76,7 @@ class modulePorts extends module {
 			$package_suffix = $this->TinderboxDS->getPackageSuffix( $build->getJailId() );
 		}
 
-		
+
 		foreach( $ports as $port ) {
 			if( $different_builds == 1 && $id != $port->getBuildId() ) {
 				$build = $this->TinderboxDS->getBuildById( $port->getBuildId() );
@@ -117,7 +117,7 @@ class modulePorts extends module {
 					$port_link_package   = '';
 					break;
 			}
-			
+
 			$data[] = array(	'build_name'                 => $build_name,
 						'port_directory'             => $port->getDirectory(),
 						'port_maintainer'            => $this->TinderboxDS->prettyEmail( $port->getMaintainer() ).' ',
@@ -132,5 +132,5 @@ class modulePorts extends module {
 		}
 		return $data;
 	}
-}	
+}
 ?>

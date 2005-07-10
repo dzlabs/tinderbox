@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/module/moduleTinderd.php,v 1.1 2005/07/10 07:39:18 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/module/moduleTinderd.php,v 1.2 2005/07/10 17:06:25 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -40,9 +40,9 @@ class moduleTinderd extends module {
 		$this->moduleHosts  = new moduleHosts();
 		$this->moduleUsers  = new moduleUsers();
 	}
-	
+
 	function checkQueueEntryAccess( $entry, $mode ) {
-		
+
 		if( $this->moduleUsers->checkWwwAdmin() ) {
 			return true;
 		}
@@ -87,7 +87,7 @@ class moduleTinderd extends module {
 		}
 
 	}
-	
+
 	function create_prio_array( $entry ) {
 		if( $this->checkQueueEntryAccess( $entry, 'priolower5' ) ) {
 			$i = 1;
@@ -97,16 +97,16 @@ class moduleTinderd extends module {
 			}
 			$i = 5;
 		}
-		
+
 		for( ; $i <= 10; $i++ ) {
-			$prio[]=$i;
+			$prio[] = $i;
 		}
-		
+
 		return $prio;
 	}
-	
+
 	function list_tinderd_queue( $host_id, $build_id ) {
-	
+
 		if( !$this->moduleUsers->is_logged_in() ) {
 			return $this->template_parse( 'please_login.tpl' );
 		} else {
@@ -114,7 +114,7 @@ class moduleTinderd extends module {
 			$this->template_assign( 'all_builds', $this->moduleBuilds->get_all_builds() );
 			$this->template_assign( 'host_id',    $host_id );
 			$this->template_assign( 'build_id',   $build_id );
-			
+
 			if( !empty( $host_id ) ) {
 				$hosts[0]  = $this->TinderboxDS->getHostById( $host_id );
 			} else {
@@ -133,7 +133,7 @@ class moduleTinderd extends module {
 				$this->host_id = $host->getId();
 
 				foreach( $builds as $build ) {
-			
+
 					$this->build_id = $build->getId();
 
 					if( is_object( $host ) && is_object( $build ) ) {
@@ -148,7 +148,7 @@ class moduleTinderd extends module {
 									                      'host'      => $build_ports_queue_entry->getHostName(),
 									                      'user'      => $build_ports_queue_entry->getUserName(),
 									                      'all_prio'  => $this->create_prio_array( $build_ports_queue_entry ) );
-								
+
 								}
 								if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'modify' ) ) {
 									$entries[$i]['modify'] = 1;
@@ -175,22 +175,22 @@ class moduleTinderd extends module {
 			return $this->template_parse( 'list_tinderd_queue.tpl' );
 		}
 	}
-	
+
 	function change_tinderd_queue( $action, $entry_id, $host_id, $build_id, $priority ) {
-	
+
 		if( !$this->moduleUsers->is_logged_in() ) {
 			return $this->template_parse( 'please_login.tpl' );
 		} else {
 			$build_ports_queue_entry = $this->TinderboxDS->getBuildPortsQueueEntryById( $entry_id );
 			$this->host_id  = $build_ports_queue_entry->getHostId();
 			$this->build_id = $build_ports_queue_entry->getBuildId();
-			if( $action == "delete" ) {
+			if( $action == 'delete' ) {
 				if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'delete' ) ) {
-					$this->TinderboxDS->deleteBuildPortsQueueEntry( $entry_id ) ;
+					$this->TinderboxDS->deleteBuildPortsQueueEntry( $entry_id );
 				} else {
 					$this->TinderboxDS->addError( build_ports_queue_not_allowed_to_delete );
 				}
-			} elseif(  $action == "save" ) {
+			} elseif(  $action == 'save' ) {
 				if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'modify' ) ) {
 					$this->host_id  = $host_id;
 					$this->build_id = $build_id;
@@ -219,7 +219,7 @@ class moduleTinderd extends module {
 			$build_ports_queue_entry = $this->TinderboxDS->createBuildPortsQueueEntry( $host_id, $build_id, $priority, $port_directory, $this->moduleUsers->get_id() );
 			$this->host_id  = $host_id;
 			$this->build_id = $build_id;
-			if( $action == "add" ) {
+			if( $action == 'add' ) {
 				if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'add' ) ) {
 					if( $priority < 5 && !$this->checkQueueEntryAccess( $entry, 'priolower5' ) ) {
 						$this->template_assign( 'new_host_id', $host_id );
@@ -241,5 +241,5 @@ class moduleTinderd extends module {
 		}
 		return;
 	}
-}	
+}
 ?>

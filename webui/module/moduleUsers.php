@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.1 2005/07/10 07:39:18 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.2 2005/07/10 17:06:25 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -38,10 +38,10 @@ class moduleUsers extends module {
 		$this->moduleBuilds = new moduleBuilds();
 		$this->moduleHosts  = new moduleHosts();
 	}
-	
+
 	function display_login() {
 		global $moduleSession;
-		
+
 		if( $this->is_logged_in() ) {
 			$this->template_assign( 'user_name', $moduleSession->getAttribute( 'user' )->getName() );
 			if( $this->checkWwwAdmin() ) {
@@ -54,14 +54,14 @@ class moduleUsers extends module {
 
 		return $this->template_parse( 'display_login.tpl' );
 	}
-		
+
 	function display_add_user( $user_name, $user_email, $user_password, $www_enabled, $permission_object ) {
 		if( !$this->is_logged_in() ) {
 			return $this->template_parse( 'please_login.tpl' );
 		} elseif ( $this->checkWwwAdmin() ) {
-			$user_properties  = $this->display_properties( $user_name, $user_email, $user_password, $www_enabled) ;
+			$user_properties  = $this->display_properties( $user_name, $user_email, $user_password, $www_enabled );
 			$user_permissions = $this->display_permissions( $permission_object );
-			
+
 			$this->template_assign( 'user_properties',  $user_properties  );
 			$this->template_assign( 'user_permissions', $user_permissions );
 		} else {
@@ -75,7 +75,7 @@ class moduleUsers extends module {
 		if( !$this->is_logged_in() ) {
 			return $this->template_parse( 'please_login.tpl' );
 		}
-		
+
 		$user = $this->TinderboxDS->getUserByName( $user_name );
 		if( $first == 1 ) {
 			$user_email    = $user->getEmail();
@@ -93,13 +93,13 @@ class moduleUsers extends module {
 			}
 		}
 
-		if( !is_array($permission_object) ) {
-			$permission_object[0][0][0]=1;
+		if( !is_array( $permission_object ) ) {
+			$permission_object[0][0][0] = 1;
 		}
-		if( $this->checkWwwAdmin() || ( $this->get_id() == $user->getId() )) {
-			$user_properties  = $this->display_properties( $user_name, $user_email, $user_password, $www_enabled) ;
+		if( $this->checkWwwAdmin() || ( $this->get_id() == $user->getId() ) ) {
+			$user_properties  = $this->display_properties( $user_name, $user_email, $user_password, $www_enabled );
 			$user_permissions = $this->display_permissions( $permission_object );
-			
+
 			$this->template_assign( 'user_properties',  $user_properties  );
 			$this->template_assign( 'user_permissions', $user_permissions );
 		} else {
@@ -128,77 +128,77 @@ class moduleUsers extends module {
 	function action_user( $action, $user_name, $user_email, $user_password, $www_enabled, $permission_object ) {
 		if( !$this->is_logged_in() ) {
 			return $this->template_parse( 'please_login.tpl' );
-		} elseif( empty($user_name) ) {
+		} elseif( empty( $user_name ) ) {
 			$this->TinderboxDS->addError( user_admin_user_name_empty );
-			return "0";
+			return '0';
 		}
 
-		if( $action == "add" ) {
+		if( $action == 'add' ) {
 			$user = new User();
 		} else {
-			$user = $this->TinderboxDS->getUserByName($user_name);
+			$user = $this->TinderboxDS->getUserByName( $user_name );
 		}
 
-		if( ( $this->checkWwwAdmin() ) || ( $action != "add" && ( $this->get_id() == $user->getId() ) ) ) {
-			if( is_object( $user ) && $user->getId() && $action == "add" ) {
+		if( ( $this->checkWwwAdmin() ) || ( $action != 'add' && ( $this->get_id() == $user->getId() ) ) ) {
+			if( is_object( $user ) && $user->getId() && $action == 'add' ) {
 				$this->TinderboxDS->addError( user_admin_user_exists );
-				return "0";
-			} elseif( (!is_object( $user ) || !$user->getId() )&& ( $action == "delete" || $action == "modify") ) {
+				return '0';
+			} elseif( ( !is_object( $user ) || !$user->getId() )&& ( $action == 'delete' || $action == 'modify' ) ) {
 				$this->TinderboxDS->addError( user_admin_user_not_exist );
-				return "0";
+				return '0';
 			} else {
 				switch( $www_enabled ) {
-					case "1":	$www_enabled = 1; break;
+					case '1':	$www_enabled = 1; break;
 					default:	$www_enabled = 0; break;
 				}
 
-				$user->setName($user_name);
-				$user->setEmail($user_email);
-				$user->setWwwEnabled($www_enabled);
+				$user->setName( $user_name );
+				$user->setEmail( $user_email );
+				$user->setWwwEnabled( $www_enabled );
 				if( $user_password ) {
 					$user->setPassword( $this->TinderboxDS->cryptPassword( $user_password ) );
 				}
 
-				if( $action == "add" ) {
+				if( $action == 'add' ) {
 					if( !$this->TinderboxDS->addUser( $user ) ) {
-						return "0";
+						return '0';
 					}
-					$user = $this->TinderboxDS->getUserByName($user_name);
-				} elseif( $action == "modify" ) {
+					$user = $this->TinderboxDS->getUserByName( $user_name );
+				} elseif( $action == 'modify' ) {
 					if( !$this->TinderboxDS->updateUser( $user ) ) {
-						return "0";
+						return '0';
 					}
 					if( $this->checkWwwAdmin() ) {
 						$this->TinderboxDS->deleteUserPermissions( $user );
 					}
-				} elseif( $action == "delete" ) {
+				} elseif( $action == 'delete' ) {
 					if( !$this->TinderboxDS->deleteUser( $user ) ) {
-						return "0";
+						return '0';
 					}
-					return "1";
+					return '1';
 				}
 
-				if( $this->checkWwwAdmin() && is_array($permission_object) ) {
+				if( $this->checkWwwAdmin() && is_array( $permission_object ) ) {
 					foreach( $permission_object as $host => $build_value ) {
 						foreach( $build_value as $build => $permission_value ) {
 							foreach( $permission_value as $permission => $enable_value ) {
-								if( $enable_value == "on" ) {
-									if( !$this->TinderboxDS->addUserPermission( $user->getId(), $host, 'builds', $build, $permission) ) {
+								if( $enable_value == 'on' ) {
+									if( !$this->TinderboxDS->addUserPermission( $user->getId(), $host, 'builds', $build, $permission ) ) {
 										$this->TinderboxDS->deleteUser( $user );
-										return "0";
+										return '0';
 									}
 								}
 							}
 						}
 					}
 				}
-				return "1";
+				return '1';
 			}
 		} else {
 			$this->TinderboxDS->addError( permission_denied );
-			return "0";
+			return '0';
 		}
-		return "0";
+		return '0';
 	}
 
 	function do_login( $username, $password ) {
@@ -241,7 +241,7 @@ class moduleUsers extends module {
 		global $moduleSession;
 
 		$user = $this->TinderboxDS->getUserById( $moduleSession->getAttribute( 'user' )->getId() );
-		if( is_object($user) ) {
+		if( is_object( $user ) ) {
 			return $user->getWwwEnabled();
 		}
 
@@ -276,7 +276,7 @@ class moduleUsers extends module {
 			return false;
 		}
 	}
-	
+
 	function get_permission( $host_id, $object_type, $object_id, $permission ) {
 		if( !is_array( $this->permissions[$host_id][$object_type][$object_id] ) && $this->permissions[$host_id][$object_type][$object_id]['set'] != 1 ) {
 			$this->fetch_permissions( $host_id, $object_type, $object_id );
@@ -285,7 +285,7 @@ class moduleUsers extends module {
 	}
 
 	function checkWwwAdmin() {
-		return $this->get_permission('0','users', $this->get_id(), 'IS_WWW_ADMIN' );
+		return $this->get_permission( '0', 'users', $this->get_id(), 'IS_WWW_ADMIN' );
 	}
 
 	function checkPermAddQueue( $host_id, $object_type, $object_id ) {
@@ -311,5 +311,5 @@ class moduleUsers extends module {
 	function checkPermDeleteOtherQueue( $host_id, $object_type, $object_id ) {
 		return $this->get_permission( $host_id, $object_type, $object_id, 'PERM_DELETE_OTHER_QUEUE' );
 	}
-}	
+}
 ?>

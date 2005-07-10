@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/module/moduleBuildPorts.php,v 1.2 2005/07/10 07:39:18 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/module/moduleBuildPorts.php,v 1.3 2005/07/10 17:06:25 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -36,14 +36,14 @@ class moduleBuildPorts extends module {
 		$this->module();
 		$this->modulePorts = new modulePorts();
 	}
-	
+
 	function display_list_buildports( $build_name ) {
 
 		$build = $this->TinderboxDS->getBuildByName( $build_name );
 		$ports = $this->TinderboxDS->getPortsForBuild( $build );
 		$ports_tree = $this->TinderboxDS->getPortsTreeById( $build->getPortsTreeId() );
 		$jail = $this->TinderboxDS->getJailById( $build->getJailId() );
-		
+
 		if( is_array( $ports ) && count( $ports ) > 0 ) {
 			$this->template_assign( 'data', $this->modulePorts->get_list_data( $build_name, $ports ) );
 		} else {
@@ -71,7 +71,7 @@ class moduleBuildPorts extends module {
 		}
 
 		$ports = $this->TinderboxDS->getPortsByStatus( $build_id, $maintainer, 'FAIL' );
-			
+
 		if( is_array( $ports ) && count( $ports ) > 0 ) {
 			$this->template_assign( 'data', $this->modulePorts->get_list_data( $build_name, $ports ) );
 		} else {
@@ -95,7 +95,7 @@ class moduleBuildPorts extends module {
 		}
 
 		$ports = $this->TinderboxDS->getLatestPorts( $build_id, 20 );
-			
+
 		if( is_array( $ports ) && count( $ports ) > 0 ) {
 			$this->template_assign( 'data', $this->modulePorts->get_list_data( $build_name, $ports ) );
 		} else {
@@ -128,7 +128,7 @@ class moduleBuildPorts extends module {
 					$data[$i]['port_current_version'] = $build->getBuildCurrentPort();
 				else
 					$data[$i]['port_current_version'] = preparing_next_build;
-					
+
 				$data[$i]['build_name'] = $build->getName();
 				$i++;
 	                }
@@ -141,5 +141,5 @@ class moduleBuildPorts extends module {
 
 		return $this->template_parse( 'current_buildports.tpl' );
 	}
-}	
+}
 ?>

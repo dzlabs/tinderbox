@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/module/module.php,v 1.2 2005/07/10 07:39:18 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/module/module.php,v 1.3 2005/07/10 17:06:25 oliver Exp $
 #
 
 require_once 'core/TinderboxDS.php';
@@ -34,7 +34,7 @@ class module {
 	function module() {
 		$this->TinderboxDS = new TinderboxDS();
 	}
-	
+
 	function template_parse( $template ) {
 		global $templatesdir;
 		global $templatesuri;
@@ -61,11 +61,11 @@ class module {
 
 		return $parsed;
 	}
-	
+
 	function template_assign( $varname, $varcontent ) {
 		$this->TEMPLATE_VARS[$varname] = $varcontent;
 	}
-	
+
 	function template_cleanup() {
 		return $this->TEMPLATE_VARS = array();
 	}

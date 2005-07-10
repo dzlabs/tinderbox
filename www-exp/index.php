@@ -24,10 +24,14 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/index.php,v 1.2 2005/07/10 07:39:17 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/index.php,v 1.3 2005/07/10 17:06:25 oliver Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
+
+function get_var( $var ) {
+	return $_POST[$var]?$_POST[$var]:$_GET[$var];
+}
 
 require_once 'module/moduleBuilds.php';
 require_once 'module/moduleBuildPorts.php';
@@ -47,86 +51,86 @@ $moduleUsers		= new moduleUsers();
 
 $moduleSession->start();
 if( $_POST['do_login'] ) {
-	$moduleUsers->do_login($_POST['User_Name'],$_POST['User_Password']);
+	$moduleUsers->do_login( $_POST['User_Name'], $_POST['User_Password'] );
 } elseif( $_POST['do_logout'] || ( $moduleUsers->is_logged_in() && !$moduleUsers->get_www_enabled() ) ) {
 	$moduleUsers->do_logout();
-	header("Location: index.php");
+	header( 'Location: index.php' );
 }
 
 $display_login = $moduleUsers->display_login();
 
-$action = $_POST['action']?$_POST['action']:$_GET['action'];
+$action = get_var( 'action' );
 
 if( $action ) {
-	$moduleSession->setAttribute( 'action', $action);
+	$moduleSession->setAttribute( 'action', $action );
 } else {
 	$action = $moduleSession->getAttribute( 'action' );
 }
 
 switch( $action ) {
-	case 'describe_port':		$port_id    = $_POST['id']?$_POST['id']:$_GET['id'];
+	case 'describe_port':		$port_id    = get_var( 'id' );
 					$display    = $modulePorts->display_describe_port( $port_id );
 					break;
-	case 'failed_buildports':	$build      = $_POST['build']?$_POST['build']:$_GET['build'];
-					$maintainer = $_POST['maintainer']?$_POST['maintainer']:$_GET['maintainer'];
+	case 'failed_buildports':	$build      = get_var( 'build' );
+					$maintainer = get_var( 'maintainer' );
 					$display    = $moduleBuildPorts->display_failed_buildports( $build, $maintainer );
 					break;
-	case 'latest_buildports':	$build      = $_POST['build']?$_POST['build']:$_GET['build'];
+	case 'latest_buildports':	$build      = get_var( 'build' );
 					$display    = $moduleBuildPorts->display_latest_buildports( $build );
 					break;
-	case 'list_buildports':		$build      = $_POST['build']?$_POST['build']:$_GET['build'];
+	case 'list_buildports':		$build      = get_var( 'build' );
 					$display    = $moduleBuildPorts->display_list_buildports( $build );
 					break;
-	case 'list_tinderd_queue':	$host_id    = $_POST['filter_host_id']?$_POST['filter_host_id']:$_GET['filter_host_id'];
-					$build_id   = $_POST['filter_build_id']?$_POST['filter_build_id']:$_GET['filter_build_id'];
+	case 'list_tinderd_queue':	$host_id    = get_var( 'filter_host_id' );
+					$build_id   = get_var( 'filter_build_id' );
 					$display    = $moduleTinderd->list_tinderd_queue( $host_id, $build_id );
 					break;
-	case 'change_tinderd_queue':	$change_tinderd_queue = $_POST['change_tinderd_queue']?$_POST['change_tinderd_queue']:$_GET['change_tinderd_queue'];
-					$entry_id   = $_POST['entry_id']?$_POST['entry_id']:$_GET['entry_id'];
-					$host_id    = $_POST['host_id']?$_POST['host_id']:$_GET['host_id'];
-					$build_id   = $_POST['build_id']?$_POST['build_id']:$_GET['build_id'];
-					$priority   = $_POST['priority']?$_POST['priority']:$_GET['priority'];
-					$moduleTinderd->change_tinderd_queue( $change_tinderd_queue, $entry_id, $host_id, $build_id, $priority );
-					$host_id    = $_POST['filter_host_id']?$_POST['filter_host_id']:$_GET['filter_host_id'];
-					$build_id   = $_POST['filter_build_id']?$_POST['filter_build_id']:$_GET['filter_build_id'];
+	case 'change_tinderd_queue':	$ctinderdq  = get_var( 'change_tinderd_queue' );
+					$entry_id   = get_var( 'entry_id' );
+					$host_id    = get_var( 'host_id' );
+					$build_id   = get_var( 'build_id' );
+					$priority   = get_var( 'priority' );
+					$host_id    = get_var( 'filter_host_id' );
+					$build_id   = get_var( 'filter_build_id' );
+					$moduleTinderd->change_tinderd_queue( $ctinderdq, $entry_id, $host_id, $build_id, $priority );
 					$display    = $moduleTinderd->list_tinderd_queue( $host_id, $build_id );
-					break;	
-	case 'add_tinderd_queue':	$add_tinderd_queue = $_POST['add_tinderd_queue']?$_POST['add_tinderd_queue']:$_GET['add_tinderd_queue'];
-					$host_id    = $_POST['new_host_id']?$_POST['new_host_id']:$_GET['new_host_id'];
-					$build_id   = $_POST['new_build_id']?$_POST['new_build_id']:$_GET['new_build_id'];
-					$priority   = $_POST['new_priority']?$_POST['new_priority']:$_GET['new_priority'];
-					$port_directory = $_POST['new_port_directory']?$_POST['new_port_directory']:$_GET['new_port_directory'];
-					$moduleTinderd->add_tinderd_queue( $add_tinderd_queue, $host_id, $build_id, $priority, $port_directory );
-					$host_id    = $_POST['filter_host_id']?$_POST['filter_host_id']:$_GET['filter_host_id'];
-					$build_id   = $_POST['filter_build_id']?$_POST['filter_build_id']:$_GET['filter_build_id'];
+					break;
+	case 'add_tinderd_queue':	$atinderdq  = get_var( 'add_tinderd_queue' );
+					$host_id    = get_var( 'new_host_id' );
+					$build_id   = get_var( 'new_build_id' );
+					$priority   = get_var( 'new_priority' );
+					$directory  = get_var( 'new_port_directory' );
+					$host_id    = get_var( 'filter_host_id' );
+					$build_id   = get_var( 'filter_build_id' );
+					$moduleTinderd->add_tinderd_queue( $atinderdq, $host_id, $build_id, $priority, $directory );
 					$display    = $moduleTinderd->list_tinderd_queue( $host_id, $build_id );
-					break;	
+					break;
 	case 'display_add_user':	$display    = $moduleUsers->display_add_user( '', '', '', '', array() );
 					break;
-	case 'add_user':		$user_name  = $_POST['user_name']?$_POST['user_name']:$_GET['user_name'];
-					$user_email = $_POST['user_email']?$_POST['user_email']:$_GET['user_email'];
-					$user_password = $_POST['user_password']?$_POST['user_password']:$_GET['user_password'];
-					$www_enabled = $_POST['www_enabled']?$_POST['www_enabled']:$_GET['www_enabled'];
-					$permission_object = $_POST['permission_object']?$_POST['permission_object']:$_GET['permission_object'];
-					$display    = $moduleUsers->action_user( "add", $user_name, $user_email, $user_password, $www_enabled, $permission_object );
+	case 'add_user':		$user_name  = get_var( 'user_name' );
+					$user_email = get_var( 'user_email' );
+					$user_pwd   = get_var( 'user_password' );
+					$wwwenabled = get_var( 'www_enabled' );
+					$perm_obj   = get_var( 'permission_object' );
+					$display    = $moduleUsers->action_user( 'add', $user_name, $user_email, $userpwd, $wwwenabled, $perm_obj );
 					switch( $display ) {
-						case "1":	header("Location: index.php"); break;
-						case "0":	$display = $moduleUsers->display_add_user( $user_name, $user_email, $user_password, $www_enabled, $permission_object ); break;
+						case '1':	header( 'Location: index.php' ); break;
+						case '0':	$display = $moduleUsers->display_add_user( $user_name, $user_email, $user_pwd, $wwwenabled, perm_obj ); break;
 					}
 					break;
-	case 'display_modify_user':	$user_name  = $_POST['modify_user_name']?$_POST['modify_user_name']:$_GET['modify_user_name'];
+	case 'display_modify_user':	$user_name  = get_var( 'modify_user_name' );
 					$display    = $moduleUsers->display_modify_user( 1, $user_name, '', '', '', '', array() );
 					break;
-	case 'modify_user':		$action_user = $_POST['action_user']?$_POST['action_user']:$_GET['action_user'];
-					$user_name   = $_POST['user_name']?$_POST['user_name']:$_GET['user_name'];
-					$user_email  = $_POST['user_email']?$_POST['user_email']:$_GET['user_email'];
-					$user_password = $_POST['user_password']?$_POST['user_password']:$_GET['user_password'];
-					$www_enabled = $_POST['www_enabled']?$_POST['www_enabled']:$_GET['www_enabled'];
-					$permission_object = $_POST['permission_object']?$_POST['permission_object']:$_GET['permission_object'];
-					$display     = $moduleUsers->action_user( $action_user, $user_name, $user_email, $user_password, $www_enabled, $permission_object );
+	case 'modify_user':		$actionuser = get_var( 'action_user' );
+					$user_name  = get_var( 'user_name' );
+					$user_email = get_var( 'user_email' );
+					$user_pwd   = get_var( 'user_password' );
+					$www_nabled = get_var( 'www_enabled' );
+					$perm_obj   = get_var( 'permission_object' );
+					$display     = $moduleUsers->action_user( $actionuser, $user_name, $user_email, $user_pwd, $wwwenabled, $perm_obj );
 					switch( $display ) {
-						case "1":	header("Location: index.php"); break;
-						case "0":	$display = $moduleUsers->display_modify_user( 0, $user_name, $user_email, $user_password, $www_enabled, $permission_object ); break;
+						case '1':	header( 'Location: index.php' ); break;
+						case '0':	$display = $moduleUsers->display_modify_user( 0, $username, $user_email, $user_pwd, $www_enabled, $perm_obj ); break;
 					}
 					break;
 	case 'list_builds':
