@@ -1,73 +1,268 @@
-$MCom: portstools/tinderbox/README,v 1.19 2005/07/10 07:29:42 oliver Exp $
+$MCom: portstools/tinderbox/README,v 1.20 2005/07/10 20:06:32 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
-Requirements: FreeBSD 6-CURRENT (earlier versions should work, but development
-  happens on -CURRENT only) perl, DBD::Mysql perl module, MySQL 4.1 or newer.
-  php4, php4-mysql extension, PEAR::DB() for web frontend
-  Make sure you have register_globals=on in your php.ini
+Obtaining Tinderbox:
+--------------------
 
-- Create /space, put scripts under /space/scripts, edit ds.pm, tinderbox.ph,
-  ds.inc (for the web frontend ), setup MySQL database
-- Create database tinderbox and grant permissions to user tinder
-- Create tables within tinderbox database with:
-	mysql -utinder -p tinderbox < tinderbox.schema
+The latest release of Tinderbox can be downloaded from
+http://tinderbox.marcuscom.com.
 
-- Initialize the Tinderbox: cd /space/scripts && ./tc init
-- Setup NFS server with this in /etc/exports:
-  /space  -ro -alldirs -maproot=0:0 localhost
-  If your /space is a symlink, export real filesystem's mount point
-- Create new jail using create_new_jail
-- Create new ports tree using create_new_portstree
-- Create new build using create_new_build
-- If you will be building ports such as linux-jdk* that require linprocfs
-  be sure to kldload linprocfs before starting Tinderbox builds
+Tinderbox lives in MarcusCom CVS repository under ``portstools'' module.
 
-If you want to mount /ports inside your portstree or /src inside your jail
-via nullfs or nfs from an other location, define
+http://www.marcuscom.com:8080/cgi-bin/cvsweb.cgi/
+
+Requirements:
+-------------
+
+FreeBSD 6-CURRENT (earlier versions should work, but development
+happens on -CURRENT only) Perl 5.8 or later, DBD::Mysql Perl module,
+and MySQL 4.1 or later.
+
+The web frontends require php4, php4-mysql extension, and PEAR::DB().
+Make sure you have "register_globals=on" in your php.ini.
+
+Installation:
+-------------
+
+By default, Tinderbox expects to do all of its work in /space.  This is
+completely configurable, however.  Hence forth, /space will be referred to
+as ${pb} (think: package build).  If you are using an alternative Tinderbox
+root, just substitute ${pb} with that root directory.
+
+1. Create directories ${pb} and ${pb}/scripts.
+
+2. Extract the Tinderbox distribution into ${pb}/scripts.
+
+3. Edit ds.ph and tinderbox.ph for your setup (if you are using the standard
+   web frontend, also edit www/ds.inc).
+
+4. Create the database and database user on the host that you defined within
+   ds.ph.  Note: the database can live on the same server as Tinderbox.  Just
+   set $DB_HOST to localhost in ds.ph.  The Tinderbox user must be granted
+   the following permissions on the Tinderbox database (for security purposes
+   no other permissions should be granted):
+
+Select_priv
+Insert_priv
+Update_priv
+Delete_priv
+
+5. Populate the database with the Tinderbox schema:
+
+mysql -uroot -p -h {$DB_HOST} {$DB_NAME} < tinderbox.schema
+
+   Where {$DB_HOST} and {$DB_NAME} are the values of $DB_HOST and $DB_NAME
+   from ds.ph respectively.  Note: do not do this if you are upgrading!
+   If you do, you will overwrite all of your previous data.  If schema changes
+   are required for upgrading, a separate upgrade schema file will be
+   included, and instructions will be available at
+   http://tinderbox.marcuscom.com.
+
+6. Initialize the Tinderbox:
+
+# cd ${pb}/scripts && ./tc init
+
+7. Tinderbox can use either NFS or nullfs to mount the required file systems
+   within the build chroots (called Builds in Tinderbox).  If you wish to use
+   nullfs, skip to step 10.
+
+8. Setup the Tinderbox server as an NFS server by adding the following to
+   /etc/exports:
+
+${pb} -ro -alldirs -maproot=0:0 localhost
+
+   Note: ${pb} _CANNOT_ be a symlink.  It should be a real, fully-qualified
+   path.
+
+9. Add the following to /etc/rc.conf to enable the NFS client and server:
+
+nfs_client_enable="YES"
+nfs_server_flags="-u -t -n 20"
+rpcbind_enable="YES"
+nfs_server_enable="YES"
+nfs_reserved_port_only="YES"
+
+10. Create the required Jails using the ${pb}/scripts/create_new_jail
+    command.  A Jail is nothing more than a version of FreeBSD.  For example,
+    to create a jail for FreeBSD 5.4-RELEASE:
+
+# cd ${pb}/scripts && ./create_new_jail -n 5.4 -d "FreeBSD 5.4-RELEASE" \
+	-t RELEASE_5_4_0_RELEASE -u NONE
+
+    Note: all Jail names _MUST_ begin with their FreeBSD major version number.
+    That is, the following is an illegal jail name: ``FreeBSD-5.4''.
+
+11. Create the required PortsTrees using the ${pb}/scripts/create_new_portstree
+    command.  A PortsTree is a set of ports you wish to build.  A PortsTree
+    does not have to be a complete FreeBSD ports tree.  However, all ports
+    within a tree must have all of their dependencies within the same tree.
+
+    For example, to create a portstree that tracks the full FreeBSD ports
+    tree:
+
+# cd ${pb}/scripts && ./create_new_portstree -n FreeBSD \
+	-d "FreeBSD ports tree" -w http://www.freebsd.org/cgi/cvsweb.cgi/ports/
+
+12. Create the required Builds using the ${pb}/scripts/create_new_build
+    command.  A Build is a combination of a Jail and a PortsTree.  The
+    build is the object in which packages are created.  To create a build
+    that combines a 5.4-RELEASE Jail with the FreeBSD ports tree:
+
+# cd ${pb}/scripts && ./create_new_build -n 5.4-FreeBSD -j 5.4 -p FreeBSD \
+	-d "5.4-RELEASE with FreeBSD ports tree"
+
+    Note: the recommended way to name Builds is ``Jail-PortsTree''.  All builds
+    must also begin with their FreeBSD major version number.
+
+
+NOTE: All the create_new_* scripts use cvsup12 as their default cvsup mirror.
+If you would like to use a different one (or enable additional cvsup options),
+modify the scripts before running them.
+
+Using Tinderbox:
+----------------
+
+To run a Tinderbox build, and track the progress in the database, you must
+first add the port you wish to build to the database using the
+${pb}/scripts/tc application:
+
+# cd ${pb}/scripts && ./tc addPort -b {BUILD} -d {PORT DIRECTORY} -r
+
+Where {BUILD} is the name of the Build for which this port should be built,
+and {PORT DIRECTORY} is the directory within the PortsTree where this port
+can be found.  For example, to build the GNOME 2 Desktop port for the
+Build ``5.4-FreeBSD'':
+
+# cd ${pb}/scripts && ./tc addPort -b 5.4-FreeBSD -d x11/gnome2 -r
+
+Note: a port does not have to be added to the database for Tinderbox to
+build it.  If you just want to do a quick ad hoc port build, forgo the
+previously mentioned step.
+
+To start a Tinderbox build, use the ${pb}/scripts/tinderbuild command:
+
+# cd ${pb}/scripts && ./tinderbuild -b {BUILD} {PORT DIRECTORY}
+
+For example, to build the GNOME 2 Desktop for the Build 5.4-FreeBSD:
+
+# cd ${pb}/scripts && ./tinderbuild -b 5.4-FreeBSD x11/gnome2
+
+TIP: The example above will run the build in the foreground with all messages
+and errors echoing to the terminal.  To capture all of this,  it is
+recommended to redirect tinderbuild output to a log file.  For example:
+
+Bourne shell equivalents:
+
+# cd ${pb}/scripts && ./tinderbuild -b 5.4-FreeBSD x11/gnome2 \
+	> ${pb}/builds/5.4-FreeBSD/build.log 2>&1 &
+
+C shell equivalents:
+
+# cd ${pb}/scripts && ./tinderbuild -b 5.4-FreeBSD x11/gnome2 \
+	>& ${pb}/builds/5.4-FreeBSD/build.log &
+
+The tinderbuild script also accepts some additional command line arguments:
+
+ -init 		: updates the Jail then updates the Build
+ -cleanpackages : removes all packages already built for the specified Build
+ -updateports 	: updates the Build's PortsTree (NOTE: dangerous if doing
+                  parallel runs with the same PortsTree)
+ -skipmake 	: skips the Makefile generation stage (NOTE: only use this
+                  option if a good Makefile already exists)
+ -noduds	: skips the duds file generation stage (NOTE: packages which
+                  are forbidden or ignored will be built)
+
+Maintenance:
+------------
+
+To update existing Jails, use the ${pb}/scripts/mkjail command.  For example:
+
+# cd ${pb}/scripts && ./mkjail 5.4
+
+To update existing PortsTrees, use the ``tc'' (Tinderbox Controller)
+application with the ``upgradePortsTree'' command.  For example:
+
+# cd ${pb}/scripts && ./tc updatePortsTree -p FreeBSD
+
+Over time, Builds may become cluttered with old log files and packages.  To
+cleanup old, unreferenced, files, use the ${pb}/scripts/tc application
+with the ``tbcleanup'' command:
+
+# cd ${pb}/scripts && ./tc tbcleanup
+
+Troubleshooting:
+----------------
+
+If you encounter problems with Tinderbox, it helps to see what is going
+on inside a Build.  Tinderbox operational logs can be found under
+${pb}/builds/{BUILD} (where {BUILD} is the Build name).  This is where
+tinderbuild output should be redirected (see ``Using Tinderbox'' above).
+The make.0 and make.1 logs contain the initial build setup for each port.
+The reason there are two logs is that tinderbuild runs in two phases.
+The second build phase is identical to the first, and is run to catch
+any transient problems that may have occurred in the first phase.
+
+The full build log of each port will be copied to ${pb}/logs/{BUILD}
+(where {BUILD} is the Build name).  If the port failed to build successfully,
+the log will also be copied to ${pb}/errors/{BUILD} (where {BUILD} is the
+Build name).
+
+Sometimes, the log alone is not sufficient for figuring out
+why a port failed to build.  In such cases, one must also see the port's
+work directory.  To have Tinderbox save this, create an empty file called
+``.keep'' in the port's directory, and the work directory will be tarred,
+compressed, and copied to ${pb}/wrkdirs/{BUILD} (where {BUILD} is the
+Build name).
+
+==============================================================================
+
+ADVANCED TOPICS
+
+Alternative Mounting:
+---------------------
+
+If you want to mount /ports inside your PortsTree or /src inside your Jail
+via nullfs or NFS from another location, define:
   #MOUNT_PORTSTREE_<portstreename>="server:/directory"
   #MOUNT_JAIL_<jailname>="server:/directory"
-for nfs mounts or
+for NFS mounts or:
   #MOUNT_PORTSTREE_<portstreename>="/directory"
   #MOUNT_JAIL_<jailname>="/directory"
-for nullfs mounts in rawenv before you call create_new_portstree or
-create_new_jail. They will automatically utilise this.
-Furthermore, tinderbuild will ensure that these filesystems are correctly
-mounted so you don't need to mount them by your own before calling tinderbuild.
+for nullfs mounts in ${pb}/scripts/rawenv before you call
+create_new_portstree or create_new_jail.
 
-To update an existing jail:
-- mkjail
+They will automatically use this. Furthermore, tinderbuild will ensure that
+these file systems are correctly mounted so you do not need to mount them by
+your own before calling tinderbuild.
 
-To run a build of a port:
-- tc addPort -b <buildname> -d <port directory> -r
-- tinderbuild -b <buildname> <port directory>
+Distfile Caching:
+-----------------
 
-tinderbuild options:
--init will call mkjail then mkbuild
--cleanpackages will remove all packages already built for the given build.
--updateports will update the build's portstree (dangerous if doing multiple
-  parallel runs)
--skipmake skips the Makefile generation stage if a good Makefile already exists
--noduds skip duds file generation (packages which are forbidden or ignored will
-  be built)
+Caching distfiles in a local repository can greatly improve build times.
+As long as there is sufficient disk space, enabling a local (or NFS)
+distfile cache is easy.  Just add the following to ${pb}/scripts/rawenv:
 
-Getting a copy of work directory for failed build:
-- touch .keep file into port directory
-- make sure directory /space/wrkdirs/<build_name> exists
-  Tarred work directory for the build will appear there.
+DISTFILE_CACHE={MOUNT POINT}
 
-Distfile caching:
-- add DISTFILE_CACHE="<nfs mount>" to rawenv, eg.:
-  DISTFILE_CACHE="localhost:/usr/ports/distfiles"
-Note: this doesn't have to be an NFS mount.  It can be a local path as well.
-If it is a local path, it will be mounted with mount_nullfs.
+Where {MOUNT POINT} is either an NFS specification, or fully qualified path
+(in the case of nullfs) in which to store downloaded distfiles.  For example:
 
-===================================================================
+NFS:
 
-USING CCACHE WITH TINDERBOX BUILDS
+DISTFILE_CACHE="localhost:/space/distfiles"
 
-To use ccache support, you must first create a tar file with ccache and various
-symlinks within a /opt directory.  Your tarball contents should be:
+nullfs:
+
+DISTFILE_CACHE="/d/distfiles"
+
+Using Ccache:
+-------------
+
+Another excellent way of accelerating builds is to use the compiler cache,
+``ccache''.  To use ccache support, you must first create a tar file with
+ccache and various symlinks within a /opt directory.  Your tarball contents
+should be:
 
 opt
 opt/ccache
@@ -76,8 +271,8 @@ opt/cc -> ccache
 opt/g++ -> ccache
 opt/c++ -> ccache
 
-This tarball must be called ccache.tar, and be placed in the jail directory
-for each jail that will use ccache (e.g. /space/jails/5-STABLE).
+This tarball must be called ccache.tar, and be placed in the Jail directory
+for each Jail that will use ccache (e.g. ${pb}/jails/5.4).
 
 Once the tarball is created, add:
 
@@ -85,57 +280,61 @@ CCACHE_ENABLED=1
 CCACHE_DIR=/ccache
 CCACHE_NOLINK=1
 CCACHE_MAX_SIZE=2G
- G=GB M=MB K=KB, default is 1GB
+# G=GB M=MB K=KB, default is 1GB
 
-To your rawenv file.  Then run your builds as you normally would.  To debug
-ccache, add the following to rawenv:
+To your ${pb}/scripts/rawenv file.  Then run your builds as you normally
+would.  To debug ccache, add the following to ${pb}/scripts/rawenv:
 
 CCACHE_LOGFILE=/ccache.log
 
 Then, in the root of each build directory, there will be a ccache.log that
 will let you know if the cache is working.
 
-===================================================================
+Automating/Queuing Port Builds:
+-------------------------------
 
-USING tinderd FOR AUTOMATING/QUEUEING PORT BUILDS
-
-If you want to use tinderbox to test many different ports after each other
-you probably want "tinderd". tinderd runs as a daemon and looks to see if
-something was added to the "ports to build queue". You can add different
+If you want to use tinderbox to test many different ports one after the other
+you probably want ``tinderd''. tinderd runs as a daemon and looks to see if
+something was added to the ``ports to build queue''. You can add different
 ports for different builds for different hosts with different priorities.
-tinderd will automaticly pick up the port with the highest priority for its
+tinderd will automatically pick up the port with the highest priority for its
 host and starts building it. That repeats until the queue is empty. After
-the queue got empty tinderd will sleep for a configurable amount of time
+the queue empties tinderd will sleep for a configurable amount of time
 (default: 120 seconds) thereafter it starts searching for new queue entries
 again.
 
 To set it up you must first add a Tinderbox host to the database:
-  tc addHost
-Right after that you can start tinderd. (it will stay in foreground by default)
-Now use
-  tc addBuildPortsQueueEntry -b <build name> -d <port directory>
-to add a port to the queue. tinderd will automaticly pick it up, run a
+
+# cd ${pb}/scripts && ./tc addHost
+
+Right after that you can start tinderd (it will stay in foreground by default).
+Now use:
+
+# cd ${pb}/scripts && ./tc addBuildPortsQueueEntry -b {BUILD} \
+	-d {PORT DIRECTORY}
+
+To add a port to the queue. tinderd will automatically pick it up, run a
 tinderbuild on it, and will delete the entry after tinderbuild completed.
+(Where {BUILD} is a Build name, and {PORT DIRECTORY} is a directory under
+{BUILDS}'s PortsTree (e.g. x11/gnome2).)
 
-To use tinderd scheduling via www (www-exp/) you must first create
-an User
-  tc addUser -n <username> -e <email> -p <password> -w
-Then you have to define one www administrator who has full rights on
-all hosts/builds and is the only account which might add other users.
-  tc setWwwAdmin -u <username>
+NOTE: You must be running the ``www-exp'' web frontend to take advantage
+of the following.
 
-After that, just browse to www-exp/ with your webbrowser and login
-with <username> and <password>. You can now create and modify other
+To use tinderd scheduling via the web you must first create a User:
+
+# cd ${pb}/scripts && ./tc addUser -n {USER} -e {EMAIL} -p {PASSWORD} -w
+
+(Where {USER} is a username, {EMAIL} is the user's email address,
+and {PASSWORD} is the user's password for Tinderbox web access.)
+
+Then you have to define one web administrator who has full rights on
+all Hosts/Builds and is the only account which can add other users:
+
+# cd ${pb}/scripts && ./tc setWwwAdmin -u {USER}
+
+(Where {USER} is the web administrator's username.)
+
+After that, just browse to the Tinderbox web site with your web browser and
+login with {USER} and {PASSWORD}. You can now create and modify other
 users easily by using the "Add User" or "Modify User" links.
-
-
-===================================================================
-
-GETTING TINDERBOX
-
-The latest release of Tinderbox can be downloaded from
-http://tinderbox.marcuscom.com.
-
-Tinderbox lives in Marcuscom CVS repository under portstools module.
-
-http://www.marcuscom.com:8080/cgi-bin/cvsweb.cgi/
