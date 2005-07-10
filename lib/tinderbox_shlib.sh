@@ -191,18 +191,18 @@ request_mount() {
 				return 1
 			fi
 			_destination=${_pb}/jails/${_jail}/src
-			if [ -z "${_source}" ] ; then 
+			if [ -z "${_source}" ] ; then
 				_source=$(parse_rawenv -q -t mount-jail -a ${_jail})
 			fi
 			_fq_source=1
 			;;
 		portstree)
-			if [ -z "${_portstree}" ] ; then 
+			if [ -z "${_portstree}" ] ; then
 				echo "portstree has to be filled!" >&2
 				return 1
 			fi
 			_destination=${_pb}/portstrees/${_portstree}/ports
-			if [ -z "${_source}" ] ; then 
+			if [ -z "${_source}" ] ; then
 				_source=$(parse_rawenv -q -t mount-portstree -a ${_portstree})
 			fi
 			_fq_source=1
