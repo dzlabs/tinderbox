@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/module/moduleUsers.php,v 1.2 2005/07/10 17:06:25 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/module/moduleUsers.php,v 1.3 2005/07/10 22:38:07 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -133,17 +133,19 @@ class moduleUsers extends module {
 			return '0';
 		}
 
+		$user = $this->TinderboxDS->getUserByName( $user_name );
+
 		if( $action == 'add' ) {
-			$user = new User();
-		} else {
-			$user = $this->TinderboxDS->getUserByName( $user_name );
+			if( is_object( $user ) && $user->getId() ) {
+				$this->TinderboxDS->addError( user_admin_user_exists );
+				return '0';
+			} else {
+				$user = new User();
+			}
 		}
 
 		if( ( $this->checkWwwAdmin() ) || ( $action != 'add' && ( $this->get_id() == $user->getId() ) ) ) {
-			if( is_object( $user ) && $user->getId() && $action == 'add' ) {
-				$this->TinderboxDS->addError( user_admin_user_exists );
-				return '0';
-			} elseif( ( !is_object( $user ) || !$user->getId() )&& ( $action == 'delete' || $action == 'modify' ) ) {
+			if( ( !is_object( $user ) || !$user->getId() ) && ( $action == 'delete' || $action == 'modify' ) ) {
 				$this->TinderboxDS->addError( user_admin_user_not_exist );
 				return '0';
 			} else {

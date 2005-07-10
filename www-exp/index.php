@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/index.php,v 1.4 2005/07/10 17:40:08 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/index.php,v 1.5 2005/07/10 22:38:07 oliver Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -112,10 +112,10 @@ switch( $action ) {
 					$user_pwd   = get_var( 'user_password' );
 					$wwwenabled = get_var( 'www_enabled' );
 					$perm_obj   = get_var( 'permission_object' );
-					$display    = $moduleUsers->action_user( 'add', $user_name, $user_email, $userpwd, $wwwenabled, $perm_obj );
+					$display    = $moduleUsers->action_user( 'add', $user_name, $user_email, $user_pwd, $wwwenabled, $perm_obj );
 					switch( $display ) {
-						case '1':	header( 'Location: index.php' ); break;
-						case '0':	$display = $moduleUsers->display_add_user( $user_name, $user_email, $user_pwd, $wwwenabled, perm_obj ); break;
+						case '1':	unset( $display ); header( 'Location: index.php' ); break;
+						case '0':	$display = $moduleUsers->display_add_user( $user_name, $user_email, $user_pwd, $wwwenabled, $perm_obj ); break;
 					}
 					break;
 	case 'display_modify_user':	$user_name  = get_var( 'modify_user_name' );
@@ -125,12 +125,12 @@ switch( $action ) {
 					$user_name  = get_var( 'user_name' );
 					$user_email = get_var( 'user_email' );
 					$user_pwd   = get_var( 'user_password' );
-					$www_nabled = get_var( 'www_enabled' );
+					$wwwenabled = get_var( 'www_enabled' );
 					$perm_obj   = get_var( 'permission_object' );
-					$display     = $moduleUsers->action_user( $actionuser, $user_name, $user_email, $user_pwd, $wwwenabled, $perm_obj );
+					$display    = $moduleUsers->action_user( $actionuser, $user_name, $user_email, $user_pwd, $wwwenabled, $perm_obj );
 					switch( $display ) {
-						case '1':	header( 'Location: index.php' ); break;
-						case '0':	$display = $moduleUsers->display_modify_user( 0, $username, $user_email, $user_pwd, $www_enabled, $perm_obj ); break;
+						case '1':	unset( $display ); header( 'Location: index.php' ); break;
+						case '0':	$display = $moduleUsers->display_modify_user( 0, $user_name, $user_email, $user_pwd, $www_enabled, $perm_obj ); break;
 					}
 					break;
 	case 'list_builds':
