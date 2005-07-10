@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/User.pm,v 1.3 2005/06/28 05:47:55 adamw Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/User.pm,v 1.4 2005/07/10 07:29:42 oliver Exp $
 #
 
 package User;
@@ -36,9 +36,11 @@ use vars qw(@ISA);
 sub new {
         my $that        = shift;
         my $object_hash = {
-                User_Id    => "",
-                User_Name  => "",
-                User_Email => "",
+                User_Id          => "",
+                User_Name        => "",
+                User_Email       => "",
+                User_Password    => "",
+                User_Www_Enabled => "",
         };
 
         my @args = ();
@@ -65,6 +67,18 @@ sub getEmail {
         return $self->{User_Email};
 }
 
+sub getPassword {
+        my $self = shift;
+
+        return $self->{User_Password};
+}
+
+sub getWwwEnabled {
+        my $self = shift;
+
+        return $self->{User_Www_Enabled};
+}
+
 sub setName {
         my $self = shift;
         my $name = shift;
@@ -77,6 +91,20 @@ sub setEmail {
         my $email = shift;
 
         $self->{User_Email} = $email;
+}
+
+sub setPassword {
+        my $self     = shift;
+        my $password = shift;
+
+        $self->{User_Password} = $password;
+}
+
+sub setWwwEnabled {
+        my $self       = shift;
+        my $wwwenabled = shift;
+
+        $self->{User_Www_Enabled} = $wwwenabled;
 }
 
 1;

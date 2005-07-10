@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.18 2005/07/09 19:58:01 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.19 2005/07/10 07:29:42 oliver Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -116,6 +116,18 @@ Now use
   tc addBuildPortsQueueEntry -b <build name> -d <port directory>
 to add a port to the queue. tinderd will automaticly pick it up, run a
 tinderbuild on it, and will delete the entry after tinderbuild completed.
+
+To use tinderd scheduling via www (www-exp/) you must first create
+an User
+  tc addUser -n <username> -e <email> -p <password> -w
+Then you have to define one www administrator who has full rights on
+all hosts/builds and is the only account which might add other users.
+  tc setWwwAdmin -u <username>
+
+After that, just browse to www-exp/ with your webbrowser and login
+with <username> and <password>. You can now create and modify other
+users easily by using the "Add User" or "Modify User" links.
+
 
 ===================================================================
 

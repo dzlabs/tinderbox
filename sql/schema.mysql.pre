@@ -65,9 +65,25 @@ CREATE TABLE users (
   User_Id int NOT NULL auto_increment,
   User_Name varchar(16) NOT NULL,
   User_Email varchar(255),
+  User_Password varchar(41) NOT NULL,
+  User_Www_Enabled tinyint(1) NOT NULL default '0',
   PRIMARY KEY (User_Id),
   UNIQUE (User_Name),
   INDEX User_Name_Idx (User_Name)
+) TYPE=INNODB;
+
+DROP TABLE IF EXISTS user_permissions;
+CREATE TABLE IF NOT EXISTS user_permissions (
+  User_Id int(11) NOT NULL,
+  Host_Id int(11) NOT NULL,
+  User_Permission_Object_Type enum('builds','users') NOT NULL,
+  User_Permission_Object_Id int(11) NOT NULL default '0',
+  User_Permission int(11) NOT NULL default '0',
+  PRIMARY KEY  (User_Id,User_Permission_Object_Type,User_Permission_Object_Id,User_Permission,Host_Id),
+  INDEX (User_Id),
+  FOREIGN KEY (User_Id)
+    REFERENCES users(User_Id)
+    ON UPDATE CASCADE ON DELETE RESTRICT
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS build_users;

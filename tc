@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.43 2005/07/07 04:53:22 marcus Exp $
+# $MCom: portstools/tinderbox/tc,v 1.44 2005/07/10 07:31:23 oliver Exp $
 #
 
 # This is a hack to make sure we can always find our modules.
@@ -286,8 +286,14 @@ require "tinderlib.pl";
         "addUser" => {
                 func   => \&addUser,
                 help   => "Add a user to the datastore",
-                usage  => "-n <user name> [-e <user email>]",
-                optstr => 'n:e:',
+                usage  => "-n <user name> [-e <user email>] [-p password] [-w]",
+                optstr => 'n:e:p:w',
+        },
+        "setWwwAdmin" => {
+                func   => \&setWwwAdmin,
+                help   => "Defines which user is the www admin",
+                usage  => "-u <user name>",
+                optstr => 'u:',
         },
         "updateBuildUser" => {
                 func => \&updateBuildUser,
@@ -607,6 +613,9 @@ sub addPort {
 }
 
 sub addBuildPortsQueueEntry {
+        my $admin;
+        my $user_id;
+
         if (!$opts->{'b'} || !$opts->{'d'}) {
                 usage("addBuildPortsQueueEntry");
         }
@@ -630,7 +639,14 @@ sub addBuildPortsQueueEntry {
         my $build = $ds->getBuildByName($opts->{'b'});
         my $host  = $ds->getHostByName($hostname);
 
-        $ds->addBuildPortsQueueEntry($build, $opts->{'d'}, $host, $priority, 0);
+        if ($admin = $ds->getWwwAdmin()) {
+                $user_id = $admin->getId();
+        } else {
+                $user_id = 0;
+        }
+
+        $ds->addBuildPortsQueueEntry($build, $opts->{'d'}, $host, $priority,
+                $user_id);
 }
 
 sub listBuildPortsQueue {
@@ -1565,7 +1581,9 @@ sub addUser {
         my $user = new User();
 
         $user->setName($opts->{'n'});
-        $user->setEmail($opts->{'e'}) if ($opts->{'e'});
+        $user->setEmail($opts->{'e'})    if ($opts->{'e'});
+        $user->setPassword($opts->{'p'}) if ($opts->{'p'});
+        $user->setWwwEnabled(1)          if ($opts->{'w'});
 
         my $rc = $ds->addUser($user);
 
@@ -1575,6 +1593,38 @@ sub addUser {
                             . $ds->getError()
                             . "\n");
         }
+}
+
+sub setWwwAdmin {
+        my $old_admin;
+        my $old_id;
+
+        if (!$opts->{'u'}) {
+                usage("setWwwAdmin");
+        }
+
+        my $username = $opts->{'u'};
+        if (!$ds->isValidUser($username)) {
+                cleanup($ds, 1, "Unknown user, $username\n");
+        }
+
+        if ($old_admin = $ds->getWwwAdmin()) {
+                $old_id = $old_admin->getId();
+        } else {
+                $old_id = 0;
+        }
+
+        my $user = $ds->getUserByName($username);
+
+        my $rc = $ds->setWwwAdmin($user);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                        "Failed to set www admin: " . $ds->getError() . "\n");
+        }
+
+        my $rc =
+            $ds->moveBuildPortsQueueFromUserToUser($old_id, $user->getId());
 }
 
 sub addBuildUser {

@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.28 2005/07/09 03:56:13 marcus Exp $
+# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.29 2005/07/10 07:29:42 oliver Exp $
 #
 
 package TinderboxDS;
@@ -96,6 +96,22 @@ sub isValidBuildPortsQueueId {
         );
 
         return ($rc > 0) ? 1 : 0;
+}
+
+sub moveBuildPortsQueueFromUserToUser {
+        my $self   = shift;
+        my $old_id = shift;
+        my $new_id = shift;
+
+        my $rc = $self->_doQuery(
+                "UPDATE build_ports_queue
+                    SET User_Id=?
+                  WHERE User_Id=?",
+                [$new_id, $old_id]
+        );
+
+        return $rc;
+
 }
 
 sub getBuildPortsQueueById {
@@ -805,12 +821,61 @@ sub getUsersForBuild {
         return @users;
 }
 
+sub getWwwAdmin {
+        my $self = shift;
+
+        my @results;
+        my $rc = $self->_doQueryHashRef(
+                "SELECT users.* FROM users,user_permissions WHERE users.User_Id=user_permissions.User_Id AND user_permissions.User_Permission_Object_Type='users' AND user_permissions.User_Permission_Object_Id=users.User_Id AND user_permissions.User_Permission=?",
+                \@results, 1
+        );
+
+        if (!$rc) {
+                return undef;
+        }
+
+        my @user = $self->_newFromArray("User", @results);
+
+        return $user[0];
+
+}
+
+sub setWwwAdmin {
+        my $self = shift;
+        my $user = shift;
+
+        my $rc = $self->_doQueryNumRows(
+                'SELECT User_Id FROM user_permissions where User_Permission=?',
+                1
+        );
+
+        if (!$rc) {
+                $rc = $self->_doQuery(
+                        'INSERT INTO user_permissions (User_Id,Host_Id,User_Permission_Object_Type,User_Permission_Object_Id,User_Permission) VALUES (?, ? , ?, ?, ?)',
+                        [$user->getId(), '0', 'users', $user->getId(), 1]
+                );
+        } else {
+                $rc = $self->_doQuery(
+                        'UPDATE user_permissions SET User_Id=?, User_Permission_Object_Id=? WHERE User_Permission=1',
+                        [$user->getId(), $user->getId()]
+                );
+        }
+
+        return $rc;
+}
+
 sub addUser {
         my $self = shift;
         my $user = shift;
         my $uCls = (ref($user) eq "REF") ? $$user : $user;
 
-        my $rc = $self->_addObject($uCls);
+        my $rc = $self->_doQuery(
+                "INSERT INTO users (User_Name,User_Email,User_Password,User_Www_Enabled) VALUES (?, ?, PASSWORD(?), ?)",
+                [
+                        $user->getName(),   $user->getEmail(),
+                        $user->getPassword, $user->getWwwEnabled
+                ]
+        );
 
         if (ref($user) eq "REF") {
                 $$user = $self->getUserByName($uCls->getName());
