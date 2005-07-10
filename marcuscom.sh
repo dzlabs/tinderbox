@@ -24,11 +24,16 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/marcuscom.sh,v 1.3 2005/06/28 05:47:55 adamw Exp $
+# $MCom: portstools/tinderbox/marcuscom.sh,v 1.4 2005/07/10 07:25:59 oliver Exp $
 #
 
 
-pb=/space
+pb=$0
+[ -z "$(echo "${pb}" | sed 's![^/]!!g')" ] && \
+pb=$(type "$pb" | sed 's/^.* //g')
+pb=$(realpath $(dirname $pb))
+pb=${pb%%/scripts}
+
 CVSROOT=":pserver:anonymous@sushi.marcuscom.com:/space/cvs/marcuscom-cvs"
 TMPDIR="/tmp/mc_cvs"
 

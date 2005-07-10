@@ -1,6 +1,10 @@
 #!/bin/sh
 
-pb=/space
+pb=$0
+[ -z "$(echo "${pb}" | sed 's![^/]!!g')" ] && \
+pb=$(type "$pb" | sed 's/^.* //g')
+pb=$(realpath $(dirname $pb))
+pb=${pb%%/scripts}
 
 . ${pb}/scripts/tinderbox_shlib.sh
 
