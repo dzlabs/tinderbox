@@ -24,64 +24,59 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/PortsTree.php,v 1.2 2005/07/10 07:39:18 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/core/User.php,v 1.1 2005/07/10 07:39:18 oliver Exp $
 #
 
     require_once 'TinderObject.php';
 
-    class PortsTree extends TinderObject {
+    class User extends TinderObject {
 
-	function PortsTree($argv = array()) {
+	function User($argv = array()) {
 	    $object_hash = array(
-		Ports_Tree_Id => "",
-		Ports_Tree_Name => "",
-		Ports_Tree_Description => "",
-		Ports_Tree_Last_Built => "",
-		Ports_Tree_Update_Cmd => "",
-                Ports_Tree_CVSweb_URL => ""
+                User_Id => "",
+		User_Name => "",
+		User_Email => "",
+		User_Password => "",
+		User_Www_Enabled => ""
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
 	}
 
 	function getId() {
-	    return $this->Ports_Tree_Id;
+	    return $this->User_Id;
 	}
 
 	function getName() {
-	    return $this->Ports_Tree_Name;
+	    return $this->User_Name;
 	}
 
-	function getDescription() {
-	    return $this->Ports_Tree_Description;
+	function getEmail() {
+	    return $this->User_Email;
 	}
 
-	function getLastBuilt() {
-	    return $this->Ports_Tree_Last_Built;
+	function getPassword() {
+	    return $this->User_Password;
 	}
 
-	function getUpdateCmd() {
-	    return $this->Ports_Tree_Update_Cmd;
+	function getWwwEnabled() {
+	    return $this->User_Www_Enabled;
 	}
-
-        function getCVSwebURL() {
-            return $this->Ports_Tree_CVSweb_URL;
-        }
 
 	function setName($name) {
-	    $this->Ports_Tree_Name = $name;
+	    return $this->User_Name = $name;
 	}
 
-	function setDescription($descr) {
-	    $this->Ports_Tree_Description = $descr;
+	function setEmail($email) {
+	    return $this->User_Email = $email;
 	}
 
-	function setLastBuilt($time) {
-	    $this->Ports_Tree_Last_Built = $time;
+	function setPassword($password) {
+	    return $this->User_Password = $password;
 	}
 
-	function setUpdateCmd($cmd) {
-	    $this->Ports_Tree_Update_Cmd = $cmd;
+	function setWwwEnabled($www_enabled) {
+	    return $this->User_Www_Enabled = $www_enabled;
 	}
     }
 ?>

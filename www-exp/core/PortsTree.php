@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/core/PortsTree.php,v 1.1 2005/07/01 18:20:51 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/core/PortsTree.php,v 1.2 2005/07/10 07:39:18 oliver Exp $
 #
 
     require_once 'TinderObject.php';
@@ -67,7 +67,7 @@
         function getCVSwebURL() {
             return $this->Ports_Tree_CVSweb_URL;
         }
-    
+
 	function setName($name) {
 	    $this->Ports_Tree_Name = $name;
 	}

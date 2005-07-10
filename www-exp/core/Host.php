@@ -24,64 +24,29 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/PortsTree.php,v 1.2 2005/07/10 07:39:18 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/core/Host.php,v 1.1 2005/07/10 07:39:18 oliver Exp $
 #
 
     require_once 'TinderObject.php';
 
-    class PortsTree extends TinderObject {
+    class Host extends TinderObject {
 
-	function PortsTree($argv = array()) {
+	function Host($argv = array()) {
 	    $object_hash = array(
-		Ports_Tree_Id => "",
-		Ports_Tree_Name => "",
-		Ports_Tree_Description => "",
-		Ports_Tree_Last_Built => "",
-		Ports_Tree_Update_Cmd => "",
-                Ports_Tree_CVSweb_URL => ""
+                Host_Id => "",
+		Host_Name => ""
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
 	}
 
 	function getId() {
-	    return $this->Ports_Tree_Id;
+	    return $this->Host_Id;
 	}
 
 	function getName() {
-	    return $this->Ports_Tree_Name;
+	    return $this->Host_Name;
 	}
 
-	function getDescription() {
-	    return $this->Ports_Tree_Description;
-	}
-
-	function getLastBuilt() {
-	    return $this->Ports_Tree_Last_Built;
-	}
-
-	function getUpdateCmd() {
-	    return $this->Ports_Tree_Update_Cmd;
-	}
-
-        function getCVSwebURL() {
-            return $this->Ports_Tree_CVSweb_URL;
-        }
-
-	function setName($name) {
-	    $this->Ports_Tree_Name = $name;
-	}
-
-	function setDescription($descr) {
-	    $this->Ports_Tree_Description = $descr;
-	}
-
-	function setLastBuilt($time) {
-	    $this->Ports_Tree_Last_Built = $time;
-	}
-
-	function setUpdateCmd($cmd) {
-	    $this->Ports_Tree_Update_Cmd = $cmd;
-	}
     }
 ?>

@@ -7,11 +7,11 @@
 # modification, are permitted provided that the following conditions
 # are met:
 # 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer. 
+#    notice, this list of conditions and the following disclaimer
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-#                
+#
 # THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/module/moduleBuilds.php,v 1.1 2005/07/01 18:09:37 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/module/moduleBuilds.php,v 1.2 2005/07/10 07:39:18 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -45,7 +45,7 @@ class moduleBuilds extends module {
 			$data = $this->get_list_data( $builds );
 			foreach( $data as $res )
 				$sort[] = $res['name'];
-			array_multisort($sort, SORT_ASC, $data);
+			array_multisort( $sort, SORT_ASC, $data );
 			$this->template_assign( 'data', $data );
 		} else {
 			$this->template_assign( 'no_list', 1 );
@@ -92,6 +92,15 @@ class moduleBuilds extends module {
 
 		return $data;
 
+	}
+
+	function get_all_builds() {
+		$all_builds_raw = $this->TinderboxDS->getAllBuilds();
+		$all_builds = array();
+		foreach( $all_builds_raw as $build ) {
+			$all_builds[] = array( 'build_id' => $build->getId(), 'build_name' => $build->getName() );
+		}
+		return $all_builds;
 	}
 }	
 ?>

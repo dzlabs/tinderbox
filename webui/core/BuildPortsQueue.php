@@ -24,64 +24,68 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/PortsTree.php,v 1.2 2005/07/10 07:39:18 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/BuildPortsQueue.php,v 1.1 2005/07/10 07:39:18 oliver Exp $
 #
 
     require_once 'TinderObject.php';
 
-    class PortsTree extends TinderObject {
+    class BuildPortsQueue extends TinderObject {
 
-	function PortsTree($argv = array()) {
+	function BuildPortsQueue($argv = array()) {
 	    $object_hash = array(
-		Ports_Tree_Id => "",
-		Ports_Tree_Name => "",
-		Ports_Tree_Description => "",
-		Ports_Tree_Last_Built => "",
-		Ports_Tree_Update_Cmd => "",
-                Ports_Tree_CVSweb_URL => ""
+                Build_Ports_Queue_Id => "",
+		Build_Id => "",
+		Build_Name => "",
+		User_Id => "",
+		User_Name => "",
+		Port_Directory => "",
+		Priority => "",
+		Host_Id => "",
+		Host_Name => ""
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
 	}
 
 	function getId() {
-	    return $this->Ports_Tree_Id;
+	    return $this->Build_Ports_Queue_Id;
 	}
 
-	function getName() {
-	    return $this->Ports_Tree_Name;
+	function getPortDirectory() {
+	    return $this->Port_Directory;
 	}
 
-	function getDescription() {
-	    return $this->Ports_Tree_Description;
+	function getPriority() {
+	    return $this->Priority;
 	}
 
-	function getLastBuilt() {
-	    return $this->Ports_Tree_Last_Built;
+	function getBuildId() {
+	    return $this->Build_Id;
 	}
 
-	function getUpdateCmd() {
-	    return $this->Ports_Tree_Update_Cmd;
+	function getBuildName() {
+	    return $this->Build_Name;
 	}
 
-        function getCVSwebURL() {
-            return $this->Ports_Tree_CVSweb_URL;
-        }
-
-	function setName($name) {
-	    $this->Ports_Tree_Name = $name;
+	function getHostId() {
+	    return $this->Host_Id;
 	}
 
-	function setDescription($descr) {
-	    $this->Ports_Tree_Description = $descr;
+	function getHostName() {
+	    return $this->Host_Name;
 	}
 
-	function setLastBuilt($time) {
-	    $this->Ports_Tree_Last_Built = $time;
+	function getUserId() {
+	    return $this->User_Id;
 	}
 
-	function setUpdateCmd($cmd) {
-	    $this->Ports_Tree_Update_Cmd = $cmd;
+	function getUserName() {
+	    return $this->User_Name;
 	}
+
+	function getBuildPortsQueueId() {
+	    return $this->Build_Ports_Queue_Id;
+	}
+
     }
 ?>
