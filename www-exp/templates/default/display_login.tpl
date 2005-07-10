@@ -49,7 +49,7 @@
 					</td></tr>
 					<tr><td class="noborder"><a href="index.php?action=display_add_user" style="margin-left:10px">Add User</a></td></tr>
 					<?}else{?>
-					<tr><td class="noborder"><a href="index.php?action=display_modify_user&modify_user_name=<?=$user_name?>" style="margin-left:10px">Modify User</a></td></tr>
+					<tr><td class="noborder"><a href="index.php?action=display_modify_user&amp;modify_user_name=<?=$user_name?>" style="margin-left:10px">Modify User</a></td></tr>
 					<?}?>
 				</table>
 			</form></td>
