@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/index.php,v 1.3 2005/07/10 17:06:25 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/index.php,v 1.4 2005/07/10 17:40:08 oliver Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -90,9 +90,9 @@ switch( $action ) {
 					$host_id    = get_var( 'host_id' );
 					$build_id   = get_var( 'build_id' );
 					$priority   = get_var( 'priority' );
+					$moduleTinderd->change_tinderd_queue( $ctinderdq, $entry_id, $host_id, $build_id, $priority );
 					$host_id    = get_var( 'filter_host_id' );
 					$build_id   = get_var( 'filter_build_id' );
-					$moduleTinderd->change_tinderd_queue( $ctinderdq, $entry_id, $host_id, $build_id, $priority );
 					$display    = $moduleTinderd->list_tinderd_queue( $host_id, $build_id );
 					break;
 	case 'add_tinderd_queue':	$atinderdq  = get_var( 'add_tinderd_queue' );
@@ -100,9 +100,9 @@ switch( $action ) {
 					$build_id   = get_var( 'new_build_id' );
 					$priority   = get_var( 'new_priority' );
 					$directory  = get_var( 'new_port_directory' );
+					$moduleTinderd->add_tinderd_queue( $atinderdq, $host_id, $build_id, $priority, $directory );
 					$host_id    = get_var( 'filter_host_id' );
 					$build_id   = get_var( 'filter_build_id' );
-					$moduleTinderd->add_tinderd_queue( $atinderdq, $host_id, $build_id, $priority, $directory );
 					$display    = $moduleTinderd->list_tinderd_queue( $host_id, $build_id );
 					break;
 	case 'display_add_user':	$display    = $moduleUsers->display_add_user( '', '', '', '', array() );
