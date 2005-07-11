@@ -24,12 +24,28 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/makemake,v 1.29 2005/07/09 07:25:21 marcus Exp $
+# $MCom: portstools/tinderbox/makemake,v 1.30 2005/07/11 19:58:28 marcus Exp $
 #
+
+# Handle being called from a directory other than where things
+# 'normally' reside
+BEGIN {
+        my $scripts;
+        if ($0 !~ m|/|) {
+                $scripts = '.';
+        } else {
+                $scripts = $0;
+                $scripts =~ s|/[^/]+$||;
+        }
+        push @INC, $scripts;
+        require lib;
+        import lib $scripts;
+}
 
 use strict;
 use TinderboxDS;
 use Getopt::Std;
+use File::Path;
 use vars qw(
     $BUILD
     $BUILD_NAME
@@ -48,12 +64,14 @@ require "tinderlib.pl";
 # Get a database handle for obtaining the ports.
 my $ds          = new TinderboxDS();
 my @build_names = $ds->getAllBuilds();
+
 if (!@build_names && defined($ds->getError())) {
         cleanup($ds, 1,
                 "Failed to get list of jails: " . $ds->getError() . "\n");
 } elsif (!@build_names) {
         cleanup($ds, 1, "There are no builds configured in this tinderbox\n");
 }
+
 if (scalar(@ARGV) < 1) {
         print STDERR "usage: $0 [-n] <build name> [<port directory> ...]\n";
         print STDERR "Current builds are:\n";
@@ -63,28 +81,15 @@ if (scalar(@ARGV) < 1) {
         cleanup($ds, 1, undef);
 }
 
-my $noduds  = 0;
-my $opts    = {};
-my @flarr   = ();
-my $pbflags = "";
-
+my $opts;
 getopts('n', $opts);
+my $noduds = $opts->{'n'} ? 1 : 0;
 
-if ($opts->{'n'}) {
-        $noduds = 1;
-}
-
-if (defined($ENV{'NOCLEAN'})) {
-        push @flarr, "-noclean";
-}
-if (defined($ENV{'PLISTCHECK'})) {
-        push @flarr, "-plistcheck";
-}
-if (defined($ENV{'NULLFS'})) {
-        push @flarr, "-nullfs";
-}
-
-$pbflags = join(" ", @flarr);
+my @flarr;
+push @flarr, "-noclean"    if (defined($ENV{'NOCLEAN'}));
+push @flarr, "-plistcheck" if (defined($ENV{'PLISTCHECK'}));
+push @flarr, "-nullfs"     if (defined($ENV{'NULLFS'}));
+my $pbflags = join(" ", @flarr);
 
 @PORTS = ();
 $BUILD = $ds->getBuildByName($ARGV[0]);
@@ -99,17 +104,24 @@ $JAIL_NAME      = $JAIL->getName();
 $PORTSTREE      = $ds->getPortsTreeForBuild($BUILD);
 $PORTSTREE_NAME = $PORTSTREE->getName();
 
+#---------------------------------------------------------------------------
+# Set up the environment, including a few bogus values to prevent
+# system-installed packages from affecting the tinderbox run.
+#---------------------------------------------------------------------------
+
 buildenv($BUILD_ROOT, $BUILD_NAME, $JAIL_NAME, $PORTSTREE_NAME);
 
 delete $ENV{'DISPLAY'};
-
-# Set LOCALBASE, X11BASE, PKGDB_DIR, and LINUXBASE to bogus values to prevent
-# system installed packages from affecting the tinderbox.
 $ENV{'LOCALBASE'}  = "/nonexistentlocal";
 $ENV{'X11BASE'}    = "/nonexistentx";
 $ENV{'PKG_DBDIR'}  = "/nonexistentdb";
 $ENV{'PORT_DBDIR'} = "/nonexistentportdb";
 $ENV{'LINUXBASE'}  = "/nonexistentlinux";
+
+#---------------------------------------------------------------------------
+# Handle either ports on the command line, or configured ports for
+# a particular build
+#---------------------------------------------------------------------------
 
 if (!scalar(@ARGV)) {
         my @dsPorts = $ds->getPortsForBuild($BUILD);
@@ -119,7 +131,6 @@ if (!scalar(@ARGV)) {
                             . $ds->getError()
                             . "\n");
         }
-
         push @PORTS, @dsPorts;
 
 } else {
@@ -139,10 +150,16 @@ if (!scalar(@ARGV)) {
                 }
         }
 }
+
+#---------------------------------------------------------------------------
+# Main loop.  Process all the ports, and their dependencies
+#---------------------------------------------------------------------------
+
 my (
-        %pkgdir,   %pkgdeps,  %pkgedeps,     %pkgpdeps, %pkgfdeps,
-        %pkgbdeps, %pkgrdeps, %rundepscache, @duds
+        %pkgdir,   %pkgdeps,  %pkgedeps, %pkgpdeps, %pkgfdeps,
+        %pkgbdeps, %pkgrdeps, @duds,     %makecache
 );
+
 while (scalar(@PORTS)) {
         my $port    = shift @PORTS;
         my $portdir = $port->getDirectory();
@@ -161,17 +178,13 @@ while (scalar(@PORTS)) {
                 }
                 cleanup($ds, 1, undef);
         }
-        $pkgname = `cd $tportdir && make -V PKGNAME`;
-        chomp $pkgname;
+        $pkgname = getPortPkgName($portdir, \%makecache);
 
         # Create a list of duds (ports that will not be attempted because they
         # are marked IGNORE or FORBIDDEN).
         if (!$noduds) {
-                my $dudpkg = `cd $tportdir && make ignorelist ECHO_MSG=true`;
-                if ($dudpkg) {
-                        chomp $dudpkg;
-                        push @duds, $dudpkg;
-                }
+                my $dudpkg = getPortIgnoreList($portdir, \%makecache);
+                push @duds, $dudpkg if ($dudpkg);
         }
 
         my (@edeps, @pdeps, @fdeps, @bdeps, @rdeps) = ();
@@ -182,17 +195,17 @@ while (scalar(@PORTS)) {
         $pkgbdeps{$portdir} = [];
         $pkgrdeps{$portdir} = [];
         $pkgdir{$portdir}   = $pkgname;
-        push @edeps, getDepends($tportdir, "EXTRACT");
-        push @pdeps, getDepends($tportdir, "PATCH");
-        push @fdeps, getDepends($tportdir, "FETCH");
-        push @bdeps, getDepends($tportdir, "BUILD");
-        push @rdeps, getRunDepends($tportdir, \%rundepscache);
+        push @edeps, getPortExtractDepends($portdir, \%makecache);
+        push @pdeps, getPortPatchDepends($portdir, \%makecache);
+        push @fdeps, getPortFetchDepends($portdir, \%makecache);
+        push @bdeps, getPortBuildDependsList($portdir, \%makecache);
+        push @rdeps, getPortRunDependsList($portdir, \%makecache);
 
-        findRunDepends(\@edeps, \%pkgedeps, $portdir, \%rundepscache, \@PORTS);
-        findRunDepends(\@pdeps, \%pkgpdeps, $portdir, \%rundepscache, \@PORTS);
-        findRunDepends(\@fdeps, \%pkgfdeps, $portdir, \%rundepscache, \@PORTS);
-        findRunDepends(\@bdeps, \%pkgbdeps, $portdir, \%rundepscache, \@PORTS);
-        findRunDepends(\@rdeps, \%pkgrdeps, $portdir, \%rundepscache, \@PORTS);
+        findRunDepends(\@edeps, \%pkgedeps, $portdir, \%makecache, \@PORTS);
+        findRunDepends(\@pdeps, \%pkgpdeps, $portdir, \%makecache, \@PORTS);
+        findRunDepends(\@fdeps, \%pkgfdeps, $portdir, \%makecache, \@PORTS);
+        findRunDepends(\@bdeps, \%pkgbdeps, $portdir, \%makecache, \@PORTS);
+        findRunDepends(\@rdeps, \%pkgrdeps, $portdir, \%makecache, \@PORTS);
 
         foreach my $depport (
                 @{$pkgedeps{$portdir}}, @{$pkgpdeps{$portdir}},
@@ -205,119 +218,98 @@ while (scalar(@PORTS)) {
                 }
         }
 }
-my $makefile = join("/", $BUILD_ROOT, "builds", $BUILD_NAME, "Makefile");
-unless (open(MK, ">" . $makefile)) {
-        cleanup($ds, 1, "Failed to open $makefile for writing: $!\n");
-}
+
+#---------------------------------------------------------------------------
+# Write out Makefile and duds file
+# Symlink Makefile to the correct 'All' directory
+#---------------------------------------------------------------------------
+
+my $builddir = $BUILD_ROOT . '/builds/' . $BUILD_NAME;
+
+cleanup($ds, 1, "Failed to open $builddir makefile for writing: $!\n")
+    unless (open(MK, "> $builddir/Makefile"));
+
 foreach my $key (keys %pkgdir) {
-        my @depsarr      = @{$pkgdeps{$key}};
-        my %seen         = ();
-        my @depsarrclean = grep { !$seen{$_}++ } @depsarr;
-        my @deppkgnames = map { $pkgdir{$_} . $ENV{'PKGSUFFIX'} } @depsarrclean;
-        my @edeppkgnames =
-            map { $pkgdir{$_} . $ENV{'PKGSUFFIX'} } @{$pkgedeps{$key}};
-        my @pdeppkgnames =
-            map { $pkgdir{$_} . $ENV{'PKGSUFFIX'} } @{$pkgpdeps{$key}};
-        my @fdeppkgnames =
-            map { $pkgdir{$_} . $ENV{'PKGSUFFIX'} } @{$pkgfdeps{$key}};
-        my @bdeppkgnames =
-            map { $pkgdir{$_} . $ENV{'PKGSUFFIX'} } @{$pkgbdeps{$key}};
-        my @rdeppkgnames =
-            map { $pkgdir{$_} . $ENV{'PKGSUFFIX'} } @{$pkgrdeps{$key}};
-        my $edeplst = "\"" . join(" ", @edeppkgnames) . "\"";
-        my $pdeplst = "\"" . join(" ", @pdeppkgnames) . "\"";
-        my $fdeplst = "\"" . join(" ", @fdeppkgnames) . "\"";
-        my $bdeplst = "\"" . join(" ", @bdeppkgnames) . "\"";
-        my $rdeplst = "\"" . join(" ", @rdeppkgnames) . "\"";
-        print MK "all: $pkgdir{$key}$ENV{'PKGSUFFIX'}\n";
-        print MK "$pkgdir{$key}: $pkgdir{$key}$ENV{'PKGSUFFIX'}\n";
-        print MK "$pkgdir{$key}$ENV{'PKGSUFFIX'}: "
-            . join(" ", @deppkgnames) . "\n";
-        print MK
-            "\t\@$PORTBUILD $BUILD_NAME $JAIL_NAME $PORTSTREE_NAME $pbflags $edeplst $pdeplst $fdeplst $bdeplst $rdeplst $pkgdir{$key}$ENV{'PKGSUFFIX'} /usr/ports/$key\n";
+        my $pname    = $pkgdir{$key} . $ENV{'PKGSUFFIX'};
+        my $pkgnames = makeList(\%pkgdir, 1, \%makecache, @{$pkgdeps{$key}});
+        my $edeplst  = makeList(\%pkgdir, 0, \%makecache, @{$pkgedeps{$key}});
+        my $pdeplst  = makeList(\%pkgdir, 0, \%makecache, @{$pkgpdeps{$key}});
+        my $fdeplst  = makeList(\%pkgdir, 0, \%makecache, @{$pkgfdeps{$key}});
+        my $bdeplst  = makeList(\%pkgdir, 0, \%makecache, @{$pkgbdeps{$key}});
+        my $rdeplst  = makeList(\%pkgdir, 0, \%makecache, @{$pkgrdeps{$key}});
+
+        printf MK "all: %s\n",          $pname;
+        printf MK "%s: %s\n",           $pkgdir{$key}, $pname;
+        printf MK "%s: %s\n",           $pname, $pkgnames;
+        printf MK "\t@%s %s %s %s %s ", $PORTBUILD, $BUILD_NAME, $JAIL_NAME,
+            $PORTSTREE_NAME, $pbflags;
+        printf MK "\"%s\" \"%s\" \"%s\" \"%s\" \"%s\" ", $edeplst, $pdeplst,
+            $fdeplst, $bdeplst, $rdeplst;
+        printf MK "%s /usr/ports/%s\n", $pname, $key;
 }
+
 close(MK);
 
-my $dudsfile = join("/", $BUILD_ROOT, "builds", $BUILD_NAME, "duds");
-unlink($dudsfile);
-
+unlink("$builddir/duds");
 if (!$noduds) {
-        unless (open(DUDS, ">" . $dudsfile)) {
-                cleanup($ds, 1, "Failed to open $dudsfile for writing: $!\n");
-        }
+        cleanup($ds, 1, "Failed to open $builddir duds for writing: $!\n")
+            unless (open(DUDS, "> $builddir/duds"));
         foreach my $dud (sort @duds) {
-                print DUDS $dud . "\n";
+                printf DUDS "%s\n", $dud;
         }
-
         close(DUDS);
 }
 
-# Now, symlink the Makefile to the correct All directory.
-system("mkdir -p $BUILD_ROOT/packages/$BUILD_NAME/All");
-unlink "$BUILD_ROOT/packages/$BUILD_NAME/All/Makefile";
-symlink $makefile, "$BUILD_ROOT/packages/$BUILD_NAME/All/Makefile";
+my $pkgdir = $BUILD_ROOT . '/packages/' . $BUILD_NAME . '/All';
+mkpath $pkgdir;
+symlink "$builddir/Makefile", "$pkgdir/Makefile";
+
+#---------------------------------------------------------------------------
+# And finish up
+#---------------------------------------------------------------------------
 
 cleanup($ds, 0, undef);
 
-sub getDepends {
-        my $portdir = shift;
-        my $type    = shift;
+#---------------------------------------------------------------------------
+# A few subroutines used in the main loop
+#---------------------------------------------------------------------------
 
-        my $deps = `cd $portdir && make -V ${type}_DEPENDS`;
-
-        my @deplist = ();
-        foreach my $dep (split(/\s+/, $deps)) {
-                my ($d, $ddir) = split(/:/, $dep);
-                push @deplist, $ddir;
-        }
-
-        return @deplist;
+sub uniqueList {
+        my %seen;
+        my @uniq = grep { !$seen{$_}++ } @_;
+        return @uniq;
 }
 
-sub getRunDepends {
-        my $portdir      = shift;
-        my $rundepscache = shift;
-
-        if (defined($rundepscache) && defined($rundepscache->{$portdir})) {
-                return @{$rundepscache->{$portdir}};
-        }
-
-        my @deps = _getDepends($portdir, "run-depends-list");
-        $rundepscache->{$portdir} = \@deps;
-
-        return @deps;
-}
-
-sub _getDepends {
-        my $portdir = shift;
-        my $target  = shift;
-
-        my @deplist = `cd $portdir && make $target`;
-
-        return @deplist;
+sub makeList {
+        my $pkgdir = shift;
+        my $douniq = shift;
+        my $cache  = shift;
+        my $list   = join(' ',
+                map { $pkgdir{$_} . $ENV{'PKGSUFFIX'} }
+                    $douniq eq 1 ? uniqueList(@_) : @_);
+        return $list;
 }
 
 sub findRunDepends {
-        my $source  = shift;
-        my $dest    = shift;
-        my $portdir = shift;
-        my $cache   = shift;
-        my $ports   = shift;
+        my $source    = shift;
+        my $dest      = shift;
+        my $portdir   = shift;
+        my $makecache = shift;
+        my $ports     = shift;
 
         foreach my $rdep (@{$source}) {
+                next if ($rdep eq "");
                 my %seen = ();
-                chomp $rdep;
-                my @rundeps = getRunDepends($rdep);
+                my @rundeps = getPortRunDependsList($rdep, $makecache);
                 while (scalar(@rundeps)) {
                         my $rundep = shift @rundeps;
-                        chomp $rundep;
                         next if (defined($seen{$rundep}));
-                        push @rundeps, getRunDepends($rundep, $cache);
+                        next if ($rundep eq "");
+                        push @rundeps,
+                            getPortRunDependsList($rundep, $makecache);
                         $seen{$rundep}++;
-                        $rundep =~ s|^$ENV{'PORTSDIR'}/||;
                         push @{$dest->{$portdir}}, $rundep;
                 }
-                $rdep =~ s|^$ENV{'PORTSDIR'}/||;
                 push @{$dest->{$portdir}}, $rdep;
                 my $p = new Port();
                 $p->setDirectory($rdep);
@@ -325,3 +317,143 @@ sub findRunDepends {
         }
 }
 
+#---------------------------------------------------------------------------
+# Cached make(1) implementation:  Ade Lovett <ade@FreeBSD.org>
+#---------------------------------------------------------------------------
+
+sub getPortInfo {
+        my $port  = shift;
+        my $cache = shift;
+        my @ret;
+        my $tmp;
+
+        # list of variables we're going to pull from the port Makefile
+        my @makeTargets = (
+                'PKGNAME',         'IGNORE',
+                'NO_PACKAGE',      'FORBIDDEN',
+                'EXTRACT_DEPENDS', 'PATCH_DEPENDS',
+                'FETCH_DEPENDS',   'BUILD_DEPENDS',
+                'LIB_DEPENDS',     'RUN_DEPENDS',
+                'DEPENDS'
+        );
+
+        return if ($cache->{$port}{'didmake'} eq 1);
+
+        $tmp = '-V ' . join(' -V ', @makeTargets);
+        @ret = split("\n", `cd $ENV{'PORTSDIR'}/$port && make $tmp`);
+
+        foreach $tmp (@makeTargets) {
+                $cache->{$port}{$tmp} = shift @ret;
+        }
+        $cache->{$port}{'didmake'} = 1;
+}
+
+# Return the port package name
+sub getPortPkgName {
+        my $port  = shift;
+        my $cache = shift;
+
+        getPortInfo($port, $cache);
+        return $cache->{$port}{'PKGNAME'};
+}
+
+# General function for returning a port dependency list
+sub getPortDepends {
+        my $port  = shift;
+        my $cache = shift;
+        my $item  = shift;
+
+        getPortInfo($port, $cache);
+
+        my @deps = ();
+        foreach my $dep (split(/\s+/, $cache->{$port}{$item})) {
+                my ($d, $ddir) = split(/:/, $dep);
+                $ddir =~ s|^$ENV{'PORTSDIR'}/||;
+                push @deps, $ddir;
+        }
+
+        return @deps;
+}
+
+sub getPortExtractDepends {
+        my $port  = shift;
+        my $cache = shift;
+        return getPortDepends($port, $cache, 'EXTRACT_DEPENDS');
+}
+
+sub getPortPatchDepends {
+        my $port  = shift;
+        my $cache = shift;
+        return getPortDepends($port, $cache, 'PATCH_DEPENDS');
+}
+
+sub getPortFetchDepends {
+        my $port  = shift;
+        my $cache = shift;
+        return getPortDepends($port, $cache, 'FETCH_DEPENDS');
+}
+
+sub getPortBuildDepends {
+        my $port  = shift;
+        my $cache = shift;
+        return getPortDepends($port, $cache, 'BUILD_DEPENDS');
+}
+
+sub getPortLibDepends {
+        my $port  = shift;
+        my $cache = shift;
+        return getPortDepends($port, $cache, 'LIB_DEPENDS');
+}
+
+sub getPortRunDepends {
+        my $port  = shift;
+        my $cache = shift;
+        return getPortDepends($port, $cache, 'RUN_DEPENDS');
+}
+
+sub getPortOtherDepends {
+        my $port  = shift;
+        my $cache = shift;
+        return getPortDepends($port, $cache, 'DEPENDS');
+}
+
+# A close approximation to the 'ignore-list' target
+sub getPortIgnoreList {
+        my $port  = shift;
+        my $cache = shift;
+        my $n     = 0;
+
+        getPortInfo($port, $cache);
+        foreach my $tmp ('NO_PACKAGE', 'IGNORE', 'FORBIDDEN') {
+                $n++ if ($cache->{$port}{$tmp} ne "");
+        }
+
+        return $n eq 0 ? "" : getPortPkgName($port, $cache);
+}
+
+# A close approximation to the 'build-depends-list' target
+sub getPortBuildDependsList {
+        my $port  = shift;
+        my $cache = shift;
+        my @deps;
+
+        push @deps, getPortExtractDepends($port, $cache);
+        push @deps, getPortPatchDepends($port, $cache);
+        push @deps, getPortFetchDepends($port, $cache);
+        push @deps, getPortBuildDepends($port, $cache);
+        push @deps, getPortLibDepends($port, $cache);
+        push @deps, getPortOtherDepends($port, $cache);
+        return uniqueList(@deps);
+}
+
+# A close approximation to the 'run-depends-list' target
+sub getPortRunDependsList {
+        my $port  = shift;
+        my $cache = shift;
+        my @deps;
+
+        push @deps, getPortLibDepends($port, $cache);
+        push @deps, getPortRunDepends($port, $cache);
+        push @deps, getPortOtherDepends($port, $cache);
+        return uniqueList(@deps);
+}
