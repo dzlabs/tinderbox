@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/create_new_jail,v 1.14 2005/07/10 07:25:59 oliver Exp $
+# $MCom: portstools/tinderbox/create_new_jail,v 1.15 2005/07/11 21:58:22 pav Exp $
 #
 
 
@@ -98,7 +98,7 @@ rm -rf ${pb}/jails/${jail_name}
 
 mkdir -p ${pb}/jails/${jail_name}/src
 
-request_mount -q -d jail -p ${jail_name}
+request_mount -q -d jail -j ${jail_name}
 
 cat > ${pb}/jails/${jail_name}/src-supfile << EOSF
 *default host=${suphost}
