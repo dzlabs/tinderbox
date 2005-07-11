@@ -11,7 +11,7 @@ $TINDERBOX_DATA_URI      = '/tb';
 $TINDERBOX_DATA_URI_SUFX = '';
 $SHOWBUILD_URI           = $TINDERBOX_URI . '/showbuild.php';
 $SHOWPORT_URI            = $TINDERBOX_URI . '/showport.php';
-$LOG_URI = $TINDERBOX_DATA_URI . '/logs' . $TINDERBOX_DATA_URI_SUFX;
+$LOG_URI                 = $TINDERBOX_DATA_URI . '/logs' . $TINDERBOX_DATA_URI_SUFX;
 
 $ERROR_DIR      = $BUILD_ROOT . '/errors';
 $LOG_DIR        = $BUILD_ROOT . '/logs';
