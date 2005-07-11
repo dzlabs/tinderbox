@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.5 2005/07/11 16:18:38 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.6 2005/07/11 16:26:30 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -219,7 +219,9 @@ class moduleUsers extends module {
 					foreach( $permission_value as $permission => $enable_value ) {
 						if( $enable_value == 'on' ) {
 							if( !$this->TinderboxDS->addUserPermission( $user->getId(), $host, 'builds', $build, $permission ) ) {
-								$this->TinderboxDS->deleteUser( $user );
+								if( $action == 'add' ) {
+									$this->TinderboxDS->deleteUser( $user );
+								}
 								return '0';
 							}
 						}
