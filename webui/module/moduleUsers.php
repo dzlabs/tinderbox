@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.3 2005/07/10 22:38:07 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.4 2005/07/11 05:52:31 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -44,6 +44,7 @@ class moduleUsers extends module {
 
 		if( $this->is_logged_in() ) {
 			$this->template_assign( 'user_name', $moduleSession->getAttribute( 'user' )->getName() );
+			$this->template_assign( 'user_id',   $moduleSession->getAttribute( 'user' )->getId() );
 			if( $this->checkWwwAdmin() ) {
 				$this->template_assign( 'is_www_admin', 1 );
 				$this->template_assign( 'all_users', $this->get_all_users() );
@@ -59,25 +60,27 @@ class moduleUsers extends module {
 		if( !$this->is_logged_in() ) {
 			return $this->template_parse( 'please_login.tpl' );
 		} elseif ( $this->checkWwwAdmin() ) {
-			$user_properties  = $this->display_properties( $user_name, $user_email, $user_password, $www_enabled );
+			$user_properties  = $this->display_properties( '', $user_name, $user_email, $user_password, $www_enabled );
 			$user_permissions = $this->display_permissions( $permission_object );
 
 			$this->template_assign( 'user_properties',  $user_properties  );
 			$this->template_assign( 'user_permissions', $user_permissions );
 		} else {
 			$this->TinderboxDS->addError( permission_denied );
+			return $this->template_parse( 'user_admin.tpl' );
 		}
 		$this->template_assign( 'add', 1 );
 		return $this->template_parse( 'user_admin.tpl' );
 	}
 
-	function display_modify_user( $first, $user_name, $user_email, $user_password, $www_enabled, $permission_object ) {
+	function display_modify_user( $first, $user_id, $user_name, $user_email, $user_password, $www_enabled, $permission_object ) {
 		if( !$this->is_logged_in() ) {
 			return $this->template_parse( 'please_login.tpl' );
 		}
 
-		$user = $this->TinderboxDS->getUserByName( $user_name );
+		$user = $this->TinderboxDS->getUserById( $user_id );
 		if( $first == 1 ) {
+			$user_name     = $user->getName();
 			$user_email    = $user->getEmail();
 			$www_enabled   = $user->getWwwEnabled();
 			$all_hosts     = $this->moduleHosts->get_all_hosts();
@@ -97,13 +100,14 @@ class moduleUsers extends module {
 			$permission_object[0][0][0] = 1;
 		}
 		if( $this->checkWwwAdmin() || ( $this->get_id() == $user->getId() ) ) {
-			$user_properties  = $this->display_properties( $user_name, $user_email, $user_password, $www_enabled );
+			$user_properties  = $this->display_properties( $user_id, $user_name, $user_email, $user_password, $www_enabled );
 			$user_permissions = $this->display_permissions( $permission_object );
 
 			$this->template_assign( 'user_properties',  $user_properties  );
 			$this->template_assign( 'user_permissions', $user_permissions );
 		} else {
 			$this->TinderboxDS->addError( permission_denied );
+			return $this->template_parse( 'user_admin.tpl' );
 		}
 		$this->template_assign( 'modify', 1 );
 		return $this->template_parse( 'user_admin.tpl' );
@@ -117,7 +121,8 @@ class moduleUsers extends module {
 		return $this->template_parse( 'user_permissions.tpl' );
 	}
 
-	function display_properties( $user_name, $user_email, $user_password, $www_enabled ) {
+	function display_properties( $user_id, $user_name, $user_email, $user_password, $www_enabled ) {
+		$this->template_assign( 'user_id',       $user_id       );
 		$this->template_assign( 'user_name',     $user_name     );
 		$this->template_assign( 'user_email',    $user_email    );
 		$this->template_assign( 'user_password', $user_password );
@@ -125,15 +130,21 @@ class moduleUsers extends module {
 		return $this->template_parse( 'user_properties.tpl' );
 	}
 
-	function action_user( $action, $user_name, $user_email, $user_password, $www_enabled, $permission_object ) {
+	function action_user( $action, $user_id, $user_name, $user_email, $user_password, $www_enabled, $permission_object ) {
 		if( !$this->is_logged_in() ) {
 			return $this->template_parse( 'please_login.tpl' );
 		} elseif( empty( $user_name ) ) {
 			$this->TinderboxDS->addError( user_admin_user_name_empty );
 			return '0';
-		}
+		} elseif( $action == 'add' && !$this->checkWwwAdmin() ) {
+			$this->TinderboxDS->addError( permission_denied );
+			return '0';
+		} elseif( $action != 'add' && ( !$this->checkWwwAdmin() && ( $this->get_id() != $user_id ) ) ) {
+			$this->TinderboxDS->addError( permission_denied );
+			return '0';
+		}		
 
-		$user = $this->TinderboxDS->getUserByName( $user_name );
+		$user = $this->TinderboxDS->getUserById( $user_id );
 
 		if( $action == 'add' ) {
 			if( is_object( $user ) && $user->getId() ) {
@@ -142,65 +153,57 @@ class moduleUsers extends module {
 			} else {
 				$user = new User();
 			}
+		} elseif( ( $action == 'delete' || $action == 'modify' ) && !is_object( $user ) || !$user->getId() ) {
+			$this->TinderboxDS->addError( user_admin_user_not_exist );
+			return '0';
+		}
+		
+		switch( $www_enabled ) {
+			case '1':	$www_enabled = 1; break;
+			default:	$www_enabled = 0; break;
 		}
 
-		if( ( $this->checkWwwAdmin() ) || ( $action != 'add' && ( $this->get_id() == $user->getId() ) ) ) {
-			if( ( !is_object( $user ) || !$user->getId() ) && ( $action == 'delete' || $action == 'modify' ) ) {
-				$this->TinderboxDS->addError( user_admin_user_not_exist );
+		$user->setName( $user_name );
+		$user->setEmail( $user_email );
+		$user->setWwwEnabled( $www_enabled );
+		if( $user_password ) {
+			$user->setPassword( $this->TinderboxDS->cryptPassword( $user_password ) );
+		}
+
+		if( $action == 'add' ) {
+			if( !$this->TinderboxDS->addUser( $user ) ) {
 				return '0';
-			} else {
-				switch( $www_enabled ) {
-					case '1':	$www_enabled = 1; break;
-					default:	$www_enabled = 0; break;
-				}
+			}
+			$user = $this->TinderboxDS->getUserByName( $user_name );
+		} elseif( $action == 'modify' ) {
+			if( !$this->TinderboxDS->updateUser( $user ) ) {
+				return '0';
+			}
+			if( $this->checkWwwAdmin() ) {
+				$this->TinderboxDS->deleteUserPermissions( $user );
+			}
+		} elseif( $action == 'delete' ) {
+			if( !$this->TinderboxDS->deleteUser( $user ) ) {
+				return '0';
+			}
+			return '1';
+		}
 
-				$user->setName( $user_name );
-				$user->setEmail( $user_email );
-				$user->setWwwEnabled( $www_enabled );
-				if( $user_password ) {
-					$user->setPassword( $this->TinderboxDS->cryptPassword( $user_password ) );
-				}
-
-				if( $action == 'add' ) {
-					if( !$this->TinderboxDS->addUser( $user ) ) {
-						return '0';
-					}
-					$user = $this->TinderboxDS->getUserByName( $user_name );
-				} elseif( $action == 'modify' ) {
-					if( !$this->TinderboxDS->updateUser( $user ) ) {
-						return '0';
-					}
-					if( $this->checkWwwAdmin() ) {
-						$this->TinderboxDS->deleteUserPermissions( $user );
-					}
-				} elseif( $action == 'delete' ) {
-					if( !$this->TinderboxDS->deleteUser( $user ) ) {
-						return '0';
-					}
-					return '1';
-				}
-
-				if( $this->checkWwwAdmin() && is_array( $permission_object ) ) {
-					foreach( $permission_object as $host => $build_value ) {
-						foreach( $build_value as $build => $permission_value ) {
-							foreach( $permission_value as $permission => $enable_value ) {
-								if( $enable_value == 'on' ) {
-									if( !$this->TinderboxDS->addUserPermission( $user->getId(), $host, 'builds', $build, $permission ) ) {
-										$this->TinderboxDS->deleteUser( $user );
-										return '0';
-									}
-								}
+		if( $this->checkWwwAdmin() && is_array( $permission_object ) ) {
+			foreach( $permission_object as $host => $build_value ) {
+				foreach( $build_value as $build => $permission_value ) {
+					foreach( $permission_value as $permission => $enable_value ) {
+						if( $enable_value == 'on' ) {
+							if( !$this->TinderboxDS->addUserPermission( $user->getId(), $host, 'builds', $build, $permission ) ) {
+								$this->TinderboxDS->deleteUser( $user );
+								return '0';
 							}
 						}
 					}
 				}
-				return '1';
 			}
-		} else {
-			$this->TinderboxDS->addError( permission_denied );
-			return '0';
 		}
-		return '0';
+		return '1';
 	}
 
 	function do_login( $username, $password ) {

@@ -40,16 +40,16 @@
 					<?if($is_www_admin==1){?>
 					<tr><td class="noborder">
 						<input type="hidden" name="action" value="display_modify_user" />
-						<select name="modify_user_name" style="margin-left:10px">
+						<select name="modify_user_id" style="margin-left:10px">
 						<?foreach($all_users as $user){?>
-							<option value="<?=$user['user_name']?>" <?if ($user_name == $user['user_name']) {?>selected="selected"<?}?>><?=$user['user_name']?></option>
+							<option value="<?=$user['user_id']?>" <?if ($user_name == $user['user_name']) {?>selected="selected"<?}?>><?=$user['user_name']?></option>
 						<?}?>
 						</select>
 						<input type="submit" name="display_modify_user" value="Modify User" />
 					</td></tr>
 					<tr><td class="noborder"><a href="index.php?action=display_add_user" style="margin-left:10px">Add User</a></td></tr>
 					<?}else{?>
-					<tr><td class="noborder"><a href="index.php?action=display_modify_user&amp;modify_user_name=<?=$user_name?>" style="margin-left:10px">Modify User</a></td></tr>
+					<tr><td class="noborder"><a href="index.php?action=display_modify_user&amp;modify_user_id=<?=$user_id?>" style="margin-left:10px">Modify User</a></td></tr>
 					<?}?>
 				</table>
 			</form></td>
