@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/core/TinderboxDS.php,v 1.2 2005/07/10 07:39:18 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/core/TinderboxDS.php,v 1.3 2005/07/11 16:58:58 oliver Exp $
 #
 
     require_once 'DB.php';
@@ -67,6 +67,20 @@
             $this->db->setFetchMode(DB_FETCHMODE_ASSOC);
             $this->db->setOption('persistent', true);
         }
+
+	function start_transaction() {
+		$this->db->autoCommit( false );
+	}
+
+	function commit_transaction() {
+		$this->db->commit();
+		$this->db->autoCommit( true );
+	}
+
+	function rollback_transaction() {
+		$this->db->rollback();
+		$this->db->autoCommit( true );
+	}
 
         function getAllMaintainers() {
             $query = "SELECT DISTINCT LOWER(port_maintainer) AS port_maintainer FROM ports where port_maintainer IS NOT NULL ORDER BY LOWER(port_maintainer)";

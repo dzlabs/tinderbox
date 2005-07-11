@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.6 2005/07/11 16:26:30 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.7 2005/07/11 16:58:58 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -179,6 +179,8 @@ class moduleUsers extends module {
 						return '0';
 					}
 					break;
+			default:	return '0';
+					break;
 		}
 
 		switch( $www_enabled ) {
@@ -193,23 +195,31 @@ class moduleUsers extends module {
 			$user->setPassword( $this->TinderboxDS->cryptPassword( $user_password ) );
 		}
 
+		$this->TinderboxDS->start_transaction();
+
 		switch( $action ) {
 			case 'add':	if( !$this->TinderboxDS->addUser( $user ) ) {
+						$this->TinderboxDS->rollback_transaction();
 						return '0';
 					}
 					$user = $this->TinderboxDS->getUserByName( $user_name );
 					break;
 			case 'modify':	if( !$this->TinderboxDS->updateUser( $user ) ) {
+						$this->TinderboxDS->rollback_transaction();
 						return '0';
 					}
-					if( $this->checkWwwAdmin() ) {
-						$this->TinderboxDS->deleteUserPermissions( $user );
+					if( $this->checkWwwAdmin() && !$this->TinderboxDS->deleteUserPermissions( $user ) ) {
+						$this->TinderboxDS->rollback_transaction();
+						return '0';
 					}
 					break;
 			case 'delete':	if( !$this->TinderboxDS->deleteUser( $user ) ) {
+						$this->TinderboxDS->rollback_transaction();
 						return '0';
+					} else {
+						$this->TinderboxDS->commit_transaction();
+						return '1';
 					}
-					return '1';
 					break;
 		}
 
@@ -219,9 +229,7 @@ class moduleUsers extends module {
 					foreach( $permission_value as $permission => $enable_value ) {
 						if( $enable_value == 'on' ) {
 							if( !$this->TinderboxDS->addUserPermission( $user->getId(), $host, 'builds', $build, $permission ) ) {
-								if( $action == 'add' ) {
-									$this->TinderboxDS->deleteUser( $user );
-								}
+								$this->TinderboxDS->rollback_transaction();
 								return '0';
 							}
 						}
@@ -229,6 +237,8 @@ class moduleUsers extends module {
 				}
 			}
 		}
+
+		$this->TinderboxDS->commit_transaction();
 		return '1';
 	}
 
