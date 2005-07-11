@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/TinderboxDS.pm,v 1.29 2005/07/10 07:29:42 oliver Exp $
+# $MCom: portstools/tinderbox/TinderboxDS.pm,v 1.30 2005/07/11 19:54:21 oliver Exp $
 #
 
 package TinderboxDS;
@@ -482,9 +482,13 @@ sub updateUser {
         my $user = shift;
         my $uCls = (ref($user) eq "REF") ? $$user : $user;
 
-        my $rc =
-            $self->_doQuery("UPDATE users SET User_Email=? WHERE User_Id=?",
-                [$uCls->getEmail(), $uCls->getId()]);
+        my $rc = $self->_doQuery(
+                "UPDATE users set User_Email=?, User_Password=PASSWORD(?), User_Www_Enabled=? WHERE User_Id=?",
+                [
+                        $uCls->getEmail(),      $uCls->getPassword(),
+                        $uCls->getWwwEnabled(), $uCls->getId()
+                ]
+        );
 
         if (ref($user) eq "REF") {
                 $$user = $self->getUserByName($uCls->getName());
@@ -872,8 +876,8 @@ sub addUser {
         my $rc = $self->_doQuery(
                 "INSERT INTO users (User_Name,User_Email,User_Password,User_Www_Enabled) VALUES (?, ?, PASSWORD(?), ?)",
                 [
-                        $user->getName(),   $user->getEmail(),
-                        $user->getPassword, $user->getWwwEnabled
+                        $uCls->getName(),     $uCls->getEmail(),
+                        $uCls->getPassword(), $uCls->getWwwEnabled()
                 ]
         );
 

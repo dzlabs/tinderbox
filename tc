@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.45 2005/07/10 17:07:19 marcus Exp $
+# $MCom: portstools/tinderbox/tc,v 1.46 2005/07/11 19:54:21 oliver Exp $
 #
 
 BEGIN {
@@ -292,6 +292,12 @@ require "tinderlib.pl";
         "addUser" => {
                 func   => \&addUser,
                 help   => "Add a user to the datastore",
+                usage  => "-n <user name> [-e <user email>] [-p password] [-w]",
+                optstr => 'n:e:p:w',
+        },
+        "updateUser" => {
+                func   => \&updateUser,
+                help   => "Update user preferences",
                 usage  => "-n <user name> [-e <user email>] [-p password] [-w]",
                 optstr => 'n:e:p:w',
         },
@@ -1589,13 +1595,41 @@ sub addUser {
         $user->setName($opts->{'n'});
         $user->setEmail($opts->{'e'})    if ($opts->{'e'});
         $user->setPassword($opts->{'p'}) if ($opts->{'p'});
-        $user->setWwwEnabled(1)          if ($opts->{'w'});
+        $opts->{'w'} ? $user->setWwwEnabled(1) : $user->setWwwEnabled(0);
 
         my $rc = $ds->addUser($user);
 
         if (!$rc) {
                 cleanup($ds, 1,
                               "Failed to add user to the datastore: "
+                            . $ds->getError()
+                            . "\n");
+        }
+}
+
+sub updateUser {
+        if (!$opts->{'n'}) {
+                usage("updateUser");
+        }
+
+        my $username = $opts->{'n'};
+
+        if (!$ds->isValidUser($username)) {
+                cleanup($ds, 1, "Unknown user, $username\n");
+        }
+
+        my $user = $ds->getUserByName($username);
+
+        $user->setName($username);
+        $user->setEmail($opts->{'e'})    if ($opts->{'e'});
+        $user->setPassword($opts->{'p'}) if ($opts->{'p'});
+        $opts->{'w'} ? $user->setWwwEnabled(1) : $user->setWwwEnabled(0);
+
+        my $rc = $ds->updateUser($user);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to update user preferences: "
                             . $ds->getError()
                             . "\n");
         }
