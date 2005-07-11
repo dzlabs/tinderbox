@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/module/moduleUsers.php,v 1.4 2005/07/11 05:52:31 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/module/moduleUsers.php,v 1.5 2005/07/11 16:18:38 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -127,6 +127,7 @@ class moduleUsers extends module {
 		$this->template_assign( 'user_email',    $user_email    );
 		$this->template_assign( 'user_password', $user_password );
 		$this->template_assign( 'www_enabled',   $www_enabled   );
+		$this->template_assign( 'www_admin',     $this->checkWwwAdmin() );
 		return $this->template_parse( 'user_properties.tpl' );
 	}
 
@@ -142,22 +143,44 @@ class moduleUsers extends module {
 		} elseif( $action != 'add' && ( !$this->checkWwwAdmin() && ( $this->get_id() != $user_id ) ) ) {
 			$this->TinderboxDS->addError( permission_denied );
 			return '0';
-		}		
-
-		$user = $this->TinderboxDS->getUserById( $user_id );
-
-		if( $action == 'add' ) {
-			if( is_object( $user ) && $user->getId() ) {
-				$this->TinderboxDS->addError( user_admin_user_exists );
-				return '0';
-			} else {
-				$user = new User();
-			}
-		} elseif( ( $action == 'delete' || $action == 'modify' ) && !is_object( $user ) || !$user->getId() ) {
-			$this->TinderboxDS->addError( user_admin_user_not_exist );
-			return '0';
 		}
-		
+
+		switch( $action ) {
+			case 'add':	$user = new User();
+					$user2 = $this->TinderboxDS->getUserByName( $user_name );
+					if( is_object( $user2 ) && $user2->getId() ) {
+						$this->TinderboxDS->addError( user_admin_user_exists." (".$user_name.")" );
+						return '0';
+					}
+					unset( $user2 );
+					break;
+			case 'modify':	$user = $this->TinderboxDS->getUserById( $user_id );
+					if( !is_object( $user ) || !$user->getId() ) {
+						$this->TinderboxDS->addError( user_admin_user_not_exist );
+						return '0';
+					}
+					if( $user_name != $user->getName() ) {
+						if( !$this->checkWwwAdmin() ) {
+							$this->TinderboxDS->addError( user_admin_user_name_changed );
+							return '0';
+						} else {
+							$user2 = $this->TinderboxDS->getUserByName( $user_name );
+							if( is_object( $user2 ) && $user2->getId() ) {
+								$this->TinderboxDS->addError( user_admin_user_exists." (".$user_name.")" );
+								return '0';
+							}
+							unset( $user2 );
+						}
+					}
+					break;
+			case 'delete':	$user = $this->TinderboxDS->getUserById( $user_id );
+					if( !is_object( $user ) || !$user->getId() ) {
+						$this->TinderboxDS->addError( user_admin_user_not_exist );
+						return '0';
+					}
+					break;
+		}
+
 		switch( $www_enabled ) {
 			case '1':	$www_enabled = 1; break;
 			default:	$www_enabled = 0; break;
@@ -170,23 +193,24 @@ class moduleUsers extends module {
 			$user->setPassword( $this->TinderboxDS->cryptPassword( $user_password ) );
 		}
 
-		if( $action == 'add' ) {
-			if( !$this->TinderboxDS->addUser( $user ) ) {
-				return '0';
-			}
-			$user = $this->TinderboxDS->getUserByName( $user_name );
-		} elseif( $action == 'modify' ) {
-			if( !$this->TinderboxDS->updateUser( $user ) ) {
-				return '0';
-			}
-			if( $this->checkWwwAdmin() ) {
-				$this->TinderboxDS->deleteUserPermissions( $user );
-			}
-		} elseif( $action == 'delete' ) {
-			if( !$this->TinderboxDS->deleteUser( $user ) ) {
-				return '0';
-			}
-			return '1';
+		switch( $action ) {
+			case 'add':	if( !$this->TinderboxDS->addUser( $user ) ) {
+						return '0';
+					}
+					$user = $this->TinderboxDS->getUserByName( $user_name );
+					break;
+			case 'modify':	if( !$this->TinderboxDS->updateUser( $user ) ) {
+						return '0';
+					}
+					if( $this->checkWwwAdmin() ) {
+						$this->TinderboxDS->deleteUserPermissions( $user );
+					}
+					break;
+			case 'delete':	if( !$this->TinderboxDS->deleteUser( $user ) ) {
+						return '0';
+					}
+					return '1';
+					break;
 		}
 
 		if( $this->checkWwwAdmin() && is_array( $permission_object ) ) {

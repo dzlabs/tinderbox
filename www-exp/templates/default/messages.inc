@@ -6,6 +6,7 @@ define( permission_denied, 'permission denied!' );
 
 define( user_admin_user_exists, 'User already exists!' );
 define( user_admin_user_not_exist, 'User does not exist!' );
+define( user_admin_user_name_changed, 'You are allowed to change your username!' );
 define( user_admin_user_name_empty, 'You have to fill in a username!' );
 
 define( user_login_not_enabled, 'User not enabled for WWW' );
