@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.23 2005/07/12 05:31:03 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.24 2005/07/12 05:58:35 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -21,8 +21,12 @@ DBD::Mysql Perl module (databases/p5-DBD-mysql41), and MySQL 4.1 or later
 (databases/mysql41-server).
 
 The web frontends require php4 (lang/php4), php4-mysql extension
-(databases/php4-mysql), and PEAR::DB (databases/pear-DB).  Make sure you
-have "register_globals=on" in your php.ini.
+(databases/php4-mysql), and PEAR::DB (databases/pear-DB).
+
+The standard web frontend (found in the ``www'' subdirectory) requires you
+have "register_globals=on" in your php.ini.  The experimental web frontend
+(found in the ``www-exp'' subdirectory) does not require register_globals
+to be on, but does require the php4-session extension (www/php4-session).
 
 Installation:
 -------------
