@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.22 2005/07/12 03:56:50 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.23 2005/07/12 05:31:03 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -342,6 +342,13 @@ update that user's account to give them a password as well as web access:
 
 (Where {USER} is a username, {EMAIL} is the user's email address,
 and {PASSWORD} is the user's password for Tinderbox web access.)
+
+Then you have to define one web administrator who has full rights on
+all Hosts/Builds and is the only account that can add other users:
+
+# cd ${pb}/scripts && ./tc setWwwAdmin -u {USER}
+
+(Where {USER} is the web administrator's username.)
 
 After that, just browse to the Tinderbox web site with your web browser and
 login with {USER} and {PASSWORD}. You can now create and modify other
