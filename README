@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.21 2005/07/11 21:29:16 pav Exp $
+$MCom: portstools/tinderbox/README,v 1.22 2005/07/12 03:56:50 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -90,7 +90,7 @@ nfs_reserved_port_only="YES"
     to create a jail for FreeBSD 5.4-RELEASE:
 
 # cd ${pb}/scripts && ./create_new_jail -n 5.4 -d "FreeBSD 5.4-RELEASE" \
-	-t RELEASE_5_4_0_RELEASE -u NONE
+	-t RELENG_5_4_0_RELEASE -u NONE
 
     Note: all Jail names _MUST_ begin with their FreeBSD major version number.
     That is, the following is an illegal jail name: ``FreeBSD-5.4''.
@@ -119,8 +119,13 @@ nfs_reserved_port_only="YES"
 
 
 NOTE: All the create_new_* scripts use cvsup12 as their default cvsup mirror.
-If you would like to use a different one (or enable additional cvsup options),
-modify the scripts before running them.
+If you would like to use another server, or enable cvsup compression use
+the -H and -C command line arguments to the create_new_* scripts respectively.
+For example, to use cvsup2.freebsd.org and enable cvsup compression for
+all Jail updates, use the folowing command:
+
+# cd ${pb}/scripts && ./create_new_jail -n 5-STABLE -d "FreeBSD 5-STABLE" \
+	-t RELENG_5 -u CVSUP -C -H cvsup2.freebsd.org
 
 Using Tinderbox:
 ----------------
@@ -330,12 +335,13 @@ To use tinderd scheduling via the web you must first create a User:
 (Where {USER} is a username, {EMAIL} is the user's email address,
 and {PASSWORD} is the user's password for Tinderbox web access.)
 
-Then you have to define one web administrator who has full rights on
-all Hosts/Builds and is the only account which can add other users:
+If you want to enable web access for a previously created user, you must
+update that user's account to give them a password as well as web access:
 
-# cd ${pb}/scripts && ./tc setWwwAdmin -u {USER}
+# cd ${pb}/scripts && ./tc updateUser -n {USER} -e {EMAIL} -p {PASSWORD} -w
 
-(Where {USER} is the web administrator's username.)
+(Where {USER} is a username, {EMAIL} is the user's email address,
+and {PASSWORD} is the user's password for Tinderbox web access.)
 
 After that, just browse to the Tinderbox web site with your web browser and
 login with {USER} and {PASSWORD}. You can now create and modify other
