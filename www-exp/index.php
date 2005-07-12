@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/index.php,v 1.6 2005/07/11 05:52:31 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/index.php,v 1.7 2005/07/12 05:50:08 oliver Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -60,12 +60,6 @@ if( $_POST['do_login'] ) {
 $display_login = $moduleUsers->display_login();
 
 $action = get_var( 'action' );
-
-if( $action ) {
-	$moduleSession->setAttribute( 'action', $action );
-} else {
-	$action = $moduleSession->getAttribute( 'action' );
-}
 
 switch( $action ) {
 	case 'describe_port':		$port_id    = get_var( 'id' );
