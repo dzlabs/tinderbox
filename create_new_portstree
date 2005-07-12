@@ -24,12 +24,12 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/create_new_portstree,v 1.13 2005/07/11 22:14:29 marcus Exp $
+# $MCom: portstools/tinderbox/create_new_portstree,v 1.14 2005/07/12 03:50:05 marcus Exp $
 #
 
 
 usage () {
-    echo "usage: $0 -n <portstree name> [-d <description>] [-u <update command|CVSUP|NONE>] [-w <CVSweb URL>]"
+    echo "usage: $0 -n <portstree name> [-d <description>] [-u <update command|CVSUP|NONE>] [-w <CVSweb URL>] [-C] [-H cvsuphost]"
     exit 1
 }
 
@@ -46,8 +46,8 @@ pb=${pb%%/scripts}
 
 . ${pb}/scripts/tinderbox_shlib.sh
 
-suphost=cvsup12.FreeBSD.org
-cvsup_compress= #*default compress
+cvsup_host=cvsup12.FreeBSD.org
+cvsup_compress=""
 
 portstree=""
 descr=""
@@ -68,6 +68,12 @@ while [ $# -gt 0 ]; do
 	  ;;
 	x-w)
 	  url="$2"; shift;
+	  ;;
+	x-C)
+	  cvsup_compress="*default compress";
+	  ;;
+	x-H)
+	  cvsup_host="$2"; shift;
 	  ;;
 	*)
 	  usage
@@ -105,7 +111,7 @@ mkdir -p ${pb}/portstrees/${portstree}/ports
 request_mount -q -r -d portstree -p ${portstree}
 
 cat > ${pb}/portstrees/${portstree}/ports-supfile << EOSF
-*default host=${suphost}
+*default host=${cvsup_host}
 *default base=${pb}/portstrees/${portstree}
 *default prefix=${pb}/portstrees/${portstree}
 *default release=cvs tag=.

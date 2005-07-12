@@ -24,12 +24,12 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/create_new_jail,v 1.16 2005/07/11 22:14:29 marcus Exp $
+# $MCom: portstools/tinderbox/create_new_jail,v 1.17 2005/07/12 03:50:05 marcus Exp $
 #
 
 
 usage () {
-    echo "usage: $0 -n <jail name> -t <jail tag> [-d <description>] [-u <update command|CVSUP|NONE>]"
+    echo "usage: $0 -n <jail name> -t <jail tag> [-d <description>] [-u <update command|CVSUP|NONE>] [-C] [-H cvsuphost]"
     exit 1
 }
 
@@ -46,8 +46,8 @@ pb=${pb%%/scripts}
 
 . ${pb}/scripts/tinderbox_shlib.sh
 
-suphost=cvsup12.FreeBSD.org
-cvsup_compress= #*default compress
+cvsup_host=cvsup12.FreeBSD.org
+cvsup_compress=""
 
 jail_name=""
 jail_tag=""
@@ -67,6 +67,12 @@ while [ $# -gt 0 ]; do
 	  ;;
 	x-u)
 	  update_cmd="$2"; shift;
+	  ;;
+	x-C)
+	  cvsup_compress="*default compress";
+	  ;;
+	x-H)
+	  cvsup_host="$2"; shift;
 	  ;;
 	*)
 	  usage
@@ -101,7 +107,7 @@ mkdir -p ${pb}/jails/${jail_name}/src
 request_mount -q -d jail -j ${jail_name}
 
 cat > ${pb}/jails/${jail_name}/src-supfile << EOSF
-*default host=${suphost}
+*default host=${cvsup_host}
 *default base=${pb}/jails/${jail_name}
 *default prefix=${pb}/jails/${jail_name}
 *default release=cvs tag=${jail_tag}
