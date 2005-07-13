@@ -213,8 +213,15 @@ request_mount() {
 				return 1
 			fi
 			_jail=$(${_pb}/scripts/tc getJailForBuild -b ${_build})
-			_source=${_source:=${_pb}/jails/${_jail}/src}
 			_destination=${_pb}/${_build}/usr/src
+			if [ -z "${_source}" ] ; then
+				_source=$(parse_rawenv -q -t mount-jail -a ${_jail})
+				if [ -z "${_source}" ] ; then
+					_source=${_source:=${_pb}/jails/${_jail}/src}
+				else
+					_fq_source=1
+				fi
+			fi
 			;;
 		buildports)
 			if [ -z "${_build}" ] ; then
@@ -222,8 +229,15 @@ request_mount() {
 				return 1
 			fi
 			_portstree=$(${_pb}/scripts/tc getPortsTreeForBuild -b ${_build})
-			_source=${_source:=${_pb}/portstrees/${_portstree}/ports}
 			_destination=${_pb}/${_build}/a/ports
+			if [ -z "${_source}" ] ; then
+				_source=$(parse_rawenv -q -t mount-portstree -a ${_portstree})
+				if [ -z "${_source}" ] ; then
+					_source=${_source:=${_pb}/portstrees/${_portstree}/ports}
+				else
+					_fq_source=1
+				fi
+			fi
 			;;
 		distcache)
 			_destination=${_pb}/${_build}/distcache
