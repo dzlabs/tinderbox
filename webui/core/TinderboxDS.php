@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.3 2005/07/11 16:58:58 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.4 2005/07/13 20:20:42 oliver Exp $
 #
 
     require_once 'DB.php';
@@ -35,8 +35,8 @@
     require_once 'Port.php';
     require_once 'PortsTree.php';
     require_once 'User.php';
-    require_once 'ds.inc';
-    require_once 'tinderbox.inc';
+    require_once 'inc_ds.php';
+    require_once 'inc_tinderbox.php';
 
     $objectMap = array(
         "Build" => "builds",
