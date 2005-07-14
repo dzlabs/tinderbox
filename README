@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.24 2005/07/12 05:58:35 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.25 2005/07/14 00:25:24 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -27,6 +27,10 @@ The standard web frontend (found in the ``www'' subdirectory) requires you
 have "register_globals=on" in your php.ini.  The experimental web frontend
 (found in the ``www-exp'' subdirectory) does not require register_globals
 to be on, but does require the php4-session extension (www/php4-session).
+
+Keep in mind that the include files for ``www-exp'' were renamed to inc_ds.php
+and inc_tinderbox.php to prevent their contents from being accessed via
+HTTP.
 
 Installation:
 -------------
