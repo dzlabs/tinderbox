@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.26 2005/07/14 00:25:43 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.27 2005/07/16 03:28:34 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -28,10 +28,6 @@ have "register_globals=on" in your php.ini.  The experimental web frontend
 (found in the ``www-exp'' subdirectory) does not require register_globals
 to be on, but does require the php4-session extension (www/php4-session).
 
-Keep in mind that the include files for ``www-exp'' were renamed to inc_ds.php
-and inc_tinderbox.php to prevent their contents from being accessed via
-HTTP.
-
 Installation:
 -------------
 
@@ -45,7 +41,7 @@ root, just substitute ${pb} with that root directory.
 2. Extract the Tinderbox distribution into ${pb}/scripts.
 
 3. Edit ds.ph and tinderbox.ph for your setup (if you are using the standard
-   web frontend, also edit www/ds.inc).
+   web frontend, also edit www/inc_ds.php).
 
 4. Create the database and database user on the host that you defined within
    ds.ph.  Note: the database can live on the same server as Tinderbox.  Just
