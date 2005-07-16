@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/lastbuilds.php,v 1.20 2005/06/28 05:47:56 adamw Exp $
+# $MCom: portstools/tinderbox/www/lastbuilds.php,v 1.21 2005/07/16 23:15:46 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -71,6 +71,32 @@
 			} else {
 				echo "<td><i>preparing next build...</i></td>\n";
 			}
+			echo "</tr>\n";
+		}
+		?>
+		</table>
+		<?php
+	}
+
+	$queue = $ds->getQueue();
+
+	if (sizeof($queue) > 0) {
+		?>
+		<h1>Queue</h1>
+		<table>
+		<tr>
+		<th>Host</th>
+		<th>Build</th>
+		<th>Port</th>
+		<th>Priority</th>
+		</tr>
+		<?php
+		foreach ($queue as $item) {
+			echo "<tr>\n";
+			echo "<td>" . $item["Host_Name"] . "</td>\n";
+			echo "<td><a href=\"showbuild.php?name=" . $item["Build_Id"] . "\">" . $item["Build_Name"] . "</a></td>\n";
+			echo "<td>" . $item["Port_Directory"] . "</td>\n";
+			echo "<td align=\"right\">" . $item["Priority"] . "</td>\n";
 			echo "</tr>\n";
 		}
 		?>
