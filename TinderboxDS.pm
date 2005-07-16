@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/TinderboxDS.pm,v 1.30 2005/07/11 19:54:21 oliver Exp $
+# $MCom: portstools/tinderbox/TinderboxDS.pm,v 1.31 2005/07/16 23:09:40 marcus Exp $
 #
 
 package TinderboxDS;
@@ -157,8 +157,13 @@ sub getBuildPortsQueueByHost {
         my $self = shift;
         my $host = shift;
 
-        my @results =
-            $self->getObjects("BuildPortsQueue", {Host_Id => $host->getId()});
+        my @results = $self->getObjects(
+                "BuildPortsQueue",
+                {
+                        Host_Id => $host->getId(),
+                        _ORDER_ => "Priority ASC, Build_Ports_Queue_Id ASC"
+                }
+        );
 
         if (!@results) {
                 return undef;
@@ -330,6 +335,8 @@ sub getObjects {
         my @params    = @_;
         my $condition = "";
         my @objects   = ();
+        my $order     = "";
+        my $oderseen  = 0;
 
         my @values = ();
         my @conds  = ();
@@ -345,8 +352,16 @@ sub getObjects {
                 # portion of the query.
                 my @ands = ();
                 foreach my $andcond (keys %{$param}) {
-                        push @ands,   "$andcond=?";
-                        push @values, $param->{$andcond};
+                        if ($andcond eq "_ORDER_" && !$orderseen) {
+                                $order = "ORDER BY " . $param->{$andcond};
+                                $orderseen++;
+                        } elsif ($andcond eq "_ORDER_" && $orderseen) {
+                                carp
+                                    "WARN: _ORDER_ can only be specified once\n";
+                        } else {
+                                push @ands,   "$andcond=?";
+                                push @values, $param->{$andcond};
+                        }
                 }
                 push @conds, "(" . (join(" AND ", @ands)) . ")";
         }
@@ -360,6 +375,8 @@ sub getObjects {
         } else {
                 $query = "SELECT * FROM $table";
         }
+
+        $query .= $order;
 
         my $rc = $self->_doQueryHashRef($query, \@results, @values);
 
