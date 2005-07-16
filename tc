@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.46 2005/07/11 19:54:21 oliver Exp $
+# $MCom: portstools/tinderbox/tc,v 1.47 2005/07/16 23:48:07 marcus Exp $
 #
 
 BEGIN {
@@ -365,7 +365,7 @@ if (defined($COMMANDS{$command})) {
         }
         &{$COMMANDS{$command}->{'func'}}();
 } else {
-        usage();
+        usage($command);
 }
 
 cleanup($ds, 0, undef);
@@ -1763,7 +1763,7 @@ sub usage {
 
         print STDERR "usage: $0 ";
 
-        if (!defined($cmd)) {
+        if (!defined($cmd) || !defined($COMMANDS{$cmd})) {
                 my $max = 0;
                 foreach (keys %COMMANDS) {
                         if ((length $_) > $max) {
@@ -1773,8 +1773,14 @@ sub usage {
                 print STDERR "<command>\n";
                 print STDERR "Where <command> is one of:\n";
                 foreach my $key (sort keys %COMMANDS) {
-                        printf STDERR "  %-${max}s: %s\n", $key,
-                            $COMMANDS{$key}->{'help'};
+                        if (!defined($cmd)) {
+                                printf STDERR "  %-${max}s: %s\n", $key,
+                                    $COMMANDS{$key}->{'help'};
+                        } else {
+                                printf STDERR "  %-${max}s: %s\n", $key,
+                                    $COMMANDS{$key}->{'help'}
+                                    if ($key =~ /^$cmd/);
+                        }
                 }
         } else {
                 print STDERR "$cmd " . $COMMANDS{$cmd}->{'usage'} . "\n";
