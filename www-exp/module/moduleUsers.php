@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/module/moduleUsers.php,v 1.7 2005/07/11 16:58:58 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/module/moduleUsers.php,v 1.8 2005/07/16 20:19:02 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -43,8 +43,9 @@ class moduleUsers extends module {
 		global $moduleSession;
 
 		if( $this->is_logged_in() ) {
-			$this->template_assign( 'user_name', $moduleSession->getAttribute( 'user' )->getName() );
-			$this->template_assign( 'user_id',   $moduleSession->getAttribute( 'user' )->getId() );
+			$user = $moduleSession->getAttribute( 'user' );
+			$this->template_assign( 'user_name', $user->getName() );
+			$this->template_assign( 'user_id',   $user->getId() );
 			if( $this->checkWwwAdmin() ) {
 				$this->template_assign( 'is_www_admin', 1 );
 				$this->template_assign( 'all_users', $this->get_all_users() );
@@ -272,7 +273,9 @@ class moduleUsers extends module {
 	function is_logged_in() {
 		global $moduleSession;
 
-		if( is_object( $moduleSession->getAttribute( 'user' ) ) && $moduleSession->getAttribute( 'user' )->getWwwEnabled() == 1 ) {
+		$user = $moduleSession->getAttribute( 'user' );
+
+		if( is_object( $user ) && $user->getWwwEnabled() == 1 ) {
 			return true;
 		}
 		return false;
@@ -280,10 +283,11 @@ class moduleUsers extends module {
 
 	function get_www_enabled() {
 		global $moduleSession;
+		$user = $moduleSession->getAttribute( 'user' );
 
-		$user = $this->TinderboxDS->getUserById( $moduleSession->getAttribute( 'user' )->getId() );
-		if( is_object( $user ) ) {
-			return $user->getWwwEnabled();
+		$userobj = $this->TinderboxDS->getUserById( $user->getId() );
+		if( is_object( $userobj ) ) {
+			return $userobj->getWwwEnabled();
 		}
 
 		return false;
@@ -291,8 +295,9 @@ class moduleUsers extends module {
 
 	function get_id() {
 		global $moduleSession;
+		$user = $moduleSession->getAttribute( 'user' );
 
-		return $moduleSession->getAttribute( 'user' )->getId();
+		return $user->getId();
 	}
 
 	function get_all_users() {
@@ -308,7 +313,8 @@ class moduleUsers extends module {
 		global $moduleSession;
 
 		if( $this->is_logged_in() ) {
-			foreach( $this->TinderboxDS->getUserPermissions( $moduleSession->getAttribute( 'user' )->getId(), $host_id, $object_type, $object_id ) as $perm ) {
+			$user = $moduleSession->getAttribute( 'user' );
+			foreach( $this->TinderboxDS->getUserPermissions( $user->getId(), $host_id, $object_type, $object_id ) as $perm ) {
 				$this->permissions[$host_id][$object_type][$object_id][$perm['User_Permission']] = 1;
 			}
 			$this->permissions[$host_id][$object_type][$object_id]['set'] = 1;
