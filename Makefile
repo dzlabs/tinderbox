@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.11 2005/07/09 19:56:17 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.12 2005/07/16 03:30:44 marcus Exp $
 
 VERSION=	2.0.0
 
@@ -10,7 +10,7 @@ DATA=		Build.pm BuildPortsQueue.pm Host.pm Jail.pm Port.pm \
 		tinderbox.schema tinderbuild tinderd tinderlib.pl \
 		tinderbox_shlib.sh
 WWWDATA=	Build.php Jail.php Port.php PortsTree.php TinderObject.php \
-		TinderboxDS.php cleanup.php ds.inc failures.php index.php \
+		TinderboxDS.php cleanup.php inc_ds.php failures.php index.php \
 		lastbuilds.php showbuild.php showport.php tinderbox.inc \
 		tinderstyle.css Makefile
 
