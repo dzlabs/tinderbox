@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.31 2005/07/16 23:09:40 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.32 2005/07/16 23:56:55 oliver Exp $
 #
 
 package TinderboxDS;
@@ -336,7 +336,7 @@ sub getObjects {
         my $condition = "";
         my @objects   = ();
         my $order     = "";
-        my $oderseen  = 0;
+        my $orderseen = 0;
 
         my @values = ();
         my @conds  = ();
