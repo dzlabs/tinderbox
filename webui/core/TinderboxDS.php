@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.4 2005/07/13 20:20:42 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.5 2005/07/16 21:26:39 oliver Exp $
 #
 
     require_once 'DB.php';
@@ -68,19 +68,19 @@
             $this->db->setOption('persistent', true);
         }
 
-	function start_transaction() {
-		$this->db->autoCommit( false );
-	}
+        function start_transaction() {
+                $this->db->autoCommit( false );
+        }
 
-	function commit_transaction() {
-		$this->db->commit();
-		$this->db->autoCommit( true );
-	}
+        function commit_transaction() {
+                $this->db->commit();
+                $this->db->autoCommit( true );
+        }
 
-	function rollback_transaction() {
-		$this->db->rollback();
-		$this->db->autoCommit( true );
-	}
+        function rollback_transaction() {
+                $this->db->rollback();
+                $this->db->autoCommit( true );
+        }
 
         function getAllMaintainers() {
             $query = "SELECT DISTINCT LOWER(port_maintainer) AS port_maintainer FROM ports where port_maintainer IS NOT NULL ORDER BY LOWER(port_maintainer)";
@@ -126,7 +126,7 @@
         }
 
         function deleteUser($user) {
-            if( !$user->getId() || $this->deleteUserPermissions($user) ) {
+            if( !$user->getId() || $this->deleteUserPermissions($user,'') ) {
                     if( $user->getId()) {
                         $this->deleteBuildPortsQueueByUserId($user);
                 }
@@ -201,11 +201,14 @@
             return $results;
         }
 
-        function deleteUserPermissions($user) {
+        function deleteUserPermissions($user, $object_type) {
 
             $query = "
                 DELETE FROM user_permissions
                       WHERE User_Id=?";
+
+            if( $object_type )
+                $query .= " AND User_Permission_Object_Type='$object_type'";
 
             $rc = $this->_doQuery($query, array($user->getId()), $res);
 

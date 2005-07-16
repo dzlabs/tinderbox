@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.8 2005/07/16 20:19:02 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.9 2005/07/16 21:26:39 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -209,7 +209,7 @@ class moduleUsers extends module {
 						$this->TinderboxDS->rollback_transaction();
 						return '0';
 					}
-					if( $this->checkWwwAdmin() && !$this->TinderboxDS->deleteUserPermissions( $user ) ) {
+					if( $this->checkWwwAdmin() && !$this->TinderboxDS->deleteUserPermissions( $user, 'builds' ) ) {
 						$this->TinderboxDS->rollback_transaction();
 						return '0';
 					}
