@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/TinderboxDS.php,v 1.29 2005/06/28 05:47:56 adamw Exp $
+# $MCom: portstools/tinderbox/www/TinderboxDS.php,v 1.30 2005/07/16 07:49:19 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -32,8 +32,8 @@
     require_once 'Build.php';
     require_once 'Jail.php';
     require_once 'PortsTree.php';
-    require_once 'ds.inc';
-    require_once 'tinderbox.inc';
+    require_once 'inc_ds.php';
+    require_once 'inc_tinderbox.php';
 
     $objectMap = array(
 	"Port" => "ports",
