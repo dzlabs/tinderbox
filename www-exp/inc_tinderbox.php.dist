@@ -3,7 +3,7 @@
 $rootdir = '/space';
 
 $wwwrooturi  = '/tinderbox';
-$wwwrootdir  = $rootdir.'/scripts/www2';
+$wwwrootdir  = $rootdir.'/scripts/www-exp';
 $pkguri      = '/tb/packages';
 $pkgdir      = $rootdir.'/packages';
 $loguri      = '/tb/logs';
