@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.33 2005/07/17 23:09:07 marcus Exp $
+# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.34 2005/07/17 23:12:26 marcus Exp $
 #
 
 package TinderboxDS;
