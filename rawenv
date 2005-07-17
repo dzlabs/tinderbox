@@ -15,6 +15,10 @@
 #6PKGZIPCMD=bzip2
 #6INDEXFILE=INDEX-6
 #6X_WINDOW_SYSTEM=xorg
+#7PKGSUFFIX=.tbz
+#7PKGZIPCMD=bzip2
+#7INDEXFILE=INDEX-6
+#7X_WINDOW_SYSTEM=xorg
 ##MACHINE_ARCH=i386
 PORTSDIR=`realpath ##PB##/portstrees/##PORTSTREE##/ports`
 SRCBASE=`realpath ##PB##/jails/##JAIL##/src`
