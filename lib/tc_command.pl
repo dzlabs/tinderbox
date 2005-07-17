@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.47 2005/07/16 23:48:07 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.48 2005/07/17 23:09:07 marcus Exp $
 #
 
 BEGIN {
@@ -72,6 +72,36 @@ require "tinderlib.pl";
                 func  => \&init,
                 help  => "Initialize a tinderbox environment",
                 usage => "",
+        },
+        "dsversion" => {
+                func  => \&dsversion,
+                help  => "Print the datastore version",
+                usage => "",
+        },
+        "configGet" => {
+                func  => \&configGet,
+                help  => "Print current Tinderbox configuration",
+                usage => "",
+        },
+        "configCcache" => {
+                func  => \&configCcache,
+                help  => "Configure Tinderbox ccache parameters",
+                usage =>
+                    "[-d | -e] [-c cache mount src] [-s max cache size] [-l debug logfile | -L]",
+                optstr => "dec:s:l:L",
+        },
+        "configDistfile" => {
+                func   => \&configDistfile,
+                help   => "Configure Tinderbox distfile parameters",
+                usage  => "[-c distfile cache mount src | -C]",
+                optstr => "c:C",
+        },
+        "configTinderd" => {
+                func => \&configTinderd,
+                help =>
+                    "Configure Tinderbox tinder daemon (tinderd) parameters",
+                usage  => "[-t sleep time]",
+                optstr => "t:",
         },
         "listJails" => {
                 func  => \&listJails,
@@ -378,6 +408,163 @@ sub init {
         system("mkdir -p $LOG_DIR");
         system("mkdir -p $PKGS_DIR");
         system("mkdir -p $WRKDIRS_DIR");
+}
+
+sub dsversion {
+        my $version = $ds->getDSVersion()
+            or cleanup($ds, 1,
+                      "Failed to retreive datastore version: "
+                    . $ds->getError()
+                    . "\n");
+
+        print $version, "\n";
+}
+
+sub configGet {
+        my $configlet = undef;
+
+        if (scalar(@_)) {
+                $configlet = shift;
+        }
+
+        my @config = $ds->getConfig($configlet);
+
+        if (@config) {
+                map {
+                        print $_->getOptionName() . "="
+                            . $_->getOptionValue() . "\n"
+                } @config;
+        } elsif (defined($ds->getError())) {
+                cleanup($ds, 1,
+                              "Failed to get configuration: "
+                            . $ds->getError()
+                            . "\n");
+        } else {
+                cleanup($ds, 1,
+                        "There is no configuration available for this Tinderbox.\n"
+                );
+        }
+}
+
+sub configCcache {
+        my @config = ();
+        my ($enabled, $logfile);
+
+        if (($opts->{'d'} && $opts->{'e'}) || ($opts->{'l'} && $opts->{'L'})) {
+                usage("configCcache");
+        }
+
+        if (scalar(keys %{$opts}) == 0) {
+                configGet("ccache");
+                cleanup($ds, 0, undef);
+        }
+
+        $enabled = new TBConfig();
+        $enabled->setOptionName("enabled");
+
+        $logfile = new TBConfig();
+        $logfile->setOptionName("logfile");
+
+        if ($opts->{'e'}) {
+                my $nolink = new TBConfig();
+                $enabled->setOptionValue("1");
+                $nolink->setOptionName("nolink");
+                $nolink->setOptionValue("1");
+                push @config, $enabled;
+                push @config, $nolink;
+        }
+
+        if ($opts->{'d'}) {
+                $enabled->setOptionValue("0");
+                push @config, $enabled;
+        }
+
+        if ($opts->{'c'}) {
+                my $cdir = new TBConfig();
+                $cdir->setOptionName("dir");
+                $cdir->setOptionValue($opts->{'c'});
+                push @config, $cdir;
+        }
+
+        if ($opts->{'s'}) {
+                my $size = new TBConfig();
+                $size->setOptionName("max_size");
+                $size->setOptionValue($opts->{'s'});
+                push @config, $size;
+        }
+
+        if ($opts->{'L'}) {
+                $logfile->setOptionValue(undef);
+                push @config, $logfile;
+        }
+
+        if ($opts->{'l'}) {
+                $logfile->setOptionValue($opts->{'l'});
+                push @config, $logfile;
+        }
+
+        $ds->updateConfig("ccache", @config)
+            or cleanup($ds, 1,
+                      "Failed to update ccache configuration: "
+                    . $ds->getError()
+                    . "\n");
+}
+
+sub configDistfile {
+        my @config = ();
+        my $cache;
+
+        if ($opts->{'c'} && $opts->{'C'}) {
+                usage("configDistfile");
+        }
+
+        if (scalar(keys %{$opts}) == 0) {
+                configGet("distfile");
+                cleanup($ds, 0, undef);
+        }
+
+        $cache = new TBConfig();
+        $cache->setOptionName("cache");
+
+        if ($opts->{'c'}) {
+                $cache->setOptionValue($opts->{'c'});
+                push @config, $cache;
+        }
+
+        if ($opts->{'C'}) {
+                $cache->setOptionValue(undef);
+                push @config, $cache;
+        }
+
+        $ds->updateConfig("distfile", @config)
+            or cleanup($ds, 1,
+                      "Failed to update distfile configuration: "
+                    . $ds->getError()
+                    . "\n");
+}
+
+sub configTinderd {
+        my @config = ();
+        my $sleeptime;
+
+        if (scalar(keys %{$opts}) == 0) {
+                configGet("tinderd");
+                cleanup($ds, 0, undef);
+        }
+
+        $sleeptime = new TBConfig();
+        $sleeptime->setOptionName("sleeptime");
+
+        if ($opts->{'t'}) {
+                $sleeptime->setOptionValue($opts->{'t'});
+                push @config, $sleeptime;
+        }
+
+        $ds->updateConfig("tinderd", @config)
+            or cleanup($ds, 1,
+                      "Failed to update tinderd configuration: "
+                    . $ds->getError()
+                    . "\n");
 }
 
 sub listJails {

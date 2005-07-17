@@ -1,6 +1,13 @@
 
 SET FOREIGN_KEY_CHECKS=0;
 
+DROP TABLE IF EXISTS config;
+CREATE TABLE config (
+  Config_Option_Name varchar(255) NOT NULL,
+  Config_Option_Value text,
+  PRIMARY KEY (Config_Option_Name)
+) TYPE=INNODB;
+
 ALTER TABLE users
   ADD User_Password varchar(41) NOT NULL,
   ADD User_Www_Enabled tinyint(1) NOT NULL default '0';
@@ -50,5 +57,13 @@ CREATE TABLE build_ports_queue (
     REFERENCES hosts (Host_Id)
     ON UPDATE CASCADE
 ) TYPE=INNODB;
+
+INSERT INTO config VALUES ('__DSVERSION__', '2.0.0');
+INSERT INTO config VALUES ('CCACHE_ENABLED', '0');
+INSERT INTO config VALUES ('CCACHE_DIR', '');
+INSERT INTO config VALUES ('CCACHE_NOLINK', '1');
+INSERT INTO config VALUES ('CCACHE_MAX_SIZE', '1G');
+INSERT INTO config VALUES ('DISTFILE_CACHE', '');
+INSERT INTO config VALUES ('TINDERD_SLEEPTIME', '120');
 
 SET FOREIGN_KEY_CHECKS=1;

@@ -23,29 +23,53 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/buildenv,v 1.9 2005/07/17 23:09:07 marcus Exp $
+# $MCom: portstools/tinderbox/TBConfig.pm,v 1.1 2005/07/17 23:09:07 marcus Exp $
 #
 
-buildenv () {
-    pb=$1
-    build=$2
-    jail=$3
-    portstree=$4
+package TBConfig;
 
-    major_version=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
+use strict;
+use TinderObject;
+use vars qw(@ISA);
+@ISA = qw(TinderObject);
 
-    save_IFS=${IFS}
-    IFS='
-'
-    for _tb_var in `cat ${pb}/scripts/rawenv ; ${pb}/scripts/tc configGet`; do
-	var=$(echo ${_tb_var} | sed -e "s|^#${major_version}||")
-	var=$(echo ${var} | sed -e 's|##PB##|${pb}|g')
-	var=$(echo ${var} | sed -e 's|##BUILD##|${build}|g')
-	var=$(echo ${var} | sed -e 's|##JAIL##|${jail}|g')
-	var=$(echo ${var} | sed -e 's|##PORTSTREE##|${portstree}|g')
-	var=$(echo ${var} | sed -E -e 's|\^\^([^\^]+)\^\^|${\1}|g')
-	eval "export ${var}" > /dev/null 2>&1
-    done
+sub new {
+        my $that        = shift;
+        my $object_hash = {
+                Config_Option_Name  => "",
+                Config_Option_Value => "",
+        };
 
-    IFS=${save_IFS}
+        my @args = ();
+        push @args, $object_hash, @_;
+
+        $that->SUPER::new(@args);
 }
+
+sub getOptionName {
+        my $self = shift;
+
+        return $self->{Config_Option_Name};
+}
+
+sub getOptionValue {
+        my $self = shift;
+
+        return $self->{Config_Option_Value};
+}
+
+sub setOptionName {
+        my $self = shift;
+        my $name = shift;
+
+        $self->{Config_Option_Name} = $name;
+}
+
+sub setOptionValue {
+        my $self  = shift;
+        my $value = shift;
+
+        $self->{Config_Option_Value} = $value;
+}
+
+1;

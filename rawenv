@@ -1,3 +1,8 @@
+## rawenv TB v2 -- DO NOT EDIT
+# There are no longer any user-servicible parts in this file.  You must
+# use the ``tc config'' commands to view and change your Tinderbox config.
+##
+
 #4PKGSUFFIX=.tgz
 #4PKGZIPCMD=gzip
 #4INDEXFILE=INDEX
@@ -34,4 +39,3 @@ PORTOBJFORMAT=elf
 PARALLEL_PACKAGE_BUILD=1
 HAVE_MOTIF=1
 FTP_PASSIVE_MODE=yes
-#TINDERD_SLEEPTIME=120

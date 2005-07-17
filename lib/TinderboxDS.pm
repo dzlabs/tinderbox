@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.32 2005/07/16 23:56:55 oliver Exp $
+# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.33 2005/07/17 23:09:07 marcus Exp $
 #
 
 package TinderboxDS;
@@ -36,6 +36,7 @@ use BuildPortsQueue;
 use Build;
 use User;
 use Host;
+use TBConfig;
 use DBI;
 use Carp;
 use vars qw(
@@ -55,6 +56,7 @@ use vars qw(
         "PortsTree"       => "ports_trees",
         "User"            => "users",
         "Host"            => "hosts",
+        "TBConfig"        => "config",
 );
 
 require "ds.ph";
@@ -70,11 +72,82 @@ sub new {
 
         my $dsn = "DBI:$DB_DRIVER:database=$DB_NAME;host=$DB_HOST";
 
-        $self->{'dbh'} = DBI->connect($dsn, $DB_USER, $DB_PASS)
+        $self->{'dbh'} =
+               DBI->connect($dsn, $DB_USER, $DB_PASS, {PrintError => 0})
             or croak "ERROR: Tinderbox DS: Unable to initialize datasource.";
 
         bless($self, $class);
         $self;
+}
+
+sub getDSVersion {
+        my $self = shift;
+        my $version;
+        my $config;
+
+        my @results;
+        my $rc = $self->_doQuery("DESCRIBE config", []);
+
+        if (!$rc) {
+                return "1.X";
+        }
+
+        @results =
+            $self->getObjects("TBConfig",
+                {Config_Option_Name => '__DSVERSION__'});
+
+        if (!@results) {
+                return undef;
+        }
+
+        $config  = $results[0];
+        $version = $config->getOptionValue();
+
+        return $version;
+}
+
+sub getConfig {
+        my $self      = shift;
+        my $configlet = shift;
+        my @config    = ();
+
+        if (defined($configlet)) {
+                $configlet = uc $configlet;
+                $configlet .= '_%';
+
+                @config =
+                    $self->getObjects("TBConfig",
+                        {Config_Option_Name => $configlet});
+        } else {
+                @config = $self->getObjects("TBConfig");
+        }
+
+        return @config;
+}
+
+sub updateConfig {
+        my $self      = shift;
+        my $configlet = shift;
+        my @config    = @_;
+
+        foreach my $conf (@config) {
+                my $oname  = uc($configlet . '_' . $conf->getOptionName());
+                my $ovalue = $conf->getOptionValue();
+                if (!defined($ovalue)) {
+                        $ovalue = "";
+                }
+
+                my $rc = $self->_doQuery(
+                        "UPDATE config SET Config_Option_Value=? WHERE Config_Option_Name=?",
+                        [$ovalue, $oname]
+                );
+
+                if (!$rc) {
+                        return $rc;
+                }
+        }
+
+        return 1;
 }
 
 sub getAllPorts {
@@ -359,7 +432,11 @@ sub getObjects {
                                 carp
                                     "WARN: _ORDER_ can only be specified once\n";
                         } else {
-                                push @ands,   "$andcond=?";
+                                if ($param->{$andcond} =~ /[^\\]%/) {
+                                        push @ands, "$andcond LIKE ?";
+                                } else {
+                                        push @ands, "$andcond=?";
+                                }
                                 push @values, $param->{$andcond};
                         }
                 }
@@ -1344,6 +1421,7 @@ sub _doQuery {
         my $query  = shift;
         my $params = shift;
         my $sth    = shift;    # Optional
+        my $rc;
 
         my $_sth;              # This is the real statement handler.
 
@@ -1353,18 +1431,18 @@ sub _doQuery {
         $_sth = $self->{'dbh'}->prepare($query);
 
         if (!$_sth) {
-                $self->{'error'} = $_sth->error;
+                $self->{'error'} = $self->{'dbh'}->errstr;
                 return 0;
         }
 
         if (scalar(@{$params})) {
-                $_sth->execute(@{$params});
+                $rc = $_sth->execute(@{$params});
         } else {
-                $_sth->execute;
+                $rc = $_sth->execute;
         }
 
-        if (!$_sth) {
-                $self->{'error'} = $_sth->error;
+        if (!$rc) {
+                $self->{'error'} = $_sth->errstr;
                 return 0;
         }
 

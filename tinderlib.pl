@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tinderlib.pl,v 1.6 2005/06/28 05:47:55 adamw Exp $
+# $MCom: portstools/tinderbox/tinderlib.pl,v 1.7 2005/07/17 23:09:07 marcus Exp $
 #
 
 use strict;
@@ -51,11 +51,20 @@ sub buildenv {
         my $portstree = shift;
 
         my ($major_version) = ($jail =~ /(^\d)/);
+        my (@rawenv, @tbconfig) = ();
 
         open(RAWENV, "$pb/scripts/rawenv")
             or die "ERROR: Cannot open $pb/scripts/rawenv for reading: $!\n";
+        @rawenv = <RAWENV>;
 
-        while (<RAWENV>) {
+        close(RAWENV);
+
+        @tbconfig = `$pb/scripts/tc configGet`
+            or die "ERROR: Cannot execute $pb/scripts/tc configGet: $?\n";
+
+        push @rawenv, @tbconfig;
+
+        foreach (@rawenv) {
                 chomp;
                 s/^#$major_version//;
                 next if /^#/;
@@ -91,8 +100,6 @@ sub buildenv {
                 }
                 $ENV{$var} = join(" ", @value);
         }
-
-        close(RAWENV);
 }
 
 # This function sends email based on the given parameters.
