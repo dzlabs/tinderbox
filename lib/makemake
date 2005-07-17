@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/makemake,v 1.30 2005/07/11 19:58:28 marcus Exp $
+# $MCom: portstools/tinderbox/lib/makemake,v 1.31 2005/07/17 23:33:39 marcus Exp $
 #
 
 # Handle being called from a directory other than where things
@@ -262,6 +262,7 @@ if (!$noduds) {
 
 my $pkgdir = $BUILD_ROOT . '/packages/' . $BUILD_NAME . '/All';
 mkpath $pkgdir;
+unlink "$pkgdir/Makefile";
 symlink "$builddir/Makefile", "$pkgdir/Makefile";
 
 #---------------------------------------------------------------------------
