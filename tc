@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.48 2005/07/17 23:09:07 marcus Exp $
+# $MCom: portstools/tinderbox/tc,v 1.49 2005/07/18 02:58:57 marcus Exp $
 #
 
 BEGIN {
@@ -87,21 +87,21 @@ require "tinderlib.pl";
                 func  => \&configCcache,
                 help  => "Configure Tinderbox ccache parameters",
                 usage =>
-                    "[-d | -e] [-c cache mount src] [-s max cache size] [-l debug logfile | -L]",
-                optstr => "dec:s:l:L",
+                    "[-d | -e] [-c <cache mount src>] [-s <max cache size>] [-l <debug logfile> | -L]",
+                optstr => 'dec:s:l:L',
         },
         "configDistfile" => {
                 func   => \&configDistfile,
                 help   => "Configure Tinderbox distfile parameters",
-                usage  => "[-c distfile cache mount src | -C]",
-                optstr => "c:C",
+                usage  => "[-c <distfile cache mount src> | -C]",
+                optstr => 'c:C',
         },
         "configTinderd" => {
                 func => \&configTinderd,
                 help =>
                     "Configure Tinderbox tinder daemon (tinderd) parameters",
-                usage  => "[-t sleep time]",
-                optstr => "t:",
+                usage  => "[-t <sleep time>]",
+                optstr => 't:',
         },
         "listJails" => {
                 func  => \&listJails,
@@ -141,15 +141,15 @@ require "tinderlib.pl";
                 func  => \&addJail,
                 help  => "Add a jail to the datastore",
                 usage =>
-                    "-n <jail name> -t <jail tag> [-d <jail description>] [-u <jail update command|CVSUP|NONE>]",
-                optstr => 'n:t:u:d:',
+                    "-n <jail name> -t <jail tag> [-d <jail description>] [-m <src mount source>] [-u <jail update command|CVSUP|NONE>]",
+                optstr => 'm:n:t:u:d:',
         },
         "addPortsTree" => {
                 func  => \&addPortsTree,
                 help  => "Add a portstree to the datastore",
                 usage =>
-                    "-n <portstree name> [-d <portstree description>] [-u <portstree update command|NONE|CVSUP>] [-w <CVSweb URL>]",
-                optstr => 'n:u:d:w:',
+                    "-n <portstree name> [-d <portstree description>] [-m <ports mount source>] [-u <portstree update command|NONE|CVSUP>] [-w <CVSweb URL>]",
+                optstr => 'm:n:u:d:w:',
         },
         "addPort" => {
                 func => \&addPort,
@@ -192,6 +192,18 @@ require "tinderlib.pl";
         "getPortsUpdateCmd" => {
                 func   => \&getPortsUpdateCmd,
                 help   => "Get the update command for the given portstree",
+                usage  => "-p <portstree name>",
+                optstr => 'p:',
+        },
+        "getSrcMount" => {
+                func   => \&getSrcMount,
+                help   => "Get the src mount source for the given jail",
+                usage  => "-j <jail name>",
+                optstr => 'j:',
+        },
+        "getPortsMount" => {
+                func   => \&getPortsMount,
+                help   => "Get the ports mount source for the given jail",
                 usage  => "-p <portstree name>",
                 optstr => 'p:',
         },
@@ -710,6 +722,7 @@ sub addJail {
         $jail->setTag($tag);
         $jail->setUpdateCmd($update_cmd);
         $jail->setDescription($opts->{'d'}) if ($opts->{'d'});
+        $jail->setSrcMount($opts->{'m'})    if ($opts->{'m'});
 
         my $rc = $ds->addJail($jail);
 
@@ -744,6 +757,7 @@ sub addPortsTree {
         $portstree->setName($name);
         $portstree->setUpdateCmd($update_cmd);
         $portstree->setDescription($opts->{'d'}) if ($opts->{'d'});
+        $portstree->setPortsMount($opts->{'m'})  if ($opts->{'m'});
         $portstree->setCVSwebURL($opts->{'w'})   if ($opts->{'w'});
         $portstree->setLastBuilt($ds->getTime());
 
@@ -981,6 +995,42 @@ sub getSrcUpdateCmd {
         }
 
         print $update_cmd . "\n";
+}
+
+sub getSrcMount {
+        if (!$opts->{'j'}) {
+                usage("getSrcMount");
+        }
+
+        my $jail_name = $opts->{'j'};
+
+        if (!$ds->isValidJail($jail_name)) {
+                cleanup($ds, 1, "Unknown jail, $jail_name\n");
+        }
+
+        my $jail = $ds->getJailByName($jail_name);
+
+        my $mount_src = $jail->getSrcMount();
+
+        print $mount_src . "\n";
+}
+
+sub getPortsMount {
+        if (!$opts->{'p'}) {
+                usage("getPortsMount");
+        }
+
+        my $portstree_name = $opts->{'p'};
+
+        if (!$ds->isValidPortsTree($portstree_name)) {
+                cleanup($ds, 1, "Unknown portstree, $portstree_name\n");
+        }
+
+        my $portstree = $ds->getPortsTreeByName($portstree_name);
+
+        my $mount_src = $portstree->getPortsMount();
+
+        print $mount_src . "\n";
 }
 
 sub getPortsUpdateCmd {
@@ -1850,7 +1900,7 @@ sub setWwwAdmin {
                         "Failed to set www admin: " . $ds->getError() . "\n");
         }
 
-        my $rc =
+        $rc =
             $ds->moveBuildPortsQueueFromUserToUser($old_id, $user->getId());
 }
 

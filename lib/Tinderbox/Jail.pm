@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/Jail.pm,v 1.6 2005/06/28 05:47:55 adamw Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/Jail.pm,v 1.7 2005/07/18 02:58:57 marcus Exp $
 #
 
 package Jail;
@@ -42,6 +42,7 @@ sub new {
                 Jail_Last_Built  => "",
                 Jail_Update_Cmd  => "",
                 Jail_Description => "",
+                Jail_Src_Mount   => "",
         };
 
         my @args = ();
@@ -86,6 +87,12 @@ sub getDescription {
         return $self->{Jail_Description};
 }
 
+sub getSrcMount {
+        my $self = shift;
+
+        return $self->{Jail_Src_Mount};
+}
+
 sub setName {
         my $self = shift;
         my $name = shift;
@@ -119,6 +126,13 @@ sub setDescription {
         my $descr = shift;
 
         $self->{Jail_Description} = $descr;
+}
+
+sub setSrcMount {
+        my $self  = shift;
+        my $mount = shift;
+
+        $self->{Jail_Src_Mount} = $mount;
 }
 
 1;

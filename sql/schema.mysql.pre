@@ -27,6 +27,7 @@ CREATE TABLE jails (
   Jail_Last_Built datetime,
   Jail_Update_Cmd varchar(255) DEFAULT 'CVSUP',
   Jail_Description text,
+  Jail_Src_Mount text,
   PRIMARY KEY (Jail_Id),
   UNIQUE (Jail_Name),
   INDEX Jail_Name_Idx (Jail_Name)
@@ -40,6 +41,7 @@ CREATE TABLE ports_trees (
   Ports_Tree_Last_Built datetime,
   Ports_Tree_Update_Cmd varchar(255) DEFAULT 'CVSUP',
   Ports_Tree_CVSweb_URL varchar(255),
+  Ports_Tree_Ports_Mount text,
   PRIMARY KEY (Ports_Tree_Id),
   UNIQUE (Ports_Tree_Name),
   INDEX Ports_Tree_Name_Idx (Ports_Tree_Name)

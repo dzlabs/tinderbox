@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/PortsTree.pm,v 1.5 2005/06/28 05:47:55 adamw Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/PortsTree.pm,v 1.6 2005/07/18 02:58:57 marcus Exp $
 #
 
 package PortsTree;
@@ -42,6 +42,7 @@ sub new {
                 Ports_Tree_Last_Built  => "",
                 Ports_Tree_Update_Cmd  => "",
                 Ports_Tree_CVSweb_URL  => "",
+                Ports_Tree_Ports_Mount => "",
         };
 
         my @args = ();
@@ -92,6 +93,12 @@ sub getCVSwebURL {
         return $self->{Ports_Tree_CVSweb_URL};
 }
 
+sub getPortsMount {
+        my $self = shift;
+
+        return $self->{Ports_Tree_Ports_Mount};
+}
+
 sub setName {
         my $self = shift;
         my $name = shift;
@@ -125,6 +132,13 @@ sub setCVSwebURL {
         my $url  = shift;
 
         $self->{Ports_Tree_CVSweb_URL} = $url;
+}
+
+sub setPortsMount {
+        my $self  = shift;
+        my $mount = shift;
+
+        $self->{Ports_Tree_Ports_Mount} = $mount;
 }
 
 1;

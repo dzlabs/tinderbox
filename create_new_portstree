@@ -24,12 +24,12 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/create_new_portstree,v 1.14 2005/07/12 03:50:05 marcus Exp $
+# $MCom: portstools/tinderbox/create_new_portstree,v 1.15 2005/07/18 02:58:57 marcus Exp $
 #
 
 
 usage () {
-    echo "usage: $0 -n <portstree name> [-d <description>] [-u <update command|CVSUP|NONE>] [-w <CVSweb URL>] [-C] [-H cvsuphost]"
+    echo "usage: $0 -n <portstree name> [-d <description>] [-m ports mount source] [-u <update command|CVSUP|NONE>] [-w <CVSweb URL>] [-C] [-H cvsuphost]"
     exit 1
 }
 
@@ -54,6 +54,7 @@ descr=""
 update_cmd=""
 uc=""
 url=""
+mount_src=""
 
 while [ $# -gt 0 ]; do
     case "x$1" in
@@ -74,6 +75,9 @@ while [ $# -gt 0 ]; do
 	  ;;
 	x-H)
 	  cvsup_host="$2"; shift;
+	  ;;
+	x-m)
+	  mount_src="$2"; shift;
 	  ;;
 	*)
 	  usage
@@ -139,7 +143,11 @@ fi
 if [ ! -z "${url}" ]; then
     url="-w ${url}"
 fi
-${pb}/scripts/tc addPortsTree -n ${portstree} ${uc} ${url} "${descr}"
+if [ ! -z "${mount_src}" ]; then
+    mount_src="-m ${mount_src}"
+fi
+
+${pb}/scripts/tc addPortsTree -n ${portstree} ${uc} ${url} ${mount_src} "${descr}"
 
 if [ $? != 0 ]; then
     echo "FAILED."

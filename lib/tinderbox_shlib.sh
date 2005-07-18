@@ -192,7 +192,7 @@ request_mount() {
 			fi
 			_destination=${_pb}/jails/${_jail}/src
 			if [ -z "${_source}" ] ; then
-				_source=$(parse_rawenv -q -t mount-jail -a ${_jail})
+				_source=$(${_pb}/scripts/tc getSrcMount -j ${_jail})
 			fi
 			_fq_source=1
 			;;
@@ -203,7 +203,7 @@ request_mount() {
 			fi
 			_destination=${_pb}/portstrees/${_portstree}/ports
 			if [ -z "${_source}" ] ; then
-				_source=$(parse_rawenv -q -t mount-portstree -a ${_portstree})
+				_source=$(${_pb}/scripts/tc getPortsMount -p ${_portstree})
 			fi
 			_fq_source=1
 			;;
@@ -215,7 +215,7 @@ request_mount() {
 			_jail=$(${_pb}/scripts/tc getJailForBuild -b ${_build})
 			_destination=${_pb}/${_build}/usr/src
 			if [ -z "${_source}" ] ; then
-				_source=$(parse_rawenv -q -t mount-jail -a ${_jail})
+				_source=$(${_pb}/scripts/tc getSrcMount -j ${_jail})
 				if [ -z "${_source}" ] ; then
 					_source=${_source:=${_pb}/jails/${_jail}/src}
 				else
@@ -231,7 +231,7 @@ request_mount() {
 			_portstree=$(${_pb}/scripts/tc getPortsTreeForBuild -b ${_build})
 			_destination=${_pb}/${_build}/a/ports
 			if [ -z "${_source}" ] ; then
-				_source=$(parse_rawenv -q -t mount-portstree -a ${_portstree})
+				_source=$(${_pb}/scripts/tc getPortsMount -p ${_portstree})
 				if [ -z "${_source}" ] ; then
 					_source=${_source:=${_pb}/portstrees/${_portstree}/ports}
 				else

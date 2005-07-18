@@ -12,6 +12,12 @@ ALTER TABLE users
   ADD User_Password varchar(41) NOT NULL,
   ADD User_Www_Enabled tinyint(1) NOT NULL default '0';
 
+ALTER TABLE jails
+  ADD Jail_Src_Mount text;
+
+ALTER TABLE ports_trees
+  ADD Ports_Tree_Ports_Mount text;
+
 DROP TABLE IF EXISTS user_permissions;
 CREATE TABLE IF NOT EXISTS user_permissions (
   User_Id int(11) NOT NULL,
