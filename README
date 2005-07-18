@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.27 2005/07/16 03:28:34 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.28 2005/07/18 20:40:52 pav Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -235,13 +235,16 @@ Alternative Mounting:
 
 If you want to mount /ports inside your PortsTree or /src inside your Jail
 via nullfs or NFS from another location, define:
-  #MOUNT_PORTSTREE_<portstreename>="server:/directory"
-  #MOUNT_JAIL_<jailname>="server:/directory"
+
+  ./tc setPortsMount -p <portstreename> -m server:/directory
+  ./tc setSrcMount -p <jailname> -m server:/directory
+
 for NFS mounts or:
-  #MOUNT_PORTSTREE_<portstreename>="/directory"
-  #MOUNT_JAIL_<jailname>="/directory"
-for nullfs mounts in ${pb}/scripts/rawenv before you call
-create_new_portstree or create_new_jail.
+
+  ./tc setPortsMount -p <portstreename> -m /directory
+  ./tc setSrcMount -p <jailname> -m /directory
+
+for nullfs mounts before you call create_new_portstree or create_new_jail.
 
 They will automatically use this. Furthermore, tinderbuild will ensure that
 these file systems are correctly mounted so you do not need to mount them by
@@ -252,20 +255,20 @@ Distfile Caching:
 
 Caching distfiles in a local repository can greatly improve build times.
 As long as there is sufficient disk space, enabling a local (or NFS)
-distfile cache is easy.  Just add the following to ${pb}/scripts/rawenv:
+distfile cache is easy.  Just use the following command:
 
-DISTFILE_CACHE={MOUNT POINT}
+  ./tc configDistfile -c <mount point>
 
-Where {MOUNT POINT} is either an NFS specification, or fully qualified path
+Where <mount point> is either an NFS specification, or fully qualified path
 (in the case of nullfs) in which to store downloaded distfiles.  For example:
 
 NFS:
 
-DISTFILE_CACHE="localhost:/space/distfiles"
+  ./tc configDistfile -c localhost:/space/distfiles
 
 nullfs:
 
-DISTFILE_CACHE="/d/distfiles"
+  ./tc configDistfile -c /d/distfiles
 
 Using Ccache:
 -------------
@@ -285,18 +288,13 @@ opt/c++ -> ccache
 This tarball must be called ccache.tar, and be placed in the Jail directory
 for each Jail that will use ccache (e.g. ${pb}/jails/5.4).
 
-Once the tarball is created, add:
+Once the tarball is created, run (-e for enabling, -d for disabling,
+-c specifies directory, -s maximal size:
 
-CCACHE_ENABLED=1
-CCACHE_DIR=/ccache
-CCACHE_NOLINK=1
-CCACHE_MAX_SIZE=2G
-# G=GB M=MB K=KB, default is 1GB
+  ./tc configCcache -e -c /ccache -s 2G
 
-To your ${pb}/scripts/rawenv file.  Then run your builds as you normally
-would.  To debug ccache, add the following to ${pb}/scripts/rawenv:
-
-CCACHE_LOGFILE=/ccache.log
+Then run your builds as you normally would.  To debug ccache, add -l /ccache.log
+switch to the command.
 
 Then, in the root of each build directory, there will be a ccache.log that
 will let you know if the cache is working.
