@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.35 2005/07/18 09:30:50 oliver Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.36 2005/07/18 13:22:57 oliver Exp $
 #
 
 package TinderboxDS;
@@ -699,6 +699,23 @@ sub addPortsTree {
         return $rc;
 }
 
+sub updateJail {
+        my $self = shift;
+        my $jail = shift;
+        croak "ERROR: Argument not of type Jail\n" if (ref($jail) ne "Jail");
+
+        my $rc = $self->_doQuery(
+                "UPDATE jails SET Jail_Name=?, Jail_Tag=?, Jail_Update_Cmd=?, Jail_Description=?, Jail_Src_Mount=? WHERE Jail_Id=?",
+                [
+                        $jail->getName(),      $jail->getTag(),
+                        $jail->getUpdateCmd(), $jail->getDescription(),
+                        $jail->getSrcMount(),  $jail->getId()
+                ]
+        );
+
+        return $rc;
+}
+
 sub updateJailLastBuilt {
         my $self = shift;
         my $jail = shift;
@@ -822,6 +839,27 @@ sub getPortLastBuiltVersion {
         }
 
         return $results[0]->{Last_Built_Version};
+}
+
+sub updatePortsTree {
+        my $self      = shift;
+        my $portstree = shift;
+        croak "ERROR: Argument not of type PortsTree\n"
+            if (ref($portstree) ne "PortsTree");
+
+        my $rc = $self->_doQuery(
+                "UPDATE ports_trees SET Ports_Tree_Name=?, Ports_Tree_Description=?, Ports_Tree_Update_Cmd=?, Ports_Tree_CVSweb_URL=?, Ports_Tree_Ports_Mount=? WHERE Ports_Tree_Id=?",
+                [
+                        $portstree->getName(),
+                        $portstree->getDescription(),
+                        $portstree->getUpdateCmd(),
+                        $portstree->getCVSwebURL(),
+                        $portstree->getPortsMount(),
+                        $portstree->getId()
+                ]
+        );
+
+        return $rc;
 }
 
 sub updatePortsTreeLastBuilt {

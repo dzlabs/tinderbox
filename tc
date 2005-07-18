@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.53 2005/07/18 13:05:19 marcus Exp $
+# $MCom: portstools/tinderbox/tc,v 1.54 2005/07/18 13:22:57 oliver Exp $
 #
 
 BEGIN {
@@ -209,9 +209,21 @@ require "tinderlib.pl";
         },
         "getPortsMount" => {
                 func   => \&getPortsMount,
-                help   => "Get the ports mount source for the given jail",
+                help   => "Get the ports mount source for the given portstree",
                 usage  => "-p <portstree name>",
                 optstr => 'p:',
+        },
+        "setSrcMount" => {
+                func   => \&setSrcMount,
+                help   => "Set the src mount source for the given jail",
+                usage  => "-j <jail name> -m <mountsource>",
+                optstr => 'j:m:',
+        },
+        "setPortsMount" => {
+                func   => \&setPortsMount,
+                help   => "Set the ports mount source for the given portstree",
+                usage  => "-p <portstree name> -m <mountsource>",
+                optstr => 'p:m:',
         },
         "rmHost" => {
                 func   => \&rmHost,
@@ -1072,6 +1084,58 @@ sub getPortsMount {
         my $mount_src = $portstree->getPortsMount();
 
         print $mount_src . "\n";
+}
+
+sub setSrcMount {
+        if (!$opts->{'j'} || !$opts->{'m'}) {
+                usage("setSrcMount");
+        }
+
+        my $jail_name = $opts->{'j'};
+
+        if (!$ds->isValidJail($jail_name)) {
+                cleanup($ds, 1, "Unknown jail, $jail_name\n");
+        }
+
+        my $jail = $ds->getJailByName($jail_name);
+
+        $jail->setSrcMount($opts->{'m'});
+
+        my $rc = $ds->updateJail($jail);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to set the SrcMount for jail "
+                            . $jail->getName() . ": "
+                            . $ds->getError()
+                            . "\n");
+        }
+}
+
+sub setPortsMount {
+        if (!$opts->{'p'} || !$opts->{'m'}) {
+                usage("setPortsMount");
+        }
+
+        my $portstree_name = $opts->{'p'};
+
+        if (!$ds->isValidPortsTree($portstree_name)) {
+                cleanup($ds, 1, "Unknown portstree, $portstree_name\n");
+        }
+
+        my $portstree = $ds->getPortsTreeByName($portstree_name);
+
+        $portstree->setPortsMount($opts->{'m'});
+
+        my $rc = $ds->updatePortsTree($portstree);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to set the PortsMount for portstree "
+                            . $portstree->getName() . ": "
+                            . $ds->getError()
+                            . "\n");
+        }
 }
 
 sub getPortsUpdateCmd {
