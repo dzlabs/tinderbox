@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.6 2005/07/18 09:31:49 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.7 2005/07/18 17:22:09 oliver Exp $
 #
 
     require_once 'DB.php';
@@ -254,7 +254,7 @@
                          AND builds.Build_Id = build_ports_queue.Build_Id
                          AND users.User_Id = build_ports_queue.User_Id
                          AND hosts.Host_Id = build_ports_queue.Host_Id
-                    ORDER BY Priority";
+                    ORDER BY Priority ASC, Build_Ports_Queue_Id ASC";
             $rc = $this->_doQueryHashRef($query, $results, array($host_id,$build_id));
 
             if (!$rc) {
