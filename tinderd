@@ -6,10 +6,8 @@ pb=$(type "$pb" | sed 's/^.* //g')
 pb=$(realpath $(dirname $pb))
 pb=${pb%%/scripts}
 
-. ${pb}/scripts/tinderbox_shlib.sh
-
 TINDERBUILD_ARGS="$*"
-TINDERD_SLEEPTIME=$(parse_rawenv -t raw -a TINDERD_SLEEPTIME -q)
+eval $(${pb}/scripts/tc configTinderd)
 TINDERD_SLEEPTIME=${TINDERD_SLEEPTIME:=120}
 
 main_loop() {
@@ -33,7 +31,7 @@ main_loop() {
 			fi
 			${pb}/scripts/tc updateBuildPortsQueueEntryCompletionDate -i "${ID}"
 			if [ "${MAIL}" = "1" ] ; then
-				${pb}/scripts/tc sendBuildCompletionMail -b "${BUILD}" -u ${USER}"
+				${pb}/scripts/tc sendBuildCompletionMail -b "${BUILD}" -u "${USER}"
 			fi
 				
 			${pb}/scripts/tc reorgBuildPortsQueue
