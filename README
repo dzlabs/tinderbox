@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.28 2005/07/18 20:40:52 pav Exp $
+$MCom: portstools/tinderbox/README,v 1.29 2005/07/18 20:54:21 pav Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -234,21 +234,26 @@ Alternative Mounting:
 ---------------------
 
 If you want to mount /ports inside your PortsTree or /src inside your Jail
-via nullfs or NFS from another location, define:
+via nullfs or NFS from another location, use -m switch to create_new_portstree
+and create_new_jail.
 
-  ./tc setPortsMount -p <portstreename> -m server:/directory
-  ./tc setSrcMount -p <jailname> -m server:/directory
+Example for NFS:
 
-for NFS mounts or:
+  ./create_new_portstree -n FreeBSD -m server:/directory
+  ./create_new_jail -n FreeBSD -m server:/directory
 
-  ./tc setPortsMount -p <portstreename> -m /directory
-  ./tc setSrcMount -p <jailname> -m /directory
+Example for nullfs:
 
-for nullfs mounts before you call create_new_portstree or create_new_jail.
+  ./create_new_portstree -n FreeBSD -m /directory
+  ./create_new_jail -n FreeBSD -m /directory
 
-They will automatically use this. Furthermore, tinderbuild will ensure that
-these file systems are correctly mounted so you do not need to mount them by
-your own before calling tinderbuild.
+Tinderbuild will ensure that these file systems are correctly mounted so you do
+not need to mount them by your own before calling tinderbuild.
+
+If you want to change this settings later, use:
+
+  ./tc setPortsMount -p <portstreename> -m <mount path>
+  ./tc setSrcMount -j <jailname> -m <mount path>
 
 Distfile Caching:
 -----------------
@@ -289,7 +294,7 @@ This tarball must be called ccache.tar, and be placed in the Jail directory
 for each Jail that will use ccache (e.g. ${pb}/jails/5.4).
 
 Once the tarball is created, run (-e for enabling, -d for disabling,
--c specifies directory, -s maximal size:
+-c specifies directory, -s maximal size):
 
   ./tc configCcache -e -c /ccache -s 2G
 
