@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.52 2005/07/18 12:27:41 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.53 2005/07/18 13:05:19 marcus Exp $
 #
 
 BEGIN {
@@ -2142,9 +2142,11 @@ sub usage {
                                 }
                         }
                 }
-                foreach my $key (sort keys %COMMANDS) {
-                        printf STDERR "  %-${max}s: %s\n", $key,
-                            $COMMANDS{$key}->{'help'};
+                if (!$match) {
+                        foreach my $key (sort keys %COMMANDS) {
+                                printf STDERR "  %-${max}s: %s\n", $key,
+                                    $COMMANDS{$key}->{'help'};
+                        }
                 }
         } else {
                 print STDERR "$cmd " . $COMMANDS{$cmd}->{'usage'} . "\n";
