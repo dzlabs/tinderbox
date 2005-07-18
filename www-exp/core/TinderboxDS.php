@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/core/TinderboxDS.php,v 1.7 2005/07/18 17:22:09 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/core/TinderboxDS.php,v 1.8 2005/07/18 17:38:19 oliver Exp $
 #
 
     require_once 'DB.php';
@@ -292,25 +292,6 @@
             return true;
         }
 
-        function updateBuildPortsQueueEntry($entry_id,$host_id,$build_id,$priority,$email_on_completion) {
-            switch( $email_on_completion ) {
-                case '1':    $email_on_completion = 1; break;
-                default:     $email_on_completion = 0; break;
-            }
-
-            $query = "UPDATE build_ports_queue
-                         SET Host_Id=?, Build_id=?, Priority=?, Email_On_Completion=?
-                       WHERE Build_Ports_Queue_Id=?";
-
-            $rc = $this->_doQuery($query, array($host_id,$build_id,$priority,$email_on_completion,$entry_id), $res);
-
-            if (!$rc) {
-                return false;
-            }
-
-            return true;
-        }
-
         function createBuildPortsQueueEntry($host_id,$build_id,$priority,$port_directory,$user_id,$email_on_completion) {
             switch( $email_on_completion ) {
                 case '1':    $email_on_completion = 1; break;
@@ -329,6 +310,21 @@
             $results = $this->_newFromArray("BuildPortsQueue",$entries);
 
             return $results[0];
+        }
+
+        function updateBuildPortsQueueEntry($entry) {
+
+            $query = "UPDATE build_ports_queue
+                         SET Host_Id=?, Build_id=?, Priority=?, Email_On_Completion=?, Status=?
+                       WHERE Build_Ports_Queue_Id=?";
+
+            $rc = $this->_doQuery($query, array($entry->getHostId(),$entry->getBuildId(),$entry->getPriority(),$entry->getEmailOnCompletion(),$entry->getStatus(),$entry->getId()), $res);
+
+            if (!$rc) {
+                return false;
+            }
+
+            return true;
         }
 
         function addBuildPortsQueueEntry($entry) {

@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.3 2005/07/18 09:31:47 oliver Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.4 2005/07/18 17:38:19 oliver Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -62,6 +62,7 @@ Build
 			<th>User</th>
 			<th style="width: 20px">&nbsp</th>
 			<th>Email On<br />Completion</th>
+			<th>&nbsp;</th>
 			<th>&nbsp;</th>
 			<th>&nbsp;</th>
 		</tr>
@@ -128,6 +129,11 @@ Build
 						<input type="submit" name="change_tinderd_queue" value="delete" />
 					<?}?>
 				</td>
+				<td>
+					<?if($row['modify'] == 1){?>
+						<input type="submit" name="change_tinderd_queue" value="reset status" />
+					<?}?>
+				</td>
 			</tr>
 			</form>
 		<?}?>
@@ -168,7 +174,7 @@ Build
 				<td align="center">
 					<input type="checkbox" name="new_email_on_completion" value="1" <?if($new_email_on_completion == 1 ) {?>checked="checked"<?}?> />
 				</td>
-				<td><br /><input type="submit" name="add_tinderd_queue" value="add" /></td>
+				<td colspan="2"><br /><input type="submit" name="add_tinderd_queue" value="add" /></td>
 			</tr>
 			</form>
 

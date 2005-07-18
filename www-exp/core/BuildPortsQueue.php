@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/core/BuildPortsQueue.php,v 1.2 2005/07/18 09:31:49 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/core/BuildPortsQueue.php,v 1.3 2005/07/18 17:38:19 oliver Exp $
 #
 
     require_once 'TinderObject.php';
@@ -108,5 +108,28 @@
 	    return $this->Build_Ports_Queue_Id;
 	}
 
+	function setHostId( $host_id ) {
+	    return $this->Host_Id = $host_id;
+	}
+
+	function setBuildId( $build_id ) {
+	    return $this->Build_Id = $build_id;
+	}
+
+	function setPriority( $priority ) {
+	    return $this->Priority = $priority;
+	}
+
+	function setEmailOnCompletion( $email_on_completion ) {
+            switch( $email_on_completion ) {
+                case '1':    $email_on_completion = 1; break;
+                default:     $email_on_completion = 0; break;
+            }
+	    return $this->Email_On_Completion = $email_on_completion;
+	}
+
+	function resetStatus() {
+	    return $this->Status='ENQUEUED';
+	}
     }
 ?>

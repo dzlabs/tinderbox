@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.3 2005/07/18 09:31:47 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.4 2005/07/18 17:38:19 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -206,6 +206,13 @@ class moduleTinderd extends module {
 				} else {
 					$this->TinderboxDS->addError( build_ports_queue_not_allowed_to_delete );
 				}
+			} elseif( $action == 'reset status' ) {
+				if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'modify' ) ) {
+					$build_ports_queue_entry->resetStatus();
+					$this->TinderboxDS->updateBuildPortsQueueEntry( $build_ports_queue_entry );
+				} else {
+					$this->TinderboxDS->addError( build_ports_queue_not_allowed_to_modify );
+				}
 			} elseif(  $action == 'save' ) {
 				if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'modify' ) ) {
 					$this->host_id  = $host_id;
@@ -214,7 +221,11 @@ class moduleTinderd extends module {
 						if( $build_ports_queue_entry->getPriority() != $priority && $priority < 5 && !$this->checkQueueEntryAccess( $entry, 'priolower5' ) ) {
 							$this->TinderboxDS->addError( build_ports_queue_priority_to_low );
 						} else {
-							$this->TinderboxDS->updateBuildPortsQueueEntry( $entry_id, $host_id, $build_id, $priority, $email_on_completion );
+							$build_ports_queue_entry->setHostId( $host_id );
+							$build_ports_queue_entry->setBuildId( $build_id );
+							$build_ports_queue_entry->setPriority( $priority );
+							$build_ports_queue_entry->setEmailOnCompletion( $email_on_completion );
+							$this->TinderboxDS->updateBuildPortsQueueEntry( $build_ports_queue_entry );;
 						}
 					} else {
 						$this->TinderboxDS->addError( build_ports_queue_not_allowed_to_modify );
