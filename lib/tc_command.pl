@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.49 2005/07/18 02:58:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.50 2005/07/18 03:28:09 marcus Exp $
 #
 
 BEGIN {
@@ -87,8 +87,8 @@ require "tinderlib.pl";
                 func  => \&configCcache,
                 help  => "Configure Tinderbox ccache parameters",
                 usage =>
-                    "[-d | -e] [-c <cache mount src>] [-s <max cache size>] [-l <debug logfile> | -L]",
-                optstr => 'dec:s:l:L',
+                    "[-d | -e] [-c <cache mount src>] [-s <max cache size>] [-j | -J] [-l <debug logfile> | -L]",
+                optstr => 'dec:s:l:LjJ',
         },
         "configDistfile" => {
                 func   => \&configDistfile,
@@ -460,9 +460,12 @@ sub configGet {
 
 sub configCcache {
         my @config = ();
-        my ($enabled, $logfile);
+        my ($enabled, $logfile, $jail);
 
-        if (($opts->{'d'} && $opts->{'e'}) || ($opts->{'l'} && $opts->{'L'})) {
+        if (       ($opts->{'d'} && $opts->{'e'})
+                || ($opts->{'l'} && $opts->{'L'})
+                || ($opts->{'j'} && $opts - {'J'}))
+        {
                 usage("configCcache");
         }
 
@@ -476,6 +479,9 @@ sub configCcache {
 
         $logfile = new TBConfig();
         $logfile->setOptionName("logfile");
+
+        $jail = new TBConfig();
+        $jail->setOptionName("jail");
 
         if ($opts->{'e'}) {
                 my $nolink = new TBConfig();
@@ -503,6 +509,16 @@ sub configCcache {
                 $size->setOptionName("max_size");
                 $size->setOptionValue($opts->{'s'});
                 push @config, $size;
+        }
+
+        if ($opts->{'j'}) {
+                $jail->setOptionValue("1");
+                push @config, $jail;
+        }
+
+        if ($opts->{'J'}) {
+                $jail->setOptionValue("0");
+                push @config, $jail;
         }
 
         if ($opts->{'L'}) {
@@ -1900,8 +1916,7 @@ sub setWwwAdmin {
                         "Failed to set www admin: " . $ds->getError() . "\n");
         }
 
-        $rc =
-            $ds->moveBuildPortsQueueFromUserToUser($old_id, $user->getId());
+        $rc = $ds->moveBuildPortsQueueFromUserToUser($old_id, $user->getId());
 }
 
 sub addBuildUser {

@@ -170,7 +170,7 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/X1
 # Just to be shure we start in a clean build-tree
 cleanup_mounts -d build -b ${branch}
 
-if [ -n "${CCACHE_ENABLED}" ]; then
+if [ x"${CCACHE_ENABLED}" = x"1" ]; then
     # XXX We need to do this since certain ports (e.g. cdrtools) don't
     # respect CC the way they should (thanks for the tip, Adam).
     export PATH=/opt:${PATH}
@@ -231,7 +231,7 @@ if [ -f ${pb}/jails/${jail}/pkg_install.tar ]; then
     tar -C ${chroot} -xf ${pb}/jails/${jail}/pkg_install.tar
 fi
 
-if [ -n "${CCACHE_ENABLED}" -a -f ${pb}/jails/${jail}/ccache.tar ]; then
+if [ x"${CCACHE_ENABLED}" = x"1" -a -f ${pb}/jails/${jail}/ccache.tar ]; then
     tar -C ${chroot} -xf ${pb}/jails/${jail}/ccache.tar
 fi
 
@@ -285,10 +285,10 @@ fi
 
 mount -t devfs foo ${chroot}/dev
 
-if [ -n "${CCACHE_ENABLED}" ]; then
+if [ x"${CCACHE_ENABLED}" = x"1" ]; then
     mkdir -p ${pb}/${CCACHE_DIR}/${branch}
     mkdir -p ${chroot}/${CCACHE_DIR}
-    if [ -n "${CCACHE_JAIL}" ]; then
+    if [ x"${CCACHE_JAIL}" = x"1" ]; then
 	if [ ${nullfs} -eq 1 ] ; then
 		request_mount -n -d ccache -s ${pb}/${CCACHE_DIR}/${jail} -b ${branch}
 	else
