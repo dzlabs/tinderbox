@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.5 2005/07/16 21:26:39 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.6 2005/07/18 09:31:49 oliver Exp $
 #
 
     require_once 'DB.php';
@@ -292,12 +292,17 @@
             return true;
         }
 
-        function updateBuildPortsQueueEntry($entry_id,$host_id,$build_id,$priority) {
+        function updateBuildPortsQueueEntry($entry_id,$host_id,$build_id,$priority,$email_on_completion) {
+            switch( $email_on_completion ) {
+                case '1':    $email_on_completion = 1; break;
+                default:     $email_on_completion = 0; break;
+            }
+
             $query = "UPDATE build_ports_queue
-                         SET Host_Id=?, Build_id=?, Priority=?
+                         SET Host_Id=?, Build_id=?, Priority=?, Email_On_Completion=?
                        WHERE Build_Ports_Queue_Id=?";
 
-            $rc = $this->_doQuery($query, array($host_id,$build_id,$priority,$entry_id), $res);
+            $rc = $this->_doQuery($query, array($host_id,$build_id,$priority,$email_on_completion,$entry_id), $res);
 
             if (!$rc) {
                 return false;
@@ -306,12 +311,20 @@
             return true;
         }
 
-        function createBuildPortsQueueEntry($host_id,$build_id,$priority,$port_directory,$user_id) {
+        function createBuildPortsQueueEntry($host_id,$build_id,$priority,$port_directory,$user_id,$email_on_completion) {
+            switch( $email_on_completion ) {
+                case '1':    $email_on_completion = 1; break;
+                default:     $email_on_completion = 0; break;
+            }
+
             $entries[] = array('Host_Id'        => $host_id,
                                'Build_Id'       => $build_id,
                                'Priority'       => $priority,
                                'Port_Directory' => $port_directory,
-                               'User_Id'        => $user_id);
+                               'User_Id'        => $user_id,
+			       'Enqueue_Date'   => date("Y-m-d H:i:s", time()),
+			       'Email_On_Completion' => $email_on_completion,
+			       'Status'         => 'ENQUEUED');
 
             $results = $this->_newFromArray("BuildPortsQueue",$entries);
 
@@ -320,11 +333,11 @@
 
         function addBuildPortsQueueEntry($entry) {
             $query = "INSERT INTO build_ports_queue
-                         (Host_Id,Build_id,Priority,Port_Directory,User_id)
+                         (Host_Id,Enqueue_Date,Build_id,Priority,Port_Directory,User_id,Email_On_Completion,Status)
                       VALUES
-                         (?,?,?,?,?)";
+                         (?,?,?,?,?,?,?,?)";
 
-            $rc = $this->_doQuery($query, array($entry->getHostId(),$entry->getBuildId(),$entry->getPriority(),$entry->getPortDirectory(),$entry->getUserId()), $res);
+            $rc = $this->_doQuery($query, array($entry->getHostId(),$entry->getEnqueueDate(),$entry->getBuildId(),$entry->getPriority(),$entry->getPortDirectory(),$entry->getUserId(),$entry->getEmailOnCompletion(),$entry->getStatus()), $res);
 
             if (!$rc) {
                 return false;

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.2 2005/07/10 17:06:25 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.3 2005/07/18 09:31:47 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -141,13 +141,29 @@ class moduleTinderd extends module {
 						if( is_array( $build_ports_queue_entries ) && count( $build_ports_queue_entries ) > 0 ) {
 							foreach( $build_ports_queue_entries as $build_ports_queue_entry ) {
 								if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'list' ) ) {
+									switch( $build_ports_queue_entry->getStatus() ) {
+										case 'ENQUEUED':
+											$status_field_class  = 'queue_entry_enqueued';
+											break;
+										case 'PROCESSING':
+											$status_field_class  = 'queue_entry_processing';
+											break;
+										case 'SUCCESS':
+											$status_field_class  = 'queue_entry_success';
+											break;
+										case 'FAIL':
+											$status_field_class  = 'port_fail';
+											break;
+									}
 									$entries[$i] = array( 'entry_id'  => $build_ports_queue_entry->getBuildPortsQueueId(),
 									                      'directory' => $build_ports_queue_entry->getPortDirectory(),
 									                      'priority'  => $build_ports_queue_entry->getPriority(),
 									                      'build'     => $build_ports_queue_entry->getBuildName(),
 									                      'host'      => $build_ports_queue_entry->getHostName(),
 									                      'user'      => $build_ports_queue_entry->getUserName(),
-									                      'all_prio'  => $this->create_prio_array( $build_ports_queue_entry ) );
+											      'all_prio'  => $this->create_prio_array( $build_ports_queue_entry ),
+											      'email_on_completion' => $build_ports_queue_entry->getEmailOnCompletion(),
+											      'status_field_class'  => $status_field_class);
 
 								}
 								if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'modify' ) ) {
@@ -176,7 +192,7 @@ class moduleTinderd extends module {
 		}
 	}
 
-	function change_tinderd_queue( $action, $entry_id, $host_id, $build_id, $priority ) {
+	function change_tinderd_queue( $action, $entry_id, $host_id, $build_id, $priority, $email_on_completion ) {
 
 		if( !$this->moduleUsers->is_logged_in() ) {
 			return $this->template_parse( 'please_login.tpl' );
@@ -198,7 +214,7 @@ class moduleTinderd extends module {
 						if( $build_ports_queue_entry->getPriority() != $priority && $priority < 5 && !$this->checkQueueEntryAccess( $entry, 'priolower5' ) ) {
 							$this->TinderboxDS->addError( build_ports_queue_priority_to_low );
 						} else {
-							$this->TinderboxDS->updateBuildPortsQueueEntry( $entry_id, $host_id, $build_id, $priority );
+							$this->TinderboxDS->updateBuildPortsQueueEntry( $entry_id, $host_id, $build_id, $priority, $email_on_completion );
 						}
 					} else {
 						$this->TinderboxDS->addError( build_ports_queue_not_allowed_to_modify );
@@ -211,12 +227,12 @@ class moduleTinderd extends module {
 		return;
 	}
 
-	function add_tinderd_queue( $action, $host_id, $build_id, $priority, $port_directory ) {
+	function add_tinderd_queue( $action, $host_id, $build_id, $priority, $port_directory, $email_on_completion ) {
 
 		if( !$this->moduleUsers->is_logged_in() ) {
 			return $this->template_parse( 'please_login.tpl' );
 		} else {
-			$build_ports_queue_entry = $this->TinderboxDS->createBuildPortsQueueEntry( $host_id, $build_id, $priority, $port_directory, $this->moduleUsers->get_id() );
+			$build_ports_queue_entry = $this->TinderboxDS->createBuildPortsQueueEntry( $host_id, $build_id, $priority, $port_directory, $this->moduleUsers->get_id(), $email_on_completion );
 			$this->host_id  = $host_id;
 			$this->build_id = $build_id;
 			if( $action == 'add' ) {
@@ -226,6 +242,7 @@ class moduleTinderd extends module {
 						$this->template_assign( 'new_build_id', $build_id );
 						$this->template_assign( 'new_priority', $priority );
 						$this->template_assign( 'new_port_directory', $port_directory );
+						$this->template_assign( 'new_email_on_completion', $email_on_completion );
 						$this->TinderboxDS->addError( build_ports_queue_priority_to_low );
 					} else {
 						$this->TinderboxDS->addBuildPortsQueueEntry( $build_ports_queue_entry );

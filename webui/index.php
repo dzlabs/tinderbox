@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.7 2005/07/12 05:50:08 oliver Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.8 2005/07/18 09:31:49 oliver Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -84,7 +84,8 @@ switch( $action ) {
 					$host_id    = get_var( 'host_id' );
 					$build_id   = get_var( 'build_id' );
 					$priority   = get_var( 'priority' );
-					$moduleTinderd->change_tinderd_queue( $ctinderdq, $entry_id, $host_id, $build_id, $priority );
+					$emailoc    = get_var( 'email_on_completion' );
+					$moduleTinderd->change_tinderd_queue( $ctinderdq, $entry_id, $host_id, $build_id, $priority, $emailoc );
 					$host_id    = get_var( 'filter_host_id' );
 					$build_id   = get_var( 'filter_build_id' );
 					$display    = $moduleTinderd->list_tinderd_queue( $host_id, $build_id );
@@ -94,7 +95,8 @@ switch( $action ) {
 					$build_id   = get_var( 'new_build_id' );
 					$priority   = get_var( 'new_priority' );
 					$directory  = get_var( 'new_port_directory' );
-					$moduleTinderd->add_tinderd_queue( $atinderdq, $host_id, $build_id, $priority, $directory );
+					$emailoc    = get_var( 'new_email_on_completion' );
+					$moduleTinderd->add_tinderd_queue( $atinderdq, $host_id, $build_id, $priority, $directory, $emailoc );
 					$host_id    = get_var( 'filter_host_id' );
 					$build_id   = get_var( 'filter_build_id' );
 					$display    = $moduleTinderd->list_tinderd_queue( $host_id, $build_id );

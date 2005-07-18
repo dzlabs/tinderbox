@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/www-exp/templates/default/list_tinderd_queue.tpl,v 1.2 2005/07/10 08:15:28 oliver Exp $ //-->
+<!-- $MCom: portstools/tinderbox/www-exp/templates/default/list_tinderd_queue.tpl,v 1.3 2005/07/18 09:31:47 oliver Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -60,6 +60,8 @@ Build
 			<th>Priority</th>
 			<th>Port Directory</th>
 			<th>User</th>
+			<th style="width: 20px">&nbsp</th>
+			<th>Email On<br />Completion</th>
 			<th>&nbsp;</th>
 			<th>&nbsp;</th>
 		</tr>
@@ -108,6 +110,14 @@ Build
 				</td>
 				<td><?=$row['directory']?></td>
 				<td><?=$row['user']?></td>
+				<td class="<?=$row['status_field_class']?>">&nbsp;</td>
+				<td align="center">
+					<?if($row['modify'] == 1){?>
+						<input type="checkbox" name="email_on_completion" value="1" <?if($row['email_on_completion'] == 1 ) {?>checked="checked"<?}?> />
+					<?}else{?>
+						<?if($row['email_on_completion'] == 1 ) {?>X"<?}?>
+					<?}?>
+				</td>
 				<td>
 					<?if($row['modify'] == 1){?>
 						<input type="submit" name="change_tinderd_queue" value="save" />
@@ -154,6 +164,10 @@ Build
 				</td>
 				<td><br /><input type="text" size="20" name="new_port_directory" value="<?=$new_port_directory?>" /></td>
 				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+				<td align="center">
+					<input type="checkbox" name="new_email_on_completion" value="1" <?if($new_email_on_completion == 1 ) {?>checked="checked"<?}?> />
+				</td>
 				<td><br /><input type="submit" name="add_tinderd_queue" value="add" /></td>
 			</tr>
 			</form>
