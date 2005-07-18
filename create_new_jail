@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/create_new_jail,v 1.18 2005/07/18 02:58:57 marcus Exp $
+# $MCom: portstools/tinderbox/create_new_jail,v 1.19 2005/07/18 20:54:59 oliver Exp $
 #
 
 
@@ -108,8 +108,6 @@ rm -rf ${pb}/jails/${jail_name}
 
 mkdir -p ${pb}/jails/${jail_name}/src
 
-request_mount -q -d jail -j ${jail_name}
-
 cat > ${pb}/jails/${jail_name}/src-supfile << EOSF
 *default host=${cvsup_host}
 *default base=${pb}/jails/${jail_name}
@@ -142,6 +140,12 @@ if [ $? != 0 ]; then
 fi
 
 echo "DONE."
+
+if [ ! -z "${mount_src}" ]; then
+    echo -n "INFO: mounting src..."
+    request_mount -q -d jail -j ${jail_name}
+    echo "DONE."
+fi
 
 echo "INFO: Initializing new jail..."
 ${pb}/scripts/mkjail ${jail_name}
