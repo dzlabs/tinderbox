@@ -25,55 +25,6 @@ cleanup_mount() {
 	fi
 }
 
-parse_rawenv() {
-
-	_argument=
-	_type=
-	_quiet=1
-
-	_pb=${pb:=/space}
-	# Just in case /space is a symlink
-	_pb=$(realpath ${_pb})
-	_rawenv="${_pb}/scripts/rawenv"
-
-	while getopts a:t:q OPT ; do
-		case $OPT in
-			a)	_argument=${OPTARG}
-				;;
-			t)	_type=${OPTARG}
-				;;
-			q)	_quiet=1
-				;;
-		esac
-	done
-
-	if [ -z "${_type}" ] ; then
-		echo "type has to be filled!" >&2
-		return 1
-	fi
-	if [ -z "${_argument}" ] ; then
-		echo "argument has to be filled!" >&2
-		return 1
-	fi
-
-	case ${_type} in
-		mount-portstree)	_var="#MOUNT_PORTSTREE_${_argument}"
-					;;
-		mount-jail)		_var="#MOUNT_JAIL_${_argument}"
-					;;
-		raw)			_var="${_argument}"
-					;;
-		*)			echo "unknown type" >&2
-					return 1
-					;;
-	esac
-
-	if ! grep -m 1 "^${_var}=" ${_rawenv} | sed 's|[^=]*[	 ]*=["	 ]*\([^"]*\).*|\1|' ; then
-		[ ${_quiet} -ne 1 ] && echo "${_var} not found in rawenv" >&2
-		return 1
-	fi
-}
-
 cleanup_mounts() {
 
 	_build=
