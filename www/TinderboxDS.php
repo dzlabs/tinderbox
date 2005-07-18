@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/TinderboxDS.php,v 1.31 2005/07/16 23:15:46 pav Exp $
+# $MCom: portstools/tinderbox/www/TinderboxDS.php,v 1.32 2005/07/18 20:06:47 pav Exp $
 #
 
     require_once 'DB.php';
@@ -269,8 +269,9 @@
         }
 
 	function getQueue() {
-	    $query = "SELECT Port_Directory,Priority,build_ports_queue.Build_Id,Build_Name,Host_Name FROM build_ports_queue,hosts,builds ";
-	    $query.= "WHERE build_ports_queue.Build_Id=builds.Build_ID AND build_ports_queue.Host_Id=hosts.Host_Id ORDER BY Priority,Build_Ports_Queue_Id";
+	    $query = "SELECT Port_Directory,Priority,build_ports_queue.Build_Id,Build_Name,Host_Name,Status FROM build_ports_queue,hosts,builds ";
+	    $query.= "WHERE build_ports_queue.Build_Id=builds.Build_ID AND build_ports_queue.Host_Id=hosts.Host_Id AND NOT (build_ports_queue.Status = 'SUCCESS') ";
+	    $query.= "ORDER BY Priority,Build_Ports_Queue_Id";
 	    $rc = $this->_doQueryHashRef($query, $results);
 	    if (!$rc) {
 		return null;

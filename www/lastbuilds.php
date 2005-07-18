@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/lastbuilds.php,v 1.22 2005/07/17 23:57:48 pav Exp $
+# $MCom: portstools/tinderbox/www/lastbuilds.php,v 1.23 2005/07/18 20:06:47 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -92,7 +92,11 @@
 		</tr>
 		<?php
 		foreach ($queue as $item) {
-			echo "<tr>\n";
+			if ($item["Status"] == "PROCESSING") {
+				echo "<tr bgcolor='#a9ddef'>\n";
+			} else {
+				echo "<tr>\n";
+			}
 			echo "<td>" . $item["Host_Name"] . "</td>\n";
 			echo "<td><a href=\"showbuild.php?name=" . $item["Build_Name"] . "\">" . $item["Build_Name"] . "</a></td>\n";
 			echo "<td>" . $item["Port_Directory"] . "</td>\n";
