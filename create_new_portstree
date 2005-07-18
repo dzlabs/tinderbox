@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/create_new_portstree,v 1.15 2005/07/18 02:58:57 marcus Exp $
+# $MCom: portstools/tinderbox/create_new_portstree,v 1.16 2005/07/18 20:59:12 oliver Exp $
 #
 
 
@@ -112,8 +112,6 @@ rm -rf ${pb}/portstrees/${portstree}
 
 mkdir -p ${pb}/portstrees/${portstree}/ports
 
-request_mount -q -r -d portstree -p ${portstree}
-
 cat > ${pb}/portstrees/${portstree}/ports-supfile << EOSF
 *default host=${cvsup_host}
 *default base=${pb}/portstrees/${portstree}
@@ -125,16 +123,6 @@ ports-all
 EOSF
 
 echo "DONE."
-
-if [ ! -z "${update_cmd}" ]; then
-    echo -n "INFO: Updating portstree with ${update_cmd}..."
-    eval ${update_cmd} > /dev/null 2>&1
-    if [ $? != 0 ]; then
-	echo "FAILED."
-	exit 1
-    fi
-    echo "DONE."
-fi
 
 echo -n "INFO: Adding portstree to datastore..."
 if [ ! -z "${descr}" ]; then
@@ -155,5 +143,21 @@ if [ $? != 0 ]; then
 fi
 
 echo "DONE."
+
+if [ ! -z "${mount_src}" ]; then
+    echo -n "INFO: mounting ports..."
+    request_mount -q -r -d portstree -p ${portstree}
+    echo "DONE."
+fi
+
+if [ ! -z "${update_cmd}" ]; then
+    echo -n "INFO: Updating portstree with ${update_cmd}..."
+    eval ${update_cmd} > /dev/null 2>&1
+    if [ $? != 0 ]; then
+        echo "FAILED."
+        exit 1
+    fi
+    echo "DONE."
+fi
 
 exit 0
