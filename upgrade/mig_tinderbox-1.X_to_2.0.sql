@@ -1,4 +1,3 @@
-
 SET FOREIGN_KEY_CHECKS=0;
 
 DROP TABLE IF EXISTS config;
@@ -7,16 +6,6 @@ CREATE TABLE config (
   Config_Option_Value text,
   PRIMARY KEY (Config_Option_Name)
 ) TYPE=INNODB;
-
-ALTER TABLE users
-  ADD User_Password varchar(41) NOT NULL,
-  ADD User_Www_Enabled tinyint(1) NOT NULL default '0';
-
-ALTER TABLE jails
-  ADD Jail_Src_Mount text;
-
-ALTER TABLE ports_trees
-  ADD Ports_Tree_Ports_Mount text;
 
 DROP TABLE IF EXISTS user_permissions;
 CREATE TABLE IF NOT EXISTS user_permissions (
@@ -32,10 +21,6 @@ CREATE TABLE IF NOT EXISTS user_permissions (
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) TYPE=INNODB;
 
-
-ALTER TABLE build_ports
-  CHANGE Last_Status Last_Status enum('UNKNOWN','SUCCESS','FAIL','BROKEN', 'LEFTOVERS') DEFAULT 'UNKNOWN';
-
 DROP TABLE IF EXISTS hosts;
 CREATE TABLE hosts (
   Host_Id int NOT NULL auto_increment,
@@ -46,14 +31,17 @@ CREATE TABLE hosts (
 
 DROP TABLE IF EXISTS build_ports_queue;
 CREATE TABLE build_ports_queue (
-  Build_Ports_Queue_Id int NOT NULL auto_increment,
+  Build_Ports_Queue_Id int(11) NOT NULL auto_increment,
+  Enqueue_Date datetime,
+  Completion_Date datetime,
   Build_Id int NOT NULL,
   User_Id int NOT NULL,
   Port_Directory varchar(255) NOT NULL,
   Priority int NOT NULL default '10',
   Host_Id int NOT NULL,
+  Email_On_Completion tinyint(1) NOT NULL,
+  Status enum('ENQUEUED','PROCESSING','SUCCESS','FAIL') NOT NULL default 'ENQUEUED',
   PRIMARY KEY (Build_Ports_Queue_Id),
-  UNIQUE KEY BId_PDirectory_HId (Build_Id,Port_Directory,Host_Id),
   KEY Host_Id (Host_Id),
   KEY User_Id (User_Id),
   FOREIGN KEY (Build_Id)
@@ -64,13 +52,26 @@ CREATE TABLE build_ports_queue (
     ON UPDATE CASCADE
 ) TYPE=INNODB;
 
-INSERT INTO config VALUES ('__DSVERSION__', '2.0.0');
-INSERT INTO config VALUES ('CCACHE_ENABLED', '0');
-INSERT INTO config VALUES ('CCACHE_DIR', '');
-INSERT INTO config VALUES ('CCACHE_NOLINK', '1');
-INSERT INTO config VALUES ('CCACHE_MAX_SIZE', '1G');
-INSERT INTO config VALUES ('CCACHE_JAIL', '0');
-INSERT INTO config VALUES ('DISTFILE_CACHE', '');
-INSERT INTO config VALUES ('TINDERD_SLEEPTIME', '120');
+ALTER TABLE users
+  ADD User_Password varchar(41) NOT NULL,
+  ADD User_Www_Enabled tinyint(1) NOT NULL default '0';
+
+ALTER TABLE build_ports
+  CHANGE Last_Status Last_Status enum('UNKNOWN','SUCCESS','FAIL','BROKEN', 'LEFTOVERS') DEFAULT 'UNKNOWN';
+
+ALTER TABLE jails
+  ADD Jail_Src_Mount text;
+
+ALTER TABLE ports_trees
+  ADD Ports_Tree_Ports_Mount text;
+
+INSERT INTO config VALUES ('__DSVERSION__', '2.0.0') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO config VALUES ('CCACHE_ENABLED', '0') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO config VALUES ('CCACHE_DIR', '') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO config VALUES ('CCACHE_NOLINK', '1') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO config VALUES ('CCACHE_MAX_SIZE', '1G') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO config VALUES ('CCACHE_JAIL', '0') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO config VALUES ('DISTFILE_CACHE', '') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO config VALUES ('TINDERD_SLEEPTIME', '120') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
 
 SET FOREIGN_KEY_CHECKS=1;
