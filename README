@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.29 2005/07/18 20:54:21 pav Exp $
+$MCom: portstools/tinderbox/README,v 1.30 2005/07/18 21:19:41 pav Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -240,12 +240,12 @@ and create_new_jail.
 Example for NFS:
 
   ./create_new_portstree -n FreeBSD -m server:/directory
-  ./create_new_jail -n FreeBSD -m server:/directory
+  ./create_new_jail -n 6-FreeBSD -m server:/directory
 
 Example for nullfs:
 
   ./create_new_portstree -n FreeBSD -m /directory
-  ./create_new_jail -n FreeBSD -m /directory
+  ./create_new_jail -n 6-FreeBSD -m /directory
 
 Tinderbuild will ensure that these file systems are correctly mounted so you do
 not need to mount them by your own before calling tinderbuild.
