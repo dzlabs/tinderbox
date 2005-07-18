@@ -143,14 +143,17 @@ CREATE TABLE hosts (
 
 DROP TABLE IF EXISTS build_ports_queue;
 CREATE TABLE build_ports_queue (
-  Build_Ports_Queue_Id int NOT NULL auto_increment,
+  Build_Ports_Queue_Id int(11) NOT NULL auto_increment,
+  Enqueue_Date datetime,
+  Completion_Date datetime,
   Build_Id int NOT NULL,
   User_Id int NOT NULL,
   Port_Directory varchar(255) NOT NULL,
   Priority int NOT NULL default '10',
   Host_Id int NOT NULL,
+  Email_On_Completion tinyint(1) NOT NULL,
+  Status enum('ENQUEUED','PROCESSING','SUCCESS','FAIL') NOT NULL default 'ENQUEUED',
   PRIMARY KEY (Build_Ports_Queue_Id),
-  UNIQUE KEY BId_PDirectory_HId (Build_Id,Port_Directory,Host_Id),
   KEY Host_Id (Host_Id),
   KEY User_Id (User_Id),
   FOREIGN KEY (Build_Id)

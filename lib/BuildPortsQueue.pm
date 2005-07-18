@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/BuildPortsQueue.pm,v 1.1 2005/07/06 18:31:21 oliver Exp $
+# $MCom: portstools/tinderbox/lib/BuildPortsQueue.pm,v 1.2 2005/07/18 09:30:50 oliver Exp $
 #
 
 package BuildPortsQueue;
@@ -37,11 +37,15 @@ sub new {
         my $that        = shift;
         my $object_hash = {
                 Build_Ports_Queue_Id => "",
+                Enqueue_Date         => "",
+                Completion_Date      => "",
                 Build_Id             => "",
                 User_Id              => "",
                 Port_Directory       => "",
                 Priority             => "",
                 Host_Id              => "",
+                Email_On_Completion  => "",
+                Status               => "",
         };
 
         my @args = ();
@@ -62,6 +66,18 @@ sub getBuildId {
         return $self->{Build_Id};
 }
 
+sub getCompletionDate {
+        my $self = shift;  
+                
+        return $self->{Completion_Date};
+}
+
+sub getEmailOnCompletion {
+        my $self = shift;  
+                
+        return $self->{Email_On_Completion};
+}
+
 sub getPortDirectory {
         my $self = shift;
 
@@ -72,6 +88,19 @@ sub getPriority {
         my $self = shift;
 
         return $self->{Priority};
+}
+
+sub getUserId {
+        my $self = shift;
+
+        return $self->{User_Id};
+}
+
+sub setCompletionDate {
+        my $self = shift;
+        my $date = shift;
+
+        $self->{Completion_Date} = $date;
 }
 
 1;

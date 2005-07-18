@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/TinderboxDS.pm,v 1.34 2005/07/17 23:12:26 marcus Exp $
+# $MCom: portstools/tinderbox/TinderboxDS.pm,v 1.35 2005/07/18 09:30:50 oliver Exp $
 #
 
 package TinderboxDS;
@@ -171,6 +171,53 @@ sub isValidBuildPortsQueueId {
         return ($rc > 0) ? 1 : 0;
 }
 
+sub updateBuildPortsQueueEntryCompletionDate {
+        my $self  = shift;
+        my $entry = shift;
+        croak "ERROR: Argument not of type BuildPortsQueue\n"
+            if (ref($entry) ne "BuildPortsQueue");
+
+        my $rc;
+
+        if (!defined($entry->getCompletionDate())) {
+                $rc = $self->_doQuery(
+                        "UPDATE build_ports_queue SET Completion_Date=NOW() WHERE Build_Ports_Queue_Id=?",
+                        [$entry->getId()]
+                );
+        } else {
+                $rc = $self->_doQuery(
+                        "UPDATE build_ports_queue SET Completion_Date=? WHERE Build_Ports_Queue_Id=?",
+                        [$entry->getCompletionDate(), $entry->getId()]
+                );
+        }
+
+        return $rc;
+}
+
+sub updateBuildPortsQueueEntryStatus {
+        my $self   = shift;
+        my $id     = shift;
+        my $status = shift;
+
+        my %status_hash = (
+                ENQUEUED   => 1,
+                PROCESSING => 1,
+                SUCCESS    => 1,
+                FAIL       => 1,
+        );
+
+        if (!defined($status_hash{$status})) {
+                croak "ERROR: invalid status\n";
+        }
+
+        my $rc = $self->_doQuery(
+                "UPDATE build_ports_queue SET Status=? WHERE Build_Ports_Queue_Id=?",
+                [$status, $id]
+        );
+
+        return $rc;
+}
+
 sub moveBuildPortsQueueFromUserToUser {
         my $self   = shift;
         my $old_id = shift;
@@ -227,22 +274,49 @@ sub getBuildPortsQueueByKeys {
 }
 
 sub getBuildPortsQueueByHost {
-        my $self = shift;
-        my $host = shift;
+        my $self   = shift;
+        my $host   = shift;
+        my $status = shift;
+        my @results;
 
-        my @results = $self->getObjects(
-                "BuildPortsQueue",
-                {
-                        Host_Id => $host->getId(),
-                        _ORDER_ => "Priority ASC, Build_Ports_Queue_Id ASC"
-                }
-        );
+        if ($status) {
+                @results = $self->getObjects(
+                        "BuildPortsQueue",
+                        {
+                                Host_Id => $host->getId(),
+                                Status  => $status,
+                                _ORDER_ =>
+                                    "Priority ASC, Build_Ports_Queue_Id ASC"
+                        }
+                );
+        } else {
+                @results = $self->getObjects(
+                        "BuildPortsQueue",
+                        {
+                                Host_Id => $host->getId(),
+                                _ORDER_ =>
+                                    "Priority ASC, Build_Ports_Queue_Id ASC"
+                        }
+                );
+        }
 
         if (!@results) {
                 return undef;
         }
 
         return @results;
+}
+
+sub reorgBuildPortsQueue {
+        my $self = shift;
+        my $host = shift;
+
+        my $rc = $self->_doQuery(
+                "DELETE FROM build_ports_queue WHERE Host_Id=? AND Enqueue_Date<=NOW()-25200 AND Status != 'ENQUEUED'",
+                [$host->getId()]
+        );
+
+        return $rc;
 }
 
 sub getPortsForBuild {
@@ -884,6 +958,19 @@ sub isUserForBuild {
         );
 
         return ($rc > 0) ? 1 : 0;
+}
+
+sub getUserById {
+        my $self   = shift;
+        my $userid = shift;
+
+        my @results = $self->getObjects("User", {User_Id => $userid});
+
+        if (!@results) {
+                return undef;
+        }
+
+        return $results[0];
 }
 
 sub getUserByName {

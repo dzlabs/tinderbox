@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.50 2005/07/18 03:28:09 marcus Exp $
+# $MCom: portstools/tinderbox/tc,v 1.51 2005/07/18 09:30:50 oliver Exp $
 #
 
 BEGIN {
@@ -121,8 +121,14 @@ require "tinderlib.pl";
         "listBuildPortsQueue" => {
                 func   => \&listBuildPortsQueue,
                 help   => "Lists the Ports to Build Queue",
+                usage  => "[-h <host>] [-r] [-s <status>]",
+                optstr => 'h:s:r',
+        },
+        "reorgBuildPortsQueue" => {
+                func   => \&reorgBuildPortsQueue,
+                help   => "Reorganizes the Ports to Build Queue",
                 usage  => "[-h <host>]",
-                optstr => 'h:r',
+                optstr => 'h:',
         },
         "addHost" => {
                 func   => \&addHost,
@@ -259,6 +265,14 @@ require "tinderlib.pl";
                 usage  => "-p <portstree name> [-l <last built timestamp>]",
                 optstr => 'p:l:',
         },
+        "updateBuildPortsQueueEntryCompletionDate" => {
+                func => \&updateBuildPortsQueueEntryCompletionDate,
+                help =>
+                    "Update the specified Build Ports Queue Entry completion time",
+                usage  => "-i <id> [-l <completion timestamp>]",
+                optstr => 'i:l:',
+        },
+
         "updateJailLastBuilt" => {
                 func   => \&updateJailLastBuilt,
                 help   => "Update the specified jail's last built time",
@@ -303,6 +317,13 @@ require "tinderlib.pl";
                 usage  => "-b <build name> -s <IDLE|PORTBUILD>",
                 optstr => 'b:s:',
         },
+        "updateBuildPortsQueueEntryStatus" => {
+                func => \&updateBuildPortsQueueEntryStatus,
+                help =>
+                    "Update the current status for the specific queue entry",
+                usage  => "-i id -s <ENQUEUED|PROCESSING|SUCCESS|FAIL>",
+                optstr => 'i:s:',
+        },
         "getPortLastBuiltVersion" => {
                 func => \&getPortLastBuiltVersion,
                 help =>
@@ -321,8 +342,8 @@ require "tinderlib.pl";
                 func => \&sendBuildCompletionMail,
                 help =>
                     "Send email to the build interest list when a build completes",
-                usage  => "-b <build name>",
-                optstr => 'b:',
+                usage  => "-b <build name> [-u <user>]",
+                optstr => 'b:u:',
         },
         "addBuildUser" => {
                 func   => \&addBuildUser,
@@ -880,6 +901,7 @@ sub addBuildPortsQueueEntry {
 
 sub listBuildPortsQueue {
         my $raw;
+        my $status   = $opts->{'s'};
         my $hostname = `hostname`;
         chomp($hostname);
 
@@ -897,7 +919,7 @@ sub listBuildPortsQueue {
 
         my $host = $ds->getHostByName($hostname);
 
-        my @buildportsqueue = $ds->getBuildPortsQueueByHost($host);
+        my @buildportsqueue = $ds->getBuildPortsQueueByHost($host, $status);
 
         if (@buildportsqueue) {
                 if ($raw ne 1) {
@@ -914,8 +936,11 @@ sub listBuildPortsQueue {
                                     $ds->getBuildById($buildport->getBuildId());
                                 if ($raw eq 1) {
                                         print $buildport->getId() . ":"
+                                            . $buildport->getUserId() . ":"
                                             . $build->getName() . ":"
                                             . $buildport->getPortDirectory()
+                                            . ":"
+                                            . $buildport->getEmailOnCompletion()
                                             . "\n";
                                 } else {
                                         printf(
@@ -1074,6 +1099,56 @@ sub getPortsUpdateCmd {
         }
 
         print $update_cmd . "\n";
+}
+
+sub reorgBuildPortsQueue {
+
+        my $hostname = `hostname`;
+        chomp($hostname);
+        if ($opts->{'h'}) {
+                $hostname = $opts->{'h'};
+        }
+
+        if (!$ds->isValidHost($hostname)) {
+                cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
+        }
+
+        my $host = $ds->getHostByName($hostname);
+
+        my $rc = $ds->reorgBuildPortsQueue($host);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to reorganize BuildPortsQueue for host "
+                            . $host->getName() . ": "
+                            . $ds->getError()
+                            . "\n");
+        }
+}
+
+sub updateBuildPortsQueueEntryStatus {
+
+        if (!$opts->{'i'} || !$opts->{'s'}) {
+                usage("updateBuildPortsQueueEntryStatus");
+        }
+
+        if (!$ds->isValidBuildPortsQueueId($opts->{'i'})) {
+                cleanup($ds, 1,
+                              "Unknown Build Ports Queue Entry, "
+                            . $opts->{'i'}
+                            . "\n");
+        }
+
+        my $rc =
+            $ds->updateBuildPortsQueueEntryStatus($opts->{'i'}, $opts->{'s'});
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to update BuildPortsQueueEntryStatus "
+                            . $opts->{'i'} . ": "
+                            . $ds->getError()
+                            . "\n");
+        }
 }
 
 sub rmBuildPortsQueue {
@@ -1478,6 +1553,29 @@ sub updatePortsTree {
         }
 }
 
+sub updateBuildPortsQueueEntryCompletionDate {
+        if (!$opts->{'i'}) {
+                usage("updateBuildPortsQueueEntryCompletionDate");
+        }
+
+        if (!$ds->isValidBuildPortsQueueId($opts->{'i'})) {
+                cleanup($ds, 1,
+                        "Unknown BuildPortsQueueEntry, " . $opts->{'i'} . "\n");
+        }
+
+        my $buildportsqueue = $ds->getBuildPortsQueueById($opts->{'i'});
+
+        $buildportsqueue->setCompletionDate($opts->{'l'});
+
+        $ds->updateBuildPortsQueueEntryCompletionDate($buildportsqueue)
+            or cleanup(
+                $ds,
+                1,
+                "Failed to update completion time value in the datastore: "
+                    . $ds->getError() . "\n"
+            );
+}
+
 sub updateJailLastBuilt {
         if (!$opts->{'j'}) {
                 usage("updateJailLastBuilt");
@@ -1799,6 +1897,7 @@ EOD
 }
 
 sub sendBuildCompletionMail {
+        my @users;
         if (!$opts->{'b'}) {
                 usage("sendBuildCompletionMail");
         }
@@ -1820,7 +1919,12 @@ ${SERVER_PROTOCOL}://${SERVER_HOST}${SHOWBUILD_URI}?name=$buildname
 
 Please do not reply to this email.
 EOD
-        my @users = $ds->getBuildCompletionUsers($build);
+
+        if ($opts->{'u'}) {
+                push @users, $ds->getUserById($opts->{'u'});
+        } else {
+                @users = $ds->getBuildCompletionUsers($build);
+        }
 
         if (scalar(@users)) {
 

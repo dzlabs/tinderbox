@@ -15,17 +15,28 @@ TINDERD_SLEEPTIME=${TINDERD_SLEEPTIME:=120}
 main_loop() {
 	while true ; do
     		trap "" 1
-		ENTRY=$(${pb}/scripts/tc listBuildPortsQueue -r 2>/dev/null | head -1)
-		ID=${ENTRY%:*}
-		BUILD=${ENTRY#*:}
-		BUILD=${BUILD%:*}
-		PORT=${ENTRY##*:}
+		ENTRY=$(${pb}/scripts/tc listBuildPortsQueue -s ENQUEUED -r 2>/dev/null | head -1)
+		ID=$(echo ${ENTRY} | cut -d: -f1)
+		USER=$(echo ${ENTRY} | cut -d: -f2)
+		BUILD=$(echo ${ENTRY} | cut -d: -f3)
+		PORT=$(echo ${ENTRY} | cut -d: -f4)
+		MAIL=$(echo ${ENTRY} | cut -d: -f5)
 
 		if [ -n "${BUILD}" -a -n "${PORT}" -a -n "${ID}" ] ; then
 			echo "Going to build ${PORT} on ${BUILD}"
-			${pb}/scripts/tc addPort -b ${BUILD} -d ${PORT} -r
-			${pb}/scripts/tinderbuild -b ${BUILD} ${TINDERBUILD_ARGS} ${PORT} >/dev/null
-			${pb}/scripts/tc rmBuildPortsQueueEntry -i ${ID}
+			${pb}/scripts/tc updateBuildPortsQueueEntryStatus -i "${ID}" -s PROCESSING
+			${pb}/scripts/tc addPort -b "${BUILD}" -d "${PORT}" -r
+			if ${pb}/scripts/tinderbuild -b "${BUILD}" ${TINDERBUILD_ARGS} "${PORT}" >/dev/null ; then
+				${pb}/scripts/tc updateBuildPortsQueueEntryStatus -i "${ID}" -s SUCCESS
+			else
+				${pb}/scripts/tc updateBuildPortsQueueEntryStatus -i "${ID}" -s FAIL
+			fi
+			${pb}/scripts/tc updateBuildPortsQueueEntryCompletionDate -i "${ID}"
+			if [ "${MAIL}" = "1" ] ; then
+				${pb}/scripts/tc sendBuildCompletionMail -b "${BUILD}" -u ${USER}"
+			fi
+				
+			${pb}/scripts/tc reorgBuildPortsQueue
 		else
 			echo "INFO: Nothing to do. Sleeping ${TINDERD_SLEEPTIME} seconds."
 			trap main_loop 1
