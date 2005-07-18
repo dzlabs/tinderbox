@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/makemake,v 1.31 2005/07/17 23:33:39 marcus Exp $
+# $MCom: portstools/tinderbox/lib/makemake,v 1.32 2005/07/18 13:53:28 marcus Exp $
 #
 
 # Handle being called from a directory other than where things
@@ -81,7 +81,7 @@ if (scalar(@ARGV) < 1) {
         cleanup($ds, 1, undef);
 }
 
-my $opts;
+my $opts = {};
 getopts('n', $opts);
 my $noduds = $opts->{'n'} ? 1 : 0;
 
