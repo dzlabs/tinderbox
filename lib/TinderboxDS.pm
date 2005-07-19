@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.36 2005/07/18 13:22:57 oliver Exp $
+# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.37 2005/07/19 04:04:36 marcus Exp $
 #
 
 package TinderboxDS;
@@ -106,20 +106,43 @@ sub getDSVersion {
         return $version;
 }
 
+sub defaultConfig {
+        my $self      = shift;
+        my $configlet = shift;
+        my $host      = shift;
+        croak "ERROR: Argument 2 not of type Host\n" if (ref($host) ne "Host");
+
+        my $rc = $self->_doQuery(
+                "DELETE FROM config WHERE Config_Option_Name LIKE ? AND Host_Id=?",
+                [$configlet . '%', $host->getId()]
+        );
+
+        return $rc;
+}
+
 sub getConfig {
         my $self      = shift;
         my $configlet = shift;
-        my @config    = ();
+        my $host      = shift;
+        croak "ERROR: Argument 2 not of type Host\n"
+            if (defined($host) && ref($host) ne "Host");
+        my @config = ();
+        my $hostid;
+
+        if (defined($host)) {
+                $hostid = $host->getHostId();
+        } else {
+                $hostid = -1;
+        }
 
         if (defined($configlet)) {
                 $configlet = uc $configlet;
                 $configlet .= '_%';
 
-                @config =
-                    $self->getObjects("TBConfig",
-                        {Config_Option_Name => $configlet});
+                @config = $self->getObjects("TBConfig",
+                        {Config_Option_Name => $configlet, Host_Id => $hostid});
         } else {
-                @config = $self->getObjects("TBConfig");
+                @config = $self->getObjects("TBConfig", {Host_Id => $hostid});
         }
 
         return @config;
@@ -128,19 +151,41 @@ sub getConfig {
 sub updateConfig {
         my $self      = shift;
         my $configlet = shift;
-        my @config    = @_;
+        my $host      = shift;
+        croak "Argument 2 not of type Host\n"
+            if (defined($host) && ref($host) ne "Host");
+        my @config = @_;
+        my $hostid;
+
+        $configlet = uc $configlet;
+        $configlet .= '_';
+
+        if (defined($host)) {
+                $self->defaultConfig($configlet, $host);
+                $hostid = $host->getHostId();
+        } else {
+                $hostid = -1;
+        }
 
         foreach my $conf (@config) {
-                my $oname  = uc($configlet . '_' . $conf->getOptionName());
+                my $oname  = uc($configlet . $conf->getOptionName());
                 my $ovalue = $conf->getOptionValue();
+                my $rc;
                 if (!defined($ovalue)) {
                         $ovalue = "";
                 }
 
-                my $rc = $self->_doQuery(
-                        "UPDATE config SET Config_Option_Value=? WHERE Config_Option_Name=?",
-                        [$ovalue, $oname]
-                );
+                if ($hostid > -1) {
+                        $conf->setOptionName($oname);
+                        $conf->setOptionValue($ovalue);
+                        $conf->setHostId($hostid);
+                        $rc = $self->_addObject($conf);
+                } else {
+                        $rc = $self->_doQuery(
+                                "UPDATE config SET Config_Option_Value=? WHERE Config_Option_Name=?",
+                                [$ovalue, $oname]
+                        );
+                }
 
                 if (!$rc) {
                         return $rc;

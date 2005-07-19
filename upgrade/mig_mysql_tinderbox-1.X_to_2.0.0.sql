@@ -1,12 +1,5 @@
 SET FOREIGN_KEY_CHECKS=0;
 
-DROP TABLE IF EXISTS config;
-CREATE TABLE config (
-  Config_Option_Name varchar(255) NOT NULL,
-  Config_Option_Value text,
-  PRIMARY KEY (Config_Option_Name)
-) TYPE=INNODB;
-
 DROP TABLE IF EXISTS user_permissions;
 CREATE TABLE IF NOT EXISTS user_permissions (
   User_Id int(11) NOT NULL,
@@ -27,6 +20,18 @@ CREATE TABLE hosts (
   Host_Name varchar(255) NOT NULL,
   PRIMARY KEY (Host_Id),
   KEY Host_Name (Host_Name)
+) TYPE=INNODB;
+
+DROP TABLE IF EXISTS config;
+CREATE TABLE config (
+  Config_Option_Name varchar(255) NOT NULL,
+  Config_Option_Value text,
+  Config_Option_Host int NOT NULL DEFAULT -1,
+  PRIMARY KEY (Config_Option_Name, Host_Id),
+  INDEX (Config_Option_Host),
+  FOREIGN KEY (Config_Option_Host)
+    REFERENCES hosts(Host_Id)
+    ON UPDATE CASCADE ON DELETE RESTRICT
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS build_ports_queue;
@@ -65,14 +70,16 @@ ALTER TABLE jails
 ALTER TABLE ports_trees
   ADD Ports_Tree_Ports_Mount text;
 
-INSERT INTO config VALUES ('__DSVERSION__', '2.0.0') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
-INSERT INTO config VALUES ('CCACHE_ENABLED', '0') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
-INSERT INTO config VALUES ('CCACHE_DIR', '') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
-INSERT INTO config VALUES ('CCACHE_NOLINK', '1') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
-INSERT INTO config VALUES ('CCACHE_MAX_SIZE', '1G') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
-INSERT INTO config VALUES ('CCACHE_JAIL', '0') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
-INSERT INTO config VALUES ('CCACHE_LOGFILE', '') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
-INSERT INTO config VALUES ('DISTFILE_CACHE', '') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
-INSERT INTO config VALUES ('TINDERD_SLEEPTIME', '120') ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO hosts VALUES (-1, '__ALL__') ON DUPLICATE KEY UPDATE Host_Name=VALUES(Host_Name)
+
+INSERT INTO config VALUES ('__DSVERSION__', '2.0.0', -1) ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO config VALUES ('CCACHE_ENABLED', '0', -1) ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO config VALUES ('CCACHE_DIR', '', -1) ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO config VALUES ('CCACHE_NOLINK', '1', -1) ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO config VALUES ('CCACHE_MAX_SIZE', '1G', -1) ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO config VALUES ('CCACHE_JAIL', '0', -1) ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO config VALUES ('CCACHE_LOGFILE', '', -1) ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO config VALUES ('DISTFILE_CACHE', '', -1) ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
+INSERT INTO config VALUES ('TINDERD_SLEEPTIME', '120', -1) ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
 
 SET FOREIGN_KEY_CHECKS=1;

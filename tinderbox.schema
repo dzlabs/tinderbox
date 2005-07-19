@@ -1,12 +1,5 @@
 SET FOREIGN_KEY_CHECKS=0;
 
-DROP TABLE IF EXISTS config;
-CREATE TABLE config (
-  Config_Option_Name varchar(255) NOT NULL,
-  Config_Option_Value text,
-  PRIMARY KEY (Config_Option_Name)
-) TYPE=INNODB;
-
 DROP TABLE IF EXISTS ports;
 CREATE TABLE ports (
   Port_Id int NOT NULL auto_increment,
@@ -141,6 +134,18 @@ CREATE TABLE hosts (
   KEY Host_Name (Host_Name)
 ) TYPE=INNODB;
 
+DROP TABLE IF EXISTS config;
+CREATE TABLE config (
+  Config_Option_Name varchar(255) NOT NULL,
+  Config_Option_Value text,
+  Config_Option_Host int NOT NULL DEFAULT -1,
+  PRIMARY KEY (Config_Option_Name, Host_Id),
+  INDEX (Config_Option_Host),
+  FOREIGN KEY (Config_Option_Host)
+    REFERENCES hosts(Host_Id)
+    ON UPDATE CASCADE ON DELETE RESTRICT
+) TYPE=INNODB;
+
 DROP TABLE IF EXISTS build_ports_queue;
 CREATE TABLE build_ports_queue (
   Build_Ports_Queue_Id int(11) NOT NULL auto_increment,
@@ -164,19 +169,22 @@ CREATE TABLE build_ports_queue (
     ON UPDATE CASCADE
 ) TYPE=INNODB;
 
+INSERT INTO hosts VALUES (-1, '__ALL__');
+
 ##
 # Supported config commands.  If any new commands are added here,
 # __DSVERSION__ must be bumped.  Use micro version bumps for new config
 # commands, and minor version bumps for schema changes.
 ##
-INSERT INTO config VALUES ('__DSVERSION__', '2.0.0');
-INSERT INTO config VALUES ('CCACHE_ENABLED', '0');
-INSERT INTO config VALUES ('CCACHE_DIR', '');
-INSERT INTO config VALUES ('CCACHE_NOLINK', '1');
-INSERT INTO config VALUES ('CCACHE_MAX_SIZE', '1G');
-INSERT INTO config VALUES ('CCACHE_JAIL', '0');
-INSERT INTO config VALUES ('CCACHE_LOGFILE', '');
-INSERT INTO config VALUES ('DISTFILE_CACHE', '');
-INSERT INTO config VALUES ('TINDERD_SLEEPTIME', '120');
+INSERT INTO config VALUES ('__DSVERSION__', '2.0.0', -1);
+INSERT INTO config VALUES ('CCACHE_ENABLED', '0', -1);
+INSERT INTO config VALUES ('CCACHE_DIR', '', -1);
+INSERT INTO config VALUES ('CCACHE_NOLINK', '1', -1);
+INSERT INTO config VALUES ('CCACHE_MAX_SIZE', '1G', -1);
+INSERT INTO config VALUES ('CCACHE_JAIL', '0', -1);
+INSERT INTO config VALUES ('CCACHE_LOGFILE', '', -1);
+INSERT INTO config VALUES ('DISTFILE_CACHE', '', -1);
+INSERT INTO config VALUES ('TINDERD_SLEEPTIME', '120', -1);
+
 
 SET FOREIGN_KEY_CHECKS=1;

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.54 2005/07/18 13:22:57 oliver Exp $
+# $MCom: portstools/tinderbox/tc,v 1.55 2005/07/19 04:04:36 marcus Exp $
 #
 
 BEGIN {
@@ -87,21 +87,23 @@ require "tinderlib.pl";
                 func  => \&configCcache,
                 help  => "Configure Tinderbox ccache parameters",
                 usage =>
-                    "[-d | -e] [-c <cache mount src>] [-s <max cache size>] [-j | -J] [-l <debug logfile> | -L]",
-                optstr => 'dec:s:l:LjJ',
+                    "[-d | -e] [-c <cache mount src>] [-s <max cache size>] [-j | -J] [-l <debug logfile> | -L] [-h <host name>] | -G -h <host name>",
+                optstr => 'dec:s:l:LjJh:G',
         },
         "configDistfile" => {
-                func   => \&configDistfile,
-                help   => "Configure Tinderbox distfile parameters",
-                usage  => "[-c <distfile cache mount src> | -C]",
-                optstr => 'c:C',
+                func  => \&configDistfile,
+                help  => "Configure Tinderbox distfile parameters",
+                usage =>
+                    "[-c <distfile cache mount src> | -C] [-h <host name> | -G -h <host name>",
+                optstr => 'c:Ch:G',
         },
         "configTinderd" => {
                 func => \&configTinderd,
                 help =>
                     "Configure Tinderbox tinder daemon (tinderd) parameters",
-                usage  => "[-t <sleep time>]",
-                optstr => 't:',
+                usage =>
+                    "[-t <sleep time>] [-h <host name>] | -G -h <host name>",
+                optstr => 't:h:G',
         },
         "listJails" => {
                 func  => \&listJails,
@@ -462,17 +464,35 @@ sub dsversion {
                     . $ds->getError()
                     . "\n");
 
-        print $version, "\n";
+        print $version . "\n";
+}
+
+sub _configGetHost {
+        my $hostname = shift;
+        my $host;
+
+        if ($hostname) {
+                if (!$ds->isValidHost($hostname)) {
+                        cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
+                }
+                $host = $ds->getHostByName($hostname);
+        } else {
+                $host = undef;
+        }
+
+        return $host;
 }
 
 sub configGet {
         my $configlet = undef;
+        my $host      = undef;
 
         if (scalar(@_)) {
                 $configlet = shift;
+                $host      = shift;
         }
 
-        my @config = $ds->getConfig($configlet);
+        my @config = $ds->getConfig($configlet, $host);
 
         if (@config) {
                 map {
@@ -494,16 +514,28 @@ sub configGet {
 sub configCcache {
         my @config = ();
         my ($enabled, $logfile, $jail);
+        my $host;
 
         if (       ($opts->{'d'} && $opts->{'e'})
                 || ($opts->{'l'} && $opts->{'L'})
-                || ($opts->{'j'} && $opts - {'J'}))
+                || ($opts->{'j'} && $opts->{'J'}))
         {
                 usage("configCcache");
         }
 
+        if ($opts->{'G'} && !$opts->{'h'}) {
+                usage("configCcache");
+        }
+
+        $host = _configGetHost($opts->{'h'});
+
         if (scalar(keys %{$opts}) == 0) {
-                configGet("ccache");
+                configGet("ccache", $host);
+                cleanup($ds, 0, undef);
+        }
+
+        if ($opts->{'G'}) {
+                $ds->defaultConfig("ccache", $host);
                 cleanup($ds, 0, undef);
         }
 
@@ -564,7 +596,7 @@ sub configCcache {
                 push @config, $logfile;
         }
 
-        $ds->updateConfig("ccache", @config)
+        $ds->updateConfig("ccache", @config, $host)
             or cleanup($ds, 1,
                       "Failed to update ccache configuration: "
                     . $ds->getError()
@@ -574,13 +606,25 @@ sub configCcache {
 sub configDistfile {
         my @config = ();
         my $cache;
+        my $host;
 
         if ($opts->{'c'} && $opts->{'C'}) {
                 usage("configDistfile");
         }
 
+        if ($opts->{'G'} && !$opts->{'h'}) {
+                usage("configDistfile");
+        }
+
+        $host = _configGetHost($opts->{'h'});
+
         if (scalar(keys %{$opts}) == 0) {
-                configGet("distfile");
+                configGet("distfile", $host);
+                cleanup($ds, 0, undef);
+        }
+
+        if ($opts->{'G'}) {
+                $ds->defaultConfig("distfile", $host);
                 cleanup($ds, 0, undef);
         }
 
@@ -597,7 +641,7 @@ sub configDistfile {
                 push @config, $cache;
         }
 
-        $ds->updateConfig("distfile", @config)
+        $ds->updateConfig("distfile", @config, $host)
             or cleanup($ds, 1,
                       "Failed to update distfile configuration: "
                     . $ds->getError()
@@ -607,9 +651,21 @@ sub configDistfile {
 sub configTinderd {
         my @config = ();
         my $sleeptime;
+        my $host;
+
+        if ($opts->{'G'} && !$opts->{'h'}) {
+                usage("configTinderd");
+        }
+
+        $host = _configGetHost($opts->{'h'});
 
         if (scalar(keys %{$opts}) == 0) {
-                configGet("tinderd");
+                configGet("tinderd", $host);
+                cleanup($ds, 0, undef);
+        }
+
+        if ($opts->{'G'}) {
+                $ds->defaultConfig("tinderd", $host);
                 cleanup($ds, 0, undef);
         }
 
@@ -621,7 +677,7 @@ sub configTinderd {
                 push @config, $sleeptime;
         }
 
-        $ds->updateConfig("tinderd", @config)
+        $ds->updateConfig("tinderd", @config, $host)
             or cleanup($ds, 1,
                       "Failed to update tinderd configuration: "
                     . $ds->getError()

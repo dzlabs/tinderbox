@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TBConfig.pm,v 1.1 2005/07/17 23:09:07 marcus Exp $
+# $MCom: portstools/tinderbox/lib/TBConfig.pm,v 1.2 2005/07/19 04:04:36 marcus Exp $
 #
 
 package TBConfig;
@@ -38,6 +38,7 @@ sub new {
         my $object_hash = {
                 Config_Option_Name  => "",
                 Config_Option_Value => "",
+                Host_Id             => "",
         };
 
         my @args = ();
@@ -58,6 +59,12 @@ sub getOptionValue {
         return $self->{Config_Option_Value};
 }
 
+sub getHostId {
+        my $self = shift;
+
+        return $self->{Host_Id};
+}
+
 sub setOptionName {
         my $self = shift;
         my $name = shift;
@@ -70,6 +77,13 @@ sub setOptionValue {
         my $value = shift;
 
         $self->{Config_Option_Value} = $value;
+}
+
+sub setHostId {
+        my $self   = shift;
+        my $hostid = shift;
+
+        $self->{Host_Id} = $hostid;
 }
 
 1;
