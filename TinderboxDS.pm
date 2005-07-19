@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/TinderboxDS.pm,v 1.42 2005/07/19 17:15:32 marcus Exp $
+# $MCom: portstools/tinderbox/TinderboxDS.pm,v 1.43 2005/07/19 18:11:15 oliver Exp $
 #
 
 package TinderboxDS;
@@ -126,8 +126,11 @@ sub getConfig {
         my $host      = shift;
         croak "ERROR: Argument 2 not of type Host\n"
             if (defined($host) && ref($host) ne "Host");
+        my $merged = shift;
+
         my @config = ();
         my $hostid;
+        my $fallbackhostid;
         my @results;
         my $rc;
 
@@ -137,29 +140,29 @@ sub getConfig {
                 $hostid = -1;
         }
 
+        if ($merged eq 1) {
+                $fallbackhostid = -1
+        } else {
+                $fallbackhostid = $hostid
+        }
+
         if (defined($configlet)) {
                 $configlet = uc $configlet;
                 $configlet .= '_%';
-
-                @config = $self->getObjects(
-                        "TBConfig",
-                        {
-                                Config_Option_Name => $configlet,
-                                Host_Id            => $hostid
-                        }
-                );
         } else {
-                $rc =
-                    $self->_doQueryHashRef(
-                        "SELECT * FROM config WHERE Config_Option_Name NOT IN (SELECT Config_Option_Name FROM config WHERE Host_Id=?) AND Host_Id=-1 OR Host_Id=?",
-                        \@results, $hostid, $hostid);
-
-                if (!$rc) {
-                        return undef;
-                }
-
-                @config = $self->_newFromArray("TBConfig", @results);
+                $configlet = '%';
         }
+
+        $rc =
+            $self->_doQueryHashRef(
+                "SELECT * FROM config WHERE (Config_Option_Name NOT IN (SELECT Config_Option_Name FROM config WHERE Host_Id=?) AND Host_Id=? OR Host_Id=?) AND Config_Option_Name LIKE ?",
+                \@results, $hostid, $fallbackhostid, $hostid, $configlet);
+
+        if (!$rc) {
+                return undef;
+        }
+
+        @config = $self->_newFromArray("TBConfig", @results);
 
         return @config;
 }
@@ -187,17 +190,10 @@ sub updateConfig {
                         $ovalue = "";
                 }
 
-                if ($hostid > -1) {
-                        $rc = $self->_doQuery(
-                                "INSERT INTO config VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE Config_Option_Value=?",
-                                [$oname, $ovalue, $hostid, $ovalue]
-                        );
-                } else {
-                        $rc = $self->_doQuery(
-                                "UPDATE config SET Config_Option_Value=? WHERE Config_Option_Name=?",
-                                [$ovalue, $oname]
-                        );
-                }
+                $rc = $self->_doQuery(
+                        "INSERT INTO config VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE Config_Option_Value=?",
+                        [$oname, $ovalue, $hostid, $ovalue]
+                );
 
                 if (!$rc) {
                         return $rc;

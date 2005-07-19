@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.56 2005/07/19 10:00:32 oliver Exp $
+# $MCom: portstools/tinderbox/tc,v 1.57 2005/07/19 18:11:15 oliver Exp $
 #
 
 BEGIN {
@@ -79,22 +79,23 @@ require "tinderlib.pl";
                 usage => "",
         },
         "configGet" => {
-                func  => \&configGet,
-                help  => "Print current Tinderbox configuration",
-                usage => "",
+                func   => \&configGet,
+                help   => "Print current Tinderbox configuration",
+                usage  => "[-G | -h <host name>]",
+                optstr => 'h:G',
         },
         "configCcache" => {
                 func  => \&configCcache,
                 help  => "Configure Tinderbox ccache parameters",
                 usage =>
-                    "[-d | -e] [-c <cache mount src>] [-s <max cache size>] [-j | -J] [-l <debug logfile> | -L] [-h <host name>] | -G -h <host name>",
+                    "[-d | -e] [-c <cache mount src>] [-s <max cache size>] [-j | -J] [-l <debug logfile> | -L] [-h <host name> | -G] | -G -h <host name>",
                 optstr => 'dec:s:l:LjJh:G',
         },
         "configDistfile" => {
                 func  => \&configDistfile,
                 help  => "Configure Tinderbox distfile parameters",
                 usage =>
-                    "[-c <distfile cache mount src> | -C] [-h <host name> | -G -h <host name>",
+                    "[-c <distfile cache mount src> | -C] [-h <host name> | -G] | -G -h <host name>",
                 optstr => 'c:Ch:G',
         },
         "configTinderd" => {
@@ -486,6 +487,7 @@ sub _configGetHost {
 sub configGet {
         my $configlet = undef;
         my $host      = undef;
+        my $merged    = 1;
         my $hostname;
 
         if (scalar(@_)) {
@@ -493,15 +495,25 @@ sub configGet {
                 $host      = shift;
         }
 
-        if (!$configlet && !$host) {
-                $hostname = `hostname`;
-                chomp($hostname);
-                if ($ds->isValidHost($hostname)) {
-                        $host = $ds->getHostByName($hostname);
+        if (!$host) {
+                if ($opts->{'h'}) {
+                        $host = _configGetHost($opts->{'h'});
+                } elsif ($opts->{'G'}) {
+                        $host = undef;
+                } else {
+                        $hostname = `hostname`;
+                        chomp($hostname);
+                        if ($ds->isValidHost($hostname)) {
+                                $host = $ds->getHostByName($hostname);
+                        }
                 }
         }
 
-        my @config = $ds->getConfig($configlet, $host);
+        if ($opts->{'G'} || $opts->{'h'}) {
+                $merged = undef;
+        }
+
+        my @config = $ds->getConfig($configlet, $host, $merged);
 
         if (@config) {
                 map {
@@ -532,20 +544,17 @@ sub configCcache {
                 usage("configCcache");
         }
 
-        if ($opts->{'G'} && !$opts->{'h'}) {
-                usage("configCcache");
-        }
-
         $host = _configGetHost($opts->{'h'});
 
         if (scalar(keys %{$opts}) == 0
-                || (scalar(keys %{$opts}) == 1 && $opts->{'h'}))
+                || (scalar(keys %{$opts}) == 1 && ($opts->{'h'} ^ $opts->{'G'}))
+            )
         {
                 configGet("ccache", $host);
                 cleanup($ds, 0, undef);
         }
 
-        if ($opts->{'G'}) {
+        if ($opts->{'G'} && $host) {
                 $ds->defaultConfig("ccache", $host);
                 cleanup($ds, 0, undef);
         }
@@ -623,20 +632,17 @@ sub configDistfile {
                 usage("configDistfile");
         }
 
-        if ($opts->{'G'} && !$opts->{'h'}) {
-                usage("configDistfile");
-        }
-
         $host = _configGetHost($opts->{'h'});
 
         if (scalar(keys %{$opts}) == 0
-                || (scalar(keys %{$opts}) == 1 && $opts->{'h'}))
+                || (scalar(keys %{$opts}) == 1 && ($opts->{'h'} ^ $opts->{'G'}))
+            )
         {
                 configGet("distfile", $host);
                 cleanup($ds, 0, undef);
         }
 
-        if ($opts->{'G'}) {
+        if ($opts->{'G'} && $host) {
                 $ds->defaultConfig("distfile", $host);
                 cleanup($ds, 0, undef);
         }
@@ -666,18 +672,17 @@ sub configTinderd {
         my $sleeptime;
         my $host;
 
-        if ($opts->{'G'} && !$opts->{'h'}) {
-                usage("configTinderd");
-        }
-
         $host = _configGetHost($opts->{'h'});
 
-        if (scalar(keys %{$opts}) == 0) {
+        if (scalar(keys %{$opts}) == 0
+                || (scalar(keys %{$opts}) == 1 && ($opts->{'h'} ^ $opts->{'G'}))
+            )
+        {
                 configGet("tinderd", $host);
                 cleanup($ds, 0, undef);
         }
 
-        if ($opts->{'G'}) {
+        if ($opts->{'G'} && $host) {
                 $ds->defaultConfig("tinderd", $host);
                 cleanup($ds, 0, undef);
         }
