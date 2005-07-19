@@ -9,9 +9,15 @@ $SERVER_HOST     = 'www.marcuscom.com';
 $TINDERBOX_URI           = '/tinderbox';
 $TINDERBOX_DATA_URI      = '/tb';
 $TINDERBOX_DATA_URI_SUFX = '';
-$SHOWBUILD_URI           = $TINDERBOX_URI . '/showbuild.php';
-$SHOWPORT_URI            = $TINDERBOX_URI . '/showport.php';
 $LOG_URI                 = $TINDERBOX_DATA_URI . '/logs' . $TINDERBOX_DATA_URI_SUFX;
+
+# for www:
+$SHOWBUILD_URI           = $TINDERBOX_URI . '/showbuild.php?name=';
+$SHOWPORT_URI            = $TINDERBOX_URI . '/showport.php?id=';
+
+# for www-exp:
+#$SHOWBUILD_URI           = $TINDERBOX_URI . '/index.php?action=list_buildports&build=';
+#$SHOWPORT_URI            = $TINDERBOX_URI . '/index.php?action=describe_port&id=';
 
 $ERROR_DIR      = $BUILD_ROOT . '/errors';
 $LOG_DIR        = $BUILD_ROOT . '/logs';

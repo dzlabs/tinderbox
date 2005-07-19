@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.57 2005/07/19 18:11:15 oliver Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.58 2005/07/19 22:08:04 oliver Exp $
 #
 
 BEGIN {
@@ -2007,7 +2007,7 @@ EOD
                 $data .= <<EOD;
 More details can be found at:
 
-${SERVER_PROTOCOL}://${SERVER_HOST}${SHOWPORT_URI}?id=$portid
+${SERVER_PROTOCOL}://${SERVER_HOST}${SHOWPORT_URI}$portid
 
 EOD
         }
@@ -2053,7 +2053,7 @@ sub sendBuildCompletionMail {
         my $data    = <<EOD;
 Build $buildname completed on $now.  Details can be found at:
 
-${SERVER_PROTOCOL}://${SERVER_HOST}${SHOWBUILD_URI}?name=$buildname
+${SERVER_PROTOCOL}://${SERVER_HOST}${SHOWBUILD_URI}$buildname
 
 Please do not reply to this email.
 EOD
