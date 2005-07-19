@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.37 2005/07/19 04:04:36 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.38 2005/07/19 07:08:54 marcus Exp $
 #
 
 package TinderboxDS;
@@ -157,18 +157,14 @@ sub updateConfig {
         my @config = @_;
         my $hostid;
 
-        $configlet = uc $configlet;
-        $configlet .= '_';
-
         if (defined($host)) {
-                $self->defaultConfig($configlet, $host);
                 $hostid = $host->getHostId();
         } else {
                 $hostid = -1;
         }
 
         foreach my $conf (@config) {
-                my $oname  = uc($configlet . $conf->getOptionName());
+                my $oname  = uc($configlet . '_' . $conf->getOptionName());
                 my $ovalue = $conf->getOptionValue();
                 my $rc;
                 if (!defined($ovalue)) {
@@ -176,10 +172,10 @@ sub updateConfig {
                 }
 
                 if ($hostid > -1) {
-                        $conf->setOptionName($oname);
-                        $conf->setOptionValue($ovalue);
-                        $conf->setHostId($hostid);
-                        $rc = $self->_addObject($conf);
+                        $rc = $self->_doQuery(
+                                "INSERT INTO config VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE Config_Option_Value=?",
+                                [$oname, $ovalue, $hostid, $ovalue]
+                        );
                 } else {
                         $rc = $self->_doQuery(
                                 "UPDATE config SET Config_Option_Value=? WHERE Config_Option_Name=?",
