@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.1 2005/07/19 06:58:12 marcus Exp $
+# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.2 2005/07/19 18:50:14 marcus Exp $
 #
 
 pb=$0
@@ -86,13 +86,15 @@ mig_db() {
 
     if [ -f "${pb}/upgrade/mig_tinderbox-${dbversion}_to_${version}.sql" ]; then
 	echo "INFO: Migrating database schema from ${dbversion} to ${version} ..."
-	rc=$(load_schema "${pb}/upgrade/mig_tinderbox-${dbversion}_to_${version}.sql")
+	rc=$(load_schema "${pb}/upgrade/mig_tinderbox-${dbversion}_to_${version}.sql" "" "")
 	if [ ${rc} != 0 ]; then
 	    echo "ERROR: Failed to load upgrade database schema."
-	    return 1
+	    return 2
 	fi
 
 	echo "DONE."
+    else
+	return 1
     fi
 
     return 0
