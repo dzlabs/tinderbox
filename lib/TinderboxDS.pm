@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.41 2005/07/19 10:00:32 oliver Exp $
+# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.42 2005/07/19 17:15:32 marcus Exp $
 #
 
 package TinderboxDS;
@@ -113,7 +113,7 @@ sub defaultConfig {
         croak "ERROR: Argument 2 not of type Host\n" if (ref($host) ne "Host");
 
         my $rc = $self->_doQuery(
-                "DELETE FROM config WHERE Config_Option_Name LIKE ? AND Config_Option_Host=?",
+                "DELETE FROM config WHERE Config_Option_Name LIKE ? AND Host_Id=?",
                 [$configlet . '%', $host->getId()]
         );
 
@@ -145,13 +145,13 @@ sub getConfig {
                         "TBConfig",
                         {
                                 Config_Option_Name => $configlet,
-                                Config_Option_Host => $hostid
+                                Host_Id            => $hostid
                         }
                 );
         } else {
                 $rc =
                     $self->_doQueryHashRef(
-                        "SELECT * FROM config WHERE Config_Option_Name NOT IN (SELECT Config_Option_Name FROM config WHERE Config_Option_Host=?) AND Config_Option_Host=-1 OR Config_Option_Host=?",
+                        "SELECT * FROM config WHERE Config_Option_Name NOT IN (SELECT Config_Option_Name FROM config WHERE Host_Id=?) AND Host_Id=-1 OR Host_Id=?",
                         \@results, $hostid, $hostid);
 
                 if (!$rc) {
