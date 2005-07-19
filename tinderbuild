@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tinderbuild,v 1.31 2005/07/10 07:25:59 oliver Exp $
+# $MCom: portstools/tinderbox/tinderbuild,v 1.32 2005/07/19 19:16:44 oliver Exp $
 #
 
 
@@ -51,7 +51,6 @@ usage () {
     echo "usage: $0 -b <build name> [-init] [-cleanpackages] [-updateports] [-skipmake] [-noclean] [-noduds] [-plistcheck] [-nullfs] [-cleandistfiles] [portdir/portname [...]]"
 }
 
-. ${pb}/scripts/buildenv
 . ${pb}/scripts/tinderbox_shlib.sh
 
 _builds=$(${pb}/scripts/tc listBuilds)

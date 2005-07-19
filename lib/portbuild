@@ -76,8 +76,6 @@ shift
 # Default niceness value
 nice=0
 
-. ${pb}/scripts/buildenv
-
 if [ "x$1" = "x-noclean" ]; then
     noclean=1
     shift

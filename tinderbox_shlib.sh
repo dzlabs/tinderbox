@@ -1,3 +1,31 @@
+#-
+# Copyright (c) 2004-2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#	notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#	notice, this list of conditions and the following disclaimer in the
+#	documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# $MCom: portstools/tinderbox/tinderbox_shlib.sh,v 1.11 2005/07/19 19:16:44 oliver Exp $
+#
+
 kill_procs()
 {
 	dir=$1
@@ -40,42 +68,42 @@ cleanup_mounts() {
 
 	while getopts d:b:p:j: OPT ; do
 		case ${OPT} in
-			d)      _destination=${OPTARG}
+			d)	  _destination=${OPTARG}
 				;;
-			b)      _build=${OPTARG}
+			b)	  _build=${OPTARG}
 				;;
-			p)      _portstree=${OPTARG}
+			p)	  _portstree=${OPTARG}
 				;;
-			j)      _jail=${OPTARG}
+			j)	  _jail=${OPTARG}
 				;;
 		esac
 	done
 
 	case ${_destination} in
-                jail)
-                        if [ -z "${_jail}" ] ; then
-                                echo "jail has to be filled!" >&2
+		jail)
+			if [ -z "${_jail}" ] ; then
+				echo "jail has to be filled!" >&2
 				return 1
-                        fi
-                        _destination=${_pb}/jails/${_jail}
-                        ;;
-                portstree)
+			fi
+			_destination=${_pb}/jails/${_jail}
+			;;
+		portstree)
 			if [ -z "${_portstree}" ] ; then
 				echo "portstree has to be filled!" >&2
 				return 1
 			fi
-                        _destination=${_pb}/portstrees/${_portstree}
-                        ;;
-                build)
+			_destination=${_pb}/portstrees/${_portstree}
+			;;
+		build)
 			if [ -z "${_build}" ] ; then
 				echo "build has to be filled!" >&2
 				return 1
 			fi
-                        _destination=${_pb}/${_build}
+			_destination=${_pb}/${_build}
 			if [ "${_ARCH}" = "i386" ] ; then
 				umount -f ${_destination}/compat/linux/proc >/dev/null 2>&1
 			fi
-                        ;;
+			;;
 		distcache)
 			if [ -z "${_build}" ] ; then
 				echo "build has to be filled!" >&2
@@ -83,10 +111,10 @@ cleanup_mounts() {
 			fi
 			_destination=${_pb}/${_build}/distcache
 			;;
-                *)      echo "unknown destination type!"
+		*)	  echo "unknown destination type!"
 			return 1
-                        ;;
-        esac
+			;;
+	esac
 
 	df | grep ' '${_destination}'[/$]' | sed 's|.* ||g' | sort -r | while read mountpoint ; do
 		cleanup_mount ${mountpoint}
@@ -203,11 +231,11 @@ request_mount() {
 	esac
 
 	if [ -z "${_source}" ] ; then
-	    	[ ${_quiet} -ne 1 ] && echo "source has to be filled!" >&2
+			[ ${_quiet} -ne 1 ] && echo "source has to be filled!" >&2
 		return 1
 	fi
 	if [ -z "${_destination}" ] ; then
-	    	echo "destination has to be filled!" >&2
+			echo "destination has to be filled!" >&2
 		return 1
 	fi
 
@@ -268,4 +296,29 @@ request_mount() {
 	mount ${_options} ${_source} ${_destination}
 
 	return ${?}
+}
+
+buildenv () {
+	pb=$1
+	build=$2
+	jail=$3
+	portstree=$4
+
+	major_version=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
+
+	save_IFS=${IFS}
+	IFS='
+'
+	for _tb_var in `cat ${pb}/scripts/rawenv ; ${pb}/scripts/tc configGet`; do
+		var=$(echo ${_tb_var} | sed \
+			-e "s|^#${major_version}||; \
+			    s|##PB##|${pb}|g; \
+			    s|##BUILD##|${build}|g; \
+			    s|##JAIL##|${jail}|g; \
+			    s|##PORTSTREE##|${portstree}|g" \
+			-E -e 's|\^\^([^\^]+)\^\^|${\1}|g')
+		eval "export ${var}" > /dev/null 2>&1
+	done
+
+	IFS=${save_IFS}
 }
