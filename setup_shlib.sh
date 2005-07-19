@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/setup_shlib.sh,v 1.2 2005/07/19 07:00:33 marcus Exp $
+# $MCom: portstools/tinderbox/setup_shlib.sh,v 1.3 2005/07/19 07:02:13 marcus Exp $
 #
 
 pb=$0
@@ -44,7 +44,7 @@ load_schema() {
     db_host=""
     db_name=""
 
-    read -p "Does this host have access to connect to the Tinderbox database as root? (y/n)[y]" option
+    read -p "Does this host have access to connect to the Tinderbox database as root? (y/n)" option
 
     case "${option}" in
 	[Yy][Ee][Ss])
