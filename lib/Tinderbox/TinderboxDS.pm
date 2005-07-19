@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.40 2005/07/19 08:54:01 oliver Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.41 2005/07/19 10:00:32 oliver Exp $
 #
 
 package TinderboxDS;
@@ -128,9 +128,11 @@ sub getConfig {
             if (defined($host) && ref($host) ne "Host");
         my @config = ();
         my $hostid;
+        my @results;
+        my $rc;
 
         if (defined($host)) {
-                $hostid = $host->getHostId();
+                $hostid = $host->getId();
         } else {
                 $hostid = -1;
         }
@@ -139,10 +141,24 @@ sub getConfig {
                 $configlet = uc $configlet;
                 $configlet .= '_%';
 
-                @config = $self->getObjects("TBConfig",
-                        {Config_Option_Name => $configlet, Config_Option_Host => $hostid});
+                @config = $self->getObjects(
+                        "TBConfig",
+                        {
+                                Config_Option_Name => $configlet,
+                                Config_Option_Host => $hostid
+                        }
+                );
         } else {
-                @config = $self->getObjects("TBConfig", {Config_Option_Host => $hostid});
+                $rc =
+                    $self->_doQueryHashRef(
+                        "SELECT * FROM config WHERE Config_Option_Name NOT IN (SELECT Config_Option_Name FROM config WHERE Config_Option_Host=?) AND Config_Option_Host=-1 OR Config_Option_Host=?",
+                        \@results, $hostid, $hostid);
+
+                if (!$rc) {
+                        return undef;
+                }
+
+                @config = $self->_newFromArray("TBConfig", @results);
         }
 
         return @config;
@@ -151,7 +167,7 @@ sub getConfig {
 sub updateConfig {
         my $self      = shift;
         my $configlet = shift;
-	my @config    = shift;
+        my @config    = shift;
         my $host      = shift;
         croak "Argument 3 not of type Host\n"
             if (defined($host) && ref($host) ne "Host");
