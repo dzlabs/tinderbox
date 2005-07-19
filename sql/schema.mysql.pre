@@ -139,7 +139,7 @@ CREATE TABLE config (
   Config_Option_Name varchar(255) NOT NULL,
   Config_Option_Value text,
   Config_Option_Host int NOT NULL DEFAULT -1,
-  PRIMARY KEY (Config_Option_Name, Host_Id),
+  PRIMARY KEY (Config_Option_Name, Config_Option_Host),
   INDEX (Config_Option_Host),
   FOREIGN KEY (Config_Option_Host)
     REFERENCES hosts(Host_Id)
