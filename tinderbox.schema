@@ -138,10 +138,10 @@ DROP TABLE IF EXISTS config;
 CREATE TABLE config (
   Config_Option_Name varchar(255) NOT NULL,
   Config_Option_Value text,
-  Config_Option_Host int NOT NULL DEFAULT -1,
-  PRIMARY KEY (Config_Option_Name, Config_Option_Host),
-  INDEX (Config_Option_Host),
-  FOREIGN KEY (Config_Option_Host)
+  Host_Id int NOT NULL DEFAULT -1,
+  PRIMARY KEY (Config_Option_Name, Host_Id),
+  INDEX (Host_Id)
+  FOREIGN KEY (Host_Id)
     REFERENCES hosts(Host_Id)
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) TYPE=INNODB;
