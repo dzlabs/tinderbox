@@ -1,9 +1,10 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.14 2005/07/18 20:22:14 pav Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.15 2005/07/19 07:18:01 marcus Exp $
 
 VERSION=	2.0.0
 
-DATA=		Build.pm BuildPortsQueue.pm Host.pm Jail.pm Port.pm \
-		PortsTree.pm README TBConfig.pm TinderObject.pm TinderboxDS.pm User.pm \
+DATA=		Build.pm BuildPortsQueue.pm Host.pm Jail.pm MakeCache.pm \
+		Port.pm PortsTree.pm README TBConfig.pm TinderObject.pm \
+		TinderboxDS.pm User.pm \
 		buildenv buildscript create_new_build create_new_jail \
 		create_new_portstree ds.ph list_jails makemake \
 		mkbuild mkjail pnohang.c portbuild rawenv tc tinderbox.ph \
