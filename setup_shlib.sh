@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/setup_shlib.sh,v 1.1 2005/07/19 06:58:12 marcus Exp $
+# $MCom: portstools/tinderbox/setup_shlib.sh,v 1.2 2005/07/19 07:00:33 marcus Exp $
 #
 
 pb=$0
@@ -52,7 +52,7 @@ load_schema() {
 	    read -p "Enter database name : " db_name
 	    ;;
 	*)
-	    echo "You must load schema file ${schema_file} to complete your upgrade." | /usr/bin/fmt 75 79
+	    echo "You must load the schema file ${schema_file} to complete your upgrade." | /usr/bin/fmt 75 79
 	    return 0
 	    ;;
     esac
