@@ -140,7 +140,7 @@ CREATE TABLE config (
   Config_Option_Value text,
   Host_Id int NOT NULL DEFAULT -1,
   PRIMARY KEY (Config_Option_Name, Host_Id),
-  INDEX (Host_Id)
+  INDEX (Host_Id),
   FOREIGN KEY (Host_Id)
     REFERENCES hosts(Host_Id)
     ON UPDATE CASCADE ON DELETE RESTRICT
