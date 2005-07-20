@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.8 2005/07/18 17:38:19 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.9 2005/07/20 11:20:24 oliver Exp $
 #
 
     require_once 'DB.php';
@@ -229,6 +229,7 @@
                 case 'PERM_PRIO_LOWER_5':        $permission = 5; break;
                 case 'PERM_MODIFY_OTHER_QUEUE':  $permission = 6; break;
                 case 'PERM_DELETE_OTHER_QUEUE':  $permission = 7; break;
+                default:                         return false;
             }
 
             $query = "
@@ -397,7 +398,7 @@
 
 
         function getBuildStats($build_id) {
-            $query = "SELECT SUM(IF(Last_Status = \"FAIL\", 1, 0)) AS fails FROM build_ports WHERE Build_Id = ?";
+            $query = 'SELECT SUM(IF(Last_Status = "FAIL", 1, 0)) AS fails FROM build_ports WHERE Build_Id = ?';
             $rc = $this->_doQueryHashRef($query, $results, $build_id);
             if (!$rc) return null;
             return $results[0];
@@ -751,7 +752,7 @@
         }
 
         function prettyEmail($input) {
-            return str_replace("@FreeBSD.org", "", $input);
+            return str_replace(array('@FreeBSD.org','@freebsd.org'), '', $input);
         }
 
    }
