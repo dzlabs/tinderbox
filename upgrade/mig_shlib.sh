@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.8 2005/07/20 12:25:37 oliver Exp $
+# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.9 2005/07/20 16:14:51 marcus Exp $
 #
 
 pb=$0
@@ -40,8 +40,8 @@ mig_rawenv() {
 	rawenv=$1
 	tinder_echo "INFO: Migrating ${rawenv} ..."
 
-	if [ ! -s "${rawenv}" ] ; then
-		tinder_echo "INFO: ${rawenv} does not exist!"
+	if [ ! -f "${rawenv}" ] ; then
+		tinder_echo "INFO: ${rawenv} does not exist."
 	else
 	    	first_line=$(head -1 "${rawenv}")
 
@@ -106,8 +106,9 @@ mig_files() {
 
     tinder_echo "INFO: Migrating files ..."
 
-    if [ ! -s "${rawenv}.dist" ] ; then
-        tinder_echo "INFO: ${rawenv}.dist does not exist!"
+    if [ ! -f "${rawenv}.dist" ] ; then
+        tinder_echo "ERROR: ${rawenv}.dist does not exist!"
+	return 1
     else
         if [ ! -f "${rawenv}" ]; then
             cp "${rawenv}.dist" "${rawenv}"
