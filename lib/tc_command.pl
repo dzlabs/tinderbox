@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.60 2005/07/20 18:11:09 oliver Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.61 2005/07/20 18:15:53 oliver Exp $
 #
 
 BEGIN {
@@ -928,7 +928,7 @@ sub addPort {
                 $requestMountArgs{'destination'} = "portstree";
                 requestMount($BUILD_ROOT, %requestMountArgs);
 
-                $requestMountArgs{'destination'} = 'jail';
+                $requestMountArgs{'destination'} = "jail";
                 requestMount($BUILD_ROOT, %requestMountArgs);
 
                 if (!$tag) {
