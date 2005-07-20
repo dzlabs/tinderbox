@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.2 2005/07/19 18:50:14 marcus Exp $
+# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.3 2005/07/20 03:27:18 marcus Exp $
 #
 
 pb=$0
@@ -38,14 +38,13 @@ pb=${pb%%/scripts}
 mig_rawenv2db() {
 
 	rawenv=$1
-	header=$2
 
 	if [ ! -s "${rawenv}" ] ; then
 		return 0
 	else
 	    	first_line=$(head -1 "${rawenv}")
 
-		if [ x"${first_line}" = x"${header}" ]; then
+		if [ x"${first_line}" = x"${RAWNEV_HEADER}" ]; then
 		    	return 0
 		fi
 
@@ -80,13 +79,12 @@ mig_rawenv2db() {
 }
 
 mig_db() {
-    version=$1
 
     dbversion=$(call_tc dsversion)
 
-    if [ -f "${pb}/upgrade/mig_tinderbox-${dbversion}_to_${version}.sql" ]; then
-	echo "INFO: Migrating database schema from ${dbversion} to ${version} ..."
-	rc=$(load_schema "${pb}/upgrade/mig_tinderbox-${dbversion}_to_${version}.sql" "" "")
+    if [ -f "${pb}/upgrade/mig_tinderbox-${dbversion}_to_${VERSION}.sql" ]; then
+	echo "INFO: Migrating database schema from ${dbversion} to ${VERSION} ..."
+	rc=$(load_schema "${pb}/upgrade/mig_tinderbox-${dbversion}_to_${VERSION}.sql" "" "")
 	if [ ${rc} != 0 ]; then
 	    echo "ERROR: Failed to load upgrade database schema."
 	    return 2
