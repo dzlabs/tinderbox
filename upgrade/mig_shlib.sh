@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.3 2005/07/20 03:27:18 marcus Exp $
+# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.4 2005/07/20 03:40:05 marcus Exp $
 #
 
 pb=$0
@@ -33,7 +33,7 @@ pb=$(type "$pb" | sed 's/^.* //g')
 pb=$(realpath $(dirname $pb))
 pb=${pb%%/scripts}
 
-. ${pb}/scripts/setup_shlib.sh
+. ${pb}/scripts/lib/setup_shlib.sh
 
 mig_rawenv2db() {
 
@@ -113,6 +113,10 @@ mig_files() {
 	cp -p "${rawenv}" "${rawenv}.bak"
 	cp "${rawenv}.dist" "${rawenv}"
     fi
+
+    for d in ${REMOVE_FILES} ; do
+	rm -f ${d}
+    done
 
     echo "DONE."
 
