@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.59 2005/07/20 03:19:03 marcus Exp $
+# $MCom: portstools/tinderbox/tc,v 1.60 2005/07/20 18:11:09 oliver Exp $
 #
 
 BEGIN {
@@ -38,7 +38,7 @@ BEGIN {
         push @INC, $scripts;
         push @INC, "$scripts/lib";
         require lib;
-	import lib $scripts;
+        import lib $scripts;
         import lib "$scripts/lib";
 }
 
@@ -503,8 +503,7 @@ sub configGet {
                 } elsif ($opts->{'G'}) {
                         $host = undef;
                 } else {
-                        $hostname = `hostname`;
-                        chomp($hostname);
+                        $hostname = getHostname();
                         if ($ds->isValidHost($hostname)) {
                                 $host = $ds->getHostByName($hostname);
                         }
@@ -748,8 +747,7 @@ sub listPortsTrees {
 }
 
 sub addHost {
-        my $hostname = `hostname`;
-        chomp($hostname);
+        my $hostname = getHostname();
 
         if ($opts->{'h'}) {
                 $hostname = $opts->{'h'};
@@ -897,6 +895,8 @@ sub addPortsTree {
 }
 
 sub addPort {
+        my %requestMountArgs;
+
         if (       (!$opts->{'b'} && !$opts->{'a'})
                 || ($opts->{'b'} && $opts->{'a'})
                 || !$opts->{'d'})
@@ -920,6 +920,16 @@ sub addPort {
                 my $jail      = $ds->getJailById($build->getJailId());
                 my $portstree = $ds->getPortsTreeById($build->getPortsTreeId());
                 my $tag       = $jail->getTag();
+                $requestMountArgs{'quiet'}     = 1;
+                $requestMountArgs{'build'}     = $build->getName();
+                $requestMountArgs{'jail'}      = $jail->getName();
+                $requestMountArgs{'portstree'} = $portstree->getName();
+
+                $requestMountArgs{'destination'} = "portstree";
+                requestMount($BUILD_ROOT, %requestMountArgs);
+
+                $requestMountArgs{'destination'} = 'jail';
+                requestMount($BUILD_ROOT, %requestMountArgs);
 
                 if (!$tag) {
                         $tag = $jail->getName();
@@ -960,8 +970,7 @@ sub addBuildPortsQueueEntry {
 
         my $priority = $opts->{'p'} ? $opts->{'p'} : 10;
 
-        my $hostname = `hostname`;
-        chomp($hostname);
+        my $hostname = getHostname();
         if ($opts->{'h'}) {
                 $hostname = $opts->{'h'};
         }
@@ -990,8 +999,7 @@ sub addBuildPortsQueueEntry {
 sub listBuildPortsQueue {
         my $raw;
         my $status   = $opts->{'s'};
-        my $hostname = `hostname`;
-        chomp($hostname);
+        my $hostname = getHostname();
 
         if ($opts->{'h'}) {
                 $hostname = $opts->{'h'}
@@ -1243,8 +1251,8 @@ sub getPortsUpdateCmd {
 
 sub reorgBuildPortsQueue {
 
-        my $hostname = `hostname`;
-        chomp($hostname);
+        my $hostname = getHostname();
+
         if ($opts->{'h'}) {
                 $hostname = $opts->{'h'};
         }
@@ -1293,8 +1301,8 @@ sub updateBuildPortsQueueEntryStatus {
 
 sub rmBuildPortsQueue {
 
-        my $hostname = `hostname`;
-        chomp($hostname);
+        my $hostname = getHostname();
+
         if ($opts->{'h'}) {
                 $hostname = $opts->{'h'};
         }
@@ -1332,8 +1340,8 @@ sub rmBuildPortsQueueEntry {
 
                 $buildportsqueue = $ds->getBuildPortsQueueById($opts->{'i'});
         } else {
-                my $hostname = `hostname`;
-                chomp($hostname);
+                my $hostname = getHostname();
+
                 if ($opts->{'h'}) {
                         $hostname = $opts->{'h'};
                 }
@@ -1372,8 +1380,7 @@ sub rmBuildPortsQueueEntry {
 }
 
 sub rmHost {
-        my $hostname = `hostname`;
-        chomp($hostname);
+        my $hostname = getHostname();
 
         if ($opts->{'h'}) {
                 $hostname = $opts->{'h'};

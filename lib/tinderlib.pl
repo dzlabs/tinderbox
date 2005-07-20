@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.8 2005/07/20 03:19:03 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.9 2005/07/20 18:11:09 oliver Exp $
 #
 
 use strict;
@@ -130,6 +130,54 @@ sub sendMail {
         $smtp->quit;
 
         return $rc;
+}
+
+sub getHostname {
+        my $hostname = `hostname`;
+        chomp($hostname);
+
+        return $hostname;
+}
+
+sub requestMount {
+        my $pb        = shift;
+        my %arguments = @_;
+        my $args      = undef;
+
+        if ($arguments{'quiet'}) {
+                $args .= ' -q ';
+        }
+
+        if ($arguments{'readonly'}) {
+                $args .= ' -r ';
+        }
+
+        if ($arguments{'jail'}) {
+                $args .= ' -j ' . $arguments{'jail'};
+        }
+
+        if ($arguments{'portstree'}) {
+                $args .= ' -p ' . $arguments{'portstree'};
+        }
+
+        if ($arguments{'build'}) {
+                $args .= ' -b ' . $arguments{'build'};
+        }
+
+        if ($arguments{'nullfs'}) {
+                $args .= ' -n ';
+        }
+
+        if ($arguments{'destination'}) {
+                $args .= ' -d ' . $arguments{'destination'};
+        }
+
+        if ($arguments{'source'}) {
+                $args .= ' -s ' . $arguments{'source'};
+        }
+
+        `sh -c '. $pb/scripts/lib/tinderbox_shlib.sh ; request_mount $args'`;
+        return 0;
 }
 
 1;
