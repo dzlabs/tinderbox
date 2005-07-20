@@ -54,7 +54,7 @@ pb=$(type "$pb" | sed 's/^.* //g')
 pb=$(realpath $(dirname $pb))
 pb=${pb%%/scripts}
 
-. ${pb}/scripts/tinderbox_shlib.sh
+. ${pb}/scripts/lib/tinderbox_shlib.sh
 
 error=0
 init=0
