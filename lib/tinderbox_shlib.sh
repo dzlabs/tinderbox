@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderbox_shlib.sh,v 1.15 2005/07/20 12:18:52 oliver Exp $
+# $MCom: portstools/tinderbox/lib/tinderbox_shlib.sh,v 1.16 2005/07/20 16:41:23 oliver Exp $
 #
 
 tinder_echo() {
