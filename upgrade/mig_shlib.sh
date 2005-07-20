@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.4 2005/07/20 03:40:05 marcus Exp $
+# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.5 2005/07/20 04:22:33 marcus Exp $
 #
 
 pb=$0
@@ -35,7 +35,7 @@ pb=${pb%%/scripts}
 
 . ${pb}/scripts/lib/setup_shlib.sh
 
-mig_rawenv2db() {
+mig_rawenv() {
 
 	rawenv=$1
 
@@ -79,18 +79,24 @@ mig_rawenv2db() {
 }
 
 mig_db() {
+    do_load=$1
+    db_host=$2
+    db_name=$3
 
     dbversion=$(call_tc dsversion)
 
     if [ -f "${pb}/upgrade/mig_tinderbox-${dbversion}_to_${VERSION}.sql" ]; then
-	echo "INFO: Migrating database schema from ${dbversion} to ${VERSION} ..."
-	rc=$(load_schema "${pb}/upgrade/mig_tinderbox-${dbversion}_to_${VERSION}.sql" "" "")
-	if [ ${rc} != 0 ]; then
-	    echo "ERROR: Failed to load upgrade database schema."
-	    return 2
+	if [ ${do_load} = 1 ]; then
+	    echo "INFO: Migrating database schema from ${dbversion} to ${VERSION} ..."
+	    rc=$(load_schema "${pb}/upgrade/mig_tinderbox-${dbversion}_to_${VERSION}.sql" ${db_host} ${db_name})
+	    if [ ${rc} != 0 ]; then
+	        echo "ERROR: Failed to load upgrade database schema."
+	        return 2
+	    fi
+	    echo "DONE."
+	else
+	    echo "WARN: You must load ${pb}/upgrade/mig_tinderbox-${dbversion}_to_${VERSION}.sql to complete your upgrade."
 	fi
-
-	echo "DONE."
     else
 	return 1
     fi
@@ -105,13 +111,11 @@ mig_files() {
 
     if [ ! -f "${rawenv}" ]; then
 	cp "${rawenv}.dist" "${rawenv}"
-	echo "DONE."
-	return 0
-    fi
-
-    if ! cmp -s "${rawenv}.dist" "${rawenv}" ; then
-	cp -p "${rawenv}" "${rawenv}.bak"
-	cp "${rawenv}.dist" "${rawenv}"
+    else
+        if ! cmp -s "${rawenv}.dist" "${rawenv}" ; then
+	    cp -p "${rawenv}" "${rawenv}.bak"
+	    cp "${rawenv}.dist" "${rawenv}"
+        fi
     fi
 
     for d in ${REMOVE_FILES} ; do

@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.5 2005/07/20 03:19:03 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.6 2005/07/20 04:22:33 marcus Exp $
 #
 
 pb=$0
@@ -38,25 +38,31 @@ call_tc() {
 	${pb}/scripts/tc "$@"
 }
 
+get_dbinfo() {
+    db_host=""
+    db_name=""
+
+    read -p "Does this host have access to connect to the Tinderbox database as root? (y/n)" option
+
+    case "${option}" in
+        [Yy][Ee][Ss])
+            read -p "Enter database host : " db_host
+	    read -p "Enter database name : " db_name
+	    ;;
+        *)
+	    return 1
+	    ;;
+    esac
+
+    echo "${db_host}:${db_name}"
+
+    return 0
+}
+
 load_schema() {
     schema_file=$1
     db_host=$2
     db_name=$3
-
-    if [ -z "${db_host}" -o -z "${db_name}" ]; then
-        read -p "Does this host have access to connect to the Tinderbox database as root? (y/n)" option
-
-        case "${option}" in
-	    [Yy][Ee][Ss])
-	        read -p "Enter database host : " db_host
-	        read -p "Enter database name : " db_name
-	        ;;
-	    *)
-	        echo "You must load the schema file ${schema_file} to complete your upgrade." | /usr/bin/fmt 75 79
-	        return 0
-	        ;;
-        esac
-    fi
 
     echo "The next prompt will be for root's password to the ${db_name} database." | /usr/bin/fmt 75 79
 
