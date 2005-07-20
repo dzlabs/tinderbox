@@ -33,7 +33,7 @@ main_loop() {
 			if [ "${MAIL}" = "1" ] ; then
 				${pb}/scripts/tc sendBuildCompletionMail -b "${BUILD}" -u "${USER}"
 			fi
-				
+
 			${pb}/scripts/tc reorgBuildPortsQueue
 		else
 			echo "INFO: Nothing to do. Sleeping ${TINDERD_SLEEPTIME} seconds."
