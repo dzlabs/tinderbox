@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/upgrade.sh,v 1.3 2005/07/20 16:10:16 marcus Exp $
+# $MCom: portstools/tinderbox/upgrade.sh,v 1.4 2005/07/20 16:11:57 marcus Exp $
 #
 
 pb=$0
@@ -57,7 +57,7 @@ read -p "Hit <ENTER> to get started: " i
 if ${pb}/scripts/tc dsversion >/dev/null 2>&1 ; then
 	DSVERSION=$(${pb}/scripts/tc dsversion)
 else
-	DSVERSION=1.X
+    tinder_exit "ERROR: Database migration failed!  Consult the output above for more information." $?
 fi
 
 # First, migrate the database, if needed.
