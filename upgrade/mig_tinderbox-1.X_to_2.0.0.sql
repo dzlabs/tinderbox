@@ -70,7 +70,7 @@ ALTER TABLE jails
 ALTER TABLE ports_trees
   ADD Ports_Tree_Ports_Mount text;
 
-INSERT INTO hosts VALUES (-1, '__ALL__') ON DUPLICATE KEY UPDATE Host_Name=VALUES(Host_Name)
+INSERT INTO hosts VALUES (-1, '__ALL__') ON DUPLICATE KEY UPDATE Host_Name=VALUES(Host_Name);
 
 INSERT INTO config VALUES ('__DSVERSION__', '2.0.0', -1) ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
 INSERT INTO config VALUES ('CCACHE_ENABLED', '0', -1) ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
