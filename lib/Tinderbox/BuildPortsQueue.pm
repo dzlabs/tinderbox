@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/BuildPortsQueue.pm,v 1.2 2005/07/18 09:30:50 oliver Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/BuildPortsQueue.pm,v 1.3 2005/07/20 03:19:03 marcus Exp $
 #
 
 package BuildPortsQueue;

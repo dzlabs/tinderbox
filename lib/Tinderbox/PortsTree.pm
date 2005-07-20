@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/PortsTree.pm,v 1.6 2005/07/18 02:58:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/PortsTree.pm,v 1.7 2005/07/20 03:19:03 marcus Exp $
 #
 
 package PortsTree;

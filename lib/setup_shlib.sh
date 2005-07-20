@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.4 2005/07/19 18:50:13 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.5 2005/07/20 03:19:03 marcus Exp $
 #
 
 pb=$0
