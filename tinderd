@@ -21,7 +21,7 @@ main_loop() {
 		MAIL=$(echo ${ENTRY} | cut -d: -f5)
 
 		if [ -n "${BUILD}" -a -n "${PORT}" -a -n "${ID}" ] ; then
-			echo "Going to build ${PORT} on ${BUILD}"
+			tinder_echo "Going to build ${PORT} on ${BUILD}"
 			${pb}/scripts/tc updateBuildPortsQueueEntryStatus -i "${ID}" -s PROCESSING
 			${pb}/scripts/tc addPort -b "${BUILD}" -d "${PORT}" -r
 			if ${pb}/scripts/tinderbuild -b "${BUILD}" ${TINDERBUILD_ARGS} "${PORT}" >/dev/null ; then
@@ -36,7 +36,7 @@ main_loop() {
 
 			${pb}/scripts/tc reorgBuildPortsQueue
 		else
-			echo "INFO: Nothing to do. Sleeping ${TINDERD_SLEEPTIME} seconds."
+			tinder_echo "INFO: Nothing to do. Sleeping ${TINDERD_SLEEPTIME} seconds."
 			trap main_loop 1
 			sleep ${TINDERD_SLEEPTIME}
 		fi
