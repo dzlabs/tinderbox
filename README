@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.30 2005/07/18 21:19:41 pav Exp $
+$MCom: portstools/tinderbox/README,v 1.31 2005/07/20 02:57:59 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -20,11 +20,11 @@ to work on RELENG_5 and RELENG_6 too), Perl 5.8 or later (lang/perl5.8),
 DBD::Mysql Perl module (databases/p5-DBD-mysql41), and MySQL 4.1 or later
 (databases/mysql41-server).
 
-The web frontends require php4 (lang/php4), php4-mysql extension
+The web front-ends require php4 (lang/php4), php4-mysql extension
 (databases/php4-mysql), and PEAR::DB (databases/pear-DB).
 
-The standard web frontend (found in the ``www'' subdirectory) requires you
-have "register_globals=on" in your php.ini.  The experimental web frontend
+The standard web front-end (found in the ``www'' subdirectory) requires you
+have "register_globals=on" in your php.ini.  The experimental web front-end
 (found in the ``www-exp'' subdirectory) does not require register_globals
 to be on, but does require the php4-session extension (www/php4-session).
 
@@ -41,7 +41,7 @@ root, just substitute ${pb} with that root directory.
 2. Extract the Tinderbox distribution into ${pb}/scripts.
 
 3. Edit ds.ph and tinderbox.ph for your setup (if you are using the standard
-   web frontend, also edit www/inc_ds.php).
+   web front-end, also edit www/inc_ds.php).
 
 4. Create the database and database user on the host that you defined within
    ds.ph.  Note: the database can live on the same server as Tinderbox.  Just
@@ -126,7 +126,7 @@ NOTE: All the create_new_* scripts use cvsup12 as their default cvsup mirror.
 If you would like to use another server, or enable cvsup compression use
 the -H and -C command line arguments to the create_new_* scripts respectively.
 For example, to use cvsup2.freebsd.org and enable cvsup compression for
-all Jail updates, use the folowing command:
+all Jail updates, use the following command:
 
 # cd ${pb}/scripts && ./create_new_jail -n 5-STABLE -d "FreeBSD 5-STABLE" \
 	-t RELENG_5 -u CVSUP -C -H cvsup2.freebsd.org
@@ -192,7 +192,7 @@ To update existing Jails, use the ${pb}/scripts/mkjail command.  For example:
 # cd ${pb}/scripts && ./mkjail 5.4
 
 To update existing PortsTrees, use the ``tc'' (Tinderbox Controller)
-application with the ``upgradePortsTree'' command.  For example:
+application with the ``updatePortsTree'' command.  For example:
 
 # cd ${pb}/scripts && ./tc updatePortsTree -p FreeBSD
 
@@ -332,7 +332,7 @@ tinderbuild on it, and will delete the entry after tinderbuild completed.
 (Where {BUILD} is a Build name, and {PORT DIRECTORY} is a directory under
 {BUILDS}'s PortsTree (e.g. x11/gnome2).)
 
-NOTE: You must be running the ``www-exp'' web frontend to take advantage
+NOTE: You must be running the ``www-exp'' web front-end to take advantage
 of the following.
 
 To use tinderd scheduling via the web you must first create a User:
