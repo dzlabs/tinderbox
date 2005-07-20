@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.5 2005/07/20 04:22:33 marcus Exp $
+# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.6 2005/07/20 04:26:36 marcus Exp $
 #
 
 pb=$0
@@ -98,10 +98,10 @@ mig_db() {
 	    echo "WARN: You must load ${pb}/upgrade/mig_tinderbox-${dbversion}_to_${VERSION}.sql to complete your upgrade."
 	fi
     else
-	return 1
+	return 0
     fi
 
-    return 0
+    return 1
 }
 
 mig_files() {
