@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderbox_shlib.sh,v 1.13 2005/07/20 03:51:07 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderbox_shlib.sh,v 1.14 2005/07/20 03:52:01 marcus Exp $
 #
 
 kill_procs()
