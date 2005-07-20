@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.6 2005/07/20 04:26:36 marcus Exp $
+# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.7 2005/07/20 12:18:52 oliver Exp $
 #
 
 pb=$0
@@ -38,9 +38,10 @@ pb=${pb%%/scripts}
 mig_rawenv() {
 
 	rawenv=$1
+	tinder_echo "INFO: Migrating ${rawenv} ..."
 
 	if [ ! -s "${rawenv}" ] ; then
-		return 0
+		tinder_echo "INFO: ${rawenv} does not exist!"
 	else
 	    	first_line=$(head -1 "${rawenv}")
 
@@ -48,7 +49,6 @@ mig_rawenv() {
 		    	return 0
 		fi
 
-		echo -n "INFO: Migrating ${rawenv} ..."
 
 		while read line ; do
 			var=${line%=*}
@@ -72,9 +72,8 @@ mig_rawenv() {
 		cp -p "${rawenv}" "${rawenv}.bak"
 		rm -f "${rawenv}"
 
-		echo "DONE."
 	fi
-
+	tinder_echo "DONE."
 	return 0
 }
 
@@ -82,39 +81,42 @@ mig_db() {
     do_load=$1
     db_host=$2
     db_name=$3
+    mig_file=${pb}/scripts/upgrade/mig_tinderbox-${MIG_VERSION_FROM}_to_${MIG_VERSION_TO}.sql
 
-    dbversion=$(call_tc dsversion)
-
-    if [ -f "${pb}/upgrade/mig_tinderbox-${dbversion}_to_${VERSION}.sql" ]; then
+    if [ -s "${mig_file}" ]; then
 	if [ ${do_load} = 1 ]; then
-	    echo "INFO: Migrating database schema from ${dbversion} to ${VERSION} ..."
-	    rc=$(load_schema "${pb}/upgrade/mig_tinderbox-${dbversion}_to_${VERSION}.sql" ${db_host} ${db_name})
+	    tinder_echo "INFO: Migrating database schema from ${MIG_VERSION_FROM} to ${MIG_VERSION_TO} ..."
+	    rc=$(load_schema "${mig_file}" ${db_host} ${db_name})
 	    if [ ${rc} != 0 ]; then
-	        echo "ERROR: Failed to load upgrade database schema."
+	        tinder_echo "ERROR: Failed to load upgrade database schema."
 	        return 2
 	    fi
-	    echo "DONE."
+	    tinder_echo "DONE."
 	else
-	    echo "WARN: You must load ${pb}/upgrade/mig_tinderbox-${dbversion}_to_${VERSION}.sql to complete your upgrade."
+	    tinder_echo "WARN: You must load ${mig_file} to complete your upgrade."
 	fi
     else
-	return 0
+	return 1
     fi
 
-    return 1
+    return 0
 }
 
 mig_files() {
     rawenv=$1
 
-    echo -n "INFO: Migrating files ..."
+    tinder_echo "INFO: Migrating files ..."
 
-    if [ ! -f "${rawenv}" ]; then
-	cp "${rawenv}.dist" "${rawenv}"
+    if [ ! -s "${rawenv}.dist" ] ; then
+        tinder_echo "INFO: ${rawenv}.dist does not exist!"
     else
-        if ! cmp -s "${rawenv}.dist" "${rawenv}" ; then
-	    cp -p "${rawenv}" "${rawenv}.bak"
-	    cp "${rawenv}.dist" "${rawenv}"
+        if [ ! -f "${rawenv}" ]; then
+            cp "${rawenv}.dist" "${rawenv}"
+        else
+            if ! cmp -s "${rawenv}.dist" "${rawenv}" ; then
+                cp -p "${rawenv}" "${rawenv}.bak"
+               cp "${rawenv}.dist" "${rawenv}"
+            fi
         fi
     fi
 
@@ -122,7 +124,7 @@ mig_files() {
 	rm -f ${d}
     done
 
-    echo "DONE."
+    tinder_echo "DONE."
 
     return 0
 }

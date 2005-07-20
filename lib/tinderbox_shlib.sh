@@ -23,8 +23,21 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderbox_shlib.sh,v 1.14 2005/07/20 03:52:01 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderbox_shlib.sh,v 1.15 2005/07/20 12:18:52 oliver Exp $
 #
+
+tinder_echo() {
+	echo "$1" | /usr/bin/fmt 75 79
+}
+
+tinder_exit() {
+	tinder_echo "$1"
+	if [ -n "$2" ] ; then
+		exit $2
+	else
+		exit 255
+	fi
+}
 
 kill_procs()
 {

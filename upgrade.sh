@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/upgrade.sh,v 1.1 2005/07/20 04:23:18 marcus Exp $
+# $MCom: portstools/tinderbox/upgrade.sh,v 1.2 2005/07/20 12:18:52 oliver Exp $
 #
 
 pb=$0
@@ -34,53 +34,74 @@ pb=$(realpath $(dirname $pb))
 pb=${pb%%/scripts}
 
 VERSION="2.0.0"
+
+# DB_MIGRATION_PATH contains all versions where upgrade SQLs are existing for
+# if DB_MIGRATION_PATH is for example "1.X 2.0.0 2.0.1 2.1.0" then there are
+# scripts for 1.X->2.0.0, 2.0.0->2.0.1, 2.0.1->2.1.0 so even a user with 1.X
+# could easily upgrade to the latest version and none needs to maintain
+# 1.X->2.0.0, 1.X->2.0.1, 1.X->2.1.0 and so on scripts.
+DB_MIGRATION_PATH="1.X ${VERSION}"
+
 RAWENV_HEADER="## rawenv TB v2 -- DO NOT EDIT"
 REMOVE_FILES="Build.pm BuildPortsQueue.pm Host.pm Jail.pm MakeCache.pm Port.pm PortsTree.pm TBConfig.pm TinderObject.pm TinderboxDS.pm User.pm setup_shlib.sh tinderbox_shlib.sh tinderlib.pl"
-TINDERBOX_URL="http://tinderbox.marcuscom.com"
+TINDERBOX_URL="http://tinderbox.marcuscom.com/"
 
 . ${pb}/scripts/upgrade/mig_shlib.sh
+. ${pb}/scripts/lib/tinderbox_shlib.sh
 
-echo "Welcome to the Tinderbox Upgrade and Migration script.  This script will guide you through an upgrade to Tinderbox ${VERSION}." | /usr/bin/fmt 75 79
+tinder_echo "Welcome to the Tinderbox Upgrade and Migration script.  This script will guide you through an upgrade to Tinderbox ${VERSION}."
 
 read -p "Hit <ENTER> to get started: " i
 
+# Check if the current Datasource Version is ascertainable
+if ${pv}/scripts/tc dsversion >/dev/null 2>&1 ; then
+	DSVERSION=$(${pv}/scripts/tc dsversion)
+else
+	DSVERSION=1.X
+fi
+
 # First, migrate the database, if needed.
+echo ""
 db_host=""
 db_name=""
 do_load=0
 dbinfo=$(get_dbinfo)
 if [ $? = 0 ]; then
-    db_host=$(echo ${dbinfo} | cut -d':' -f1)
-    db_name=$(echo ${dbinfo} | cut -d':' -f2)
+    db_host=${dbinfo%:*}
+    db_name=${dbinfo#*:}
     do_load=1
 fi
 
-rc=$(mig_db ${do_load} ${db_host} ${db_name})
-while [ ${rc} = 1 ]; do
-    rc=$(mig_db ${do_load} ${db_host} ${db_name})
+set -- $DB_MIGRATION_PATH
+while [ -n "${1}" -a -n "${2}" ] ; do
+    MIG_VERSION_FROM=${1}
+    MIG_VERSION_TO=${2}
+
+    if [ ${MIG_VERSION_FROM} = ${DSVERSION} ] ; then
+        mig_db ${do_load} ${db_host} ${db_name}
+        case $? in
+            2)    tinder_exit "ERROR: Database migration failed!  Consult the output above for more information." 2
+                  ;;
+            1)    tinder_exit "ERROR: No Migration Script available to migrate ${MIG_VERSION_FROM} to ${MIG_VERSION_TO}" 1
+                  ;;
+            0)    DSVERSION=${MIG_VERSION_TO}
+                  ;;
+        esac
+    fi
+    shift 1
 done
 
-if [ ${rc} != 0 ]; then
-    echo "ERROR: Database migration failed!  Consult the output above for more information." | /usr/bin/fmt 75 79
-    exit ${rc}
-fi
-
 # Now migrate rawenv if needed.
-rc=$(mig_rawenv ${pb}/scripts/rawenv)
-
-if [ ${rc} != 0 ]; then
-    echo "Rawenv migration failed!  Consult the output above for more information." | /usr/bin/fmt 75 79
-    exit ${rc}
+echo ""
+if ! mig_rawenv ${pb}/scripts/rawenv ; then
+    tinder_exit "Rawenv migration failed!  Consult the output above for more information." 1
 fi
 
 # Finally, migrate any remaining file data.
-rc=$(mig_files ${pb}/scripts/rawenv)
-
-if [ ${rc} != 0 ]; then
-    echo "Files migration failed!  Consult the output above for more information." | /usr/bin/fmt 75 79
-    exit ${rc}
+echo ""
+if ! mig_files ${pb}/scripts/rawenv ; then
+    tinder_exit "Files migration failed!  Consult the output above for more information." 1
 fi
 
-"Congratulations!  Tinderbox migration is complete.  Please refer to ${TINDERBOX_URL} for a list of what is new in this version as well as general Tinderbox documentation." | /usr/bin/fmt 75 79
-
-exit 0
+echo ""
+tinder_exit "Congratulations!  Tinderbox migration is complete.  Please refer to ${TINDERBOX_URL} for a list of what is new in this version as well as general Tinderbox documentation." 0
