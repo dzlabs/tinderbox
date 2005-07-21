@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/upgrade.sh,v 1.5 2005/07/21 05:15:51 marcus Exp $
+# $MCom: portstools/tinderbox/upgrade.sh,v 1.6 2005/07/21 06:08:14 marcus Exp $
 #
 
 pb=$0
@@ -49,7 +49,10 @@ TINDERBOX_URL="http://tinderbox.marcuscom.com/"
 . ${pb}/scripts/upgrade/mig_shlib.sh
 . ${pb}/scripts/lib/tinderbox_shlib.sh
 
+clear
+
 tinder_echo "Welcome to the Tinderbox Upgrade and Migration script.  This script will guide you through an upgrade to Tinderbox ${VERSION}."
+echo ""
 
 read -p "Hit <ENTER> to get started: " i
 
