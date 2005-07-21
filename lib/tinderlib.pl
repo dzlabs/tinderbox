@@ -23,11 +23,12 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.10 2005/07/20 18:26:16 oliver Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.11 2005/07/21 00:16:34 marcus Exp $
 #
 
 use strict;
 use Net::SMTP;
+use Sys::Hostname;
 
 sub cleanup {
         my ($ds, $code, $msg) = @_;
@@ -133,7 +134,6 @@ sub sendMail {
 }
 
 sub getHostname {
-	use Sys::Hostname;
         my $hostname = hostname();
 
         return $hostname;
