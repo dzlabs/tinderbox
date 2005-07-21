@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/setup.sh,v 1.6 2005/07/21 06:04:14 marcus Exp $
+# $MCom: portstools/tinderbox/setup.sh,v 1.7 2005/07/21 06:08:03 marcus Exp $
 #
 
 pb=$0
@@ -53,7 +53,7 @@ MYSQL_DB_PREREQS="databases/p5-DBD-mysql41 databases/mysql41-client"
 clear
 
 tinder_echo "Welcome to the Tinderbox Setup script.  This script will guide you through some of the automated Tinderbox setup steps.  Once this script completes, you should review the documentation in ${README} or on the web at ${TINDERBOX_URL} to complete your setup."
-tinder_echo ""
+echo ""
 
 read -p "Hit <ENTER> to get started: " i
 
@@ -75,7 +75,7 @@ if [ $? = 1 ]; then
     tinder_echo "WARN:  ${missing}"
 fi
 tinder_echo "DONE."
-tinder_echo ""
+echo ""
 
 # Now install the default preferences files.
 tinder_echo "INFO: Creating default configuration files ..."
@@ -89,7 +89,7 @@ for f in ${PREF_FILES} ; do
     cp -f ${pb}/scripts/${f}.dist ${pb}/scripts/${f}
 done
 tinder_echo "DONE."
-tinder_echo ""
+echo ""
 
 # Now create the database if we can.
 tinder_echo "INFO: Beginning database configuration."
@@ -141,7 +141,7 @@ if [ ${do_db} = 1 ]; then
 	    exit 1
         fi
         tinder_echo "DONE."
-	tinder_echo ""
+	echo ""
     fi
 
     tinder_echo "INFO: Creating database ${db_name} on ${db_host} ..."
@@ -153,7 +153,7 @@ if [ ${do_db} = 1 ]; then
     fi
 
     tinder_echo "DONE."
-    tinder_echo ""
+    echo ""
 
     tinder_echo "INFO: Loading Tinderbox schema into ${db_name} ..."
     load_schema ${SCHEMA_FILE} ${db_driver} ${db_host} ${db_name}
@@ -163,7 +163,7 @@ if [ ${do_db} = 1 ]; then
     fi
 
     tinder_echo "DONE."
-    tinder_echo ""
+    echo ""
 
     read -p "Enter the desired username for the Tinderbox database : " db_user
     finished=0
@@ -171,11 +171,11 @@ if [ ${do_db} = 1 ]; then
         stty -echo
         read -p "Enter the desired password for ${db_user} : " db_pass
 	stty echo
-	tinder_echo ""
+	echo ""
 	stty -echo
         read -p "Confirm password for ${db_user} : " confirm_pass
         stty echo
-	tinder_echo ""
+	echo ""
 	if [ ${db_pass} = ${confirm_pass} ]; then
 	    finished=1
 	else
@@ -198,9 +198,9 @@ if [ ${do_db} = 1 ]; then
     if [ $? != 0 ]; then
 	tinder_exit "ERROR: Database privilege configuration failed!  Consult the output above for more information." $?
     fi
-    
+
     tinder_echo "DONE."
-    tinder_echo ""
+    echo ""
 
     cat > ${pb}/scripts/ds.ph << EOT
 \$DB_DRIVER       = '${db_driver}';
@@ -213,7 +213,7 @@ if [ ${do_db} = 1 ]; then
 EOT
 
     tinder_echo "INFO: Database configuration complete."
-    tinder_echo ""
+    echo ""
 fi
 
 # We're done now.  We don't want to call tc init here since the user may need
