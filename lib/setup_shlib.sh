@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.12 2005/07/21 07:30:39 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.13 2005/07/21 17:06:12 marcus Exp $
 #
 
 pb=$0
@@ -48,14 +48,26 @@ get_dbinfo() {
 
     case "${option}" in
         [Yy]|[Yy][Ee][Ss])
-	    read -p "Enter database admin user : " db_admin
-            read -p "Enter database host : " db_host
-	    read -p "Enter database name : " db_name
+	    read -p "Enter database admin user [root]: " db_admin
+            read -p "Enter database host [localhost]: " db_host
+	    read -p "Enter database name [tinderbox]: " db_name
 	    ;;
         *)
 	    return 1
 	    ;;
     esac
+
+    if [ -z "${db_admin}" ]; then
+	db_admin="root"
+    fi
+
+    if [ -z "${db_host}" ]; then
+	db_host="localhost"
+    fi
+
+    if [ -z "${db_name}" ]; then
+	db_name="tinderbox"
+    fi
 
     echo "${db_driver}:${db_admin}|${db_host}:${db_name}"
 
