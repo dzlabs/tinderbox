@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.13 2005/07/21 17:06:12 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.14 2005/07/21 17:52:46 marcus Exp $
 #
 
 pb=$0
@@ -38,38 +38,59 @@ call_tc() {
 	${pb}/scripts/tc "$@"
 }
 
+get_dbdriver() {
+    echo "mysql" # XXX
+}
+
 get_dbinfo() {
+    db_driver=$1
+
     db_host=""
     db_name=""
     db_admin=""
-    db_driver="mysql" # XXX
 
     read -p "Does this host have access to connect to the Tinderbox database as a database administrator? (y/n)" option
 
-    case "${option}" in
-        [Yy]|[Yy][Ee][Ss])
-	    read -p "Enter database admin user [root]: " db_admin
-            read -p "Enter database host [localhost]: " db_host
-	    read -p "Enter database name [tinderbox]: " db_name
-	    ;;
-        *)
-	    return 1
-	    ;;
-    esac
+    finished=0
+    while [ ${finished} != 1 ]; do
+        case "${option}" in
+            [Yy]|[Yy][Ee][Ss])
+	        read -p "Enter database admin user [root]: " db_admin
+                read -p "Enter database host [localhost]: " db_host
+	        read -p "Enter database name [tinderbox]: " db_name
+	        ;;
+            *)
+	        return 1
+	        ;;
+        esac
 
-    if [ -z "${db_admin}" ]; then
-	db_admin="root"
-    fi
+        if [ -z "${db_admin}" ]; then
+	    db_admin="root"
+        fi
 
-    if [ -z "${db_host}" ]; then
-	db_host="localhost"
-    fi
+        if [ -z "${db_host}" ]; then
+	    db_host="localhost"
+        fi
 
-    if [ -z "${db_name}" ]; then
-	db_name="tinderbox"
-    fi
+        if [ -z "${db_name}" ]; then
+	    db_name="tinderbox"
+        fi
 
-    echo "${db_driver}:${db_admin}|${db_host}:${db_name}"
+	echo 1>&2 "Are these settings corrrect:"
+	echo 1>&2 "    Database Administrative User : ${db_admin}"
+	echo 1>&2 "    Database Host                : ${db_host}"
+	echo 1>&2 "    Database Name                : ${db_name}"
+	read -p "(y/n)" option
+
+	case "${option}" in
+	    [Yy]|[Yy][Ee][Ss])
+	        finished=1
+		;;
+        esac
+	option="YES"
+    done
+
+    echo "${db_admin}:${db_host}:${db_name}"
 
     return 0
 }

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/setup.sh,v 1.9 2005/07/21 17:03:21 marcus Exp $
+# $MCom: portstools/tinderbox/setup.sh,v 1.10 2005/07/21 17:52:45 marcus Exp $
 #
 
 pb=$0
@@ -108,33 +108,46 @@ db_name=""
 db_user=""
 db_pass=""
 db_admin=""
-db_driver=""
 createdb_cmd=""
 createdb_prompt=""
 grant_cmd=""
 grant_prompt=""
 db_prereqs=""
 do_db=0
-dbinfo=$(get_dbinfo)
+
+db_driver=$(get_dbdriver)
+case "${db_driver}" in
+    mysql)
+        createdb_cmd=${MYSQL_CREATEDB}
+        createdb_prompt=${MYSQL_CREATEDB_PROMPT}
+        grant_cmd=${MYSQL_GRANT}
+        grant_prompt=${MYSQL_GRANT_PROMPT}
+        db_prereqs=${MYSQL_DB_PREREQS}
+        ;;
+    *)
+        tinder_exit "ERROR: Unsupport database driver: ${db_driver}"
+        ;;
+esac
+
+if [ -n "${db_prereqs}" ]; then
+    tinder_echo "INFO: Checking for prerequisites for ${db_driver} database driver ..."
+    missing=$(check_prereqs ${db_prereqs})
+
+    if [ $? = 1 ]; then
+        tinder_echo "ERROR: The following mandatory dependencies are missing.  These must be installed prior to running the Tinderbox setup script."
+        tinder_echo "ERROR:  ${missing}"
+        exit 1
+    fi
+    tinder_echo "DONE."
+    echo ""
+fi
+
+dbinfo=$(get_dbinfo ${db_driver})
 if [ $? = 0 ]; then
-    db_driver_admin=${dbinfo%|*}
-    db_host_name=${dbinfo#*|}
-    db_host=${db_host_name%:*}
-    db_name=${db_host_name#*:}
-    db_driver=${db_driver_admin%:*}
-    db_admin=${db_driver_admin#*:}
-    case "${db_driver}" in
-	mysql)
-	    createdb_cmd=${MYSQL_CREATEDB}
-	    createdb_prompt=${MYSQL_CREATEDB_PROMPT}
-	    grant_cmd=${MYSQL_GRANT}
-	    grant_prompt=${MYSQL_GRANT_PROMPT}
-	    db_prereqs=${MYSQL_DB_PREREQS}
-	    ;;
-	*)
-	    tinder_exit "ERROR: Unsupport database driver: ${db_driver}"
-	    ;;
-    esac
+    db_admin_host=${dbinfo%:*}
+    db_name=${dbinfo##*:}
+    db_admin=${db_admin_host%:*}
+    db_host=${db_admin_host#*:}
     do_db=1
 else
     tinder_echo "WARN: You must first create a database for Tinderbox, and load the database schema from ${SCHEMA_FILE}.  Consult ${TINDERBOX_URL} for more information on creating and initializing the Tinderbox database."
@@ -143,18 +156,6 @@ fi
 if [ ${do_db} = 1 ]; then
     if [ ! -f ${SCHEMA_FILE} ]; then
 	tinder_exit "ERROR: Database schema file ${SCHEMA_FILE} is missing.  Database configuration cannot be completed."
-    fi
-    if [ -n "${db_prereqs}" ]; then
-        tinder_echo "INFO: Checking for prerequisites for ${db_driver} database driver ..."
-        missing=$(check_prereqs ${db_prereqs})
-
-        if [ $? = 1 ]; then
-	    tinder_echo "ERROR: The following mandatory dependencies are missing.  These must be installed prior to running the Tinderbox setup script."
-	    tinder_echo "ERROR:  ${missing}"
-	    exit 1
-        fi
-        tinder_echo "DONE."
-	echo ""
     fi
 
     tinder_echo "INFO: Creating database ${db_name} on ${db_host} ..."
@@ -178,22 +179,36 @@ if [ ${do_db} = 1 ]; then
     tinder_echo "DONE."
     echo ""
 
-    read -p "Enter the desired username for the Tinderbox database : " db_user
     finished=0
     while [ ${finished} != 1 ]; do
-        stty -echo
-        read -p "Enter the desired password for ${db_user} : " db_pass
-	stty echo
-	echo ""
-	stty -echo
-        read -p "Confirm password for ${db_user} : " confirm_pass
-        stty echo
-	echo ""
-	if [ ${db_pass} = ${confirm_pass} ]; then
-	    finished=1
-	else
-	    tinder_echo "WARN: Passwords do not match!"
-	fi
+        read -p "Enter the desired username for the Tinderbox database : " db_user
+        pwfinished=0
+        while [ ${pwfinished} != 1 ]; do
+            stty -echo
+            read -p "Enter the desired password for ${db_user} : " db_pass
+	    stty echo
+	    echo ""
+	    stty -echo
+            read -p "Confirm password for ${db_user} : " confirm_pass
+            stty echo
+	    echo ""
+	    if [ ${db_pass} = ${confirm_pass} ]; then
+	        pwfinished=1
+	    else
+	        tinder_echo "WARN: Passwords do not match!"
+	    fi
+         done
+
+	 echo 1>&2 "Are these the settings you want:"
+	 echo 1>&2 "    Database username      : ${db_user}"
+	 echo 1>&2 "    Database user password : ****"
+	 read -p "(y/n)" option
+
+	 case "${option}" in
+	     [Yy]|[Yy][Ee][Ss])
+	         finished=1
+		 ;;
+        esac
     done
 
     grant_host=""

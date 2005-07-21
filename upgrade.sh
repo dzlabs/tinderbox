@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/upgrade.sh,v 1.7 2005/07/21 07:30:38 marcus Exp $
+# $MCom: portstools/tinderbox/upgrade.sh,v 1.8 2005/07/21 17:52:45 marcus Exp $
 #
 
 pb=$0
@@ -67,17 +67,15 @@ fi
 echo ""
 db_host=""
 db_name=""
-db_driver=""
 db_admin=""
 do_load=0
-dbinfo=$(get_dbinfo)
+db_driver=$(get_dbdriver)
+dbinfo=$(get_dbinfo ${db_driver})
 if [ $? = 0 ]; then
-    db_driver_admin=${dbinfo%|*}
-    db_host_name=${dbinfo#*|}
-    db_host=${db_host_name%:*}
-    db_name=${db_host_name#*:}
-    db_driver=${db_driver_admin%:*}
-    db_admin=${db_driver_admin#*:}
+    db_admin_host=${dbinfo%:*}
+    db_name=${dbinfo##*:}
+    db_admin=${db_admin_host%:*}
+    db_host=${db_admin_host#*:}
     do_load=1
 fi
 
