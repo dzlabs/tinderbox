@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/setup.sh,v 1.4 2005/07/21 05:21:41 marcus Exp $
+# $MCom: portstools/tinderbox/setup.sh,v 1.5 2005/07/21 05:25:18 marcus Exp $
 #
 
 pb=$0
@@ -119,7 +119,7 @@ if [ $? = 0 ]; then
     esac
     do_db=1
 else
-    tinder_echo "WARN: You must first create a database for Tinderbox, and load the database schema from ${SCHEMA_FILE}.  Consult ${TINDERBOX_URL} for moer information on creating and initializing the Tinderbox database."
+    tinder_echo "WARN: You must first create a database for Tinderbox, and load the database schema from ${SCHEMA_FILE}.  Consult ${TINDERBOX_URL} for more information on creating and initializing the Tinderbox database."
 fi
 
 if [ ${do_db} = 1 ]; then
