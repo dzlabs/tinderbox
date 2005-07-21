@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.33 2005/07/21 06:42:00 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.34 2005/07/21 18:29:54 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -93,7 +93,7 @@ nfs_reserved_port_only="YES"
     command.  A Jail is nothing more than a version of FreeBSD.  For example,
     to create a jail for FreeBSD 5.4-RELEASE:
 
-# cd ${pb}/scripts && ./create Jail -n 5.4 -d "FreeBSD 5.4-RELEASE" \
+# cd ${pb}/scripts && ./create Jail -j 5.4 -d "FreeBSD 5.4-RELEASE" \
 	-t RELENG_5_4_0_RELEASE -u NONE
 
     Note: all Jail names _MUST_ begin with their FreeBSD major version number.
@@ -107,7 +107,7 @@ nfs_reserved_port_only="YES"
     For example, to create a portstree that tracks the full FreeBSD ports
     tree:
 
-# cd ${pb}/scripts && ./create PortsTree -n FreeBSD \
+# cd ${pb}/scripts && ./create PortsTree -p FreeBSD \
 	-d "FreeBSD ports tree" -w http://www.freebsd.org/cgi/cvsweb.cgi/ports/
 
 12. Create the required Builds using the ${pb}/scripts/create
@@ -115,7 +115,7 @@ nfs_reserved_port_only="YES"
     build is the object in which packages are created.  To create a build
     that combines a 5.4-RELEASE Jail with the FreeBSD ports tree:
 
-# cd ${pb}/scripts && ./create Build -n 5.4-FreeBSD -j 5.4 -p FreeBSD \
+# cd ${pb}/scripts && ./create Build -b 5.4-FreeBSD -j 5.4 -p FreeBSD \
 	-d "5.4-RELEASE with FreeBSD ports tree"
 
     Note: the recommended way to name Builds is ``Jail-PortsTree''.  All builds
@@ -128,7 +128,7 @@ the -H and -C command line arguments to the create script respectively.
 For example, to use cvsup2.freebsd.org and enable cvsup compression for
 all Jail updates, use the following command:
 
-# cd ${pb}/scripts && ./create Jail -n 5-STABLE -d "FreeBSD 5-STABLE" \
+# cd ${pb}/scripts && ./create Jail -j 5-STABLE -d "FreeBSD 5-STABLE" \
 	-t RELENG_5 -u CVSUP -C -H cvsup2.freebsd.org
 
 Using Tinderbox:
@@ -238,13 +238,13 @@ via nullfs or NFS from another location, use -m switch to create.
 
 Example for NFS:
 
-  ./create PortsTree -n FreeBSD -m server:/directory
-  ./create Jail -n 6-FreeBSD -m server:/directory
+  ./create PortsTree -p FreeBSD -m server:/directory
+  ./create Jail -j 6-FreeBSD -m server:/directory
 
 Example for nullfs:
 
-  ./create PortsTree -n FreeBSD -m /directory
-  ./create Jail -n 6-FreeBSD -m /directory
+  ./create PortsTree -p FreeBSD -m /directory
+  ./create Jail -j 6-FreeBSD -m /directory
 
 Tinderbuild will ensure that these file systems are correctly mounted so you do
 not need to mount them by your own before calling tinderbuild.
@@ -336,7 +336,7 @@ of the following.
 
 To use tinderd scheduling via the web you must first create a User:
 
-# cd ${pb}/scripts && ./tc addUser -n {USER} -e {EMAIL} -p {PASSWORD} -w
+# cd ${pb}/scripts && ./tc addUser -u {USER} -e {EMAIL} -p {PASSWORD} -w
 
 (Where {USER} is a username, {EMAIL} is the user's email address,
 and {PASSWORD} is the user's password for Tinderbox web access.)
@@ -344,7 +344,7 @@ and {PASSWORD} is the user's password for Tinderbox web access.)
 If you want to enable web access for a previously created user, you must
 update that user's account to give them a password as well as web access:
 
-# cd ${pb}/scripts && ./tc updateUser -n {USER} -e {EMAIL} -p {PASSWORD} -w
+# cd ${pb}/scripts && ./tc updateUser -u {USER} -e {EMAIL} -p {PASSWORD} -w
 
 (Where {USER} is a username, {EMAIL} is the user's email address,
 and {PASSWORD} is the user's password for Tinderbox web access.)
