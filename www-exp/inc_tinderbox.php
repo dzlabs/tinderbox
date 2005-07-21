@@ -1,21 +1,21 @@
 <?php
 
-$rootdir = $_SERVER['DOCUMENT_ROOT'];
+$rootdir = '/space';
 
 $wwwrooturi  = '/tinderbox';
-$wwwrootdir  = $rootdir.$wwwrooturi;
+$wwwrootdir  = $rootdir.'/scripts/www-exp';
 $pkguri      = '/tb/packages';
-$pkgdir      = $rootdir.$pkguri;
+$pkgdir      = $rootdir.'/packages';
 $loguri      = '/tb/logs';
-$logdir      = $rootdir.$loguri;
+$logdir      = $rootdir.'/logs';
 $errorloguri = '/tb/errors';
-$errorlogdir = $rootdir.$errorloguri;
+$errorlogdir = $rootdir.'/errors';
 
 $templatesdir = $wwwrootdir.'/templates/default';
 $templatesuri = $wwwrooturi.'/templates/default';
 
-$tinderbox_name  = 'Olivers Tinderbox';
-$tinderbox_title = 'FooBar Packagebuild';
+$tinderbox_name  = 'Marcuscom Tinderbox';
+$tinderbox_title = 'GNOME 2 Packages for i386';
 
 #$with_timer = 1;
 ?>
