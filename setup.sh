@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/setup.sh,v 1.8 2005/07/21 07:30:38 marcus Exp $
+# $MCom: portstools/tinderbox/setup.sh,v 1.9 2005/07/21 17:03:21 marcus Exp $
 #
 
 pb=$0
@@ -39,6 +39,16 @@ PREF_FILES="rawenv tinderbox.ph"
 README="${pb}/scripts/README"
 SCHEMA_FILE="${pb}/scripts/tinderbox.schema"
 TINDERBOX_URL="http://tinderbox.marcuscom.com/"
+
+## Database-specific variables
+# Each command can make use of the following variables:
+#  db_admin : Database administrative user (e.g. root)
+#  db_driver : Database driver (e.g. mysql)
+#  db_host : Database host (e.g. localhost)
+#  db_name : Database name (e.g. tinderbox)
+#  db_user : Database user for Tinderbox (e.g. tinder)
+#  db_pass : Database user password
+##
 
 # MySQL-specific variables
 MYSQL_CREATEDB='/usr/local/bin/mysqladmin -u${db_admin} -p -h ${db_host} create ${db_name}'
