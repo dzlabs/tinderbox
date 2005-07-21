@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/upgrade.sh,v 1.4 2005/07/20 16:11:57 marcus Exp $
+# $MCom: portstools/tinderbox/upgrade.sh,v 1.5 2005/07/21 05:15:51 marcus Exp $
 #
 
 pb=$0
@@ -64,11 +64,14 @@ fi
 echo ""
 db_host=""
 db_name=""
+db_driver=""
 do_load=0
 dbinfo=$(get_dbinfo)
 if [ $? = 0 ]; then
-    db_host=${dbinfo%:*}
-    db_name=${dbinfo#*:}
+    db_driver_host=${dbinfo%:*}
+    db_name=${dbinfo##*:}
+    db_driver=${db_driver_host%:*}
+    db_host=${db_driver_host#*:}
     do_load=1
 fi
 
@@ -78,7 +81,7 @@ while [ -n "${1}" -a -n "${2}" ] ; do
     MIG_VERSION_TO=${2}
 
     if [ ${MIG_VERSION_FROM} = ${DSVERSION} ] ; then
-        mig_db ${do_load} ${db_host} ${db_name}
+        mig_db ${do_load} ${db_driver} ${db_host} ${db_name}
         case $? in
             2)    tinder_exit "ERROR: Database migration failed!  Consult the output above for more information." 2
                   ;;

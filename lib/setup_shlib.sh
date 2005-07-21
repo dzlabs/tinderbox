@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.10 2005/07/21 01:29:48 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.11 2005/07/21 05:15:51 marcus Exp $
 #
 
 pb=$0
@@ -41,6 +41,7 @@ call_tc() {
 get_dbinfo() {
     db_host=""
     db_name=""
+    db_driver="mysql" # XXX
 
     read -p "Does this host have access to connect to the Tinderbox database as root? (y/n)" option
 
@@ -54,21 +55,34 @@ get_dbinfo() {
 	    ;;
     esac
 
-    echo "${db_host}:${db_name}"
+    echo "${db_driver}:${db_host}:${db_name}"
 
     return 0
 }
 
 load_schema() {
     schema_file=$1
-    db_host=$2
-    db_name=$3
+    db_driver=$2
+    db_host=$3
+    db_name=$4
 
-    echo "The next prompt will be for root's password to the ${db_name} database." | /usr/bin/fmt 75 79
+    MYSQL_LOAD='/usr/local/bin/mysql -uroot -p -h ${db_host} ${db_name} < "${schema_file}"'
+    MYSQL_LOAD_PROMPT='echo "The next prompt will be for root'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
 
-    /usr/local/bin/mysql -uroot -p -h ${db_host} ${db_name} < "${schema_file}"
+    rc=0
+    case "${db_driver}" in
+	mysql)
+	    eval ${MYSQL_LOAD_PROMPT}
+	    eval ${MYSQL_LOAD}
+	    rc=$?
+	    ;;
+	*)
+	    echo "Unsupported database driver: ${db_driver}"
+	    return 1
+	    ;;
+    esac
 
-    return $?
+    return ${rc}
 }
 
 check_prereqs() {

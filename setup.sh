@@ -24,12 +24,8 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/setup.sh,v 1.2 2005/07/21 04:26:02 marcus Exp $
+# $MCom: portstools/tinderbox/setup.sh,v 1.3 2005/07/21 05:15:51 marcus Exp $
 #
-
-# TODO This script assumes MySQL is used for the database.  This is true today,
-# but may change in the future.  Once additional database support is added,
-# code will have to be changed to accommodate multiple drivers.
 
 pb=$0
 [ -z "$(echo "${pb}" | sed 's![^/]!!g')" ] && \
@@ -37,12 +33,19 @@ pb=$(type "$pb" | sed 's/^.* //g')
 pb=$(realpath $(dirname $pb))
 pb=${pb%%/scripts}
 
-MAN_PREREQS="lang/perl5.8 databases/p5-DBD-mysql41 databases/mysql41-client"
+MAN_PREREQS="lang/perl5.8"
 OPT_PREREQS="lang/php4 databases/php4-mysql databases/pear-DB www/php4-session"
 PREF_FILES="rawenv tinderbox.ph"
 README="${pb}/scripts/README"
 SCHEMA_FILE="${pb}/scripts/tinderbox.schema"
 TINDERBOX_URL="http://tinderbox.marcuscom.com/"
+
+# MySQL admin commands
+MYSQL_CREATEDB='/usr/local/bin/mysqladmin -uroot -p -h ${db_host} create ${db_name}'
+MYSQL_CREATEDB_PROMPT='tinder_echo "INFO: The next prompt will be for root'"'"'s password on the database server ${db_host}."'
+MYSQL_GRANT='/usr/local/bin/mysql -uroot -p -h ${db_host} -e "GRANT SELECT, INSERT, UPDATE, DELETE ON ${db_name}.* TO '"'"'${db_user}'"'"'@'"'"'${grant_host}'"'"' IDENTIFIED BY '"'"'${db_pass}'"'"' ; FLUSH PRIVILEGES" mysql'
+MYSQL_GRANT_PROMPT=${MYSQL_CREATEDB_PROMPT}
+MYSQL_DB_PREREQS="databases/p5-DBD-mysql41 databases/mysql41-client"
 
 . ${pb}/scripts/lib/setup_shlib.sh
 . ${pb}/scripts/lib/tinderbox_shlib.sh
@@ -89,28 +92,60 @@ db_host=""
 db_name=""
 db_user=""
 db_pass=""
+db_driver=""
+createdb_cmd=""
+createdb_prompt=""
+grant_cmd=""
+grant_prompt=""
+db_prereqs=""
 do_db=0
 dbinfo=$(get_dbinfo)
 if [ $? = 0 ]; then
-    db_host=${dbinfo%:*}
-    db_name=${dbinfo#*:}
+    db_driver_host=${dbinfo%:*}
+    db_name=${dbinfo##*:}
+    db_driver=${db_driver_host%:*}
+    db_host=${db_driver_host#*:}
+    case "${db_driver}" in
+	mysql)
+	    createdb_cmd=${MYSQL_CREATEDB}
+	    createdb_prompt=${MYSQL_CREATEDB_PROMPT}
+	    grant_cmd=${MYSQL_GRANT}
+	    grant_prompt=${MYSQL_GRANT_PROMPT}
+	    db_prereqs=${MYSQL_DB_PREREQS}
+	    ;;
+	*)
+	    tinder_exit "ERROR: Unsupport database driver: ${db_driver}"
+	    ;;
+    esac
     do_db=1
 else
     tinder_echo "WARN: You must first create a database for Tinderbox, and load the database schema from ${SCHEMA_FILE}.  Consult ${TINDERBOX_URL} for moer information on creating and initializing the Tinderbox database."
+fi
+
+if [ -n "${db_prereqs}" ]; then
+    tinder_echo "INFO: Checking for prerequisites for ${db_driver} database driver ..."
+    missing=$(check_prereqs ${db_prereqs})
+
+    if [ $? = 1 ]; then
+	tinder_echo "ERROR: The following mandatory dependencies are missing.  These must be installed prior to running the Tinderbox setup script."
+	tinder_echo "ERROR:  ${missing}"
+	exit 1
+    fi
+    tinder_echo "DONE."
 fi
 
 if [ ${do_db} = 1 ]; then
     if [ ! -f ${SCHEMA_FILE} ]; then
 	tinder_exit "ERROR: Database schema file ${SCHEMA_FILE} is missing.  Database configuration cannot be completed."
     fi
-    tinder_echo "INFO: The next prompt will be for root's password on the database server ${db_host}."
-    /usr/local/bin/mysqladmin -uroot -p -h ${db_host} create ${db_name}
+    eval ${createdb_prompt}
+    eval ${createdb_cmd}
 
     if [ $? != 0 ]; then
 	tinder_exit "ERROR: Database creation failed!  Consult the output above for more information." $?
     fi
 
-    load_schema ${SCHEMA_FILE} ${db_host} ${db_name}
+    load_schema ${SCHEMA_FILE} ${db_driver} ${db_host} ${db_name}
 
     if [ $? != 0 ]; then
 	tinder_exit "ERROR: Database schema load failed!  Consult the output above for more information." $?
@@ -137,16 +172,16 @@ if [ ${do_db} = 1 ]; then
 	grant_host=$(hostname)
     fi
 
-    tinder_echo "INFO: The next prompt will be for root's password on the database server ${db_host}."
+    eval ${grant_prompt}
 
-    /usr/local/bin/mysql -uroot -p -h ${db_host} -e "GRANT SELECT, INSERT, UPDATE, DELETE ON ${db_name}.* TO '${db_user}'@'${grant_host}' IDENTIFIED BY '${db_pass}' ; FLUSH PRIVILEGES" mysql
+    eval ${grant_cmd}
 
     if [ $? != 0 ]; then
 	tinder_exit "ERROR: Database privilege configuration failed!  Consult the output above for more information." $?
     fi
 
     cat > ${pb}/scripts/ds.ph << EOT
-\$DB_DRIVER       = 'mysql';
+\$DB_DRIVER       = '${db_driver}';
 \$DB_HOST         = '${db_host}'
 \$DB_NAME         = '${db_name}'
 \$DB_USER         = '${db_user}'
