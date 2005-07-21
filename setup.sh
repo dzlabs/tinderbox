@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/setup.sh,v 1.3 2005/07/21 05:15:51 marcus Exp $
+# $MCom: portstools/tinderbox/setup.sh,v 1.4 2005/07/21 05:21:41 marcus Exp $
 #
 
 pb=$0
@@ -40,7 +40,7 @@ README="${pb}/scripts/README"
 SCHEMA_FILE="${pb}/scripts/tinderbox.schema"
 TINDERBOX_URL="http://tinderbox.marcuscom.com/"
 
-# MySQL admin commands
+# MySQL-specific variables
 MYSQL_CREATEDB='/usr/local/bin/mysqladmin -uroot -p -h ${db_host} create ${db_name}'
 MYSQL_CREATEDB_PROMPT='tinder_echo "INFO: The next prompt will be for root'"'"'s password on the database server ${db_host}."'
 MYSQL_GRANT='/usr/local/bin/mysql -uroot -p -h ${db_host} -e "GRANT SELECT, INSERT, UPDATE, DELETE ON ${db_name}.* TO '"'"'${db_user}'"'"'@'"'"'${grant_host}'"'"' IDENTIFIED BY '"'"'${db_pass}'"'"' ; FLUSH PRIVILEGES" mysql'
@@ -122,22 +122,22 @@ else
     tinder_echo "WARN: You must first create a database for Tinderbox, and load the database schema from ${SCHEMA_FILE}.  Consult ${TINDERBOX_URL} for moer information on creating and initializing the Tinderbox database."
 fi
 
-if [ -n "${db_prereqs}" ]; then
-    tinder_echo "INFO: Checking for prerequisites for ${db_driver} database driver ..."
-    missing=$(check_prereqs ${db_prereqs})
-
-    if [ $? = 1 ]; then
-	tinder_echo "ERROR: The following mandatory dependencies are missing.  These must be installed prior to running the Tinderbox setup script."
-	tinder_echo "ERROR:  ${missing}"
-	exit 1
-    fi
-    tinder_echo "DONE."
-fi
-
 if [ ${do_db} = 1 ]; then
     if [ ! -f ${SCHEMA_FILE} ]; then
 	tinder_exit "ERROR: Database schema file ${SCHEMA_FILE} is missing.  Database configuration cannot be completed."
     fi
+    if [ -n "${db_prereqs}" ]; then
+        tinder_echo "INFO: Checking for prerequisites for ${db_driver} database driver ..."
+        missing=$(check_prereqs ${db_prereqs})
+
+        if [ $? = 1 ]; then
+	    tinder_echo "ERROR: The following mandatory dependencies are missing.  These must be installed prior to running the Tinderbox setup script."
+	    tinder_echo "ERROR:  ${missing}"
+	    exit 1
+        fi
+        tinder_echo "DONE."
+    fi
+
     eval ${createdb_prompt}
     eval ${createdb_cmd}
 
@@ -182,10 +182,10 @@ if [ ${do_db} = 1 ]; then
 
     cat > ${pb}/scripts/ds.ph << EOT
 \$DB_DRIVER       = '${db_driver}';
-\$DB_HOST         = '${db_host}'
-\$DB_NAME         = '${db_name}'
-\$DB_USER         = '${db_user}'
-\$DB_PASS         = '${db_pass}'
+\$DB_HOST         = '${db_host}';
+\$DB_NAME         = '${db_name}';
+\$DB_USER         = '${db_user}';
+\$DB_PASS         = '${db_pass}';
 
 1;
 EOT
