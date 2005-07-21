@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.31 2005/07/20 02:57:59 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.32 2005/07/21 06:34:51 ade Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -89,17 +89,17 @@ rpcbind_enable="YES"
 nfs_server_enable="YES"
 nfs_reserved_port_only="YES"
 
-10. Create the required Jails using the ${pb}/scripts/create_new_jail
+10. Create the required Jails using the ${pb}/scripts/create
     command.  A Jail is nothing more than a version of FreeBSD.  For example,
     to create a jail for FreeBSD 5.4-RELEASE:
 
-# cd ${pb}/scripts && ./create_new_jail -n 5.4 -d "FreeBSD 5.4-RELEASE" \
+# cd ${pb}/scripts && ./create Jail -n 5.4 -d "FreeBSD 5.4-RELEASE" \
 	-t RELENG_5_4_0_RELEASE -u NONE
 
     Note: all Jail names _MUST_ begin with their FreeBSD major version number.
     That is, the following is an illegal jail name: ``FreeBSD-5.4''.
 
-11. Create the required PortsTrees using the ${pb}/scripts/create_new_portstree
+11. Create the required PortsTrees using the ${pb}/scripts/create
     command.  A PortsTree is a set of ports you wish to build.  A PortsTree
     does not have to be a complete FreeBSD ports tree.  However, all ports
     within a tree must have all of their dependencies within the same tree.
@@ -107,28 +107,28 @@ nfs_reserved_port_only="YES"
     For example, to create a portstree that tracks the full FreeBSD ports
     tree:
 
-# cd ${pb}/scripts && ./create_new_portstree -n FreeBSD \
+# cd ${pb}/scripts && ./create PortsTree -n FreeBSD \
 	-d "FreeBSD ports tree" -w http://www.freebsd.org/cgi/cvsweb.cgi/ports/
 
-12. Create the required Builds using the ${pb}/scripts/create_new_build
+12. Create the required Builds using the ${pb}/scripts/create
     command.  A Build is a combination of a Jail and a PortsTree.  The
     build is the object in which packages are created.  To create a build
     that combines a 5.4-RELEASE Jail with the FreeBSD ports tree:
 
-# cd ${pb}/scripts && ./create_new_build -n 5.4-FreeBSD -j 5.4 -p FreeBSD \
+# cd ${pb}/scripts && ./create Build -n 5.4-FreeBSD -j 5.4 -p FreeBSD \
 	-d "5.4-RELEASE with FreeBSD ports tree"
 
     Note: the recommended way to name Builds is ``Jail-PortsTree''.  All builds
     must also begin with their FreeBSD major version number.
 
 
-NOTE: All the create_new_* scripts use cvsup12 as their default cvsup mirror.
+NOTE: The create script uses cvsup12 as their default cvsup mirror.
 If you would like to use another server, or enable cvsup compression use
 the -H and -C command line arguments to the create_new_* scripts respectively.
 For example, to use cvsup2.freebsd.org and enable cvsup compression for
 all Jail updates, use the following command:
 
-# cd ${pb}/scripts && ./create_new_jail -n 5-STABLE -d "FreeBSD 5-STABLE" \
+# cd ${pb}/scripts && ./create Jail -n 5-STABLE -d "FreeBSD 5-STABLE" \
 	-t RELENG_5 -u CVSUP -C -H cvsup2.freebsd.org
 
 Using Tinderbox:
@@ -234,18 +234,17 @@ Alternative Mounting:
 ---------------------
 
 If you want to mount /ports inside your PortsTree or /src inside your Jail
-via nullfs or NFS from another location, use -m switch to create_new_portstree
-and create_new_jail.
+via nullfs or NFS from another location, use -m switch to create.
 
 Example for NFS:
 
-  ./create_new_portstree -n FreeBSD -m server:/directory
-  ./create_new_jail -n 6-FreeBSD -m server:/directory
+  ./create PortsTree -n FreeBSD -m server:/directory
+  ./create Jail -n 6-FreeBSD -m server:/directory
 
 Example for nullfs:
 
-  ./create_new_portstree -n FreeBSD -m /directory
-  ./create_new_jail -n 6-FreeBSD -m /directory
+  ./create PortsTree -n FreeBSD -m /directory
+  ./create Jail -n 6-FreeBSD -m /directory
 
 Tinderbuild will ensure that these file systems are correctly mounted so you do
 not need to mount them by your own before calling tinderbuild.
