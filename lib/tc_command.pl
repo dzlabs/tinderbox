@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.61 2005/07/20 18:15:53 oliver Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.62 2005/07/21 18:27:58 marcus Exp $
 #
 
 BEGIN {
@@ -145,22 +145,22 @@ require "tinderlib.pl";
                 func  => \&addBuild,
                 help  => "Add a build to the datastore",
                 usage =>
-                    "-n <build name> -j <jail name> -p <portstree name> [-d <build description>]",
-                optstr => 'n:j:p:d:',
+                    "-b <build name> -j <jail name> -p <portstree name> [-d <build description>]",
+                optstr => 'b:j:p:d:',
         },
         "addJail" => {
                 func  => \&addJail,
                 help  => "Add a jail to the datastore",
                 usage =>
-                    "-n <jail name> -t <jail tag> [-d <jail description>] [-m <src mount source>] [-u <jail update command|CVSUP|NONE>]",
-                optstr => 'm:n:t:u:d:',
+                    "-j <jail name> -t <jail tag> [-d <jail description>] [-m <src mount source>] [-u <jail update command|CVSUP|NONE>]",
+                optstr => 'm:j:t:u:d:',
         },
         "addPortsTree" => {
                 func  => \&addPortsTree,
                 help  => "Add a portstree to the datastore",
                 usage =>
-                    "-n <portstree name> [-d <portstree description>] [-m <ports mount source>] [-u <portstree update command|NONE|CVSUP>] [-w <CVSweb URL>]",
-                optstr => 'm:n:u:d:w:',
+                    "-p <portstree name> [-d <portstree description>] [-m <ports mount source>] [-u <portstree update command|NONE|CVSUP>] [-w <CVSweb URL>]",
+                optstr => 'm:p:u:d:w:',
         },
         "addPort" => {
                 func => \&addPort,
@@ -372,14 +372,14 @@ require "tinderlib.pl";
         "addUser" => {
                 func   => \&addUser,
                 help   => "Add a user to the datastore",
-                usage  => "-n <user name> [-e <user email>] [-p password] [-w]",
-                optstr => 'n:e:p:w',
+                usage  => "-u <user name> [-e <user email>] [-p password] [-w]",
+                optstr => 'u:e:p:w',
         },
         "updateUser" => {
                 func   => \&updateUser,
                 help   => "Update user preferences",
-                usage  => "-n <user name> [-e <user email>] [-p password] [-w]",
-                optstr => 'n:e:p:w',
+                usage  => "-u <user name> [-e <user email>] [-p password] [-w]",
+                optstr => 'u:e:p:w',
         },
         "setWwwAdmin" => {
                 func   => \&setWwwAdmin,
@@ -773,11 +773,11 @@ sub addHost {
 }
 
 sub addBuild {
-        if (!$opts->{'n'} || !$opts->{'j'} || !$opts->{'p'}) {
+        if (!$opts->{'b'} || !$opts->{'j'} || !$opts->{'p'}) {
                 usage("addBuild");
         }
 
-        my $name      = $opts->{'n'};
+        my $name      = $opts->{'b'};
         my $jail      = $opts->{'j'};
         my $portstree = $opts->{'p'};
 
@@ -816,11 +816,11 @@ sub addBuild {
 }
 
 sub addJail {
-        if (!$opts->{'n'} || !$opts->{'t'}) {
+        if (!$opts->{'j'} || !$opts->{'t'}) {
                 usage("addJail");
         }
 
-        my $name = $opts->{'n'};
+        my $name = $opts->{'j'};
         my $tag  = $opts->{'t'};
 
         if ($ds->isValidJail($name)) {
@@ -858,11 +858,11 @@ sub addJail {
 }
 
 sub addPortsTree {
-        if (!$opts->{'n'}) {
+        if (!$opts->{'p'}) {
                 usage("addPortsTree");
         }
 
-        my $name = $opts->{'n'};
+        my $name = $opts->{'p'};
 
         if ($ds->isValidPortsTree($name)) {
                 cleanup($ds, 1,
@@ -2090,13 +2090,13 @@ EOD
 }
 
 sub addUser {
-        if (!$opts->{'n'}) {
+        if (!$opts->{'u'}) {
                 usage("addUser");
         }
 
         my $user = new User();
 
-        $user->setName($opts->{'n'});
+        $user->setName($opts->{'u'});
         $user->setEmail($opts->{'e'})    if ($opts->{'e'});
         $user->setPassword($opts->{'p'}) if ($opts->{'p'});
         $opts->{'w'} ? $user->setWwwEnabled(1) : $user->setWwwEnabled(0);
@@ -2112,11 +2112,11 @@ sub addUser {
 }
 
 sub updateUser {
-        if (!$opts->{'n'}) {
+        if (!$opts->{'u'}) {
                 usage("updateUser");
         }
 
-        my $username = $opts->{'n'};
+        my $username = $opts->{'u'};
 
         if (!$ds->isValidUser($username)) {
                 cleanup($ds, 1, "Unknown user, $username\n");
