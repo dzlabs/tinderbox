@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.45 2005/07/21 20:39:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.46 2005/07/21 20:42:52 marcus Exp $
 #
 
 package TinderboxDS;
@@ -171,7 +171,7 @@ sub updateConfig {
         my $self      = shift;
         my $configlet = shift;
         my $host      = shift;
-        my @config    = shift;
+        my @config    = @_;
         croak "Argument 2 not of type Host\n"
             if (defined($host) && ref($host) ne "Host");
         my $hostid;
