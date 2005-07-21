@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.9 2005/07/16 21:26:39 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.10 2005/07/21 11:28:29 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -32,6 +32,8 @@ require_once 'module/moduleBuilds.php';
 require_once 'module/moduleHosts.php';
 
 class moduleUsers extends module {
+
+	var $permissions;
 
 	function moduleUsers() {
 		$this->module();
@@ -47,9 +49,11 @@ class moduleUsers extends module {
 			$this->template_assign( 'user_name', $user->getName() );
 			$this->template_assign( 'user_id',   $user->getId() );
 			if( $this->checkWwwAdmin() ) {
-				$this->template_assign( 'is_www_admin', 1 );
+				$this->template_assign( 'is_www_admin', true );
 				$this->template_assign( 'all_users', $this->get_all_users() );
-			}
+			} else {
+				$this->template_assign( 'is_www_admin', false );
+			}			
 		} else {
 			$this->template_assign( 'user_name', '' );
 		}
@@ -70,7 +74,8 @@ class moduleUsers extends module {
 			$this->TinderboxDS->addError( permission_denied );
 			return $this->template_parse( 'user_admin.tpl' );
 		}
-		$this->template_assign( 'add', 1 );
+		$this->template_assign( 'add',    true  );
+		$this->template_assign( 'modify', false );
 		return $this->template_parse( 'user_admin.tpl' );
 	}
 
@@ -110,7 +115,8 @@ class moduleUsers extends module {
 			$this->TinderboxDS->addError( permission_denied );
 			return $this->template_parse( 'user_admin.tpl' );
 		}
-		$this->template_assign( 'modify', 1 );
+		$this->template_assign( 'add',    false );
+		$this->template_assign( 'modify', true  );
 		return $this->template_parse( 'user_admin.tpl' );
 	}
 
@@ -325,10 +331,14 @@ class moduleUsers extends module {
 	}
 
 	function get_permission( $host_id, $object_type, $object_id, $permission ) {
-		if( !is_array( $this->permissions[$host_id][$object_type][$object_id] ) && $this->permissions[$host_id][$object_type][$object_id]['set'] != 1 ) {
+		if( !is_array( $this->permissions[$host_id][$object_type][$object_id] ) && !isset( $this->permissions[$host_id][$object_type][$object_id]['set'] ) ) {
 			$this->fetch_permissions( $host_id, $object_type, $object_id );
 		}
-		return $this->permissions[$host_id][$object_type][$object_id][$permission];
+		if( isset( $this->permissions[$host_id][$object_type][$object_id][$permission] ) ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	function checkWwwAdmin() {

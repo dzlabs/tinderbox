@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/PortsTree.php,v 1.2 2005/07/10 07:39:18 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/PortsTree.php,v 1.3 2005/07/21 11:28:29 oliver Exp $
 #
 
     require_once 'TinderObject.php';
@@ -33,12 +33,12 @@
 
 	function PortsTree($argv = array()) {
 	    $object_hash = array(
-		Ports_Tree_Id => "",
-		Ports_Tree_Name => "",
-		Ports_Tree_Description => "",
-		Ports_Tree_Last_Built => "",
-		Ports_Tree_Update_Cmd => "",
-                Ports_Tree_CVSweb_URL => ""
+		'Ports_Tree_Id' => '',
+		'Ports_Tree_Name' => '',
+		'Ports_Tree_Description' => '',
+		'Ports_Tree_Last_Built' => '',
+		'Ports_Tree_Update_Cmd' => '',
+                'Ports_Tree_CVSweb_URL' => ''
 	    );
 
 	    $this->TinderObject($object_hash, $argv);

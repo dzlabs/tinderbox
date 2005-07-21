@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/module/moduleSession.php,v 1.2 2005/07/10 17:06:25 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/module/moduleSession.php,v 1.3 2005/07/21 11:28:29 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -47,7 +47,11 @@ class moduleSession extends module {
 	}
 
 	function getAttribute( $attribute ) {
-		return $_SESSION[$attribute];
+		if( isset( $_SESSION[$attribute] ) ) {
+			return $_SESSION[$attribute];
+		} else {
+			return false;
+		}
 	}
 
 	function removeAttribute( $attribute ) {

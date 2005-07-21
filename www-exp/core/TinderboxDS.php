@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/core/TinderboxDS.php,v 1.9 2005/07/20 11:20:24 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/core/TinderboxDS.php,v 1.10 2005/07/21 11:28:29 oliver Exp $
 #
 
     require_once 'DB.php';
@@ -588,9 +588,17 @@
         }
 
         function getAllHosts() {
-            $hosts = $this->getHosts();
+            $query = "SELECT * FROM hosts WHERE Host_Name NOT IN ('__ALL__')";
 
-            return $hosts;
+            $rc = $this->_doQueryHashRef($query, $results, array());
+
+            if (!$rc) {
+                return null;
+            }
+
+            $ports = $this->_newFromArray("Host", $results);
+
+            return $ports;
         }
 
         function getAllJails() {
@@ -718,7 +726,7 @@
         function getPackageSuffix($jail_id) {
             if (empty($jail_id)) return "";
             /* Use caching to avoid a lot of SQL queries */
-            if ($this->packageSuffixCache[$jail_id]) {
+            if ( isset($this->packageSuffixCache[$jail_id])) {
                 return $this->packageSuffixCache[$jail_id];
             } else {
                 $jail = $this->getJailById($jail_id);

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/core/Build.php,v 1.1 2005/07/01 18:20:51 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/core/Build.php,v 1.2 2005/07/21 11:28:28 oliver Exp $
 #
 
     require_once 'TinderObject.php';
@@ -33,13 +33,13 @@
 
 	function Build($argv = array()) {
 	    $object_hash = array(
-		Build_Id => "",
-		Build_Name => "",
-		Jail_Id => "",
-		Ports_Tree_Id => "",
-		Build_Description => "",
-		Build_Status => "",
-		Build_Current_Port => ""
+		'Build_Id' => '',
+		'Build_Name' => '',
+		'Jail_Id' => '',
+		'Ports_Tree_Id' => '',
+		'Build_Description' => '',
+		'Build_Status' => '',
+		'Build_Current_Port' => ''
 	    );
 
 	    $this->TinderObject($object_hash, $argv);

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/module/moduleBuildPorts.php,v 1.3 2005/07/10 17:06:25 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/module/moduleBuildPorts.php,v 1.4 2005/07/21 11:28:29 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -46,8 +46,9 @@ class moduleBuildPorts extends module {
 
 		if( is_array( $ports ) && count( $ports ) > 0 ) {
 			$this->template_assign( 'data', $this->modulePorts->get_list_data( $build_name, $ports ) );
+			$this->template_assign( 'no_list', false );
 		} else {
-			$this->template_assign( 'no_list', 1 );
+			$this->template_assign( 'no_list', true );
 		}
 
 		$this->template_assign( 'maintainers',            $this->TinderboxDS->getAllMaintainers() );
@@ -68,14 +69,17 @@ class moduleBuildPorts extends module {
 		if( $build_name ) {
 			$build = $this->TinderboxDS->getBuildByName( $build_name );
 			$build_id = $build->getId();
+		} else {
+			$build_id = false;
 		}
 
 		$ports = $this->TinderboxDS->getPortsByStatus( $build_id, $maintainer, 'FAIL' );
 
 		if( is_array( $ports ) && count( $ports ) > 0 ) {
 			$this->template_assign( 'data', $this->modulePorts->get_list_data( $build_name, $ports ) );
+			$this->template_assign( 'no_list', false );
 		} else {
-			$this->template_assign( 'no_list', 1 );
+			$this->template_assign( 'no_list', true );
 		}
 
 		$this->template_assign( 'build_name', $build_name );
@@ -92,14 +96,17 @@ class moduleBuildPorts extends module {
 		if( $build_name ) {
 			$build = $this->TinderboxDS->getBuildByName( $build_name );
 			$build_id = $build->getId();
+		} else {
+			$build_id = false;
 		}
 
 		$ports = $this->TinderboxDS->getLatestPorts( $build_id, 20 );
 
 		if( is_array( $ports ) && count( $ports ) > 0 ) {
 			$this->template_assign( 'data', $this->modulePorts->get_list_data( $build_name, $ports ) );
+			$this->template_assign( 'no_list', false );
 		} else {
-			$this->template_assign( 'no_list', 1 );
+			$this->template_assign( 'no_list', true );
 		}
 
 		$this->template_assign( 'current_builds',         $current_builds );

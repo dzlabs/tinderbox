@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.3 2005/07/10 17:06:25 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.4 2005/07/21 11:28:29 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -41,14 +41,15 @@ class modulePorts extends module {
 
 		if( is_array( $ports ) && count( $ports ) > 0 ) {
 			$this->template_assign( 'data', $this->get_list_data( '', $ports ) );
+			$this->template_assign( 'no_list', false );
 		} else {
-			$this->template_assign( 'no_list', 1 );
+			$this->template_assign( 'no_list', true );
 		}
 
 		foreach( $ports as $port ) {
 			$build = $this->TinderboxDS->getBuildById( $port->getBuildId() );
 			$ports_tree = $this->TinderboxDS->getPortsTreeForBuild( $build );
-			if( !$ports_tree_ids[$ports_tree->getId()] ) {
+			if( empty( $ports_tree_ids[$ports_tree->getId()] ) ) {
 				$ports_tree_ids[$ports_tree->getId()] = 1;
 				$ports_trees_links[] = array( 'name' => $ports_tree->getName(), 'cvsweb' => $ports_tree->getCVSwebURL() );
 			}
@@ -70,15 +71,16 @@ class modulePorts extends module {
 		global $pkguri;
 
 		if( empty( $build_name ) ) {
-			$different_builds = 1;
+			$different_builds = true;
 		} else {
+			$different_builds = false;
 			$build = $this->TinderboxDS->getBuildByName( $build_name );
 			$package_suffix = $this->TinderboxDS->getPackageSuffix( $build->getJailId() );
 		}
 
 
 		foreach( $ports as $port ) {
-			if( $different_builds == 1 && $id != $port->getBuildId() ) {
+			if( $different_builds == true ) {
 				$build = $this->TinderboxDS->getBuildById( $port->getBuildId() );
 				$package_suffix = $this->TinderboxDS->getPackageSuffix( $build->getJailId() );
 				$build_name = $build->getName();

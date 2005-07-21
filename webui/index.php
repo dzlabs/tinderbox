@@ -24,13 +24,17 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.8 2005/07/18 09:31:49 oliver Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.9 2005/07/21 11:28:28 oliver Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
 
 function get_var( $var ) {
-	return $_POST[$var]?$_POST[$var]:$_GET[$var];
+	if( isset( $_POST[$var] ) ) {
+		return $_POST[$var];
+	} elseif( isset( $_GET[$var] ) ) {
+		return $_GET[$var];
+	}
 }
 
 require_once 'module/moduleBuilds.php';
@@ -50,9 +54,9 @@ $moduleTinderd		= new moduleTinderd();
 $moduleUsers		= new moduleUsers();
 
 $moduleSession->start();
-if( $_POST['do_login'] ) {
+if( isset($_POST['do_login']) ) {
 	$moduleUsers->do_login( $_POST['User_Name'], $_POST['User_Password'] );
-} elseif( $_POST['do_logout'] || ( $moduleUsers->is_logged_in() && !$moduleUsers->get_www_enabled() ) ) {
+} elseif( isset($_POST['do_logout']) || ( $moduleUsers->is_logged_in() && !$moduleUsers->get_www_enabled() ) ) {
 	$moduleUsers->do_logout();
 	header( 'Location: index.php' );
 }
@@ -137,7 +141,7 @@ switch( $action ) {
 
 echo $display;
 
-if( $with_timer == 1 ) {
+if( isset( $with_timer ) && $with_timer == 1 ) {
         $endtimer = explode( ' ', microtime() );
         $timer = ( $endtimer[1]-$starttimer[1] )+( $endtimer[0]-$starttimer[0] );
         printf( '<p style="color:#FF0000;font-size:10px;">elapsed: %03.6f seconds, %s', $timer, ' </p>' );

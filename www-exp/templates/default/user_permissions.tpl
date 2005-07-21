@@ -18,12 +18,12 @@
 		<?foreach($all_builds as $build) {?>
 		<tr>		
 			<td><?=$build['build_name']?></td>
-			<td align="center"><input type="checkbox" name="permission_object[<?=$host['host_id']?>][<?=$build['build_id']?>][PERM_ADD_QUEUE]"          <?if($permission_object[$host['host_id']][$build['build_id']]['PERM_ADD_QUEUE']){?>checked="checked"<?}?> /></td>
-			<td align="center"><input type="checkbox" name="permission_object[<?=$host['host_id']?>][<?=$build['build_id']?>][PERM_MODIFY_OWN_QUEUE]"   <?if($permission_object[$host['host_id']][$build['build_id']]['PERM_MODIFY_OWN_QUEUE']){?>checked="checked"<?}?> /></td>
-			<td align="center"><input type="checkbox" name="permission_object[<?=$host['host_id']?>][<?=$build['build_id']?>][PERM_DELETE_OWN_QUEUE]"   <?if($permission_object[$host['host_id']][$build['build_id']]['PERM_DELETE_OWN_QUEUE']){?>checked="checked"<?}?> /></td>
-			<td align="center"><input type="checkbox" name="permission_object[<?=$host['host_id']?>][<?=$build['build_id']?>][PERM_MODIFY_OTHER_QUEUE]" <?if($permission_object[$host['host_id']][$build['build_id']]['PERM_MODIFY_OTHER_QUEUE']){?>checked="checked"<?}?> /></td>
-			<td align="center"><input type="checkbox" name="permission_object[<?=$host['host_id']?>][<?=$build['build_id']?>][PERM_DELETE_OTHER_QUEUE]" <?if($permission_object[$host['host_id']][$build['build_id']]['PERM_DELETE_OTHER_QUEUE']){?>checked="checked"<?}?> /></td>
-			<td align="center"><input type="checkbox" name="permission_object[<?=$host['host_id']?>][<?=$build['build_id']?>][PERM_PRIO_LOWER_5]"       <?if($permission_object[$host['host_id']][$build['build_id']]['PERM_PRIO_LOWER_5']){?>checked="checked"<?}?> /></td>
+			<td align="center"><input type="checkbox" name="permission_object[<?=$host['host_id']?>][<?=$build['build_id']?>][PERM_ADD_QUEUE]"          <?if(isset($permission_object[$host['host_id']][$build['build_id']]['PERM_ADD_QUEUE'])){?>checked="checked"<?}?> /></td>
+			<td align="center"><input type="checkbox" name="permission_object[<?=$host['host_id']?>][<?=$build['build_id']?>][PERM_MODIFY_OWN_QUEUE]"   <?if(isset($permission_object[$host['host_id']][$build['build_id']]['PERM_MODIFY_OWN_QUEUE'])){?>checked="checked"<?}?> /></td>
+			<td align="center"><input type="checkbox" name="permission_object[<?=$host['host_id']?>][<?=$build['build_id']?>][PERM_DELETE_OWN_QUEUE]"   <?if(isset($permission_object[$host['host_id']][$build['build_id']]['PERM_DELETE_OWN_QUEUE'])){?>checked="checked"<?}?> /></td>
+			<td align="center"><input type="checkbox" name="permission_object[<?=$host['host_id']?>][<?=$build['build_id']?>][PERM_MODIFY_OTHER_QUEUE]" <?if(isset($permission_object[$host['host_id']][$build['build_id']]['PERM_MODIFY_OTHER_QUEUE'])){?>checked="checked"<?}?> /></td>
+			<td align="center"><input type="checkbox" name="permission_object[<?=$host['host_id']?>][<?=$build['build_id']?>][PERM_DELETE_OTHER_QUEUE]" <?if(isset($permission_object[$host['host_id']][$build['build_id']]['PERM_DELETE_OTHER_QUEUE'])){?>checked="checked"<?}?> /></td>
+			<td align="center"><input type="checkbox" name="permission_object[<?=$host['host_id']?>][<?=$build['build_id']?>][PERM_PRIO_LOWER_5]"       <?if(isset($permission_object[$host['host_id']][$build['build_id']]['PERM_PRIO_LOWER_5'])){?>checked="checked"<?}?> /></td>
 		</tr>
 		<?}?>
 	<?}else{?>

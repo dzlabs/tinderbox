@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuilds.php,v 1.3 2005/07/10 17:06:25 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuilds.php,v 1.4 2005/07/21 11:28:29 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -47,8 +47,9 @@ class moduleBuilds extends module {
 				$sort[] = $res['name'];
 			array_multisort( $sort, SORT_ASC, $data );
 			$this->template_assign( 'data', $data );
+			$this->template_assign( 'no_list', false );
 		} else {
-			$this->template_assign( 'no_list', 1 );
+			$this->template_assign( 'no_list', true );
 		}
 
 		$this->template_assign( 'maintainers', $this->TinderboxDS->getAllMaintainers() );
@@ -66,7 +67,7 @@ class moduleBuilds extends module {
 			$description = $build->getDescription();
 			$name        = $build->getName();
 
-			$failures    = $stats['fails'];
+			$failures    = $stats['fails']?$stats['fails']:0;
 
 			switch( $status ) {
 				case 'PORTBUILD':
@@ -83,10 +84,12 @@ class moduleBuilds extends module {
 			$data[$i]['status_field_class'] = $status_field_class;
 			$data[$i]['name'] = $name;
 			$data[$i]['description'] = $description;
-			if( is_dir( $pkgdir.'/'.$name ) )
+			if( is_dir( $pkgdir.'/'.$name ) ) {
 				$data[$i]['packagedir'] = $pkguri.'/'.$name;
-			if( $failures > 0 )
-				$data[$i]['failures'] = $failures;
+			} else {
+				$data[$i]['packagedir'] = false;
+			}			
+			$data[$i]['failures'] = $failures;
 			$i++;
 		}
 

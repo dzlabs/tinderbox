@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/BuildPortsQueue.php,v 1.3 2005/07/18 17:38:19 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/BuildPortsQueue.php,v 1.4 2005/07/21 11:28:28 oliver Exp $
 #
 
     require_once 'TinderObject.php';
@@ -33,20 +33,20 @@
 
 	function BuildPortsQueue($argv = array()) {
 	    $object_hash = array(
-                Build_Ports_Queue_Id => "",
-		Enqueue_Date => "",
-		Completion_Date  => "",
-		Host_Name => "",
-		Build_Id => "",
-		Build_Name => "",
-		User_Id => "",
-		User_Name => "",
-		Port_Directory => "",
-		Priority => "",
-		Host_Id => "",
-		Host_Name => "",
-		Email_On_Completion => "",
-		Status  => ""
+                'Build_Ports_Queue_Id' => '',
+		'Enqueue_Date' => '',
+		'Completion_Date'  => '',
+		'Host_Name' => '',
+		'Build_Id' => '',
+		'Build_Name' => '',
+		'User_Id' => '',
+		'User_Name' => '',
+		'Port_Directory' => '',
+		'Priority' => '',
+		'Host_Id' => '',
+		'Host_Name' => '',
+		'Email_On_Completion' => '',
+		'Status'  => ''
 	    );
 
 	    $this->TinderObject($object_hash, $argv);

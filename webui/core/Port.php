@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/Port.php,v 1.1 2005/07/01 18:20:52 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/Port.php,v 1.2 2005/07/21 11:28:29 oliver Exp $
 #
 
     require_once 'TinderObject.php';
@@ -33,16 +33,16 @@
 
 	function Port($argv = array()) {
 	    $object_hash = array(
-                Build_Id => "",
-		Port_Id => "",
-		Port_Name => "",
-		Port_Directory => "",
-		Port_Comment => "",
-		Port_Maintainer => "",
-		Last_Built => "",
-		Last_Status => "",
-		Last_Successful_Built => "",
-		Last_Built_Version => ""
+                'Build_Id' => '',
+		'Port_Id' => '',
+		'Port_Name' => '',
+		'Port_Directory' => '',
+		'Port_Comment' => '',
+		'Port_Maintainer' => '',
+		'Last_Built' => '',
+		'Last_Status' => '',
+		'Last_Successful_Built' => '',
+		'Last_Built_Version' => ''
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
