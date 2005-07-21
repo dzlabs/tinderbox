@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/setup.sh,v 1.1 2005/07/21 01:30:53 marcus Exp $
+# $MCom: portstools/tinderbox/setup.sh,v 1.2 2005/07/21 04:26:02 marcus Exp $
 #
 
 # TODO This script assumes MySQL is used for the database.  This is true today,
@@ -145,7 +145,7 @@ if [ ${do_db} = 1 ]; then
 	tinder_exit "ERROR: Database privilege configuration failed!  Consult the output above for more information." $?
     fi
 
-    cat >> ${pb}/scripts/ds.ph << EOT
+    cat > ${pb}/scripts/ds.ph << EOT
 \$DB_DRIVER       = 'mysql';
 \$DB_HOST         = '${db_host}'
 \$DB_NAME         = '${db_name}'
