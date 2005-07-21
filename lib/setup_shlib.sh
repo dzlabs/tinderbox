@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.9 2005/07/20 17:50:21 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.10 2005/07/21 01:29:48 marcus Exp $
 #
 
 pb=$0
@@ -69,4 +69,21 @@ load_schema() {
     /usr/local/bin/mysql -uroot -p -h ${db_host} ${db_name} < "${schema_file}"
 
     return $?
+}
+
+check_prereqs() {
+    reqs="$@"
+    error=0
+    missing=""
+
+    for r in ${reqs} ; do
+	if [ -z $(pkg_info -Q -O ${r}) ]; then
+	    missing="${missing} ${r}"
+	    error=1
+	fi
+    done
+
+    echo "${missing}"
+
+    return ${error}
 }
