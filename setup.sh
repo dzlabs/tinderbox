@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/setup.sh,v 1.7 2005/07/21 06:08:03 marcus Exp $
+# $MCom: portstools/tinderbox/setup.sh,v 1.8 2005/07/21 07:30:38 marcus Exp $
 #
 
 pb=$0
@@ -41,9 +41,9 @@ SCHEMA_FILE="${pb}/scripts/tinderbox.schema"
 TINDERBOX_URL="http://tinderbox.marcuscom.com/"
 
 # MySQL-specific variables
-MYSQL_CREATEDB='/usr/local/bin/mysqladmin -uroot -p -h ${db_host} create ${db_name}'
-MYSQL_CREATEDB_PROMPT='tinder_echo "INFO: The next prompt will be for root'"'"'s password on the database server ${db_host}."'
-MYSQL_GRANT='/usr/local/bin/mysql -uroot -p -h ${db_host} -e "GRANT SELECT, INSERT, UPDATE, DELETE ON ${db_name}.* TO '"'"'${db_user}'"'"'@'"'"'${grant_host}'"'"' IDENTIFIED BY '"'"'${db_pass}'"'"' ; FLUSH PRIVILEGES" mysql'
+MYSQL_CREATEDB='/usr/local/bin/mysqladmin -u${db_admin} -p -h ${db_host} create ${db_name}'
+MYSQL_CREATEDB_PROMPT='tinder_echo "INFO: The next prompt will be for ${db_admin}'"'"'s password on the database server ${db_host}."'
+MYSQL_GRANT='/usr/local/bin/mysql -u${db_admin} -p -h ${db_host} -e "GRANT SELECT, INSERT, UPDATE, DELETE ON ${db_name}.* TO '"'"'${db_user}'"'"'@'"'"'${grant_host}'"'"' IDENTIFIED BY '"'"'${db_pass}'"'"' ; FLUSH PRIVILEGES" mysql'
 MYSQL_GRANT_PROMPT=${MYSQL_CREATEDB_PROMPT}
 MYSQL_DB_PREREQS="databases/p5-DBD-mysql41 databases/mysql41-client"
 
@@ -97,6 +97,7 @@ db_host=""
 db_name=""
 db_user=""
 db_pass=""
+db_admin=""
 db_driver=""
 createdb_cmd=""
 createdb_prompt=""
@@ -106,10 +107,12 @@ db_prereqs=""
 do_db=0
 dbinfo=$(get_dbinfo)
 if [ $? = 0 ]; then
-    db_driver_host=${dbinfo%:*}
-    db_name=${dbinfo##*:}
-    db_driver=${db_driver_host%:*}
-    db_host=${db_driver_host#*:}
+    db_driver_admin=${dbinfo%|*}
+    db_host_name=${dbinfo#*|}
+    db_host=${db_host_name%:*}
+    db_name=${db_host_name#*:}
+    db_driver=${db_driver_admin%:*}
+    db_admin=${db_driver_admin#*:}
     case "${db_driver}" in
 	mysql)
 	    createdb_cmd=${MYSQL_CREATEDB}
@@ -156,7 +159,7 @@ if [ ${do_db} = 1 ]; then
     echo ""
 
     tinder_echo "INFO: Loading Tinderbox schema into ${db_name} ..."
-    load_schema ${SCHEMA_FILE} ${db_driver} ${db_host} ${db_name}
+    load_schema ${SCHEMA_FILE} ${db_driver} ${db_admin} ${db_host} ${db_name}
 
     if [ $? != 0 ]; then
 	tinder_exit "ERROR: Database schema load failed!  Consult the output above for more information." $?

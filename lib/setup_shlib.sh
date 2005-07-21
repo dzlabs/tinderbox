@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.11 2005/07/21 05:15:51 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.12 2005/07/21 07:30:39 marcus Exp $
 #
 
 pb=$0
@@ -41,12 +41,14 @@ call_tc() {
 get_dbinfo() {
     db_host=""
     db_name=""
+    db_admin=""
     db_driver="mysql" # XXX
 
-    read -p "Does this host have access to connect to the Tinderbox database as root? (y/n)" option
+    read -p "Does this host have access to connect to the Tinderbox database as a database administrator? (y/n)" option
 
     case "${option}" in
         [Yy]|[Yy][Ee][Ss])
+	    read -p "Enter database admin user : " db_admin
             read -p "Enter database host : " db_host
 	    read -p "Enter database name : " db_name
 	    ;;
@@ -55,7 +57,7 @@ get_dbinfo() {
 	    ;;
     esac
 
-    echo "${db_driver}:${db_host}:${db_name}"
+    echo "${db_driver}:${db_admin}|${db_host}:${db_name}"
 
     return 0
 }
@@ -63,11 +65,12 @@ get_dbinfo() {
 load_schema() {
     schema_file=$1
     db_driver=$2
-    db_host=$3
-    db_name=$4
+    db_admin=$3
+    db_host=$4
+    db_name=$5
 
-    MYSQL_LOAD='/usr/local/bin/mysql -uroot -p -h ${db_host} ${db_name} < "${schema_file}"'
-    MYSQL_LOAD_PROMPT='echo "The next prompt will be for root'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
+    MYSQL_LOAD='/usr/local/bin/mysql -u${db_admin} -p -h ${db_host} ${db_name} < "${schema_file}"'
+    MYSQL_LOAD_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
 
     rc=0
     case "${db_driver}" in
