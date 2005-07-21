@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/setup.sh,v 1.5 2005/07/21 05:25:18 marcus Exp $
+# $MCom: portstools/tinderbox/setup.sh,v 1.6 2005/07/21 06:04:14 marcus Exp $
 #
 
 pb=$0
@@ -50,7 +50,10 @@ MYSQL_DB_PREREQS="databases/p5-DBD-mysql41 databases/mysql41-client"
 . ${pb}/scripts/lib/setup_shlib.sh
 . ${pb}/scripts/lib/tinderbox_shlib.sh
 
+clear
+
 tinder_echo "Welcome to the Tinderbox Setup script.  This script will guide you through some of the automated Tinderbox setup steps.  Once this script completes, you should review the documentation in ${README} or on the web at ${TINDERBOX_URL} to complete your setup."
+tinder_echo ""
 
 read -p "Hit <ENTER> to get started: " i
 
@@ -72,6 +75,7 @@ if [ $? = 1 ]; then
     tinder_echo "WARN:  ${missing}"
 fi
 tinder_echo "DONE."
+tinder_echo ""
 
 # Now install the default preferences files.
 tinder_echo "INFO: Creating default configuration files ..."
@@ -85,6 +89,7 @@ for f in ${PREF_FILES} ; do
     cp -f ${pb}/scripts/${f}.dist ${pb}/scripts/${f}
 done
 tinder_echo "DONE."
+tinder_echo ""
 
 # Now create the database if we can.
 tinder_echo "INFO: Beginning database configuration."
@@ -136,8 +141,10 @@ if [ ${do_db} = 1 ]; then
 	    exit 1
         fi
         tinder_echo "DONE."
+	tinder_echo ""
     fi
 
+    tinder_echo "INFO: Creating database ${db_name} on ${db_host} ..."
     eval ${createdb_prompt}
     eval ${createdb_cmd}
 
@@ -145,19 +152,30 @@ if [ ${do_db} = 1 ]; then
 	tinder_exit "ERROR: Database creation failed!  Consult the output above for more information." $?
     fi
 
+    tinder_echo "DONE."
+    tinder_echo ""
+
+    tinder_echo "INFO: Loading Tinderbox schema into ${db_name} ..."
     load_schema ${SCHEMA_FILE} ${db_driver} ${db_host} ${db_name}
 
     if [ $? != 0 ]; then
 	tinder_exit "ERROR: Database schema load failed!  Consult the output above for more information." $?
     fi
 
+    tinder_echo "DONE."
+    tinder_echo ""
+
     read -p "Enter the desired username for the Tinderbox database : " db_user
     finished=0
     while [ ${finished} != 1 ]; do
         stty -echo
         read -p "Enter the desired password for ${db_user} : " db_pass
+	stty echo
+	tinder_echo ""
+	stty -echo
         read -p "Confirm password for ${db_user} : " confirm_pass
         stty echo
+	tinder_echo ""
 	if [ ${db_pass} = ${confirm_pass} ]; then
 	    finished=1
 	else
@@ -172,6 +190,7 @@ if [ ${do_db} = 1 ]; then
 	grant_host=$(hostname)
     fi
 
+    tinder_echo "INFO: Adding permissions to ${db_name} for ${db_user} ..."
     eval ${grant_prompt}
 
     eval ${grant_cmd}
@@ -179,6 +198,9 @@ if [ ${do_db} = 1 ]; then
     if [ $? != 0 ]; then
 	tinder_exit "ERROR: Database privilege configuration failed!  Consult the output above for more information." $?
     fi
+    
+    tinder_echo "DONE."
+    tinder_echo ""
 
     cat > ${pb}/scripts/ds.ph << EOT
 \$DB_DRIVER       = '${db_driver}';
@@ -191,8 +213,9 @@ if [ ${do_db} = 1 ]; then
 EOT
 
     tinder_echo "INFO: Database configuration complete."
+    tinder_echo ""
 fi
 
 # We're done now.  We don't want to call tc init here since the user may need
 # to configure tinderbox.ph first.
-tinder_exit "Congratulations!  The scripted portion of Tinderbox has completed successfully.  You should now verify the settings in ${pb}/scripts/tinderbox.ph are correct for your environment, then 'run ${pb}/scripts/tc init' to complete the setup.  Be sure to checkout ${TINDERBOX_URL} for further instructions." 0
+tinder_exit "Congratulations!  The scripted portion of Tinderbox has completed successfully.  You should now verify the settings in ${pb}/scripts/tinderbox.ph are correct for your environment, then run '${pb}/scripts/tc init' to complete the setup.  Be sure to checkout ${TINDERBOX_URL} for further instructions." 0
