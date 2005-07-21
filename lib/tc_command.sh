@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.2 2005/07/21 06:40:06 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.3 2005/07/21 07:23:10 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -91,7 +91,7 @@ createJailUsage () {
     fi
     echo "usage: create Jail -n <name> -t <tag> [-d <description>]"
     echo "       [-C] [-H <cvsuphost>] [-m <mountsrc>]"
-    echo "	 [-u <updatecommand>|CVSUP|NONE]"
+    echo "       [-u <updatecommand>|CVSUP|NONE]"
     exit 1
 }
 
