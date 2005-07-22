@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.22 2005/07/22 21:47:18 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.23 2005/07/22 21:50:54 marcus Exp $
 
 VERSION=	2.0.0.r1
 
@@ -10,6 +10,7 @@ LIBDATA=	Build.pm BuildPortsQueue.pm Host.pm Jail.pm MakeCache.pm \
 		Port.pm PortsTree.pm TBConfig.pm TinderObject.pm \
 		TinderboxDS.pm User.pm tinderlib.pl tinderbox_shlib.sh \
 		setup_shlib.sh
+ETCRCDATA=	tinderd.sh
 MIGDATA=	mig_shlib.sh mig_tinderbox-1.X_to_2.0.0.sql
 WWWDATA=	Build.php Jail.php Port.php PortsTree.php TinderObject.php \
 		TinderboxDS.php cleanup.php inc_ds.php failures.php index.php \
@@ -59,6 +60,9 @@ release:
 	cp ${.CURDIR}/lib/${lf} ${.CURDIR}/tinderbox-${VERSION}/lib
 .endfor
 	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/upgrade
+.for erf in ${ETCRCDATA}
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/etc/rc.d
+	cp ${.CURDIR}/etc/rc.d/${erf} ${.CURDIR}/tinderbox-${VERSION}/etc/rc.d
 .for mf in ${MIGDATA}
 	cp ${.CURDIR}/upgrade/${mf} ${.CURDIR}/tinderbox-${VERSION}/upgrade
 .endfor
