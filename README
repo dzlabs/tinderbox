@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.36 2005/07/22 22:00:03 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.37 2005/07/22 22:09:40 mich Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -15,7 +15,7 @@ http://www.marcuscom.com:8080/cgi-bin/cvsweb.cgi/
 Requirements:
 -------------
 
-Recent FreeBSD (development happens on -CURRENT only, but Tindebox is known
+Recent FreeBSD (development happens on -CURRENT only, but Tinderbox is known
 to work on RELENG_5 and RELENG_6 too), Perl 5.8 or later (lang/perl5.8),
 DBD::Mysql Perl module (databases/p5-DBD-mysql41), and MySQL 4.1 or later
 (databases/mysql41-server).
