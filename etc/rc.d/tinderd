@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # $FreeBSD$
-#   $MCom: portstools/tinderbox/etc/rc.d/tinderd,v 1.1 2005/07/22 21:50:55 marcus Exp $
+#   $MCom: portstools/tinderbox/etc/rc.d/tinderd,v 1.2 2005/07/22 21:52:18 marcus Exp $
 #
 
 # PROVIDE: tinderd
@@ -33,9 +33,5 @@ command_interpreter="/bin/sh"
 
 # extra required arguments
 command_args=">/dev/null &"
-
-# use when the daemon requires a configuration file to run,
-
-required_files="${tinderd_directory}/rawenv"
 
 run_rc_command "$1"
