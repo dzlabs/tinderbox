@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.34 2005/07/21 18:29:54 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.35 2005/07/22 04:17:15 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -40,10 +40,15 @@ root, just substitute ${pb} with that root directory.
 
 2. Extract the Tinderbox distribution into ${pb}/scripts.
 
-3. Edit ds.ph and tinderbox.ph for your setup (if you are using the standard
+3. Run ${pb}/scripts/setup.sh to setup configuration files and initialize the
+   Tinderbox database.  If your Tinderbox host does not have administrative
+   access to the database server, you must perform the next few steps by
+   hand.  Else, skip to step 7.
+
+4. Edit ds.ph and tinderbox.ph for your setup (if you are using the standard
    web front-end, also edit www/inc_ds.php).
 
-4. Create the database and database user on the host that you defined within
+5. Create the database and database user on the host that you defined within
    ds.ph.  Note: the database can live on the same server as Tinderbox.  Just
    set $DB_HOST to localhost in ds.ph.  The Tinderbox user must be granted
    the following permissions on the Tinderbox database (for security purposes
@@ -54,7 +59,7 @@ Insert_priv
 Update_priv
 Delete_priv
 
-5. Populate the database with the Tinderbox schema:
+6. Populate the database with the Tinderbox schema:
 
 mysql -uroot -p -h {$DB_HOST} {$DB_NAME} < tinderbox.schema
 
@@ -65,15 +70,15 @@ mysql -uroot -p -h {$DB_HOST} {$DB_NAME} < tinderbox.schema
    included, and instructions will be available at
    http://tinderbox.marcuscom.com.
 
-6. Initialize the Tinderbox:
+7. Initialize the Tinderbox:
 
 # cd ${pb}/scripts && ./tc init
 
-7. Tinderbox can use either NFS or nullfs to mount the required file systems
+8. Tinderbox can use either NFS or nullfs to mount the required file systems
    within the build chroots (called Builds in Tinderbox).  If you wish to use
-   nullfs, skip to step 10.
+   nullfs, skip to step 11.
 
-8. Setup the Tinderbox server as an NFS server by adding the following to
+9. Setup the Tinderbox server as an NFS server by adding the following to
    /etc/exports:
 
 ${pb} -ro -alldirs -maproot=0:0 localhost
@@ -81,7 +86,7 @@ ${pb} -ro -alldirs -maproot=0:0 localhost
    Note: ${pb} _CANNOT_ be a symlink.  It should be a real, fully-qualified
    path.
 
-9. Add the following to /etc/rc.conf to enable the NFS client and server:
+10. Add the following to /etc/rc.conf to enable the NFS client and server:
 
 nfs_client_enable="YES"
 nfs_server_flags="-u -t -n 20"
@@ -89,7 +94,7 @@ rpcbind_enable="YES"
 nfs_server_enable="YES"
 nfs_reserved_port_only="YES"
 
-10. Create the required Jails using the ${pb}/scripts/create
+11. Create the required Jails using the ${pb}/scripts/create
     command.  A Jail is nothing more than a version of FreeBSD.  For example,
     to create a jail for FreeBSD 5.4-RELEASE:
 
@@ -99,7 +104,7 @@ nfs_reserved_port_only="YES"
     Note: all Jail names _MUST_ begin with their FreeBSD major version number.
     That is, the following is an illegal jail name: ``FreeBSD-5.4''.
 
-11. Create the required PortsTrees using the ${pb}/scripts/create
+12. Create the required PortsTrees using the ${pb}/scripts/create
     command.  A PortsTree is a set of ports you wish to build.  A PortsTree
     does not have to be a complete FreeBSD ports tree.  However, all ports
     within a tree must have all of their dependencies within the same tree.
@@ -110,7 +115,7 @@ nfs_reserved_port_only="YES"
 # cd ${pb}/scripts && ./create PortsTree -p FreeBSD \
 	-d "FreeBSD ports tree" -w http://www.freebsd.org/cgi/cvsweb.cgi/ports/
 
-12. Create the required Builds using the ${pb}/scripts/create
+13. Create the required Builds using the ${pb}/scripts/create
     command.  A Build is a combination of a Jail and a PortsTree.  The
     build is the object in which packages are created.  To create a build
     that combines a 5.4-RELEASE Jail with the FreeBSD ports tree:
@@ -130,6 +135,21 @@ all Jail updates, use the following command:
 
 # cd ${pb}/scripts && ./create Jail -j 5-STABLE -d "FreeBSD 5-STABLE" \
 	-t RELENG_5 -u CVSUP -C -H cvsup2.freebsd.org
+
+Upgrading:
+----------
+
+Tinderbox may undergo a variety of changes between versions.  In order to
+make sure your Tinderbox stays fully operational after copying over
+a new version's distribution, you should run the ${pb}/scripts/upgrade.sh
+command:
+
+# cd ${pb}/scripts && ./upgrade.sh
+
+Note: This command may require administrative access to the database.  If such
+access is not available from your Tinderbox host, you may have to load an
+upgrade schema file manually.  The upgrade script will provide such
+instructions if needed.
 
 Using Tinderbox:
 ----------------
@@ -190,6 +210,10 @@ Maintenance:
 To update existing Jails, use the ${pb}/scripts/mkjail command.  For example:
 
 # cd ${pb}/scripts && ./mkjail 5.4
+
+The output of the Jail build will go to stdout.  The output of the update
+command (e.g. cvsup) will go to ${pb}/jails/{JAIL}/update.log (where
+{JAIL} is the name of the Jail in question).
 
 To update existing PortsTrees, use the ``tc'' (Tinderbox Controller)
 application with the ``updatePortsTree'' command.  For example:
