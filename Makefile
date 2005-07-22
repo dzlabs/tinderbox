@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.23 2005/07/22 21:50:54 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.24 2005/07/22 22:47:51 marcus Exp $
 
 VERSION=	2.0.0.r1
 
@@ -63,6 +63,7 @@ release:
 .for erf in ${ETCRCDATA}
 	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/etc/rc.d
 	cp ${.CURDIR}/etc/rc.d/${erf} ${.CURDIR}/tinderbox-${VERSION}/etc/rc.d
+.endfor
 .for mf in ${MIGDATA}
 	cp ${.CURDIR}/upgrade/${mf} ${.CURDIR}/tinderbox-${VERSION}/upgrade
 .endfor
