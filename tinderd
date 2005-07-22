@@ -6,6 +6,8 @@ pb=$(type "$pb" | sed 's/^.* //g')
 pb=$(realpath $(dirname $pb))
 pb=${pb%%/scripts}
 
+. ${pb}/scripts/lib/tinderbox_shlib.sh
+
 TINDERBUILD_ARGS="$*"
 eval $(${pb}/scripts/tc configTinderd)
 TINDERD_SLEEPTIME=${TINDERD_SLEEPTIME:=120}
@@ -13,7 +15,7 @@ TINDERD_SLEEPTIME=${TINDERD_SLEEPTIME:=120}
 main_loop() {
 	while true ; do
     		trap "" 1
-		ENTRY=$(${pb}/scripts/tc listBuildPortsQueue -s ENQUEUED -r 2>/dev/null | head -1)
+		ENTRY=$(${pb}/scripts/tc listBuildPortsQueue -s ENQUEUED -r | head -1)
 		ID=$(echo ${ENTRY} | cut -d: -f1)
 		USER=$(echo ${ENTRY} | cut -d: -f2)
 		BUILD=$(echo ${ENTRY} | cut -d: -f3)
