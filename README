@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.35 2005/07/22 04:17:15 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.36 2005/07/22 22:00:03 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -41,12 +41,15 @@ root, just substitute ${pb} with that root directory.
 2. Extract the Tinderbox distribution into ${pb}/scripts.
 
 3. Run ${pb}/scripts/setup.sh to setup configuration files and initialize the
-   Tinderbox database.  If your Tinderbox host does not have administrative
-   access to the database server, you must perform the next few steps by
-   hand.  Else, skip to step 7.
+   Tinderbox database:
 
-4. Edit ds.ph and tinderbox.ph for your setup (if you are using the standard
-   web front-end, also edit www/inc_ds.php).
+# cd ${pb}/scripts && ./setup.sh
+
+   If your Tinderbox host does not have administrative access to the database
+   server, you must perform the next few steps by hand.  Else, skip to step 7.
+
+4. Edit ${pb}/scripts/ds.ph for your setup (if you are using the standard web
+   front-end, also edit www/inc_ds.php).
 
 5. Create the database and database user on the host that you defined within
    ds.ph.  Note: the database can live on the same server as Tinderbox.  Just
@@ -70,23 +73,25 @@ mysql -uroot -p -h {$DB_HOST} {$DB_NAME} < tinderbox.schema
    included, and instructions will be available at
    http://tinderbox.marcuscom.com.
 
-7. Initialize the Tinderbox:
+7. Edit ${pb}/scripts/tinderbox.ph for your environment.
+
+8. Initialize the Tinderbox:
 
 # cd ${pb}/scripts && ./tc init
 
-8. Tinderbox can use either NFS or nullfs to mount the required file systems
+9. Tinderbox can use either NFS or nullfs to mount the required file systems
    within the build chroots (called Builds in Tinderbox).  If you wish to use
-   nullfs, skip to step 11.
+   nullfs, skip to step 12.
 
-9. Setup the Tinderbox server as an NFS server by adding the following to
-   /etc/exports:
+10. Setup the Tinderbox server as an NFS server by adding the following to
+    /etc/exports:
 
 ${pb} -ro -alldirs -maproot=0:0 localhost
 
    Note: ${pb} _CANNOT_ be a symlink.  It should be a real, fully-qualified
    path.
 
-10. Add the following to /etc/rc.conf to enable the NFS client and server:
+11. Add the following to /etc/rc.conf to enable the NFS client and server:
 
 nfs_client_enable="YES"
 nfs_server_flags="-u -t -n 20"
@@ -94,7 +99,7 @@ rpcbind_enable="YES"
 nfs_server_enable="YES"
 nfs_reserved_port_only="YES"
 
-11. Create the required Jails using the ${pb}/scripts/create
+12. Create the required Jails using the ${pb}/scripts/create
     command.  A Jail is nothing more than a version of FreeBSD.  For example,
     to create a jail for FreeBSD 5.4-RELEASE:
 
@@ -104,7 +109,7 @@ nfs_reserved_port_only="YES"
     Note: all Jail names _MUST_ begin with their FreeBSD major version number.
     That is, the following is an illegal jail name: ``FreeBSD-5.4''.
 
-12. Create the required PortsTrees using the ${pb}/scripts/create
+13. Create the required PortsTrees using the ${pb}/scripts/create
     command.  A PortsTree is a set of ports you wish to build.  A PortsTree
     does not have to be a complete FreeBSD ports tree.  However, all ports
     within a tree must have all of their dependencies within the same tree.
@@ -115,7 +120,7 @@ nfs_reserved_port_only="YES"
 # cd ${pb}/scripts && ./create PortsTree -p FreeBSD \
 	-d "FreeBSD ports tree" -w http://www.freebsd.org/cgi/cvsweb.cgi/ports/
 
-13. Create the required Builds using the ${pb}/scripts/create
+14. Create the required Builds using the ${pb}/scripts/create
     command.  A Build is a combination of a Jail and a PortsTree.  The
     build is the object in which packages are created.  To create a build
     that combines a 5.4-RELEASE Jail with the FreeBSD ports tree:
@@ -338,13 +343,24 @@ tinderd will automatically pick up the port with the highest priority for its
 host and starts building it. That repeats until the queue is empty. After
 the queue empties tinderd will sleep for a configurable amount of time
 (default: 120 seconds) thereafter it starts searching for new queue entries
-again.
+again.  If you need tinderd to check the queue before the sleep timer has
+expired, send the tinderd process a SIGHUP:
+
+# kill -HUP {PID of tinderd}
+
+Where {PID of tinderd} is the process ID of the tinderd script as seen in
+the output of ps(1).
 
 To set it up you must first add a Tinderbox host to the database:
 
 # cd ${pb}/scripts && ./tc addHost
 
 Right after that you can start tinderd (it will stay in foreground by default).
+If you want to run tinderd automatically when the system boots, copy the
+include ${pb}/etc/rc.d/tinderd.sh script to /usr/local/etc/rc.d.  Be sure
+to check out the various rc.conf variables documented in this script before
+using it.
+
 Now use:
 
 # cd ${pb}/scripts && ./tc addBuildPortsQueueEntry -b {BUILD} \
