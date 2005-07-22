@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/upgrade.sh,v 1.8 2005/07/21 17:52:45 marcus Exp $
+# $MCom: portstools/tinderbox/upgrade.sh,v 1.9 2005/07/22 05:44:20 marcus Exp $
 #
 
 pb=$0
@@ -43,7 +43,7 @@ VERSION="2.0.0"
 DB_MIGRATION_PATH="1.X ${VERSION}"
 
 RAWENV_HEADER="## rawenv TB v2 -- DO NOT EDIT"
-REMOVE_FILES="Build.pm BuildPortsQueue.pm Host.pm Jail.pm MakeCache.pm Port.pm PortsTree.pm TBConfig.pm TinderObject.pm TinderboxDS.pm User.pm setup_shlib.sh tinderbox_shlib.sh tinderlib.pl"
+REMOVE_FILES="Build.pm BuildPortsQueue.pm Host.pm Jail.pm MakeCache.pm Port.pm PortsTree.pm TBConfig.pm TinderObject.pm TinderboxDS.pm User.pm setup_shlib.sh tinderbox_shlib.sh tinderlib.pl create_new_build create_new_jail create_new_portstree list_jails"
 TINDERBOX_URL="http://tinderbox.marcuscom.com/"
 
 . ${pb}/scripts/upgrade/mig_shlib.sh
