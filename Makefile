@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.20 2005/07/21 06:34:51 ade Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.21 2005/07/22 19:21:25 oliver Exp $
 
 VERSION=	2.0.0
 
@@ -15,6 +15,17 @@ WWWDATA=	Build.php Jail.php Port.php PortsTree.php TinderObject.php \
 		TinderboxDS.php cleanup.php inc_ds.php failures.php index.php \
 		lastbuilds.php showbuild.php showport.php inc_tinderbox.php \
 		tinderstyle.css Makefile
+WWWEXPDATA=	inc_ds.php inc_tinderbox.php index.php
+WWWEXPCDATA=	Build.php BuildPortsQueue.php Host.php Jail.php Port.php \
+		PortsTree.php TinderObject.php TinderboxDS.php User.php
+WWWEXPMDATA=	module.php moduleBuildPorts.php moduleBuilds.php \
+		moduleHosts.php modulePorts.php moduleSession.php \
+		moduleTinderd.php moduleUsers.php
+WWWEXPTDATA=	current_buildports.tpl describe_port.tpl display_login.tpl \
+		failed_buildports.tpl latest_buildports.tpl list_buildports.tpl \
+		list_builds.tpl list_tinderd_queue.tpl messages.inc \
+		please_login.tpl tinderstyle.css user_admin.tpl \
+		user_permissions.tpl user_properties.tpl
 
 release:
 	-rm -rf ${.CURDIR}/tinderbox-${VERSION} \
@@ -26,6 +37,22 @@ release:
 	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/www
 .for wf in ${WWWDATA}
 	cp ${.CURDIR}/www/${wf} ${.CURDIR}/tinderbox-${VERSION}/www
+.endfor
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/www-exp
+.for wef in ${WWWEXPDATA}
+	cp ${.CURDIR}/www-exp/${wef} ${.CURDIR}/tinderbox-${VERSION}/www-exp
+.endfor
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/www-exp/core
+.for wecf in ${WWWEXPCDATA}
+	cp ${.CURDIR}/www-exp/core/${wecf} ${.CURDIR}/tinderbox-${VERSION}/www-exp/core
+.endfor
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/www-exp/module
+.for wemf in ${WWWEXPMDATA}
+	cp ${.CURDIR}/www-exp/module/${wemf} ${.CURDIR}/tinderbox-${VERSION}/www-exp/module
+.endfor
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/www-exp/templates/default
+.for wetf in ${WWWEXPTDATA}
+	cp ${.CURDIR}/www-exp/templates/default/${wetf} ${.CURDIR}/tinderbox-${VERSION}/www-exp/templates/default
 .endfor
 	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/lib
 .for lf in ${LIBDATA}
