@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.16 2005/07/20 16:41:23 oliver Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.17 2005/07/22 16:10:11 oliver Exp $
 #
 
 tinder_echo() {
@@ -260,7 +260,7 @@ request_mount() {
 	fi
 
 	# is _nullfs mount specified?
-	if [ ${_nullfs} -eq 1 ] ; then
+	if [ ${_nullfs} -eq 1 -a ${_fq_source} -ne 1 ] ; then
 		_options="-t nullfs"
 	else # it probably has to be a nfs mount then
 		# lets check what kind of _source we have. If it is allready in
