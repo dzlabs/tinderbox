@@ -195,10 +195,10 @@ if [ "${major_version}" = "4" ]; then
     mkdir -p ${chroot}/lib
     if [ "${ARCH}" = "i386" ]; then
         cp -p /sbin/mount_linprocfs /sbin/mount /sbin/umount ${chroot}/sbin
-        cp -p /lib/libufs.so.2 ${chroot}/lib
+        cp -p /lib/libufs.so.[0-9]* ${chroot}/lib
     fi
     cp -p /libexec/ld-elf.so.1 ${chroot}/libexec
-    cp -p /lib/libkvm.so.2 /lib/libm.so.3 ${chroot}/lib
+    cp -p /lib/libkvm.so.[0-9]* /lib/libm.so.[0-9]* ${chroot}/lib
     if [ -f /lib/libc.so.6 ]; then
 	if [ -f ${chroot}/lib/libc.so.6 ]; then
 		chflags noschg ${chroot}/lib/libc.so.6
@@ -210,7 +210,7 @@ if [ "${major_version}" = "4" ]; then
 	fi
 	cp -p /lib/libc.so.5 ${chroot}/lib
     fi
-elif [ "${major_version}" = "6" -a -f /lib/libc.so.5 ]; then
+elif [ ("${major_version}" = "6" -o "${major_version}" = "7") -a -f /lib/libc.so.5 ]; then
     if [ -f ${chroot}/lib/libc.so.5 ]; then
 	chflags noschg ${chroot}/lib/libc.so.5
     fi
