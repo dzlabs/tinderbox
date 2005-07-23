@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/upgrade.sh,v 1.9 2005/07/22 05:44:20 marcus Exp $
+# $MCom: portstools/tinderbox/upgrade.sh,v 1.10 2005/07/23 00:38:14 marcus Exp $
 #
 
 pb=$0
@@ -98,16 +98,30 @@ while [ -n "${1}" -a -n "${2}" ] ; do
     shift 1
 done
 
+if [ ${do_load} = 0 ]; then
+    tinder_echo "WARN: Database migration was not done.  If you proceed, you may encounter errors.  It is recommended you manually load any necessary schema updates, then re-run this script.  If you have already loaded the database schema, type 'y' or 'yes' to continue the migration."
+    echo ""
+    read -p "Do you wish to continue? (y/n)" i
+    case ${i} in
+	[Yy]|[Yy][Ee][Ss])
+	    # continue
+	    ;;
+	*)
+	   tinder_exit "INFO: Upgrade aborted by user."
+	   ;;
+    esac
+fi
+
 # Now migrate rawenv if needed.
 echo ""
 if ! mig_rawenv ${pb}/scripts/rawenv ; then
-    tinder_exit "Rawenv migration failed!  Consult the output above for more information." 1
+    tinder_exit "ERROR: Rawenv migration failed!  Consult the output above for more information." 1
 fi
 
 # Finally, migrate any remaining file data.
 echo ""
 if ! mig_files ${pb}/scripts/rawenv ; then
-    tinder_exit "Files migration failed!  Consult the output above for more information." 1
+    tinder_exit "ERROR: Files migration failed!  Consult the output above for more information." 1
 fi
 
 echo ""
