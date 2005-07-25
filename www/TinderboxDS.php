@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/TinderboxDS.php,v 1.32 2005/07/18 20:06:47 pav Exp $
+# $MCom: portstools/tinderbox/www/TinderboxDS.php,v 1.33 2005/07/25 07:56:36 pav Exp $
 #
 
     require_once 'DB.php';
@@ -388,6 +388,9 @@
 			$this->packageSuffixCache[$jail_id] = ".tbz";
 			return ".tbz";
 		} elseif (substr($jail->getName(), 0, 1) == "6") {
+			$this->packageSuffixCache[$jail_id] = ".tbz";
+			return ".tbz";
+		} elseif (substr($jail->getName(), 0, 1) == "7") {
 			$this->packageSuffixCache[$jail_id] = ".tbz";
 			return ".tbz";
 		}
