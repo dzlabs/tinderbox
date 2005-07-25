@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.11 2005/07/21 00:16:34 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.12 2005/07/25 00:39:05 marcus Exp $
 #
 
 use strict;
@@ -176,7 +176,9 @@ sub requestMount {
                 $args .= ' -s ' . $arguments{'source'};
         }
 
+        $ENV{'pb'} = $pb;
         `sh -c '. $pb/scripts/lib/tinderbox_shlib.sh ; request_mount $args'`;
+        delete $ENV{'pb'};
         return 0;
 }
 
