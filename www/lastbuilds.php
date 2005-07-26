@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/lastbuilds.php,v 1.23 2005/07/18 20:06:47 pav Exp $
+# $MCom: portstools/tinderbox/www/lastbuilds.php,v 1.24 2005/07/26 16:47:07 pav Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -94,6 +94,8 @@
 		foreach ($queue as $item) {
 			if ($item["Status"] == "PROCESSING") {
 				echo "<tr bgcolor='#a9ddef'>\n";
+			} elseif ($item["Status"] == "FAIL") {
+				echo "<tr bgcolor='#ef7979'>\n";
 			} else {
 				echo "<tr>\n";
 			}
