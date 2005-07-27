@@ -391,6 +391,29 @@ last_version=$(${pb}/scripts/tc getPortLastBuiltVersion -d ${portdir} -b ${branc
 
 if [ "${error}" = 0 ]; then
     ln -sf ${pkgname}.log2 ${chroot}/tmp/make.log
+    # Cache the distfiles if requested.  We will wait a maximum of
+    # ten minutes before giving up on the lock.
+    if [ -n "${DISTFILE_CACHE}" ]; then
+        if [ -f ${chroot}${DISTCACHE}/.lock ]; then
+	    lpid=$(echo ${chroot}${DISTCACHE}/.lock)
+	    if [ ${lpid} = $$ ]; then
+	        rm -f ${chroot}${DISTCACHE}/.lock
+	    fi
+	fi
+	lcounter=0
+	lcounter_max=200
+	while [ -f ${chroot}${DISTCACHE}/.lock -a ${lcounter} -lt ${lcounter_max} ]; do
+	    echo "INFO: Waiting for DISTCACHE lock..."
+	    lcounter=$(expr ${lcounter} + 1)
+	    sleep 3
+	done
+	if [ ${lcounter} -lt ${lcounter_max} ]; then
+	    echo $$ > ${chroot}${DISTCACHE}/.lock
+	    tar -C ${chroot}/${DISTDIR} -cf - . | \
+	        tar --unlink -C ${chroot}${DISTCACHE} -xvf -
+	    rm -f ${chroot}${DISTCACHE}/.lock
+	fi
+    fi
 
     chroot ${chroot} /usr/bin/nice -n $nice /buildscript ${dirname} 2  "$ED" "$PD" "$FD" "$BD" "$RD" > ${chroot}/tmp/${pkgname}.log2 2>&1
 
@@ -421,29 +444,6 @@ if [ "${error}" = 0 ]; then
 	[ -f ${packages}/All/${pkgname}${PKGSUFFIX} ] && \
 		touch ${packages}/All/${pkgname}${PKGSUFFIX}
 	rm -f ${pb}/errors/${branch}/${pkgname}.log
-	# Cache the distfiles if requested.  We will wait a maximum of
-	# ten minutes before giving up on the lock.
-	if [ -n "${DISTFILE_CACHE}" ]; then
-	    if [ -f ${chroot}${DISTCACHE}/.lock ]; then
-		lpid=$(echo ${chroot}${DISTCACHE}/.lock)
-		if [ ${lpid} = $$ ]; then
-		    rm -f ${chroot}${DISTCACHE}/.lock
-		fi
-	    fi
-	    lcounter=0
-	    lcounter_max=200
-	    while [ -f ${chroot}${DISTCACHE}/.lock -a ${lcounter} -lt ${lcounter_max} ]; do
-		echo "INFO: Waiting for DISTCACHE lock..."
-		lcounter=$(expr ${lcounter} + 1)
-		sleep 3
-	    done
-	    if [ ${lcounter} -lt ${lcounter_max} ]; then
-	        echo $$ > ${chroot}${DISTCACHE}/.lock
-	        tar -C ${chroot}/${DISTDIR} -cf - . | \
-	            tar --unlink -C ${chroot}${DISTCACHE} -xvf -
-	        rm -f ${chroot}${DISTCACHE}/.lock
-	    fi
-	fi
 	if grep -q "${pkgname} is marked as broken: " ${pb}/logs/${branch}/${pkgname}.log ; then
 	    status="BROKEN"
 	elif [ $(grep -A 1 '^=== Checking filesystem state' ${pb}/logs/${branch}/${pkgname}.log | grep -c '^====') -eq 0 ] ; then
