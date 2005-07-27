@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/MakeCache.pm,v 1.3 2005/07/20 03:19:03 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/MakeCache.pm,v 1.4 2005/07/27 19:38:16 ade Exp $
 #
 
 package MakeCache;
@@ -37,7 +37,7 @@ our @makeTargets = (
         'FETCH_DEPENDS',   'BUILD_DEPENDS',
         'LIB_DEPENDS',     'RUN_DEPENDS',
         'DEPENDS',         'MAINTAINER',
-        'COMMENT',
+        'COMMENT',         'PORTNAME',
 );
 
 # Create a new cache object
@@ -97,6 +97,13 @@ sub _getList {
                 push @deps, $ddir;
         }
         return @deps;
+}
+
+# Port name
+sub Name {
+        my $self = shift;
+        my $port = shift;
+        return $self->_getVariable($port, 'PORTNAME');
 }
 
 # Package name

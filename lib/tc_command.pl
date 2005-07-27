@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.63 2005/07/21 20:39:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.64 2005/07/27 19:38:16 ade Exp $
 #
 
 BEGIN {
@@ -44,6 +44,7 @@ BEGIN {
 
 use strict;
 use TinderboxDS;
+use MakeCache;
 use Getopt::Std;
 use vars qw(
     %COMMANDS
@@ -896,6 +897,7 @@ sub addPortsTree {
 
 sub addPort {
         my %requestMountArgs;
+        my %makecache;
 
         if (       (!$opts->{'b'} && !$opts->{'a'})
                 || ($opts->{'b'} && $opts->{'a'})
@@ -920,10 +922,14 @@ sub addPort {
                 my $jail      = $ds->getJailById($build->getJailId());
                 my $portstree = $ds->getPortsTreeById($build->getPortsTreeId());
                 my $tag       = $jail->getTag();
+                my $bname     = $build->getName();
+                my $jname     = $jail->getName();
+                my $ptname    = $portstree->getName();
+
                 $requestMountArgs{'quiet'}     = 1;
-                $requestMountArgs{'build'}     = $build->getName();
-                $requestMountArgs{'jail'}      = $jail->getName();
-                $requestMountArgs{'portstree'} = $portstree->getName();
+                $requestMountArgs{'build'}     = $bname;
+                $requestMountArgs{'jail'}      = $jname;
+                $requestMountArgs{'portstree'} = $ptname;
 
                 $requestMountArgs{'destination'} = "portstree";
                 requestMount($BUILD_ROOT, %requestMountArgs);
@@ -931,31 +937,33 @@ sub addPort {
                 $requestMountArgs{'destination'} = "jail";
                 requestMount($BUILD_ROOT, %requestMountArgs);
 
-                if (!$tag) {
-                        $tag = $jail->getName();
-                }
-
-                buildenv(
-                        $BUILD_ROOT,      $build->getName(),
-                        $jail->getName(), $portstree->getName()
-                );
+                buildenv($BUILD_ROOT, $bname, $jname, $ptname);
                 $ENV{'LOCALBASE'}  = "/nonexistentlocal";
                 $ENV{'X11BASE'}    = "/nonexistentx";
                 $ENV{'PKG_DBDIR'}  = "/nonexistentdb";
                 $ENV{'PORT_DBDIR'} = "/nonexistentportdb";
                 $ENV{'LINUXBASE'}  = "/nonexistentlinux";
 
+                if (!defined($makecache{$ptname})) {
+                        $makecache{$ptname} =
+                            new MakeCache($ENV{'PORTSDIR'}, $ENV{'PKGSUFFIX'});
+                }
+
                 if ($opts->{'r'}) {
                         my @deps = ($opts->{'d'});
                         my %seen = ();
                         while (my $port = shift @deps) {
                                 if (!$seen{$port}) {
-                                        addPorts($port, $build, \@deps);
+                                        addPorts($port, $build,
+                                                $makecache{$ptname}, \@deps);
                                         $seen{$port} = 1;
                                 }
                         }
                 } else {
-                        addPorts($opts->{'d'}, $build, undef);
+                        addPorts(
+                                $opts->{'d'},        $build,
+                                $makecache{$ptname}, undef
+                        );
                 }
         }
 }
@@ -2305,47 +2313,29 @@ sub usage {
 sub addPorts {
         my $port  = shift;
         my $build = shift;
+        my $cache = shift;
         my $deps  = shift;
 
-        my ($portname, $portmaintainer, $portcomment);
-
         my $portdir = $ENV{'PORTSDIR'} . "/" . $port;
-        next if (!-d $portdir);
+        return if (!-d $portdir);
 
         if (defined($deps)) {
+                my @list;
+                push @list, $cache->BuildDependsList($port);
+                push @list, $cache->RunDependsList($port);
 
-                # We need to add all ports on which this port depends
-                # recursively.
-
-                my $descr = `cd $portdir && make describe`;
-                chomp $descr;
-                my @f = split(/\|/, $descr);
-                $f[0] =~ s/\-[^\-]+$//;
-                $portname       = $f[0];
-                $portcomment    = $f[3];
-                $portmaintainer = $f[5];
-                my @deplist =
-                    split(/ /, join(" ", $f[7], $f[8], $f[9], $f[10], $f[11]));
-
-                foreach my $dep (@deplist) {
+                my %uniq;
+                foreach my $dep (grep { !$uniq{$_}++ } @list) {
                         next unless $dep;
-                        $dep =~ s|^$ENV{'PORTSDIR'}/||;
                         push @{$deps}, $dep;
                 }
-        } else {
-                ($portname, $portmaintainer, $portcomment) =
-                    `cd $portdir && make -V PORTNAME -V MAINTAINER -V COMMENT`;
-                chomp $portname;
-                chomp $portmaintainer;
-                chomp $portcomment;
         }
 
         my $pCls = new Port();
-
         $pCls->setDirectory($port);
-        $pCls->setName($portname);
-        $pCls->setMaintainer($portmaintainer);
-        $pCls->setComment($portcomment);
+        $pCls->setName($cache->Name($port));
+        $pCls->setMaintainer($cache->Maintainer($port));
+        $pCls->setComment($cache->Comment($port));
 
         # Only add the port if it isn't already in the datastore.
         my $rc;
