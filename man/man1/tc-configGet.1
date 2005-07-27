@@ -1,0 +1,67 @@
+.\" Copyright (c) 2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+.\" IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+.\" OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+.\" IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+.\" INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+.\" NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+.\" DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+.\" THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+.\" (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+.\" THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\"
+.\" $MCom: portstools/tinderbox/man/man1/tc-configGet.1,v 1.1 2005/07/27 03:59:49 marcus Exp $
+.\"
+.Dd July 21, 2005
+.Os FreeBSD
+.Dt TC-CONFIGGET 1
+.Sh NAME
+.Nm "tc configGet"
+.Nd Print current Tinderbox configuration
+.Sh SYNOPSIS
+.Nm
+.Op Fl G | Fl h Ar hostname
+.Sh DESCRIPTION
+.Nm
+fetches the current configuration for
+.Pa Tinderbox
+from the database.  The configuration will be printed to
+.Pa stdout .
+.Sh OPTIONS
+The following options are supported by
+.Nm :
+.Bl -tag -width indent
+.It Fl G
+Print the global (default) configuration.
+.It Fl h Ar hostname
+Fetch the specific configuration for
+.Ar hostname .
+These configuration settings will be used instead of the global settings.
+Any setting missing from the host configuration will be obtained from the
+global configuration.
+.El
+.Sh EXAMPLES
+.Pp
+Print the global (default) configuration:
+.Pp
+.Cm ${pb}/scripts/tc
+.Cm configGet
+.Pp
+Where
+.Cm ${pb}
+is your Tinderbox (or port build) root directory.
+.Sh "SEE ALSO"
+.Xr tc-configCcache 1
+.Sh LICENSE AND DISCLAIMER
+BSD License

@@ -1,0 +1,123 @@
+.\" Copyright (c) 2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+.\" IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+.\" OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+.\" IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+.\" INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+.\" NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+.\" DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+.\" THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+.\" (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+.\" THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\"
+.\" $MCom: portstools/tinderbox/man/man1/tc-configCcache.1,v 1.1 2005/07/27 03:59:49 marcus Exp $
+.\"
+.Dd July 21, 2005
+.Os FreeBSD
+.Dt TC-CONFIGCCACHE 1
+.Sh NAME
+.Nm "tc configCcache"
+.Nd Configure Tinderbox ccache parameters
+.Sh SYNOPSIS
+.Nm
+.Op Fl d | Fl e
+.Op Fl c Ar mount
+.Op Fl s Ar size
+.Op Fl j | Fl J
+.Op Fl l Ar logfile | Fl L
+.Op Fl G | Fl h Ar hostname
+.Nm
+.Fl G Fl h Ar hostname
+.Sh DESCRIPTION
+.Nm
+displays and configures
+.Pa Tinderbox
+settings related to ccache.  Without any arguments
+.Nm
+will print the current global (default) ccache configuration to
+.Pa stdout .
+Note that in order for ccache to work, a
+.Pa ccache.tar
+file must be created in each
+.Pa Jail
+directory.  The contents of this file must be:
+.Pp
+ opt
+ opt/ccache
+ opt/gcc -> ccache
+ opt/cc -> ccache
+ opt/g++ -> ccache
+ opt/c++ -> ccache
+.Sh OPTIONS
+The following options are supported by
+.Nm :
+.Bl -tag -width indent
+.It Fl e
+Enable ccache.
+.It Fl d
+Disable ccache.  This is the default.
+.It Fl c Ar mount
+Specify the ccache mount point.  This is the location within the
+.Pa Build
+where the ccache directory should be mounted.  The default is
+.Pa /ccache .
+.It Fl s Ar size
+Maximum size of the cache.  This should be in the format
+.Pa nG
+Where n is a number, and G stands for gigabytes.  The default is
+.Pa 1G .
+.It Fl j
+Enable per-Jail caches.  By default, a cache is created for each
+.Pa Build .
+.It Fl J
+Disable per-Jail caches.  This is the default.
+.It Fl l Ar logfile
+Enable ccache logging to
+.Ar logfile .
+This should only be used for debugging purposes.
+.It Fl L
+Disable ccache logging.  This is the default.
+.It Fl h Ar hostname
+Set or disable ccache configuration on a per-host basis.  By default all
+configuration is done on a global basis.  Specifying this option along with
+.Fl G
+will cause the configuration for
+.Ar hostname
+to be reset to the global (default) configuration.
+.It Fl G
+Set or display the global (default) configuration.  This is the default.
+Specifying this option along with
+.Fl h Ar hostname
+will cause the configuration for
+.Ar hostname
+to be reset to the global (default) configuration.
+.El
+.Sh EXAMPLES
+.Pp
+Enable ccache into
+.Pa /ccache
+and set the maximum cache size to
+.Pa 2G :
+.Pp
+.Cm ${pb}/scripts/tc
+.Cm configCcache
+-e -c /ccache -s 2G
+.Pp
+Where
+.Cm ${pb}
+is your Tinderbox (or port build) root directory.
+.Sh "SEE ALSO"
+.Xr tc-configGet 1
+.Sh LICENSE AND DISCLAIMER
+BSD License
