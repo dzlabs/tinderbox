@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/setup.sh,v 1.10 2005/07/21 17:52:45 marcus Exp $
+# $MCom: portstools/tinderbox/setup.sh,v 1.11 2005/07/27 00:45:24 marcus Exp $
 #
 
 pb=$0
@@ -51,10 +51,12 @@ TINDERBOX_URL="http://tinderbox.marcuscom.com/"
 ##
 
 # MySQL-specific variables
+MYSQL_CHECKDB='/usr/local/bin/mysql -u${db_admin} -B -s -p -h ${db_host} -e "SHOW DATABASES LIKE '"'"'${db_name}'"'"'" mysql'
 MYSQL_CREATEDB='/usr/local/bin/mysqladmin -u${db_admin} -p -h ${db_host} create ${db_name}'
 MYSQL_CREATEDB_PROMPT='tinder_echo "INFO: The next prompt will be for ${db_admin}'"'"'s password on the database server ${db_host}."'
 MYSQL_GRANT='/usr/local/bin/mysql -u${db_admin} -p -h ${db_host} -e "GRANT SELECT, INSERT, UPDATE, DELETE ON ${db_name}.* TO '"'"'${db_user}'"'"'@'"'"'${grant_host}'"'"' IDENTIFIED BY '"'"'${db_pass}'"'"' ; FLUSH PRIVILEGES" mysql'
 MYSQL_GRANT_PROMPT=${MYSQL_CREATEDB_PROMPT}
+MYSQL_CHECKDB_PROMPT=${MYSQL_CREATEDB_PROMPT}
 MYSQL_DB_PREREQS="databases/p5-DBD-mysql41 databases/mysql41-client"
 
 . ${pb}/scripts/lib/setup_shlib.sh
@@ -118,6 +120,8 @@ do_db=0
 db_driver=$(get_dbdriver)
 case "${db_driver}" in
     mysql)
+        checkdb_cmd=${MYSQL_CHECKDB}
+	checkdb_prompt=${MYSQL_CHECKDB_PROMPT}
         createdb_cmd=${MYSQL_CREATEDB}
         createdb_prompt=${MYSQL_CREATEDB_PROMPT}
         grant_cmd=${MYSQL_GRANT}
@@ -158,9 +162,26 @@ if [ ${do_db} = 1 ]; then
 	tinder_exit "ERROR: Database schema file ${SCHEMA_FILE} is missing.  Database configuration cannot be completed."
     fi
 
-    tinder_echo "INFO: Creating database ${db_name} on ${db_host} ..."
-    eval ${createdb_prompt}
-    eval ${createdb_cmd}
+    tinder_echo "INFO: Checking to see if database ${db_name} already exists on ${db_host} ..."
+    eval ${checkdb_prompt}
+    dbexist=$(eval ${checkdb_cmd})
+
+    if [ x"${dbexist}"  = x"${db_name}" ]; then
+	tinder_echo "WARN: A database with the name ${db_name} already exists on ${db_host}.  Do you want to use this database for Tinderbox (note: if you type 'n', setup will abort)?"
+	read -p "(y/n) " i
+	case "${i}" in
+	    [Yy]|[Yy][Ee][Ss])
+	        # continue
+		;;
+            *)
+	        tinder_exit "INFO: Setup aborted by user."
+		;;
+        esac
+    else
+	tinder_echo "INFO: Database ${db_name} does not exist.  Creating database ${db_name} on ${db_host} ..."
+        eval ${createdb_prompt}
+        eval ${createdb_cmd}
+    fi
 
     if [ $? != 0 ]; then
 	tinder_exit "ERROR: Database creation failed!  Consult the output above for more information." $?
