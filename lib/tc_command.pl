@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.64 2005/07/27 19:38:16 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.65 2005/08/04 21:43:13 marcus Exp $
 #
 
 BEGIN {
@@ -366,39 +366,41 @@ require "tinderlib.pl";
         "addBuildUser" => {
                 func   => \&addBuildUser,
                 help   => "Add a user to a given build's interest list",
-                usage  => "{-b <build name> | -a} -u <user name> [-c] [-e]",
+                usage  => "{-b <build name> | -a} -u <username> [-c] [-e]",
                 optstr => 'ab:ceu:',
                 ,
         },
         "addUser" => {
-                func   => \&addUser,
-                help   => "Add a user to the datastore",
-                usage  => "-u <user name> [-e <user email>] [-p password] [-w]",
+                func  => \&addUser,
+                help  => "Add a user to the datastore",
+                usage =>
+                    "-u <username> [-e <emailaddress>] [-p <password>] [-w]",
                 optstr => 'u:e:p:w',
         },
         "updateUser" => {
-                func   => \&updateUser,
-                help   => "Update user preferences",
-                usage  => "-u <user name> [-e <user email>] [-p password] [-w]",
+                func  => \&updateUser,
+                help  => "Update user preferences",
+                usage =>
+                    "-u <username> [-e <emailaddress>] [-p <password>] [-w]",
                 optstr => 'u:e:p:w',
         },
         "setWwwAdmin" => {
                 func   => \&setWwwAdmin,
                 help   => "Defines which user is the www admin",
-                usage  => "-u <user name>",
+                usage  => "-u <username>",
                 optstr => 'u:',
         },
         "updateBuildUser" => {
                 func => \&updateBuildUser,
                 help =>
                     "Update email preferences for the given user for the given build",
-                usage  => "{-b <build name> | -a} -u <user name> [-c] [-e]",
+                usage  => "{-b <build name> | -a} -u <username> [-c] [-e]",
                 optstr => 'ab:u:ce',
         },
         "rmUser" => {
                 func   => \&rmUser,
                 help   => "Remove a user from the datastore",
-                usage  => "[-b <build name>] -u <user name> [-f]",
+                usage  => "[-b <build name>] -u <username> [-f]",
                 optstr => 'fb:u:',
         },
         "sendBuildErrorMail" => {
