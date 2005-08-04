@@ -67,7 +67,7 @@ CREATE TABLE users (
   User_Id int NOT NULL auto_increment,
   User_Name varchar(16) NOT NULL,
   User_Email varchar(255),
-  User_Password varchar(41) NOT NULL,
+  User_Password varchar(41),
   User_Www_Enabled tinyint(1) NOT NULL default '0',
   PRIMARY KEY (User_Id),
   UNIQUE (User_Name),
@@ -176,7 +176,7 @@ INSERT INTO hosts VALUES (-1, '__ALL__');
 # __DSVERSION__ must be bumped.  Use micro version bumps for new config
 # commands, and minor version bumps for schema changes.
 ##
-INSERT INTO config VALUES ('__DSVERSION__', '2.0.0', -1);
+INSERT INTO config VALUES ('__DSVERSION__', '2.1.0', -1);
 INSERT INTO config VALUES ('CCACHE_ENABLED', '0', -1);
 INSERT INTO config VALUES ('CCACHE_DIR', '', -1);
 INSERT INTO config VALUES ('CCACHE_NOLINK', '1', -1);
