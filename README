@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.37 2005/07/22 22:09:40 mich Exp $
+$MCom: portstools/tinderbox/README,v 1.38 2005/08/08 03:59:52 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -64,7 +64,7 @@ Delete_priv
 
 6. Populate the database with the Tinderbox schema:
 
-mysql -uroot -p -h {$DB_HOST} {$DB_NAME} < tinderbox.schema
+mysql -uroot -p -h {$DB_HOST} {$DB_NAME} < tinderbox-mysql.schema
 
    Where {$DB_HOST} and {$DB_NAME} are the values of $DB_HOST and $DB_NAME
    from ds.ph respectively.  Note: do not do this if you are upgrading!
