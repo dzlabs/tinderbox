@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/setup.sh,v 1.11 2005/07/27 00:45:24 marcus Exp $
+# $MCom: portstools/tinderbox/setup.sh,v 1.12 2005/08/08 03:56:26 marcus Exp $
 #
 
 pb=$0
@@ -37,7 +37,6 @@ MAN_PREREQS="lang/perl5.8"
 OPT_PREREQS="lang/php4 databases/php4-mysql databases/pear-DB www/php4-session"
 PREF_FILES="rawenv tinderbox.ph"
 README="${pb}/scripts/README"
-SCHEMA_FILE="${pb}/scripts/tinderbox.schema"
 TINDERBOX_URL="http://tinderbox.marcuscom.com/"
 
 ## Database-specific variables
@@ -51,6 +50,7 @@ TINDERBOX_URL="http://tinderbox.marcuscom.com/"
 ##
 
 # MySQL-specific variables
+MYSQL_SCHEMA="${pb}/scripts/tinderbox-mysql.schema"
 MYSQL_CHECKDB='/usr/local/bin/mysql -u${db_admin} -B -s -p -h ${db_host} -e "SHOW DATABASES LIKE '"'"'${db_name}'"'"'" mysql'
 MYSQL_CREATEDB='/usr/local/bin/mysqladmin -u${db_admin} -p -h ${db_host} create ${db_name}'
 MYSQL_CREATEDB_PROMPT='tinder_echo "INFO: The next prompt will be for ${db_admin}'"'"'s password on the database server ${db_host}."'
@@ -114,6 +114,7 @@ createdb_cmd=""
 createdb_prompt=""
 grant_cmd=""
 grant_prompt=""
+schema_file=""
 db_prereqs=""
 do_db=0
 
@@ -127,6 +128,7 @@ case "${db_driver}" in
         grant_cmd=${MYSQL_GRANT}
         grant_prompt=${MYSQL_GRANT_PROMPT}
         db_prereqs=${MYSQL_DB_PREREQS}
+	schema_file=${MYSQL_SCHEMA}
         ;;
     *)
         tinder_exit "ERROR: Unsupport database driver: ${db_driver}"
@@ -154,12 +156,12 @@ if [ $? = 0 ]; then
     db_host=${db_admin_host#*:}
     do_db=1
 else
-    tinder_echo "WARN: You must first create a database for Tinderbox, and load the database schema from ${SCHEMA_FILE}.  Consult ${TINDERBOX_URL} for more information on creating and initializing the Tinderbox database."
+    tinder_echo "WARN: You must first create a database for Tinderbox, and load the database schema from ${schema_file}.  Consult ${TINDERBOX_URL} for more information on creating and initializing the Tinderbox database."
 fi
 
 if [ ${do_db} = 1 ]; then
-    if [ ! -f ${SCHEMA_FILE} ]; then
-	tinder_exit "ERROR: Database schema file ${SCHEMA_FILE} is missing.  Database configuration cannot be completed."
+    if [ ! -f ${schema_file} ]; then
+	tinder_exit "ERROR: Database schema file ${schema_file} is missing.  Database configuration cannot be completed."
     fi
 
     tinder_echo "INFO: Checking to see if database ${db_name} already exists on ${db_host} ..."
@@ -191,7 +193,7 @@ if [ ${do_db} = 1 ]; then
     echo ""
 
     tinder_echo "INFO: Loading Tinderbox schema into ${db_name} ..."
-    load_schema ${SCHEMA_FILE} ${db_driver} ${db_admin} ${db_host} ${db_name}
+    load_schema ${schema_file} ${db_driver} ${db_admin} ${db_host} ${db_name}
 
     if [ $? != 0 ]; then
 	tinder_exit "ERROR: Database schema load failed!  Consult the output above for more information." $?
