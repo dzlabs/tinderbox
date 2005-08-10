@@ -215,15 +215,15 @@ elif [ "${major_version}" = "6" -o "${major_version}" = "7" ]; then
         if [ -f ${chroot}/lib/libc.so.5 ]; then
 	    chflags noschg ${chroot}/lib/libc.so.5
         fi
+        cp -p /lib/libc.so.5 ${chroot}/lib
     fi
-    cp -p /lib/libc.so.5 ${chroot}/lib
 elif [ "${major_version}" = "5" ]; then
     if [ -f /lib/libc.so.6 ]; then
         if [ -f ${chroot}/lib/libc.so.6 ]; then
 	    chflags noschg ${chroot}/lib/libc.so.6
         fi
+        cp -p /lib/libc.so.6 ${chroot}/lib
     fi
-    cp -p /lib/libc.so.6 ${chroot}/lib
 fi
 cp -p /rescue/ps ${chroot}/bin
 cp -p /usr/bin/killall ${chroot}/usr/bin
