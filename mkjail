@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/mkjail,v 1.24 2005/08/14 18:16:29 marcus Exp $
+# $MCom: portstools/tinderbox/mkjail,v 1.25 2005/08/19 21:35:59 marcus Exp $
 #
 
 
@@ -78,7 +78,9 @@ chflags -R noschg ${D}
 rm -rf ${D}
 
 export __MAKE_CONF=/dev/null
-export MAKEOBJDIRPREFIX=${pb}/jails
+if [ -n "${JAIL_OBJDIR}" ]; then
+    export MAKEOBJDIRPREFIX=${JAIL_OBJDIR}
+fi
 
 cd ${SRCBASE}
 mkdir -p ${D}

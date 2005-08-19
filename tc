@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.65 2005/08/04 21:43:13 marcus Exp $
+# $MCom: portstools/tinderbox/tc,v 1.66 2005/08/19 21:35:59 marcus Exp $
 #
 
 BEGIN {
@@ -43,6 +43,7 @@ BEGIN {
 }
 
 use strict;
+
 use TinderboxDS;
 use MakeCache;
 use Getopt::Std;
@@ -100,6 +101,13 @@ require "tinderlib.pl";
                 usage =>
                     "[-c <distfile cache mount src> | -C] [-h <host name> | -G] | -G -h <host name>",
                 optstr => 'c:Ch:G',
+        },
+        "configJail" => {
+                func  => \&configJail,
+                help  => "Configure Tinderbox jail parameters",
+                usage =>
+                    "[-o <jail object directory> | -O] [-n <host name> | -G] | -G -h <host name>",
+                optstr => 'o:Oh:G',
         },
         "configTinderd" => {
                 func => \&configTinderd,
@@ -700,6 +708,50 @@ sub configTinderd {
         }
 
         $ds->updateConfig("tinderd", $host, @config)
+            or cleanup($ds, 1,
+                      "Failed to update tinderd configuration: "
+                    . $ds->getError()
+                    . "\n");
+}
+
+sub configJail {
+        my @config = ();
+        my $objdir;
+        my $host;
+
+        if ($opts->{'o'} && $opts->{'O'}) {
+                usage("jail");
+        }
+
+        $host = _configGetHost($opts->{'h'});
+
+        if (scalar(keys %{$opts}) == 0
+                || (scalar(keys %{$opts}) == 1 && ($opts->{'h'} ^ $opts->{'G'}))
+            )
+        {
+                configGet("jail", $host);
+                cleanup($ds, 0, undef);
+        }
+
+        if ($opts->{'G'} && $host) {
+                $ds->defaultConfig("jail", $host);
+                cleanup($ds, 0, undef);
+        }
+
+        $objdir = new TBConfig();
+        $objdir->setOptionName("objdir");
+
+        if ($opts->{'o'}) {
+                $objdir->setOptionValue($opts->{'o'});
+                push @config, $objdir;
+        }
+
+        if ($opts->{'O'}) {
+                $objdir->setOptionValue(undef);
+                push @config, $objdir;
+        }
+
+        $ds->updateConfig("jail", $host, @config)
             or cleanup($ds, 1,
                       "Failed to update tinderd configuration: "
                     . $ds->getError()
