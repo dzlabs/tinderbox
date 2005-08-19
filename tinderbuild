@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tinderbuild,v 1.34 2005/07/23 04:07:06 marcus Exp $
+# $MCom: portstools/tinderbox/tinderbuild,v 1.35 2005/08/19 23:45:10 marcus Exp $
 #
 
 
@@ -48,7 +48,7 @@ pb=$(realpath $(dirname $pb))
 pb=${pb%%/scripts}
 
 usage () {
-    echo "usage: $0 -b <build name> [-init] [-cleanpackages] [-updateports] [-skipmake] [-noclean] [-noduds] [-plistcheck] [-nullfs] [-cleandistfiles] [portdir/portname [...]]"
+    echo "usage: $0 -b <build name> [-init] [-cleanpackages] [-updateports] [-skipmake] [-noclean] [-noduds] [-plistcheck] [-nullfs] [-cleandistfiles] [-fetch-original] [portdir/portname [...]]"
 }
 
 . ${pb}/scripts/lib/tinderbox_shlib.sh
@@ -66,6 +66,7 @@ plistcheck=0
 nullfs=0
 cleandistfiles=0
 skipmake=0
+fetchorig=0
 error=2
 
 while [ $# -gt 0 ]; do
@@ -109,6 +110,9 @@ while [ $# -gt 0 ]; do
 	;;
       x-cleandistfiles)
       	cleandistfiles=1
+	;;
+      x-fetch-original)
+        fetchorig=1
 	;;
       -*)
         usage
@@ -201,6 +205,9 @@ if [ "$skipmake" = "0" ]; then
     fi
     if [ "$nullfs" = "1" ]; then
 	export NULLFS=1
+    fi
+    if [ "$fetchorig" = "1" ]; then
+	export FETCHORIG=1
     fi
     ${pb}/scripts/makemake ${duds} ${build} ${ports}
 
