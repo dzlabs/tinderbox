@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.66 2005/08/19 21:35:59 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.67 2005/08/20 19:56:12 marcus Exp $
 #
 
 BEGIN {
@@ -104,9 +104,9 @@ require "tinderlib.pl";
         },
         "configJail" => {
                 func  => \&configJail,
-                help  => "Configure Tinderbox jail parameters",
+                help  => "Configure Tinderbox Jail parameters",
                 usage =>
-                    "[-o <jail object directory> | -O] [-n <host name> | -G] | -G -h <host name>",
+                    "[-o <jail object directory> | -O] [-h <host name> | -G] | -G -h <host name>",
                 optstr => 'o:Oh:G',
         },
         "configTinderd" => {
@@ -114,7 +114,7 @@ require "tinderlib.pl";
                 help =>
                     "Configure Tinderbox tinder daemon (tinderd) parameters",
                 usage =>
-                    "[-t <sleep time>] [-h <host name>] | -G -h <host name>",
+                    "[-t <sleep time>] [-h <host name> | -G] | -G -h <host name>",
                 optstr => 't:h:G',
         },
         "listJails" => {
