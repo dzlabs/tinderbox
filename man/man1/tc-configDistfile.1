@@ -1,0 +1,100 @@
+.\" Copyright (c) 2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+.\" IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+.\" OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+.\" IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+.\" INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+.\" NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+.\" DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+.\" THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+.\" (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+.\" THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\"
+.\" $MCom: portstools/tinderbox/man/man1/tc-configDistfile.1,v 1.1 2005/08/20 20:04:12 marcus Exp $
+.\"
+.Dd July 21, 2005
+.Os FreeBSD
+.Dt TC-CONFIGDISTFILE 1
+.Sh NAME
+.Nm "tc configDistfile"
+.Nd Configure Tinderbox distfile parameters
+.Sh SYNOPSIS
+.Nm
+.Op Fl c Ar mount | Fl C
+.Op Fl G | Fl h Ar hostname
+.Nm
+.Fl G Fl h Ar hostname
+.Sh DESCRIPTION
+.Nm
+displays and configures
+.Pa Tinderbox
+settings related to distfiles.  Without any arguments
+.Nm
+will print the current global (default) distfile configuration to
+.Pa stdout .
+.Sh OPTIONS
+The following options are supported by
+.Nm :
+.Bl -tag -width indent
+.It Fl c Ar mount
+Specify the distfile cache mount source.  This can be either a fully qualified
+path, or an NFS mount specification.  In the former case, the directory will
+be mounted using nullfs.
+.Pp
+Using the distfile cache is an excellent way to speed up
+.Pa Tinderbox
+builds.  To bypass the cache for certain builds, pass the
+.Fl fetch-original
+argument to
+.Pa tinderbuild .
+.It Fl C
+Disable the distfile cache for all builds.  This is the default.
+.It Fl h Ar hostname
+Set or display distfile configuration on a per-host basis.  By default all
+configuration is done on a global basis.  Specifying this option along with
+.Fl G
+will cause the configuration for
+.Ar hostname
+to be reset to the global (default) configuration.
+.It Fl G
+Set or display the global (default) configuration.  This is the default.
+Specifying this option along with
+.Fl h Ar hostname
+will cause the configuration for
+.Ar hostname
+to be reset to the global (default) configuration.
+.El
+.Sh EXAMPLES
+.Pp
+Enable the distfile cache using a nullfs-mounted source from
+.Pa /space/distfiles
+.Pp
+.Cm ${pb}/scripts/tc
+.Cm configDistfile
+-c /space/distfiles
+.Pp
+Enable the distfile cache using an NFS-mounted source from
+.Pa foobar:/distfiles
+.Pp
+.Cm ${pb}/scripts/tc
+.Cm configDistfile
+-c foobar:/distfiles
+.Pp
+Where
+.Cm ${pb}
+is your Tinderbox (or port build) root directory.
+.Sh "SEE ALSO"
+.Xr tc-configGet 1
+.Sh LICENSE AND DISCLAIMER
+BSD License
