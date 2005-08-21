@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.47 2005/08/21 19:04:44 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.48 2005/08/21 21:32:32 marcus Exp $
 #
 
 package TinderboxDS;
@@ -160,7 +160,7 @@ sub getConfig {
                 \@results, $hostid, $fallbackhostid, $hostid, $configlet);
 
         if (!$rc) {
-                return undef;
+                return ();
         }
 
         @config = $self->_newFromArray("TBConfig", @results);
@@ -355,7 +355,7 @@ sub getBuildPortsQueueByHost {
         }
 
         if (!@results) {
-                return undef;
+                return ();
         }
 
         return @results;
@@ -385,7 +385,7 @@ sub getPortsForBuild {
         );
 
         if (!$rc) {
-                return undef;
+                return ();
         }
 
         @ports = $self->_newFromArray("Port", @results);
@@ -586,7 +586,7 @@ sub getObjects {
         my $rc = $self->_doQueryHashRef($query, \@results, @values);
 
         if (!$rc) {
-                return undef;
+                return ();
         }
 
         @objects = $self->_newFromArray($type, @results);
@@ -1015,7 +1015,7 @@ sub _getBuildUsers {
         }
 
         if (!$rc) {
-                return undef;
+                return ();
         }
 
         @users = $self->_newFromArray("User", @results);
@@ -1360,7 +1360,7 @@ sub findBuildsForJail {
                 \@results, $jail->getId());
 
         if (!$rc) {
-                return undef;
+                return ();
         }
 
         @jails = $self->_newFromArray("Jail", @results);
@@ -1379,7 +1379,7 @@ sub findBuildsForPortsTree {
                 \@results, $portstree->getId());
 
         if (!$rc) {
-                return undef;
+                return ();
         }
 
         @portstrees = $self->_newFromArray("PortsTree", @results);
@@ -1648,7 +1648,7 @@ sub _newFromArray {
         foreach (@array) {
                 my $obj = eval "new $type(\$_)";
                 if (ref($obj) ne $type) {
-                        return undef;
+                        return ();
                 }
                 push @objects, $obj;
         }
