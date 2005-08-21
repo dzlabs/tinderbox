@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.46 2005/07/21 20:42:52 marcus Exp $
+# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.47 2005/08/21 19:04:44 marcus Exp $
 #
 
 package TinderboxDS;
@@ -86,9 +86,10 @@ sub getDSVersion {
         my $config;
 
         my @results;
-        my $rc = $self->_doQuery("DESCRIBE config", []);
+        my @tables  = map  { $_ =~ s/.*\.//; $_ } $self->{'dbh'}->tables();
+        my @matches = grep { /\bconfig\b/ } @tables;
 
-        if (!$rc) {
+        if (!scalar @matches) {
                 return "1.X";
         }
 
