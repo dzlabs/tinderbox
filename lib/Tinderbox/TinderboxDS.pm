@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.49 2005/08/22 00:56:08 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.50 2005/08/22 05:32:07 marcus Exp $
 #
 
 package TinderboxDS;
@@ -191,10 +191,20 @@ sub updateConfig {
                         $ovalue = "";
                 }
 
-                $rc = $self->_doQuery(
-                        "INSERT INTO config VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE Config_Option_Value=?",
-                        [$oname, $ovalue, $hostid, $ovalue]
-                );
+                my @results =
+                    $self->getObjects("TBConfig",
+                        {Config_Option_Name => $oname, Host_Id => $hostid});
+
+                my ($query, $values);
+                if (@results) {
+                        $query = "INSERT INTO config VALUES(?, ?, ?)";
+                        $values = [$oname, $ovalue, $hostid];
+                } else {
+                        $query =
+                            "UPDATE config SET Config_Option_Value=? WHERE Config_Option_Name=? AND Host_Id=?";
+                        $values = [$ovalue, $oname, $hostid];
+                }
+                $rc = $self->_doQuery($query, $values);
 
                 if (!$rc) {
                         return $rc;
