@@ -1,6 +1,6 @@
 #!/bin/sh
 #-
-# Copyright (c) 2004-2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2004 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,16 +24,11 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/marcuscom.sh,v 1.4 2005/07/10 07:25:59 oliver Exp $
+# $Id$
 #
 
 
-pb=$0
-[ -z "$(echo "${pb}" | sed 's![^/]!!g')" ] && \
-pb=$(type "$pb" | sed 's/^.* //g')
-pb=$(realpath $(dirname $pb))
-pb=${pb%%/scripts}
-
+pb=/space
 CVSROOT=":pserver:anonymous@sushi.marcuscom.com:/space/cvs/marcuscom-cvs"
 TMPDIR="/tmp/mc_cvs"
 
@@ -44,7 +39,9 @@ portstree=$1
 mkdir -p ${TMPDIR}
 cd ${TMPDIR}
 cvs -qR -d ${CVSROOT} checkout ports
+cvs -qR -d ${CVSROOT} checkout ports-stable
 
+${pb}/scripts/marcusmerge -s ${TMPDIR} -d ${pb}/portstrees/${portstree}/ports -m ports-stable
 ${pb}/scripts/marcusmerge -s ${TMPDIR} -d ${pb}/portstrees/${portstree}/ports
 
 rm -rf ${TMPDIR}
