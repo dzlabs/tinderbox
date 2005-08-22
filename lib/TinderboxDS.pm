@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.48 2005/08/21 21:32:32 marcus Exp $
+# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.49 2005/08/22 00:56:08 marcus Exp $
 #
 
 package TinderboxDS;
@@ -892,7 +892,7 @@ sub getPortLastBuiltVersion {
                 return undef;
         }
 
-        return $results[0]->{Last_Built_Version};
+        return $results[0]->{'Last_Built_Version'};
 }
 
 sub updatePortsTree {
@@ -1534,7 +1534,7 @@ sub getAllPortsTrees {
 sub getError {
         my $self = shift;
 
-        return $self->{error};
+        return $self->{'error'};
 }
 
 sub _doQueryNumRows {
@@ -1681,8 +1681,8 @@ sub _addObject {
 sub destroy {
         my $self = shift;
 
-        $self->{error} = undef;
-        $self->{dbh}->disconnect;
+        $self->{'error'} = undef;
+        $self->{'dbh'}->disconnect;
 }
 
 sub getTime {

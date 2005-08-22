@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderObject.pm,v 1.6 2005/08/22 00:50:44 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderObject.pm,v 1.7 2005/08/22 00:56:08 marcus Exp $
 #
 
 package TinderObject;
@@ -41,7 +41,7 @@ sub new {
         my $self = {_object_hash => $args[0], _id_field => undef,};
         foreach my $key (keys %{$attrs}) {
                 $self->{$key} = $attrs->{$key}
-                    if (defined($self->{_object_hash}->{$key}));
+                    if (defined($self->{'_object_hash'}->{$key}));
         }
         bless($self, $class);
         $self;
@@ -51,7 +51,7 @@ sub toHashRef {
         my $self    = shift;
         my $hashRef = {};
 
-        foreach (keys %{$self->{_object_hash}}) {
+        foreach (keys %{$self->{'_object_hash'}}) {
                 if (
                         defined($self->{$_})
                         && (
