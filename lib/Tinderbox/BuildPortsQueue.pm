@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/BuildPortsQueue.pm,v 1.4 2005/08/22 00:53:00 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/BuildPortsQueue.pm,v 1.5 2005/08/22 02:09:32 marcus Exp $
 #
 
 package BuildPortsQueue;
@@ -33,7 +33,7 @@ use TinderObject;
 use vars qw(@ISA);
 @ISA = qw(TinderObject);
 
-use constants BUILD_PORTS_QUEUE_ID_FIELD => 'Build_Ports_Queue_Id';
+use constant BUILD_PORTS_QUEUE_ID_FIELD => 'Build_Ports_Queue_Id';
 
 sub new {
         my $that        = shift;
