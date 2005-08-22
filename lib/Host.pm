@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Host.pm,v 1.2 2005/07/20 03:19:03 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Host.pm,v 1.3 2005/08/22 00:50:44 marcus Exp $
 #
 
 package Host;
@@ -32,6 +32,8 @@ use strict;
 use TinderObject;
 use vars qw(@ISA);
 @ISA = qw(TinderObject);
+
+use constant HOST_ID_FIELD => 'Host_Id';
 
 sub new {
         my $that        = shift;
@@ -43,7 +45,10 @@ sub new {
         my @args = ();
         push @args, $object_hash, @_;
 
-        $that->SUPER::new(@args);
+        my $self = $that->SUPER::new(@args);
+        $self->{'_id_field'} = HOST_ID_FIELD;
+
+        return $self;
 }
 
 sub getId {

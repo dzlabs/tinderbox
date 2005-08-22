@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/PortsTree.pm,v 1.7 2005/07/20 03:19:03 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/PortsTree.pm,v 1.8 2005/08/22 00:50:44 marcus Exp $
 #
 
 package PortsTree;
@@ -32,6 +32,8 @@ use strict;
 use TinderObject;
 use vars qw(@ISA);
 @ISA = qw(TinderObject);
+
+use constant PORTS_TREE_ID_FIELD => 'Ports_Tree_Id';
 
 sub new {
         my $that        = shift;
@@ -48,7 +50,10 @@ sub new {
         my @args = ();
         push @args, $object_hash, @_;
 
-        $that->SUPER::new(@args);
+        my $self = $that->SUPER::new(@args);
+        $self->{'_id_field'} = PORTS_TREE_ID_FIELD;
+
+        return $self;
 }
 
 sub getId {

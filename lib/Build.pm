@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Build.pm,v 1.8 2005/07/20 03:19:03 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Build.pm,v 1.9 2005/08/22 00:50:44 marcus Exp $
 #
 
 package Build;
@@ -38,6 +38,8 @@ use vars qw(@ISA %STATUS_HASH);
         PREPARE   => 1,
         PORTBUILD => 2,
 );
+
+use constant BUILD_ID_FIELD => 'Build_Id';
 
 sub new {
         my $that        = shift;
@@ -54,7 +56,10 @@ sub new {
         my @args = ();
         push @args, $object_hash, @_;
 
-        $that->SUPER::new(@args);
+        my $self = $that->SUPER::new(@args);
+        $self->{'_id_field'} = BUILD_ID_FIELD;
+
+        return $self;
 }
 
 sub getId {

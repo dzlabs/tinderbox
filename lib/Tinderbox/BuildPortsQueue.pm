@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/BuildPortsQueue.pm,v 1.3 2005/07/20 03:19:03 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/BuildPortsQueue.pm,v 1.4 2005/08/22 00:53:00 marcus Exp $
 #
 
 package BuildPortsQueue;
@@ -32,6 +32,8 @@ use strict;
 use TinderObject;
 use vars qw(@ISA);
 @ISA = qw(TinderObject);
+
+use constants BUILD_PORTS_QUEUE_ID_FIELD => 'Build_Ports_Queue_Id';
 
 sub new {
         my $that        = shift;
@@ -51,7 +53,10 @@ sub new {
         my @args = ();
         push @args, $object_hash, @_;
 
-        $that->SUPER::new(@args);
+        my $self = $that->SUPER::new(@args);
+        $self->{'_id_field'} = BUILD_PORTS_QUEUE_ID_FIELD;
+
+        return $self;
 }
 
 sub getId {
@@ -67,14 +72,14 @@ sub getBuildId {
 }
 
 sub getCompletionDate {
-        my $self = shift;  
-                
+        my $self = shift;
+
         return $self->{Completion_Date};
 }
 
 sub getEmailOnCompletion {
-        my $self = shift;  
-                
+        my $self = shift;
+
         return $self->{Email_On_Completion};
 }
 
