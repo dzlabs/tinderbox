@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.50 2005/08/22 05:32:07 marcus Exp $
+# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.51 2005/08/22 21:51:25 marcus Exp $
 #
 
 package TinderboxDS;
@@ -196,7 +196,7 @@ sub updateConfig {
                         {Config_Option_Name => $oname, Host_Id => $hostid});
 
                 my ($query, $values);
-                if (@results) {
+                if (!@results) {
                         $query = "INSERT INTO config VALUES(?, ?, ?)";
                         $values = [$oname, $ovalue, $hostid];
                 } else {
