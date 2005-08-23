@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.10 2005/07/21 11:28:29 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.11 2005/08/23 01:55:20 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -398,7 +398,7 @@
 
 
         function getBuildStats($build_id) {
-            $query = 'SELECT SUM(IF(Last_Status = "FAIL", 1, 0)) AS fails FROM build_ports WHERE Build_Id = ?';
+            $query = 'SELECT SUM(IF(Last_Status = \'FAIL\', 1, 0)) AS fails FROM build_ports WHERE Build_Id = ?';
             $rc = $this->_doQueryHashRef($query, $results, $build_id);
             if (!$rc) return null;
             return $results[0];
