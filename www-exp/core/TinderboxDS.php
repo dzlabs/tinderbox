@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/core/TinderboxDS.php,v 1.11 2005/08/23 01:55:20 marcus Exp $
+# $MCom: portstools/tinderbox/www-exp/core/TinderboxDS.php,v 1.12 2005/08/23 03:11:10 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -357,7 +357,7 @@
         }
 
         function getLatestPorts($build_id,$limit="") {
-            $query = "SELECT ports.*,build_ports.Build_Id,build_ports.Last_Built,build_ports.Last_Status,build_ports.Last_Successful_Built,Last_Built_Version FROM ports,build_ports WHERE ports.Port_Id = build_ports.Port_Id ";
+            $query = "SELECT ports.*,build_ports.Build_Id,build_ports.Last_Built,build_ports.Last_Status,build_ports.Last_Successful_Built,Last_Built_Version FROM ports,build_ports WHERE ports.Port_Id = build_ports.Port_Id AND build_ports.Last_Built IS NOT NULL ";
             if($build_id)
                  $query .= "AND Build_Id=$build_id ";
             $query .= " ORDER BY Last_Built DESC ";

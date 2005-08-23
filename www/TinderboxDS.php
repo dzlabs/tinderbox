@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/TinderboxDS.php,v 1.33 2005/07/25 07:56:36 pav Exp $
+# $MCom: portstools/tinderbox/www/TinderboxDS.php,v 1.34 2005/08/23 03:11:10 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -117,7 +117,7 @@
 				case "Build_Name": $query.= "AND Build_Name = '" . $param . "' "; break;
 				case "Port_Id": $query.= "AND build_ports.Port_Id = '" . $param . "' "; break;
 				case "Last_Status": $query.= "AND Last_Status = '" . $param . "' "; break;
-				case "Last_Built": $query.= "ORDER BY Last_Built DESC LIMIT " . (int)$param; break;
+				case "Last_Built": $query.= "AND Last_Built IS NOT NULL ORDER BY Last_Built DESC LIMIT " . (int)$param; break;
 			}
 		    }
 		}
