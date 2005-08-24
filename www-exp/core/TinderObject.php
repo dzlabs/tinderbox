@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/core/TinderObject.php,v 1.1 2005/07/01 18:20:51 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/core/TinderObject.php,v 1.2 2005/08/24 05:07:41 marcus Exp $
 #
 
     class TinderObject {
@@ -34,6 +34,13 @@
 	    $this->_object_hash = $object_hash;
 
 	    foreach ($attrs as $key => $value) {
+			switch ($key) {
+				case 'ports_tree_cvsweb_url':
+					$key = "Ports_Tree_CVSweb_URL";
+					break;
+				default:
+					$key = str_replace(" ", "_", ucwords(str_replace("_", " ", $key)));
+			}
 		if (isset($this->_object_hash[$key])) {
 		    $this->$key = $value;
 		}
