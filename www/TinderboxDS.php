@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/TinderboxDS.php,v 1.34 2005/08/23 03:11:10 marcus Exp $
+# $MCom: portstools/tinderbox/www/TinderboxDS.php,v 1.35 2005/08/26 06:23:09 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -417,7 +417,7 @@
 	}
 
 	function prettyEmail($input) {
-		return str_replace("@FreeBSD.org", "", $input);
+		return eregi_replace("@FreeBSD.org", "", $input);
 	}
 
 	function getStatusCell($status, $build_name, $version) {

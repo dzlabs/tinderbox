@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/core/TinderboxDS.php,v 1.13 2005/08/24 05:07:13 marcus Exp $
+# $MCom: portstools/tinderbox/www-exp/core/TinderboxDS.php,v 1.14 2005/08/26 06:23:09 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -760,7 +760,7 @@
         }
 
         function prettyEmail($input) {
-            return str_replace(array('@FreeBSD.org','@freebsd.org'), '', $input);
+		return eregi_replace("@FreeBSD.org", "", $input);
         }
 
    }
