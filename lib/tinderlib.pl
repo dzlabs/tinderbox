@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.12 2005/07/25 00:39:05 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.13 2005/09/01 00:55:12 marcus Exp $
 #
 
 use strict;
@@ -53,6 +53,12 @@ sub buildenv {
 
         my ($major_version) = ($jail =~ /(^\d)/);
         my (@rawenv, @tbconfig) = ();
+
+        my @envfiles = (
+                "$pb/jails/$jail/jail.env",
+                "$pb/portstrees/$portstree/portstree.env",
+                "$pb/builds/$build/build.env",
+        );
 
         open(RAWENV, "$pb/scripts/rawenv")
             or die "ERROR: Cannot open $pb/scripts/rawenv for reading: $!\n";
@@ -100,6 +106,32 @@ sub buildenv {
                         }
                 }
                 $ENV{$var} = join(" ", @value);
+        }
+
+        foreach my $efile (@envfiles) {
+                if (-f $efile) {
+                        next unless open(INPUT, $efile);
+
+                        my @contents = <INPUT>;
+
+                        close(INPUT);
+
+                        foreach my $line (@contents) {
+                                $line =~ s/^\s+//;
+                                $line =~ s/\s+$//;
+                                next unless length $line;
+                                next if ($line =~ /^#/);
+
+                                $line =~ s/^export\s+//;
+                                my ($name, $value) = split(/=/, $line, 2);
+                                if ($value =~ /(^["'])/) {
+                                        my $fchar = $1;
+                                        $value =~ s/($fchar.*$fchar).*$/$1/;
+                                }
+
+                                $ENV{$name} = $value;
+                        }
+                }
         }
 }
 
