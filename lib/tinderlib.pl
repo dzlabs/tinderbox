@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.13 2005/09/01 00:55:12 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.14 2005/09/01 04:14:49 marcus Exp $
 #
 
 use strict;
@@ -121,6 +121,7 @@ sub buildenv {
                                 $line =~ s/\s+$//;
                                 next unless length $line;
                                 next if ($line =~ /^#/);
+                                next unless ($line =~ /=/);
 
                                 $line =~ s/^export\s+//;
                                 my ($name, $value) = split(/=/, $line, 2);
