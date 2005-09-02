@@ -60,7 +60,7 @@ error=0
 init=0
 noclean=0
 nullfs=0
-fetchorig=1
+fetchorig=0
 
 # check parameter count
 if [ $# -lt 10 ]; then
