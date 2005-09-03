@@ -3,5 +3,6 @@ $DB_HOST         = 'sushi.marcuscom.com';
 $DB_NAME         = 'tinderbox';
 $DB_USER         = 'tinder';
 $DB_PASS         = '';
+$DBI_TYPE        = 'database';
 
 1;
