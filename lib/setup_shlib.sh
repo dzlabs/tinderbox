@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.15 2005/09/03 21:29:15 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.16 2005/09/03 22:18:30 marcus Exp $
 #
 
 pb=$0
@@ -119,11 +119,19 @@ load_schema() {
     MYSQL_LOAD='/usr/local/bin/mysql -u${db_admin} -p -h ${db_host} ${db_name} < "${schema_file}"'
     MYSQL_LOAD_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
 
+    PGSQL_LOAD='/usr/local/bin/psql -U${db_admin} -W -h ${db_host} -d ${db_name} < "${schema_file}"'
+    PGSQL_LOAD_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
+
     rc=0
     case "${db_driver}" in
 	mysql)
 	    eval ${MYSQL_LOAD_PROMPT}
 	    eval ${MYSQL_LOAD}
+	    rc=$?
+	    ;;
+	pgsql)
+	    eval ${PGSQL_LOAD_PROMPT}
+	    eval ${PGSQL_LOAD}
 	    rc=$?
 	    ;;
 	*)
