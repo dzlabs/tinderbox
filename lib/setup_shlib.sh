@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.14 2005/07/21 17:52:46 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup_shlib.sh,v 1.15 2005/09/03 21:29:15 marcus Exp $
 #
 
 pb=$0
@@ -39,7 +39,21 @@ call_tc() {
 }
 
 get_dbdriver() {
-    echo "mysql" # XXX
+    db_drivers="mysql pgsql"
+    finished=0
+    db_driver=""
+
+    while [ ${finished} != 1 ]; do
+        read -p "Enter database driver (${db_drivers}): " db_driver
+
+	if echo ${db_drivers} | grep -qw "${db_driver}"; then
+	    finished=1
+	else
+	    echo 1>&2 "Invalid database driver, ${db_driver}."
+	fi
+    done
+
+    echo ${db_driver}
 }
 
 get_dbinfo() {
