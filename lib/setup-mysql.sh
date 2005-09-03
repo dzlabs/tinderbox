@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup-mysql.sh,v 1.1 2005/09/03 21:54:44 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup-mysql.sh,v 1.2 2005/09/03 22:13:14 marcus Exp $
 #
 
 DB_MAN_PREREQS="databases/p5-DBD-mysql41 databases/mysql41-client"
@@ -55,6 +55,7 @@ echo ""
 db_name=""
 db_admin=""
 db_host=""
+db_user=""
 do_db=0
 schema_file=${pb}/scripts/tinderbox-mysql.schema
 
@@ -103,7 +104,7 @@ if [ ${do_db} = 1 ]; then
     echo ""
 
     tinder_echo "INFO: Loading Tinderbox schema into ${db_name} ..."
-    load_schema ${schema_file} ${db_driver} ${db_admin} ${db_host} ${db_name}
+    load_schema ${schema_file} mysql ${db_admin} ${db_host} ${db_name}
 
     if [ $? != 0 ]; then
 	tinder_exit "ERROR: Database schema load failed!  Consult the output above for more information." $?
