@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.11 2005/07/21 05:15:52 marcus Exp $
+# $MCom: portstools/tinderbox/upgrade/mig_shlib.sh,v 1.12 2005/09/03 22:28:05 marcus Exp $
 #
 
 pb=$0
@@ -82,7 +82,7 @@ mig_db() {
     db_driver=$2
     db_host=$3
     db_name=$4
-    mig_file=${pb}/scripts/upgrade/mig_tinderbox-${MIG_VERSION_FROM}_to_${MIG_VERSION_TO}.sql
+    mig_file=${pb}/scripts/upgrade/mig_${db_driver}_tinderbox-${MIG_VERSION_FROM}_to_${MIG_VERSION_TO}.sql
 
     if [ -s "${mig_file}" ]; then
 	if [ ${do_load} = 1 ]; then
