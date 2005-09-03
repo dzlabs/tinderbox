@@ -1,6 +1,0 @@
-SET FOREIGN_KEY_CHECKS=0;
-
-INSERT INTO config VALUES ('__DSVERSION__', '2.1.1', -1) ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
-INSERT INTO config VALUES ('JAIL_OBJDIR', '', -1) ON DUPLICATE KEY UPDATE Config_Option_Value=VALUES(Config_Option_Value);
-
-SET FOREIGN_KEY_CHECKS=1;
