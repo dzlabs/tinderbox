@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/setup.sh,v 1.12 2005/08/08 03:56:26 marcus Exp $
+# $MCom: portstools/tinderbox/setup.sh,v 1.13 2005/09/03 21:54:43 marcus Exp $
 #
 
 pb=$0
@@ -34,30 +34,10 @@ pb=$(realpath $(dirname $pb))
 pb=${pb%%/scripts}
 
 MAN_PREREQS="lang/perl5.8"
-OPT_PREREQS="lang/php4 databases/php4-mysql databases/pear-DB www/php4-session"
+OPT_PREREQS="lang/php4 databases/pear-DB www/php4-session"
 PREF_FILES="rawenv tinderbox.ph"
 README="${pb}/scripts/README"
 TINDERBOX_URL="http://tinderbox.marcuscom.com/"
-
-## Database-specific variables
-# Each command can make use of the following variables:
-#  db_admin : Database administrative user (e.g. root)
-#  db_driver : Database driver (e.g. mysql)
-#  db_host : Database host (e.g. localhost)
-#  db_name : Database name (e.g. tinderbox)
-#  db_user : Database user for Tinderbox (e.g. tinder)
-#  db_pass : Database user password
-##
-
-# MySQL-specific variables
-MYSQL_SCHEMA="${pb}/scripts/tinderbox-mysql.schema"
-MYSQL_CHECKDB='/usr/local/bin/mysql -u${db_admin} -B -s -p -h ${db_host} -e "SHOW DATABASES LIKE '"'"'${db_name}'"'"'" mysql'
-MYSQL_CREATEDB='/usr/local/bin/mysqladmin -u${db_admin} -p -h ${db_host} create ${db_name}'
-MYSQL_CREATEDB_PROMPT='tinder_echo "INFO: The next prompt will be for ${db_admin}'"'"'s password on the database server ${db_host}."'
-MYSQL_GRANT='/usr/local/bin/mysql -u${db_admin} -p -h ${db_host} -e "GRANT SELECT, INSERT, UPDATE, DELETE ON ${db_name}.* TO '"'"'${db_user}'"'"'@'"'"'${grant_host}'"'"' IDENTIFIED BY '"'"'${db_pass}'"'"' ; FLUSH PRIVILEGES" mysql'
-MYSQL_GRANT_PROMPT=${MYSQL_CREATEDB_PROMPT}
-MYSQL_CHECKDB_PROMPT=${MYSQL_CREATEDB_PROMPT}
-MYSQL_DB_PREREQS="databases/p5-DBD-mysql41 databases/mysql41-client"
 
 . ${pb}/scripts/lib/setup_shlib.sh
 . ${pb}/scripts/lib/tinderbox_shlib.sh
@@ -105,167 +85,18 @@ echo ""
 
 # Now create the database if we can.
 tinder_echo "INFO: Beginning database configuration."
-db_host=""
-db_name=""
-db_user=""
-db_pass=""
-db_admin=""
-createdb_cmd=""
-createdb_prompt=""
-grant_cmd=""
-grant_prompt=""
-schema_file=""
-db_prereqs=""
-do_db=0
 
 db_driver=$(get_dbdriver)
-case "${db_driver}" in
-    mysql)
-        checkdb_cmd=${MYSQL_CHECKDB}
-	checkdb_prompt=${MYSQL_CHECKDB_PROMPT}
-        createdb_cmd=${MYSQL_CREATEDB}
-        createdb_prompt=${MYSQL_CREATEDB_PROMPT}
-        grant_cmd=${MYSQL_GRANT}
-        grant_prompt=${MYSQL_GRANT_PROMPT}
-        db_prereqs=${MYSQL_DB_PREREQS}
-	schema_file=${MYSQL_SCHEMA}
-        ;;
-    *)
-        tinder_exit "ERROR: Unsupport database driver: ${db_driver}"
-        ;;
-esac
 
-if [ -n "${db_prereqs}" ]; then
-    tinder_echo "INFO: Checking for prerequisites for ${db_driver} database driver ..."
-    missing=$(check_prereqs ${db_prereqs})
-
-    if [ $? = 1 ]; then
-        tinder_echo "ERROR: The following mandatory dependencies are missing.  These must be installed prior to running the Tinderbox setup script."
-        tinder_echo "ERROR:  ${missing}"
-        exit 1
-    fi
-    tinder_echo "DONE."
-    echo ""
+if [ ! -f "${pb}/scripts/lib/setup-${db_driver}.sh" ]; then
+    tinder_echo "ERROR: Failed to locate a setup script for the ${db_driver} database driver."
+    exit 1
 fi
 
-dbinfo=$(get_dbinfo ${db_driver})
-if [ $? = 0 ]; then
-    db_admin_host=${dbinfo%:*}
-    db_name=${dbinfo##*:}
-    db_admin=${db_admin_host%:*}
-    db_host=${db_admin_host#*:}
-    do_db=1
-else
-    tinder_echo "WARN: You must first create a database for Tinderbox, and load the database schema from ${schema_file}.  Consult ${TINDERBOX_URL} for more information on creating and initializing the Tinderbox database."
-fi
+. ${pb}/scripts/lib/setup-${db_driver}.sh
 
-if [ ${do_db} = 1 ]; then
-    if [ ! -f ${schema_file} ]; then
-	tinder_exit "ERROR: Database schema file ${schema_file} is missing.  Database configuration cannot be completed."
-    fi
-
-    tinder_echo "INFO: Checking to see if database ${db_name} already exists on ${db_host} ..."
-    eval ${checkdb_prompt}
-    dbexist=$(eval ${checkdb_cmd})
-
-    if [ x"${dbexist}"  = x"${db_name}" ]; then
-	tinder_echo "WARN: A database with the name ${db_name} already exists on ${db_host}.  Do you want to use this database for Tinderbox (note: if you type 'n', setup will abort)?"
-	read -p "(y/n) " i
-	case "${i}" in
-	    [Yy]|[Yy][Ee][Ss])
-	        # continue
-		;;
-            *)
-	        tinder_exit "INFO: Setup aborted by user."
-		;;
-        esac
-    else
-	tinder_echo "INFO: Database ${db_name} does not exist.  Creating database ${db_name} on ${db_host} ..."
-        eval ${createdb_prompt}
-        eval ${createdb_cmd}
-    fi
-
-    if [ $? != 0 ]; then
-	tinder_exit "ERROR: Database creation failed!  Consult the output above for more information." $?
-    fi
-
-    tinder_echo "DONE."
-    echo ""
-
-    tinder_echo "INFO: Loading Tinderbox schema into ${db_name} ..."
-    load_schema ${schema_file} ${db_driver} ${db_admin} ${db_host} ${db_name}
-
-    if [ $? != 0 ]; then
-	tinder_exit "ERROR: Database schema load failed!  Consult the output above for more information." $?
-    fi
-
-    tinder_echo "DONE."
-    echo ""
-
-    finished=0
-    while [ ${finished} != 1 ]; do
-        read -p "Enter the desired username for the Tinderbox database : " db_user
-        pwfinished=0
-        while [ ${pwfinished} != 1 ]; do
-            stty -echo
-            read -p "Enter the desired password for ${db_user} : " db_pass
-	    stty echo
-	    echo ""
-	    stty -echo
-            read -p "Confirm password for ${db_user} : " confirm_pass
-            stty echo
-	    echo ""
-	    if [ ${db_pass} = ${confirm_pass} ]; then
-	        pwfinished=1
-	    else
-	        tinder_echo "WARN: Passwords do not match!"
-	    fi
-         done
-
-	 echo 1>&2 "Are these the settings you want:"
-	 echo 1>&2 "    Database username      : ${db_user}"
-	 echo 1>&2 "    Database user password : ****"
-	 read -p "(y/n)" option
-
-	 case "${option}" in
-	     [Yy]|[Yy][Ee][Ss])
-	         finished=1
-		 ;;
-        esac
-    done
-
-    grant_host=""
-    if [ ${db_host} = "localhost" ]; then
-	grant_host="localhost"
-    else
-	grant_host=$(hostname)
-    fi
-
-    tinder_echo "INFO: Adding permissions to ${db_name} for ${db_user} ..."
-    eval ${grant_prompt}
-
-    eval ${grant_cmd}
-
-    if [ $? != 0 ]; then
-	tinder_exit "ERROR: Database privilege configuration failed!  Consult the output above for more information." $?
-    fi
-
-    tinder_echo "DONE."
-    echo ""
-
-    cat > ${pb}/scripts/ds.ph << EOT
-\$DB_DRIVER       = '${db_driver}';
-\$DB_HOST         = '${db_host}';
-\$DB_NAME         = '${db_name}';
-\$DB_USER         = '${db_user}';
-\$DB_PASS         = '${db_pass}';
-
-1;
-EOT
-
-    tinder_echo "INFO: Database configuration complete."
-    echo ""
-fi
+tinder_echo "INFO: Database configuration complete."
+echo ""
 
 # We're done now.  We don't want to call tc init here since the user may need
 # to configure tinderbox.ph first.
