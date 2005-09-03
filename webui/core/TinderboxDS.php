@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.14 2005/08/26 06:23:09 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.15 2005/09/03 22:41:54 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -159,8 +159,9 @@
         }
 
         function getUserByLogin($username,$password) {
-            $query = "SELECT User_Id,User_Name,User_Email,User_Password,User_Www_Enabled FROM users WHERE User_Name=? AND User_Password=PASSWORD(?)";
-            $rc = $this->_doQueryHashRef($query, $results, array($username,$password));
+	    $hashPass = md5($password);
+            $query = "SELECT User_Id,User_Name,User_Email,User_Password,User_Www_Enabled FROM users WHERE User_Name=? AND User_Password=?";
+            $rc = $this->_doQueryHashRef($query, $results, array($username,$hashPass));
 
             if (!$rc) {
                 return null;
@@ -711,16 +712,7 @@
         }
 
         function cryptPassword($password) {
-            $query = "SELECT PASSWORD(?) PASSWORD FROM DUAL";
-
-            $rc = $this->_doQuery($query, array($password), &$res);
-
-            if (!$rc) {
-                return null;
-            }
-
-            $password = $res->fetchRow();
-            return $password['PASSWORD'];
+            return md5($password);
         }
 
         function getPackageSuffix($jail_id) {

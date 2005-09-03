@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.52 2005/09/03 21:55:39 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.53 2005/09/03 22:41:54 marcus Exp $
 #
 
 package TinderboxDS;
@@ -39,6 +39,7 @@ use Host;
 use TBConfig;
 use DBI;
 use Carp;
+use Digest::MD5 qw(md5_hex);
 use vars qw(
     $DB_DRIVER
     $DB_HOST
@@ -713,11 +714,14 @@ sub updateUser {
         my $self = shift;
         my $user = shift;
         my $uCls = (ref($user) eq "REF") ? $$user : $user;
+        my $hashPass;
+
+        $hashPass = md5_hex($uCls->getPassword());
 
         my $rc = $self->_doQuery(
-                "UPDATE users set User_Email=?, User_Password=PASSWORD(?), User_Www_Enabled=? WHERE User_Id=?",
+                "UPDATE users set User_Email=?, User_Password=?, User_Www_Enabled=? WHERE User_Id=?",
                 [
-                        $uCls->getEmail(),      $uCls->getPassword(),
+                        $uCls->getEmail(),      $hashPass,
                         $uCls->getWwwEnabled(), $uCls->getId()
                 ]
         );
@@ -1155,12 +1159,15 @@ sub addUser {
         my $self = shift;
         my $user = shift;
         my $uCls = (ref($user) eq "REF") ? $$user : $user;
+        my $hashPass;
+
+        $hashPass = md5_hex($uCls->getPassword());
 
         my $rc = $self->_doQuery(
-                "INSERT INTO users (User_Name,User_Email,User_Password,User_Www_Enabled) VALUES (?, ?, PASSWORD(?), ?)",
+                "INSERT INTO users (User_Name,User_Email,User_Password,User_Www_Enabled) VALUES (?, ?, ?, ?)",
                 [
-                        $uCls->getName(),     $uCls->getEmail(),
-                        $uCls->getPassword(), $uCls->getWwwEnabled()
+                        $uCls->getName(), $uCls->getEmail(),
+                        $hashPass,        $uCls->getWwwEnabled()
                 ]
         );
 
