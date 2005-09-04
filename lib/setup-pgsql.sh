@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup-pgsql.sh,v 1.5 2005/09/04 00:23:24 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup-pgsql.sh,v 1.6 2005/09/04 00:28:18 marcus Exp $
 #
 
 DB_MAN_PREREQS="databases/p5-DBD-Pg databases/postgresql*-client"
@@ -121,7 +121,7 @@ if [ ${do_db} = 1 ]; then
     tinder_echo "DONE."
     echo ""
 
-    tinder_echo "INFO: Creating database ${db_name} on ${db_host} ..."
+    tinder_echo "INFO: Creating database ${db_name} on ${db_host} and assigning ownership to ${db_user} ..."
     tinder_echo "INFO: The next prompt will be for ${db_admin}'s password on the database server ${db_host}."
     su -l pgsql -c "createdb -O ${db_user} -h ${db_host} -U ${db_admin} -W ${db_name}"
 
