@@ -199,7 +199,7 @@ major_version=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
 if [ "${major_version}" = "4" ]; then
     mkdir -p ${chroot}/libexec
     mkdir -p ${chroot}/lib
-    if [ "${ARCH}" = "i386" ]; then
+    if [ "${ARCH}" = "i386" -o "${ARCH}" = "amd64" ]; then
         cp -p /sbin/mount_linprocfs /sbin/mount /sbin/umount ${chroot}/sbin
         cp -p /lib/libufs.so.[0-9]* ${chroot}/lib
     fi
@@ -347,7 +347,7 @@ else
     >/dev/null 2>&1
 fi
 
-if [ ${ARCH} = "i386" ]; then
+if [ ${ARCH} = "i386" -o ${ARCH} = "amd64" ]; then
     # JDK ports need linprocfs :(
     mkdir -p ${chroot}/compat/linux/proc
     chroot ${chroot} mount_linprocfs linprocfs /compat/linux/proc
