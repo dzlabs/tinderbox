@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/core/User.php,v 1.2 2005/07/21 11:28:29 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/core/User.php,v 1.3 2005/09/04 02:54:47 marcus Exp $
 #
 
     require_once 'TinderObject.php';
@@ -60,7 +60,7 @@
 	}
 
 	function getWwwEnabled() {
-	    return $this->User_Www_Enabled;
+	    return $this->_truth_array[$this->User_Www_Enabled];
 	}
 
 	function setName($name) {

@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/BuildPortsQueue.pm,v 1.5 2005/08/22 02:09:32 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/BuildPortsQueue.pm,v 1.6 2005/09/04 02:58:51 marcus Exp $
 #
 
 package BuildPortsQueue;
@@ -80,7 +80,7 @@ sub getCompletionDate {
 sub getEmailOnCompletion {
         my $self = shift;
 
-        return $self->{Email_On_Completion};
+        return $self->{'_truth_array'}->{$self->{Email_On_Completion}};
 }
 
 sub getPortDirectory {

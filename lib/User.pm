@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/User.pm,v 1.6 2005/08/22 00:50:44 marcus Exp $
+# $MCom: portstools/tinderbox/lib/User.pm,v 1.7 2005/09/04 02:58:51 marcus Exp $
 #
 
 package User;
@@ -81,7 +81,7 @@ sub getPassword {
 sub getWwwEnabled {
         my $self = shift;
 
-        return $self->{User_Www_Enabled};
+        return $self->{'_truth_array'}->{$self->{User_Www_Enabled}};
 }
 
 sub setName {

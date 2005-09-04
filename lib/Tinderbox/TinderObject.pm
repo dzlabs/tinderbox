@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderObject.pm,v 1.11 2005/09/04 01:13:36 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderObject.pm,v 1.12 2005/09/04 02:58:51 marcus Exp $
 #
 
 package TinderObject;
@@ -36,9 +36,19 @@ sub new {
         my ($that, @args) = @_;
         my $class = ref($that) || $that;
 
-        my $attrs = $args[1];
+        my $attrs        = $args[1];
+        my $_truth_array = {
+                'f' => 0,
+                't' => 1,
+                '0' => 0,
+                '1' => 1,
+        };
 
-        my $self = {_object_hash => $args[0], _id_field => undef,};
+        my $self = {
+                _object_hash => $args[0],
+                _id_field    => undef,
+                _truth_array => $_truth_array,
+        };
         foreach my $key (keys %{$attrs}) {
                 my $skey = $key;
                 if ($skey eq 'ports_tree_cvsweb_url') {
