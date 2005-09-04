@@ -24,11 +24,11 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup-pgsql.sh,v 1.2 2005/09/03 22:20:18 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup-pgsql.sh,v 1.3 2005/09/04 00:00:45 marcus Exp $
 #
 
-DB_MAN_PREREQS="databases/p5-DBD-Pg databases/postgresql74-client"
-DB_OPT_PREREQS="databases/php4-pgsql"
+DB_MAN_PREREQS="databases/p5-DBD-Pg databases/postgresql*-client"
+DB_OPT_PREREQS="databases/php[45]-pgsql"
 
 tinder_echo "INFO: Checking for prerequisites for pgsql database driver ..."
 if [ -n "${DB_MAN_PREREQS}" ]; then

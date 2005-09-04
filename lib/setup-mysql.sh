@@ -24,11 +24,11 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup-mysql.sh,v 1.2 2005/09/03 22:13:14 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup-mysql.sh,v 1.3 2005/09/04 00:00:45 marcus Exp $
 #
 
 DB_MAN_PREREQS="databases/p5-DBD-mysql41 databases/mysql41-client"
-DB_OPT_PREREQS="databases/php4-mysql"
+DB_OPT_PREREQS="databases/php[45]-mysql"
 
 tinder_echo "INFO: Checking for prerequisites for mysql database driver ..."
 if [ -n "${DB_MAN_PREREQS}" ]; then
