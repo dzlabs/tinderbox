@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup-pgsql.sh,v 1.3 2005/09/04 00:00:45 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup-pgsql.sh,v 1.4 2005/09/04 00:10:11 marcus Exp $
 #
 
 DB_MAN_PREREQS="databases/p5-DBD-Pg databases/postgresql*-client"
@@ -143,7 +143,7 @@ if [ ${do_db} = 1 ]; then
     echo ""
 
     cat > ${pb}/scripts/ds.ph << EOT
-\$DB_DRIVER       = '${db_driver}';
+\$DB_DRIVER       = 'Pg';
 \$DB_HOST         = '${db_host}';
 \$DB_NAME         = '${db_name}';
 \$DB_USER         = '${db_user}';
