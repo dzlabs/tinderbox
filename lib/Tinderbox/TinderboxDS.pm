@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.54 2005/09/04 00:06:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.55 2005/09/04 03:45:26 marcus Exp $
 #
 
 package TinderboxDS;
@@ -1512,6 +1512,17 @@ sub isPortForBuild {
         );
 
         foreach (@result) {
+
+                # XXX Remove hack after schema is lowercased.
+                foreach my $key (keys %{$_}) {
+                        my $value = $_->{$key};
+                        delete $_->{$key};
+
+                        $key = ucfirst $key;
+                        $key =~ s/_(.)/_\u$1/g;
+
+                        $_->{$key} = $value;
+                }
                 if ($build->getName() eq $_->{'Build_Name'}) {
                         $valid = 1;
                         last;
