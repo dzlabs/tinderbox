@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.55 2005/09/04 03:45:26 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.56 2005/09/04 22:44:13 marcus Exp $
 #
 
 package TinderboxDS;
@@ -71,6 +71,10 @@ sub new {
                 dbh   => undef,
                 error => undef,
         };
+
+        if (!$DBI_TYPE) {
+                $DBI_TYPE = 'database';
+        }
 
         my $dsn = "DBI:$DB_DRIVER:$DBI_TYPE=$DB_NAME;host=$DB_HOST";
 
