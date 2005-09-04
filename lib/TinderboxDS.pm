@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.53 2005/09/03 22:41:54 marcus Exp $
+# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.54 2005/09/04 00:06:57 marcus Exp $
 #
 
 package TinderboxDS;
@@ -46,6 +46,7 @@ use vars qw(
     $DB_NAME
     $DB_USER
     $DB_PASS
+    $DBI_TYPE
     %OBJECT_MAP
 );
 
