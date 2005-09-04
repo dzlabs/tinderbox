@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup-pgsql.sh,v 1.4 2005/09/04 00:10:11 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup-pgsql.sh,v 1.5 2005/09/04 00:23:24 marcus Exp $
 #
 
 DB_MAN_PREREQS="databases/p5-DBD-Pg databases/postgresql*-client"
@@ -111,7 +111,7 @@ if [ ${do_db} = 1 ]; then
     done
 
     tinder_echo "INFO: Creating user ${db_user} on host ${db_host} ..."
-    tinder_echo "INFO: The next prompt will be for ${db_admin}'s password on the database server ${db_host}.  The prompt after that will be for ${db_user}'s password."
+    tinder_echo "INFO: The next prompt will be for the new user's (${db_user}) password on the database server ${db_host}.  The prompt after that will be for ${db_admin}'s password."
     su -l pgsql -c "createuser -E -h ${db_host} -U ${db_admin} -W -P ${db_user}"
 
     if [ $? != 0 ]; then
