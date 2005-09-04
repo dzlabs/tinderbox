@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/mkjail,v 1.25 2005/08/19 21:35:59 marcus Exp $
+# $MCom: portstools/tinderbox/mkjail,v 1.26 2005/09/04 22:07:43 ade Exp $
 #
 
 
@@ -61,6 +61,8 @@ fi
 
 # We only care about SRCBASE, so the other parameters can be anything.
 buildenv ${pb} "NULL" ${jail} "NULL"
+
+request_mount -q -r -d jail -j ${jail}
 
 update_cmd=$(${pb}/scripts/tc getSrcUpdateCmd -j ${jail})
 if [ ! -z "${update_cmd}" ]; then
