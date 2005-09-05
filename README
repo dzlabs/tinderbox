@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.38 2005/08/08 03:59:52 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.39 2005/09/05 20:42:27 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -17,8 +17,13 @@ Requirements:
 
 Recent FreeBSD (development happens on -CURRENT only, but Tinderbox is known
 to work on RELENG_5 and RELENG_6 too), Perl 5.8 or later (lang/perl5.8),
-DBD::Mysql Perl module (databases/p5-DBD-mysql41), and MySQL 4.1 or later
-(databases/mysql41-server).
+Digest::MD5 (security/p5-Digest-MD5), Net::SMTP (net/p5-Net), and either
+MySQL 4.1 or later (databases/mysql41-server) or PostgreSQL 7.4 or later
+(databases/postgres74-server).
+
+If MySQL is used, the MySQL Perl module must also be installed
+(databases/p5-DBD-mysql41).  Is PostgreSQL is used, the Pg Perl module
+must also be installed (databases/p5-DBD-Pg).
 
 The web front-ends require php4 (lang/php4), php4-mysql extension
 (databases/php4-mysql), and PEAR::DB (databases/pear-DB).
@@ -55,22 +60,32 @@ root, just substitute ${pb} with that root directory.
    ds.ph.  Note: the database can live on the same server as Tinderbox.  Just
    set $DB_HOST to localhost in ds.ph.  The Tinderbox user must be granted
    the following permissions on the Tinderbox database (for security purposes
-   no other permissions should be granted):
+   no other permissions should be granted) [MySQL only]:
 
 Select_priv
 Insert_priv
 Update_priv
 Delete_priv
 
+   For PostgreSQL users, make sure the Tinderbox user owns the Tinderbox
+   database as well as all the tables within that database.
+
 6. Populate the database with the Tinderbox schema:
 
-mysql -uroot -p -h {$DB_HOST} {$DB_NAME} < tinderbox-mysql.schema
+MySQL:
+------
+mysql -u{$DB_ADMIN} -p -h {$DB_HOST} {$DB_NAME} < tinderbox-mysql.schema
+
+PostgreSQL:
+-----------
+psql -U {$DB_USER} -W -h {$DB_HOST} -d {$DB_NAME} < tinderbox-pgsql.schema
 
    Where {$DB_HOST} and {$DB_NAME} are the values of $DB_HOST and $DB_NAME
-   from ds.ph respectively.  Note: do not do this if you are upgrading!
-   If you do, you will overwrite all of your previous data.  If schema changes
-   are required for upgrading, a separate upgrade schema file will be
-   included, and instructions will be available at
+   from ds.ph respectively, {$DB_ADMIN} is the database administrator username,
+   and {$DB_USER} is the Tinderbox user.  Note: do not do this if you are
+   upgrading! If you do, you will overwrite all of your previous data.  If
+   schema changes are required for upgrading, a separate upgrade schema file
+   will be included, and instructions will be available at
    http://tinderbox.marcuscom.com.
 
 7. Edit ${pb}/scripts/tinderbox.ph for your environment.
@@ -104,7 +119,7 @@ nfs_reserved_port_only="YES"
     to create a jail for FreeBSD 5.4-RELEASE:
 
 # cd ${pb}/scripts && ./create Jail -j 5.4 -d "FreeBSD 5.4-RELEASE" \
-	-t RELENG_5_4_0_RELEASE -u NONE
+	-t RELENG_5_4_0_RELEASE -u CVSUP
 
     Note: all Jail names _MUST_ begin with their FreeBSD major version number.
     That is, the following is an illegal jail name: ``FreeBSD-5.4''.
