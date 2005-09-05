@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.27 2005/09/03 22:25:18 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.28 2005/09/05 04:47:08 marcus Exp $
 
 VERSION=	2.0.0
 
@@ -15,8 +15,10 @@ ETCRCDATA=	tinderd.sh
 MIGDATA=	mig_shlib.sh mig_mysql_tinderbox-1.X_to_2.0.0.sql \
 		mig_mysql_tinderbox-2.0.0_to_2.1.0.sql \
 		mig_mysql_tinderbox-2.1.0_to_2.1.1.sql
+MAN1DATA=	tc-configCcache.1 tc-configDistfile.1 tc-configGet.1 \
+		tc-configJail.1 tc-configTinderd.1 tc-init.1
 WWWDATA=	Build.php Jail.php Port.php PortsTree.php TinderObject.php \
-		TinderboxDS.php cleanup.php inc_ds.php failures.php index.php \
+		TinderboxDS.php inc_ds.php failures.php index.php \
 		lastbuilds.php showbuild.php showport.php inc_tinderbox.php \
 		tinderstyle.css Makefile
 WWWEXPDATA=	inc_ds.php inc_tinderbox.php index.php
@@ -69,6 +71,12 @@ release:
 .endfor
 .for mf in ${MIGDATA}
 	cp ${.CURDIR}/upgrade/${mf} ${.CURDIR}/tinderbox-${VERSION}/upgrade
+.endfor
+.for ms in 1
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/man/man${ms}
+.for mf in ${MAN${ms}DATA}
+	cp ${.CURDIR}/man/man${ms}/${mf} ${.CURDIR}/tinderbox-${VERSION}/man/man${ms}
+.endfor
 .endfor
 	cd ${.CURDIR} && \
 		tar cvzf tinderbox-${VERSION}.tar.gz tinderbox-${VERSION}
