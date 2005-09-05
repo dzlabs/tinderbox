@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/TinderboxDS.php,v 1.36 2005/09/05 04:11:39 ade Exp $
+# $MCom: portstools/tinderbox/www/TinderboxDS.php,v 1.37 2005/09/05 04:20:25 ade Exp $
 #
 
     require_once 'DB.php';
@@ -48,13 +48,13 @@
 	var $packageSuffixCache; /* in use by getPackageSuffix() */
 
 	function TinderboxDS() {
-	    global $DB_HOST, $DB_TYPE, $DB_NAME, $DB_USER, $DB_PASS;
+	    global $DB_HOST, $DB_DRIVER, $DB_NAME, $DB_USER, $DB_PASS;
 
 	    # XXX: backwards compatibility
-	    if ($DB_TYPE == "")
-		$DB_TYPE = "mysql";
+	    if ($DB_DRIVER == "")
+		$DB_DRIVER = "mysql";
 
-	    $dsn = "$DB_TYPE://$DB_USER:$DB_PASS@$DB_HOST/$DB_NAME";
+	    $dsn = "$DB_DRIVER://$DB_USER:$DB_PASS@$DB_HOST/$DB_NAME";
 
 	    $this->db = DB::connect($dsn);
 
