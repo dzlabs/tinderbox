@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.16 2005/09/05 04:11:39 ade Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.17 2005/09/05 04:17:44 ade Exp $
 #
 
     require_once 'DB.php';
@@ -60,7 +60,7 @@
 	    if ($DB_TYPE == "")
 		$DB_TYPE = "mysql";
 
-            $dsn = "mysql://$DB_USER:$DB_PASS@$DB_HOST/$DB_NAME";
+            $dsn = "$DB_TYPE://$DB_USER:$DB_PASS@$DB_HOST/$DB_NAME";
 
             $this->db = DB::connect($dsn);
 
