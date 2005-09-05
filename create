@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/create,v 1.4 2005/07/21 18:43:23 ade Exp $
+# $MCom: portstools/tinderbox/create,v 1.5 2005/09/05 03:16:55 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -147,11 +147,16 @@ createJail () {
     cleanup_mounts -d jail -j ${jailName}
     cleanDirs ${jailName} ${basedir}
 
-    # setup the directory and supfile
-    echo -n "${jailName}: set up directory/supfile... "
+    # set up the directory
+    echo -n "${jailName}: set up directory... "
     mkdir -p ${basedir}/src
-    generateSupFile ${basedir} src ${tag} ${cvsupHost} ${cvsupCompress} \
-	> ${basedir}/src-supfile
+
+    # set up the sup file (if needed)
+    if [ "${updateCmd}" != "NONE" ]; then
+	echo -n "and supfile... "
+    	generateSupFile ${basedir} src ${tag} ${cvsupHost} ${cvsupCompress} \
+	    > ${basedir}/src-supfile
+    fi
     echo "done."
 
     # add jail to datastore
@@ -251,11 +256,16 @@ createPortsTree () {
     cleanup_mounts -d portstree -p ${portsTreeName}
     cleanDirs ${portsTreeName} ${basedir}
 
-    # setup the directory and supfile
-    echo -n "${portsTreeName}: set up directory/supfile... "
+    # set up the directory
+    echo -n "${portsTreeName}: set up directory... "
     mkdir -p ${basedir}/ports
-    generateSupFile ${basedir} ports . ${cvsupHost} ${cvsupCompress} \
-	> ${basedir}/ports-supfile
+
+    # set up the sup file (if needed)
+    if [ "${updateCmd}" != "NONE" ]; then
+	echo -n "and supfile... "
+	generateSupFile ${basedir} ports . ${cvsupHost} ${cvsupCompress} \
+	    > ${basedir}/ports-supfile
+    fi
     echo "done."
 
     # add portstree to datastore
