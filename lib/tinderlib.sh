@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.17 2005/07/22 16:10:11 oliver Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.18 2005/09/07 23:40:43 ade Exp $
 #
 
 tinder_echo() {
@@ -113,7 +113,7 @@ cleanup_mounts() {
 				return 1
 			fi
 			_destination=${_pb}/${_build}
-			if [ "${_ARCH}" = "i386" ] ; then
+			if [ "${_ARCH}" = "i386" -o "${_ARCH}" = "amd64" ] ; then
 				umount -f ${_destination}/compat/linux/proc >/dev/null 2>&1
 			fi
 			;;
