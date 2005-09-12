@@ -24,11 +24,17 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/TinderObject.php,v 1.9 2005/08/24 05:10:45 marcus Exp $
+# $MCom: portstools/tinderbox/www/TinderObject.php,v 1.10 2005/09/12 17:45:54 marcus Exp $
 #
 
     class TinderObject {
 	var $_object_hash = array();
+	var $_truth_array = array(
+		"t" => 1,
+		"f" => 0,
+		"0" => 0,
+		"1" => 1,
+	);
 
 	function TinderObject($object_hash, $attrs = array()) {
 	    $this->_object_hash = $object_hash;
