@@ -316,6 +316,7 @@ if [ x"${CCACHE_ENABLED}" = x"1" ]; then
         # G=GB, M=MB, K=KB
         chroot ${chroot} ccache -M ${CCACHE_MAX_SIZE}
     fi
+    unset CCACHE_DISABLE
 fi
 
 for dir in ${cleandirs}; do
