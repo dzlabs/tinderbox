@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.39 2005/09/05 20:42:27 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.40 2005/09/21 14:32:14 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -101,7 +101,7 @@ psql -U {$DB_USER} -W -h {$DB_HOST} -d {$DB_NAME} < tinderbox-pgsql.schema
 10. Setup the Tinderbox server as an NFS server by adding the following to
     /etc/exports:
 
-${pb} -ro -alldirs -maproot=0:0 localhost
+${pb} -alldirs -maproot=0:0 localhost
 
    Note: ${pb} _CANNOT_ be a symlink.  It should be a real, fully-qualified
    path.
