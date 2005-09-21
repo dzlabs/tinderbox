@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/MakeCache.pm,v 1.4 2005/07/27 19:38:16 ade Exp $
+# $MCom: portstools/tinderbox/lib/MakeCache.pm,v 1.5 2005/09/21 03:43:14 marcus Exp $
 #
 
 package MakeCache;
@@ -93,6 +93,9 @@ sub _getList {
         $self->_execMake($port);
         foreach my $dep (split(/\s+/, $self->{CACHE}->{$port}{$item})) {
                 my ($d, $ddir) = split(/:/, $dep);
+                if (!defined($ddir)) {
+                        $ddir = $d;
+                }
                 $ddir =~ s|^$self->{BASEDIR}/||;
                 push @deps, $ddir;
         }
