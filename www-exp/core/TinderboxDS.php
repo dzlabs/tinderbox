@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/core/TinderboxDS.php,v 1.18 2005/09/05 04:20:25 ade Exp $
+# $MCom: portstools/tinderbox/www-exp/core/TinderboxDS.php,v 1.19 2005/09/29 01:24:43 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -253,7 +253,7 @@
         }
 
         function getBuildPortsQueueEntries($host_id,$build_id) {
-            $query = "SELECT build_ports_queue.*, builds.Build_Name Build_Name, users.User_Name User_Name, hosts.Host_Name Host_Name
+            $query = "SELECT build_ports_queue.*, builds.Build_Name AS Build_Name, users.User_Name AS User_Name, hosts.Host_Name AS Host_Name
                         FROM build_ports_queue, builds, users, hosts
                        WHERE build_ports_queue.Host_Id=?
                          AND build_ports_queue.Build_Id=?
