@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/create,v 1.5 2005/09/05 03:16:55 ade Exp $
+# $MCom: portstools/tinderbox/create,v 1.6 2005/10/09 05:51:22 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -91,7 +91,7 @@ createJailUsage () {
     fi
     echo "usage: create Jail -j <name> -t <tag> [-d <description>]"
     echo "       [-C] [-H <cvsuphost>] [-m <mountsrc>]"
-    echo "       [-u <updatecommand>|CVSUP|NONE]"
+    echo "       [-u <updatecommand>|CVSUP|NONE] [-I]"
     exit 1
 }
 
@@ -104,10 +104,11 @@ createJail () {
     mountSrc=""
     tag=""
     updateCmd="CVSUP"
+    init=1
 
     # argument handling
     shift
-    while getopts d:j:m:t:u:CH: arg
+    while getopts d:j:m:t:u:CH:I arg
     do
 	case "${arg}" in
 
@@ -118,6 +119,7 @@ createJail () {
 	u)	updateCmd="${OPTARG}";;
 	C)	cvsupCompress=1;;
 	H)	cvsupHost="${OPTARG}";;
+	I)	init=0;;
 	?)	createJailUsage;;
 
 	esac
@@ -187,13 +189,16 @@ createJail () {
 	echo "done."
     fi
 
-    # now initialize the jail
-    echo "${jailName}: initializing new jail..."
-    ${pb}/scripts/mkjail ${jailName}
-    if [ $? != 0 ]; then
-	echo "FAILED."
-	exit 1
+    # now initialize the jail (unless otherwise requested)
+    if [ ${init} = 1 ]; then
+	echo "${jailName}: initializing new jail..."
+	${pb}/scripts/mkjail ${jailName}
+	if [ $? != 0 ]; then
+	    echo "FAILED."
+	    exit 1
+	fi
     fi
+
     echo "done."
 
     # finished
