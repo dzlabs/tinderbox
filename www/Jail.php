@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/Jail.php,v 1.4 2005/06/28 05:47:56 adamw Exp $
+# $MCom: portstools/tinderbox/www/Jail.php,v 1.5 2005/10/10 23:30:15 ade Exp $
 #
 
     require_once 'TinderObject.php';
@@ -33,59 +33,59 @@
 
 	function Jail($argv = array()) {
 	    $object_hash = array(
-		Jail_Id => "",
-		Jail_Name => "",
-		Jail_Tag => "",
-		Jail_Last_Built => "",
-		Jail_Update_Cmd => "",
-		Jail_Description => ""
+		jail_id => "",
+		jail_name => "",
+		jail_tag => "",
+		jail_last_built => "",
+		jail_update_cmd => "",
+		jail_description => ""
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
 	}
 
 	function getId() {
-	    return $this->Jail_Id;
+	    return $this->jail_id;
 	}
 
 	function getName() {
-	    return $this->Jail_Name;
+	    return $this->jail_name;
 	}
 
 	function getTag() {
-	    return $this->Jail_Tag;
+	    return $this->jail_tag;
 	}
 
 	function getLastBuilt() {
-	    return $this->Jail_Last_Built;
+	    return $this->jail_last_built;
 	}
 
 	function getUpdateCmd() {
-	    return $this->Jail_Update_Cmd;
+	    return $this->jail_update_cmd;
 	}
 
 	function getDescription() {
-	    return $this->Jail_Description;
+	    return $this->jail_description;
 	}
 
 	function setName($name) {
-	    $this->Jail_Name = $name;
+	    $this->jail_name = $name;
 	}
 
 	function setTag($tag) {
-	    $this->Jail_Tag = $tag;
+	    $this->jail_tag = $tag;
 	}
 
 	function setLastBuilt($time) {
-	    $this->Jail_Last_Built = $time;
+	    $this->jail_last_built = $time;
 	}
 
 	function setUpdateCmd($cmd) {
-	    $this->Jail_Update_Cmd = $cmd;
+	    $this->jail_update_cmd = $cmd;
 	}
 
 	function setDescription($descr) {
-	    $this->Jail_Description = $descr;
+	    $this->jail_description = $descr;
 	}
     }
 ?>

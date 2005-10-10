@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/core/Build.php,v 1.2 2005/07/21 11:28:28 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/core/Build.php,v 1.3 2005/10/10 23:30:16 ade Exp $
 #
 
     require_once 'TinderObject.php';
@@ -33,68 +33,68 @@
 
 	function Build($argv = array()) {
 	    $object_hash = array(
-		'Build_Id' => '',
-		'Build_Name' => '',
-		'Jail_Id' => '',
-		'Ports_Tree_Id' => '',
-		'Build_Description' => '',
-		'Build_Status' => '',
-		'Build_Current_Port' => ''
+		'build_id' => '',
+		'build_name' => '',
+		'jail_id' => '',
+		'ports_tree_id' => '',
+		'build_description' => '',
+		'build_status' => '',
+		'build_current_port' => ''
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
 	}
 
 	function getId() {
-	    return $this->Build_Id;
+	    return $this->build_id;
 	}
 
 	function getName() {
-	    return $this->Build_Name;
+	    return $this->build_name;
 	}
 
 	function getJailId() {
-	    return $this->Jail_Id;
+	    return $this->jail_id;
 	}
 
 	function getPortsTreeId() {
-	    return $this->Ports_Tree_Id;
+	    return $this->ports_tree_id;
 	}
 
 	function getDescription() {
-	    return $this->Build_Description;
+	    return $this->build_description;
 	}
 
 	function getBuildStatus() {
-	    return $this->Build_Status;
+	    return $this->build_status;
 	}
 
 	function getBuildCurrentPort() {
-	    return $this->Build_Current_Port;
+	    return $this->build_current_port;
 	}
 
 	function setName($name) {
-	    $this->Build_Name = $name;
+	    $this->build_name = $name;
 	}
 
 	function setJailId($id) {
-	    $this->Jail_Id = $id;
+	    $this->jail_id = $id;
 	}
 
 	function setPortsTreeId($id) {
-	    $this->Ports_Tree_Id = $id;
+	    $this->ports_tree_id = $id;
 	}
 
 	function setDescription($descr) {
-	    $this->Build_Description = $descr;
+	    $this->build_description = $descr;
 	}
 
 	function setBuildStatus($status) {
-	    $this->Build_Status = $status;
+	    $this->build_status = $status;
 	}
 
 	function setBuildCurrentPort($port) {
-	    $this->Build_Current_Port = $port;
+	    $this->build_current_port = $port;
 	}
 
     }

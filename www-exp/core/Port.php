@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/core/Port.php,v 1.2 2005/07/21 11:28:29 oliver Exp $
+# $MCom: portstools/tinderbox/www-exp/core/Port.php,v 1.3 2005/10/10 23:30:16 ade Exp $
 #
 
     require_once 'TinderObject.php';
@@ -33,59 +33,59 @@
 
 	function Port($argv = array()) {
 	    $object_hash = array(
-                'Build_Id' => '',
-		'Port_Id' => '',
-		'Port_Name' => '',
-		'Port_Directory' => '',
-		'Port_Comment' => '',
-		'Port_Maintainer' => '',
-		'Last_Built' => '',
-		'Last_Status' => '',
-		'Last_Successful_Built' => '',
-		'Last_Built_Version' => ''
+                'build_id' => '',
+		'port_id' => '',
+		'port_name' => '',
+		'port_directory' => '',
+		'port_comment' => '',
+		'port_maintainer' => '',
+		'last_built' => '',
+		'last_status' => '',
+		'last_successful_built' => '',
+		'last_built_version' => ''
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
 	}
 
         function getBuildId() {
-            return $this->Build_Id;
+            return $this->build_id;
         }
 
 	function getId() {
-	    return $this->Port_Id;
+	    return $this->port_id;
 	}
 
 	function getName() {
-	    return $this->Port_Name;
+	    return $this->port_name;
 	}
 
 	function getDirectory() {
-	    return $this->Port_Directory;
+	    return $this->port_directory;
 	}
 
 	function getComment() {
-	    return $this->Port_Comment;
+	    return $this->port_comment;
 	}
 
 	function getMaintainer() {
-	    return $this->Port_Maintainer;
+	    return $this->port_maintainer;
 	}
 
 	function getLastBuilt() {
-	    return $this->Last_Built;
+	    return $this->last_built;
 	}
 
 	function getLastStatus() {
-	    return $this->Last_Status;
+	    return $this->last_status;
 	}
 
 	function getLastSuccessfulBuilt() {
-	    return $this->Last_Successful_Built;
+	    return $this->last_successful_built;
 	}
 
 	function getLastBuiltVersion() {
-	    return $this->Last_Built_Version;
+	    return $this->last_built_version;
 	}
 
 	function getLogfileName() {
@@ -93,19 +93,19 @@
 	}
 
 	function setName($name) {
-	    $this->Port_Name = $name;
+	    $this->port_name = $name;
 	}
 
 	function setDirectory($dir) {
-	    $this->Port_Directory = $dir;
+	    $this->port_directory = $dir;
 	}
 
 	function setComment($comment) {
-	    $this->Port_Comment = $comment;
+	    $this->port_comment = $comment;
 	}
 
 	function setMaintainer($maintainer) {
-	    $this->Port_Maintainer = $maintainer;
+	    $this->port_maintainer = $maintainer;
 	}
 
 

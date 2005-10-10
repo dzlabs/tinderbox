@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/User.php,v 1.3 2005/09/04 02:54:47 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/User.php,v 1.4 2005/10/10 23:30:16 ade Exp $
 #
 
     require_once 'TinderObject.php';
@@ -33,50 +33,50 @@
 
 	function User($argv = array()) {
 	    $object_hash = array(
-                'User_Id' => '',
-		'User_Name' => '',
-		'User_Email' => '',
-		'User_Password' => '',
-		'User_Www_Enabled' => ''
+                'user_id' => '',
+		'user_name' => '',
+		'user_email' => '',
+		'user_password' => '',
+		'user_www_enabled' => ''
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
 	}
 
 	function getId() {
-	    return $this->User_Id;
+	    return $this->user_id;
 	}
 
 	function getName() {
-	    return $this->User_Name;
+	    return $this->user_name;
 	}
 
 	function getEmail() {
-	    return $this->User_Email;
+	    return $this->user_email;
 	}
 
 	function getPassword() {
-	    return $this->User_Password;
+	    return $this->user_password;
 	}
 
 	function getWwwEnabled() {
-	    return $this->_truth_array[$this->User_Www_Enabled];
+	    return $this->_truth_array[$this->user_www_enabled];
 	}
 
 	function setName($name) {
-	    return $this->User_Name = $name;
+	    return $this->user_name = $name;
 	}
 
 	function setEmail($email) {
-	    return $this->User_Email = $email;
+	    return $this->user_email = $email;
 	}
 
 	function setPassword($password) {
-	    return $this->User_Password = $password;
+	    return $this->user_password = $password;
 	}
 
 	function setWwwEnabled($www_enabled) {
-	    return $this->User_Www_Enabled = $www_enabled;
+	    return $this->user_www_enabled = $www_enabled;
 	}
     }
 ?>

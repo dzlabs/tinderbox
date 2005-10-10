@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/Host.php,v 1.2 2005/07/21 11:28:28 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/Host.php,v 1.3 2005/10/10 23:30:16 ade Exp $
 #
 
     require_once 'TinderObject.php';
@@ -33,19 +33,19 @@
 
 	function Host($argv = array()) {
 	    $object_hash = array(
-                'Host_Id' => '',
-		'Host_Name' => ''
+                'host_id' => '',
+		'host_name' => ''
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
 	}
 
 	function getId() {
-	    return $this->Host_Id;
+	    return $this->host_id;
 	}
 
 	function getName() {
-	    return $this->Host_Name;
+	    return $this->host_name;
 	}
 
     }

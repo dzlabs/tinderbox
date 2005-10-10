@@ -1,114 +1,114 @@
 -- DROP TABLE ports CASCADE;
 CREATE TABLE ports (
-	Port_Id SERIAL PRIMARY KEY,
-	Port_Directory VARCHAR(255) UNIQUE NOT NULL,
-	Port_Name VARCHAR(64),
-	Port_Maintainer VARCHAR(128),
-	Port_Comment VARCHAR(255)
+	port_id SERIAL PRIMARY KEY,
+	port_directory VARCHAR(255) UNIQUE NOT NULL,
+	port_name VARCHAR(64),
+	port_maintainer VARCHAR(128),
+	port_comment VARCHAR(255)
 );
 
 -- DROP TABLE jails CASCADE;
 CREATE TABLE jails (
-	Jail_Id SERIAL PRIMARY KEY,
-	Jail_Name VARCHAR(32) UNIQUE NOT NULL,
-	Jail_Tag VARCHAR(32),
-	Jail_Last_Built TIMESTAMP,
-	Jail_Update_Cmd VARCHAR(255) DEFAULT 'CVSUP',
-	Jail_Description TEXT,
-	Jail_Src_Mount TEXT
+	jail_id SERIAL PRIMARY KEY,
+	jail_name VARCHAR(32) UNIQUE NOT NULL,
+	jail_tag VARCHAR(32),
+	jail_last_built TIMESTAMP,
+	jail_update_cmd VARCHAR(255) DEFAULT 'CVSUP',
+	jail_description TEXT,
+	jail_src_mount TEXT
 );
 
 -- DROP TABLE ports_trees CASCADE;
 CREATE TABLE ports_trees (
-	Ports_Tree_Id SERIAL PRIMARY KEY,
-	Ports_Tree_Name VARCHAR(32) UNIQUE NOT NULL,
-	Ports_Tree_Description TEXT,
-	Ports_Tree_Last_Built TIMESTAMP,
-	Ports_Tree_Update_Cmd VARCHAR(255) DEFAULT 'CVSUP',
-	Ports_Tree_CVSweb_URL VARCHAR(255),
-	Ports_Tree_Ports_Mount TEXT
+	ports_tree_id SERIAL PRIMARY KEY,
+	ports_tree_name VARCHAR(32) UNIQUE NOT NULL,
+	ports_tree_description TEXT,
+	ports_tree_last_built TIMESTAMP,
+	ports_tree_update_cmd VARCHAR(255) DEFAULT 'CVSUP',
+	ports_tree_cvsweb_url VARCHAR(255),
+	ports_tree_ports_mount TEXT
 );
 
 -- DROP TABLE builds CASCADE;
 CREATE TABLE builds (
-	Build_Id SERIAL PRIMARY KEY,
-	Build_Name VARCHAR(32) UNIQUE NOT NULL,
-	Jail_Id INTEGER REFERENCES Jails(Jail_Id) ON UPDATE CASCADE ON DELETE RESTRICT,
-	Ports_Tree_Id INTEGER REFERENCES ports_trees(Ports_Tree_Id) ON UPDATE CASCADE ON DELETE RESTRICT,
-	Build_Description TEXT,
-	Build_Status VARCHAR(16) CHECK (Build_Status IN ('IDLE','PREPARE','PORTBUILD')) DEFAULT 'IDLE',
-	Build_Current_Port VARCHAR(255)
+	build_id SERIAL PRIMARY KEY,
+	build_name VARCHAR(32) UNIQUE NOT NULL,
+	jail_id INTEGER REFERENCES jails(jail_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	ports_tree_id INTEGER REFERENCES ports_trees(ports_tree_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	build_description TEXT,
+	build_status VARCHAR(16) CHECK (build_status IN ('IDLE','PREPARE','PORTBUILD')) DEFAULT 'IDLE',
+	build_current_port VARCHAR(255)
 );
 
 -- DROP TABLE users CASCADE;
 CREATE TABLE users (
-	User_Id SERIAL PRIMARY KEY,
-	User_Name VARCHAR(16) UNIQUE NOT NULL,
-	User_Email VARCHAR(255),
-	User_Password VARCHAR(41),
-	User_Www_Enabled BOOLEAN NOT NULL default FALSE
+	user_id SERIAL PRIMARY KEY,
+	user_name VARCHAR(16) UNIQUE NOT NULL,
+	user_email VARCHAR(255),
+	user_password VARCHAR(41),
+	user_www_enabled BOOLEAN NOT NULL default FALSE
 );
 
 -- DROP TABLE hosts CASCADE;
 CREATE TABLE hosts (
-	Host_Id SERIAL PRIMARY KEY,
-	Host_Name VARCHAR(255) NOT NULL
+	host_id SERIAL PRIMARY KEY,
+	host_name VARCHAR(255) NOT NULL
 );
-CREATE INDEX hosts_host_name_idx ON hosts(Host_Name);
+CREATE INDEX hosts_host_name_idx ON hosts(host_name);
 
 -- DROP TABLE user_permissions CASCADE;
 CREATE TABLE user_permissions (
-	User_Id INTEGER REFERENCES users(User_Id) ON UPDATE CASCADE ON DELETE RESTRICT,
-	Host_Id INTEGER REFERENCES hosts(Host_Id) ON UPDATE CASCADE ON DELETE RESTRICT,
-	User_Permission_Object_Type VARCHAR(16) CHECK (User_Permission_Object_Type IN ('builds', 'users')),
-	User_Permission_Object_Id INTEGER NOT NULL DEFAULT '0',
-	User_Permission INTEGER NOT NULL DEFAULT '0',
-	PRIMARY KEY  (User_Id,User_Permission_Object_Type,User_Permission_Object_Id,User_Permission,Host_Id)
+	user_id INTEGER REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	host_id INTEGER REFERENCES hosts(host_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	user_permission_object_type VARCHAR(16) CHECK (user_permission_object_type IN ('builds', 'users')),
+	user_permission_object_id INTEGER NOT NULL DEFAULT '0',
+	user_permission INTEGER NOT NULL DEFAULT '0',
+	PRIMARY KEY  (user_id,user_permission_object_type,user_permission_object_id,user_permission,host_id)
 );
 
 -- DROP TABLE build_users CASCADE;
 CREATE TABLE build_users (
-	Build_User_Id SERIAL PRIMARY KEY,
-	Build_Id INTEGER REFERENCES builds(Build_Id) ON UPDATE CASCADE ON DELETE RESTRICT,
-	User_Id INTEGER REFERENCES users(User_Id) ON UPDATE CASCADE ON DELETE RESTRICT,
-	Email_On_Completion BOOLEAN DEFAULT TRUE,
-	Email_On_Error BOOLEAN DEFAULT TRUE
+	build_user_id SERIAL PRIMARY KEY,
+	build_id INTEGER REFERENCES builds(build_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	user_id INTEGER REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	email_on_completion BOOLEAN DEFAULT TRUE,
+	email_on_error BOOLEAN DEFAULT TRUE
 );
 
 -- DROP TABLE build_ports CASCADE;
 CREATE TABLE build_ports (
-	Build_Port_Id SERIAL PRIMARY KEY,
-	Build_Id INTEGER REFERENCES builds(Build_Id) ON UPDATE CASCADE ON DELETE RESTRICT,
-	Port_Id INTEGER REFERENCES ports(Port_Id) ON UPDATE CASCADE ON DELETE RESTRICT,
-	Last_Built TIMESTAMP,
-	Last_Status VARCHAR(16) CHECK (Last_Status IN ('UNKNOWN','SUCCESS','FAIL','BROKEN', 'LEFTOVERS')) DEFAULT 'UNKNOWN',
-	Last_Successful_Built TIMESTAMP,
-	Last_Built_Version VARCHAR(100)
+	build_port_id SERIAL PRIMARY KEY,
+	build_id INTEGER REFERENCES builds(build_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	port_id INTEGER REFERENCES ports(port_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	last_built TIMESTAMP,
+	last_status VARCHAR(16) CHECK (last_status IN ('UNKNOWN','SUCCESS','FAIL','BROKEN', 'LEFTOVERS')) DEFAULT 'UNKNOWN',
+	last_successful_built TIMESTAMP,
+	last_built_version VARCHAR(100)
 );
 
 -- DROP TABLE config CASCADE;
 CREATE TABLE config (
-	Config_Option_Name VARCHAR(255) NOT NULL,
-	Config_Option_Value TEXT,
-	Host_Id INTEGER REFERENCES hosts(Host_Id) ON UPDATE CASCADE ON DELETE RESTRICT,
-	PRIMARY KEY (Config_Option_Name, Host_Id)
+	config_option_name VARCHAR(255) NOT NULL,
+	config_option_value TEXT,
+	host_id INTEGER REFERENCES hosts(host_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	PRIMARY KEY (config_option_name, host_id)
 );
 
 -- DROP TABLE build_ports_queue CASCADE;
 CREATE TABLE build_ports_queue (
-	Build_Ports_Queue_Id SERIAL PRIMARY KEY,
-	Enqueue_Date TIMESTAMP,
-	Completion_Date TIMESTAMP,
-	Build_Id INTEGER REFERENCES builds(Build_Id) ON UPDATE CASCADE,
-	User_Id INTEGER REFERENCES users(User_Id) ON UPDATE CASCADE ON DELETE RESTRICT,
-	Port_Directory VARCHAR(255) NOT NULL,
-	Priority INTEGER NOT NULL DEFAULT '10',
-	Host_Id INTEGER REFERENCES hosts(Host_Id) ON UPDATE CASCADE,
-	Email_On_Completion BOOLEAN NOT NULL,
-	Status VARCHAR(16) CHECK (Status IN ('ENQUEUED','PROCESSING','SUCCESS','FAIL')) DEFAULT 'ENQUEUED'
+	build_ports_queue_id SERIAL PRIMARY KEY,
+	enqueue_date TIMESTAMP,
+	completion_date TIMESTAMP,
+	build_id INTEGER REFERENCES builds(build_id) ON UPDATE CASCADE,
+	user_id INTEGER REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	port_directory VARCHAR(255) NOT NULL,
+	priority INTEGER NOT NULL DEFAULT '10',
+	host_id INTEGER REFERENCES hosts(host_id) ON UPDATE CASCADE,
+	email_on_completion BOOLEAN NOT NULL,
+	status VARCHAR(16) CHECK (status IN ('ENQUEUED','PROCESSING','SUCCESS','FAIL')) DEFAULT 'ENQUEUED'
 );
-CREATE INDEX build_ports_queue_host_id_idx ON build_ports_queue(Host_Id);
-CREATE INDEX build_ports_queue_user_id_idx ON build_ports_queue(User_Id);
+CREATE INDEX build_ports_queue_host_id_idx ON build_ports_queue(host_id);
+CREATE INDEX build_ports_queue_user_id_idx ON build_ports_queue(user_id);
 
 INSERT INTO hosts VALUES (-1, '__ALL__');
 
@@ -117,7 +117,7 @@ INSERT INTO hosts VALUES (-1, '__ALL__');
 -- __DSVERSION__ must be bumped.  Use micro version bumps for new config
 -- commands, and minor version bumps for schema changes.
 ----
-INSERT INTO config VALUES ('__DSVERSION__', '2.1.1', -1);
+INSERT INTO config VALUES ('__DSVERSION__', '3.0', -1);
 INSERT INTO config VALUES ('CCACHE_ENABLED', '0', -1);
 INSERT INTO config VALUES ('CCACHE_DIR', '', -1);
 INSERT INTO config VALUES ('CCACHE_NOLINK', '1', -1);

@@ -1,21 +1,21 @@
 <?php
 
-$rootdir = '/space';
+$rootdir = '/home/tbox';
 
-$wwwrooturi  = '/tinderbox';
+$wwwrooturi  = '/exp';
 $wwwrootdir  = $rootdir.'/scripts/www-exp';
-$pkguri      = '/tb/packages';
+$pkguri      = '/packages';
 $pkgdir      = $rootdir.'/packages';
-$loguri      = '/tb/logs';
+$loguri      = '/logs';
 $logdir      = $rootdir.'/logs';
-$errorloguri = '/tb/errors';
+$errorloguri = '/errors';
 $errorlogdir = $rootdir.'/errors';
 
 $templatesdir = $wwwrootdir.'/templates/default';
 $templatesuri = $wwwrooturi.'/templates/default';
 
-$tinderbox_name  = 'Marcuscom Tinderbox';
-$tinderbox_title = 'GNOME 2 Packages for i386';
+$tinderbox_name  = 'Lovett Tinderbox';
+$tinderbox_title = 'Lovett Tinderbox';
 
 #$with_timer = 1;
 ?>

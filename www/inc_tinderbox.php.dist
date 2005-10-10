@@ -1,15 +1,15 @@
 <?php
 
-$rootdir = "/space";
+$rootdir = "/home/tbox";
 
 $pkgdir = $rootdir."/packages";
-$pkguri = "/tb/packages";
+$pkguri = "/packages";
 $logdir = $rootdir."/logs";
-$loguri = "/tb/logs";
+$loguri = "/logs";
 $errorlogdir = $rootdir."/errors";
-$errorloguri = "/tb/errors";
+$errorloguri = "/errors";
 
-$tinderbox_name = "Marcuscom Tinderbox";
-$tinderbox_title = "GNOME 2 Packages for i386";
+$tinderbox_name = "Lovett Tinderbox";
+$tinderbox_title = "Lovett Tinderbox";
 
 ?>

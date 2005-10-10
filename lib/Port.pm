@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Port.pm,v 1.8 2005/08/22 00:50:44 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Port.pm,v 1.9 2005/10/10 23:30:14 ade Exp $
 #
 
 package Port;
@@ -33,16 +33,16 @@ use TinderObject;
 use vars qw(@ISA);
 @ISA = qw(TinderObject);
 
-use constant PORT_ID_FIELD => 'Port_Id';
+use constant PORT_ID_FIELD => 'port_id';
 
 sub new {
         my $that        = shift;
         my $object_hash = {
-                Port_Id         => "",
-                Port_Name       => "",
-                Port_Directory  => "",
-                Port_Maintainer => "",
-                Port_Comment    => "",
+                port_id         => "",
+                port_name       => "",
+                port_directory  => "",
+                port_maintainer => "",
+                port_comment    => "",
         };
 
         my @args = ();
@@ -57,59 +57,59 @@ sub new {
 sub getId {
         my $self = shift;
 
-        return $self->{Port_Id};
+        return $self->{port_id};
 }
 
 sub getName {
         my $self = shift;
 
-        return $self->{Port_Name};
+        return $self->{port_name};
 }
 
 sub getDirectory {
         my $self = shift;
 
-        return $self->{Port_Directory};
+        return $self->{port_directory};
 }
 
 sub getMaintainer {
         my $self = shift;
 
-        return $self->{Port_Maintainer};
+        return $self->{port_maintainer};
 }
 
 sub getComment {
         my $self = shift;
 
-        return $self->{Port_Comment};
+        return $self->{port_comment};
 }
 
 sub setName {
         my $self = shift;
         my $name = shift;
 
-        $self->{Port_Name} = $name;
+        $self->{port_name} = $name;
 }
 
 sub setDirectory {
         my $self = shift;
         my $dir  = shift;
 
-        $self->{Port_Directory} = $dir;
+        $self->{port_directory} = $dir;
 }
 
 sub setMaintainer {
         my $self  = shift;
         my $maint = shift;
 
-        $self->{Port_Maintainer} = $maint;
+        $self->{port_maintainer} = $maint;
 }
 
 sub setComment {
         my $self    = shift;
         my $comment = shift;
 
-        $self->{Port_Comment} = $comment;
+        $self->{port_comment} = $comment;
 }
 
 1;

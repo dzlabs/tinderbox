@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.56 2005/09/04 22:44:13 marcus Exp $
+# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.57 2005/10/10 23:30:14 ade Exp $
 #
 
 package TinderboxDS;
@@ -101,7 +101,7 @@ sub getDSVersion {
 
         @results =
             $self->getObjects("TBConfig",
-                {Config_Option_Name => '__DSVERSION__'});
+                {config_option_name => '__DSVERSION__'});
 
         if (!@results) {
                 return undef;
@@ -120,7 +120,7 @@ sub defaultConfig {
         croak "ERROR: Argument 2 not of type Host\n" if (ref($host) ne "Host");
 
         my $rc = $self->_doQuery(
-                "DELETE FROM config WHERE Config_Option_Name LIKE ? AND Host_Id=?",
+                "DELETE FROM config WHERE config_option_name LIKE ? AND host_id=?",
                 [$configlet . '%', $host->getId()]
         );
 
@@ -148,9 +148,9 @@ sub getConfig {
         }
 
         if ($merged eq 1) {
-                $fallbackhostid = -1
+                $fallbackhostid = -1;
         } else {
-                $fallbackhostid = $hostid
+                $fallbackhostid = $hostid;
         }
 
         if (defined($configlet)) {
@@ -162,7 +162,7 @@ sub getConfig {
 
         $rc =
             $self->_doQueryHashRef(
-                "SELECT * FROM config WHERE (Config_Option_Name NOT IN (SELECT Config_Option_Name FROM config WHERE Host_Id=?) AND Host_Id=? OR Host_Id=?) AND Config_Option_Name LIKE ?",
+                "SELECT * FROM config WHERE (config_option_name NOT IN (SELECT config_option_name FROM config WHERE host_id=?) AND host_id=? OR host_id=?) AND config_option_name LIKE ?",
                 \@results, $hostid, $fallbackhostid, $hostid, $configlet);
 
         if (!$rc) {
@@ -199,7 +199,7 @@ sub updateConfig {
 
                 my @results =
                     $self->getObjects("TBConfig",
-                        {Config_Option_Name => $oname, Host_Id => $hostid});
+                        {config_option_name => $oname, host_id => $hostid});
 
                 my ($query, $values);
                 if (!@results) {
@@ -207,7 +207,7 @@ sub updateConfig {
                         $values = [$oname, $ovalue, $hostid];
                 } else {
                         $query =
-                            "UPDATE config SET Config_Option_Value=? WHERE Config_Option_Name=? AND Host_Id=?";
+                            "UPDATE config SET config_option_value=? WHERE config_option_name=? AND host_id=?";
                         $values = [$ovalue, $oname, $hostid];
                 }
                 $rc = $self->_doQuery($query, $values);
@@ -234,7 +234,7 @@ sub isValidBuildPortsQueueId {
         my $id   = shift;
 
         my $rc = $self->_doQueryNumRows(
-                "SELECT Build_Ports_Queue_Id FROM build_ports_queue WHERE Build_Ports_Queue_Id=?",
+                "SELECT build_ports_queue_id FROM build_ports_queue WHERE build_ports_queue_id=?",
                 $id
         );
 
@@ -251,12 +251,12 @@ sub updateBuildPortsQueueEntryCompletionDate {
 
         if (!defined($entry->getCompletionDate())) {
                 $rc = $self->_doQuery(
-                        "UPDATE build_ports_queue SET Completion_Date=NOW() WHERE Build_Ports_Queue_Id=?",
+                        "UPDATE build_ports_queue SET completion_date=NOW() WHERE build_ports_queue_id=?",
                         [$entry->getId()]
                 );
         } else {
                 $rc = $self->_doQuery(
-                        "UPDATE build_ports_queue SET Completion_Date=? WHERE Build_Ports_Queue_Id=?",
+                        "UPDATE build_ports_queue SET completion_date=? WHERE build_ports_queue_id=?",
                         [$entry->getCompletionDate(), $entry->getId()]
                 );
         }
@@ -281,7 +281,7 @@ sub updateBuildPortsQueueEntryStatus {
         }
 
         my $rc = $self->_doQuery(
-                "UPDATE build_ports_queue SET Status=? WHERE Build_Ports_Queue_Id=?",
+                "UPDATE build_ports_queue SET status=? WHERE build_ports_queue_id=?",
                 [$status, $id]
         );
 
@@ -295,8 +295,8 @@ sub moveBuildPortsQueueFromUserToUser {
 
         my $rc = $self->_doQuery(
                 "UPDATE build_ports_queue
-                    SET User_Id=?
-                  WHERE User_Id=?",
+                    SET user_id=?
+                  WHERE user_id=?",
                 [$new_id, $old_id]
         );
 
@@ -309,7 +309,7 @@ sub getBuildPortsQueueById {
         my $id   = shift;
 
         my @results =
-            $self->getObjects("BuildPortsQueue", {Build_Ports_Queue_Id => $id});
+            $self->getObjects("BuildPortsQueue", {build_ports_queue_id => $id});
 
         if (!@results) {
                 return undef;
@@ -330,9 +330,9 @@ sub getBuildPortsQueueByKeys {
         my @results = $self->getObjects(
                 "BuildPortsQueue",
                 {
-                        Build_Id       => $build->getId(),
-                        Port_Directory => $directory,
-                        Host_Id        => $host->getId()
+                        build_id       => $build->getId(),
+                        port_directory => $directory,
+                        host_id        => $host->getId()
                 }
         );
 
@@ -353,19 +353,19 @@ sub getBuildPortsQueueByHost {
                 @results = $self->getObjects(
                         "BuildPortsQueue",
                         {
-                                Host_Id => $host->getId(),
-                                Status  => $status,
+                                host_id => $host->getId(),
+                                status  => $status,
                                 _ORDER_ =>
-                                    "Priority ASC, Build_Ports_Queue_Id ASC"
+                                    "priority ASC, build_ports_queue_id ASC"
                         }
                 );
         } else {
                 @results = $self->getObjects(
                         "BuildPortsQueue",
                         {
-                                Host_Id => $host->getId(),
+                                host_id => $host->getId(),
                                 _ORDER_ =>
-                                    "Priority ASC, Build_Ports_Queue_Id ASC"
+                                    "priority ASC, build_ports_queue_id ASC"
                         }
                 );
         }
@@ -382,7 +382,7 @@ sub reorgBuildPortsQueue {
         my $host = shift;
 
         my $rc = $self->_doQuery(
-                "DELETE FROM build_ports_queue WHERE Host_Id=? AND Enqueue_Date<=NOW()-25200 AND Status != 'ENQUEUED'",
+                "DELETE FROM build_ports_queue WHERE host_id=? AND enqueue_date<=NOW()-25200 AND status != 'ENQUEUED'",
                 [$host->getId()]
         );
 
@@ -396,7 +396,7 @@ sub getPortsForBuild {
 
         my @results;
         my $rc = $self->_doQueryHashRef(
-                "SELECT * FROM ports WHERE Port_Id IN (SELECT Port_Id FROM build_ports WHERE Build_Id=?)",
+                "SELECT * FROM ports WHERE port_id IN (SELECT port_id FROM build_ports WHERE build_id=?)",
                 \@results, $build->getId()
         );
 
@@ -413,7 +413,7 @@ sub getPortById {
         my $self = shift;
         my $id   = shift;
 
-        my @results = $self->getObjects("Port", {Port_Id => $id});
+        my @results = $self->getObjects("Port", {port_id => $id});
 
         if (!@results) {
                 return undef;
@@ -426,7 +426,7 @@ sub getPortByDirectory {
         my $self = shift;
         my $dir  = shift;
 
-        my @results = $self->getObjects("Port", {Port_Directory => $dir});
+        my @results = $self->getObjects("Port", {port_directory => $dir});
 
         if (!@results) {
                 return undef;
@@ -439,7 +439,7 @@ sub getJailByName {
         my $self = shift;
         my $name = shift;
 
-        my @results = $self->getObjects("Jail", {Jail_Name => $name});
+        my @results = $self->getObjects("Jail", {jail_name => $name});
 
         if (!@results) {
                 return undef;
@@ -452,7 +452,7 @@ sub getBuildById {
         my $self = shift;
         my $id   = shift;
 
-        my @results = $self->getObjects("Build", {Build_Id => $id});
+        my @results = $self->getObjects("Build", {build_id => $id});
 
         if (!@results) {
                 return undef;
@@ -465,7 +465,7 @@ sub getHostByName {
         my $self = shift;
         my $name = shift;
 
-        my @results = $self->getObjects("Host", {Host_Name => $name});
+        my @results = $self->getObjects("Host", {host_name => $name});
 
         if (!@results) {
                 return undef;
@@ -478,7 +478,7 @@ sub getBuildByName {
         my $self = shift;
         my $name = shift;
 
-        my @results = $self->getObjects("Build", {Build_Name => $name});
+        my @results = $self->getObjects("Build", {build_name => $name});
 
         if (!@results) {
                 return undef;
@@ -491,7 +491,7 @@ sub getJailById {
         my $self = shift;
         my $id   = shift;
 
-        my @results = $self->getObjects("Jail", {Jail_Id => $id});
+        my @results = $self->getObjects("Jail", {jail_id => $id});
 
         if (!@results) {
                 return undef;
@@ -523,7 +523,7 @@ sub getPortsTreeById {
         my $self = shift;
         my $id   = shift;
 
-        my @results = $self->getObjects("PortsTree", {Ports_Tree_Id => $id});
+        my @results = $self->getObjects("PortsTree", {ports_tree_id => $id});
 
         if (!@results) {
                 return undef;
@@ -537,7 +537,7 @@ sub getPortsTreeByName {
         my $name = shift;
 
         my @results =
-            $self->getObjects("PortsTree", {Ports_Tree_Name => $name});
+            $self->getObjects("PortsTree", {ports_tree_name => $name});
 
         if (!@results) {
                 return undef;
@@ -623,7 +623,7 @@ sub addBuildPortsQueueEntry {
 
         my $rc = $self->_doQuery(
                 "INSERT INTO build_ports_queue
-                    ( Build_Id, User_Id, Port_Directory, Priority, Host_Id )
+                    ( build_id, user_id, port_directory, priority, host_id )
                  VALUES
                      ( ?, ?, ?, ?, ? )",
                 [$build->getId(), $user, $directory, $priority, $host->getId()]
@@ -708,7 +708,7 @@ sub updateBuildUser {
         }
 
         my $rc = $self->_doQuery(
-                "UPDATE build_users SET Email_On_Completion=?, Email_On_Error=? WHERE Build_Id=? AND User_Id=?",
+                "UPDATE build_users SET email_on_completion=?, email_on_error=? WHERE build_id=? AND user_id=?",
                 [$onCompletion, $onError, $build->getId(), $user->getId()]
         );
 
@@ -724,7 +724,7 @@ sub updateUser {
         $hashPass = md5_hex($uCls->getPassword());
 
         my $rc = $self->_doQuery(
-                "UPDATE users set User_Email=?, User_Password=?, User_Www_Enabled=? WHERE User_Id=?",
+                "UPDATE users set user_email=?, user_password=?, user_www_enabled=? WHERE user_id=?",
                 [
                         $uCls->getEmail(),      $hashPass,
                         $uCls->getWwwEnabled(), $uCls->getId()
@@ -744,7 +744,7 @@ sub updatePort {
         my $pCls = (ref($port) eq "REF") ? $$port : $port;
 
         my $rc = $self->_doQuery(
-                "UPDATE ports SET Port_Name=?, Port_Comment=?, Port_Maintainer=? WHERE Port_Id=?",
+                "UPDATE ports SET port_name=?, port_comment=?, port_maintainer=? WHERE port_id=?",
                 [
                         $pCls->getName(),       $pCls->getComment(),
                         $pCls->getMaintainer(), $pCls->getId()
@@ -778,7 +778,7 @@ sub updateJail {
         croak "ERROR: Argument not of type Jail\n" if (ref($jail) ne "Jail");
 
         my $rc = $self->_doQuery(
-                "UPDATE jails SET Jail_Name=?, Jail_Tag=?, Jail_Update_Cmd=?, Jail_Description=?, Jail_Src_Mount=? WHERE Jail_Id=?",
+                "UPDATE jails SET jail_name=?, jail_tag=?, jail_update_cmd=?, jail_description=?, jail_src_mount=? WHERE jail_id=?",
                 [
                         $jail->getName(),      $jail->getTag(),
                         $jail->getUpdateCmd(), $jail->getDescription(),
@@ -799,11 +799,11 @@ sub updateJailLastBuilt {
                 my $last_built = $jail->getLastBuilt();
                 $rc =
                     $self->_doQuery(
-                        "UPDATE jails SET Jail_Last_Built=? WHERE Jail_Id=?",
+                        "UPDATE jails SET jail_last_built=? WHERE jail_id=?",
                         [$last_built, $jail->getId()]);
         } else {
                 $rc = $self->_doQuery(
-                        "UPDATE jails SET Jail_Last_Built=NOW() WHERE Jail_Id=?",
+                        "UPDATE jails SET jail_last_built=NOW() WHERE jail_id=?",
                         [$jail->getId()]
                 );
         }
@@ -813,12 +813,12 @@ sub updateJailLastBuilt {
 
 sub updatePortLastBuilt {
         my $self = shift;
-        return $self->updatePortLastBuilts(@_, "Last_Built");
+        return $self->updatePortLastBuilts(@_, "last_built");
 }
 
 sub updatePortLastSuccessfulBuilt {
         my $self = shift;
-        return $self->updatePortLastBuilts(@_, "Last_Successful_Built");
+        return $self->updatePortLastBuilts(@_, "last_successful_built");
 }
 
 sub updatePortLastBuilts {
@@ -834,12 +834,12 @@ sub updatePortLastBuilts {
         my $rc;
         if (!defined($last_built) || $last_built eq "") {
                 $rc = $self->_doQuery(
-                        "UPDATE build_ports SET $column=NOW() WHERE Port_Id=? AND Build_Id=?",
+                        "UPDATE build_ports SET $column=NOW() WHERE port_id=? AND build_id=?",
                         [$port->getId(), $build->getId()]
                 );
         } else {
                 $rc = $self->_doQuery(
-                        "UPDATE build_ports SET $column=? WHERE Port_Id=? AND Build_Id=?",
+                        "UPDATE build_ports SET $column=? WHERE port_id=? AND build_id=?",
                         [$last_built, $port->getId(), $build->getId()]
                 );
         }
@@ -869,7 +869,7 @@ sub updatePortLastStatus {
         }
 
         my $rc = $self->_doQuery(
-                "UPDATE build_ports SET Last_Status=? WHERE Port_Id=? AND Build_Id=?",
+                "UPDATE build_ports SET last_status=? WHERE port_id=? AND build_id=?",
                 [$status, $port->getId(), $build->getId()]
         );
 
@@ -886,7 +886,7 @@ sub updatePortLastBuiltVersion {
             if (ref($build) ne "Build");
 
         my $rc = $self->_doQuery(
-                "UPDATE build_ports SET Last_Built_Version=? WHERE Port_Id=? AND Build_Id=?",
+                "UPDATE build_ports SET last_built_version=? WHERE port_id=? AND build_id=?",
                 [$version, $port->getId(), $build->getId()]
         );
 
@@ -903,7 +903,7 @@ sub getPortLastBuiltVersion {
 
         my @results;
         my $rc = $self->_doQueryHashRef(
-                "SELECT Last_Built_Version FROM build_ports WHERE Port_Id=? AND Build_Id=?",
+                "SELECT last_built_version FROM build_ports WHERE port_id=? AND build_id=?",
                 \@results, $port->getId(), $build->getId()
         );
 
@@ -911,7 +911,7 @@ sub getPortLastBuiltVersion {
                 return undef;
         }
 
-        return $results[0]->{'Last_Built_Version'};
+        return $results[0]->{'last_built_version'};
 }
 
 sub updatePortsTree {
@@ -921,7 +921,7 @@ sub updatePortsTree {
             if (ref($portstree) ne "PortsTree");
 
         my $rc = $self->_doQuery(
-                "UPDATE ports_trees SET Ports_Tree_Name=?, Ports_Tree_Description=?, Ports_Tree_Update_Cmd=?, Ports_Tree_CVSweb_URL=?, Ports_Tree_Ports_Mount=? WHERE Ports_Tree_Id=?",
+                "UPDATE ports_trees SET ports_tree_name=?, ports_tree_description=?, ports_tree_update_cmd=?, ports_tree_cvsweb_url=?, ports_tree_ports_mount=? WHERE ports_tree_id=?",
                 [
                         $portstree->getName(),
                         $portstree->getDescription(),
@@ -945,12 +945,12 @@ sub updatePortsTreeLastBuilt {
         if ($portstree->getLastBuilt()) {
                 my $last_built = $portstree->getLastBuilt();
                 $rc = $self->_doQuery(
-                        "UPDATE ports_trees SET Ports_Tree_Last_Built=? WHERE Ports_Tree_Id=?",
+                        "UPDATE ports_trees SET ports_tree_last_built=? WHERE ports_tree_id=?",
                         [$last_built, $portstree->getId()]
                 );
         } else {
                 $rc = $self->_doQuery(
-                        "UPDATE ports_trees SET Ports_Tree_Last_Built=NOW() WHERE Ports_Tree_Id=?",
+                        "UPDATE ports_trees SET ports_tree_last_built=NOW() WHERE ports_tree_id=?",
                         [$portstree->getId()]
                 );
         }
@@ -964,7 +964,7 @@ sub updateBuildStatus {
         croak "ERROR: Argument not of type build\n" if (ref($build) ne "Build");
 
         my $rc =
-            $self->_doQuery("UPDATE builds SET Build_Status=? WHERE Build_Id=?",
+            $self->_doQuery("UPDATE builds SET build_status=? WHERE build_id=?",
                 [$build->getStatus(), $build->getId()]);
 
         return $rc;
@@ -980,12 +980,12 @@ sub updateBuildCurrentPort {
         my $rc;
         if (!defined($pkgname)) {
                 $rc = $self->_doQuery(
-                        "UPDATE builds SET Build_Current_Port=NULL WHERE Build_Id=?",
+                        "UPDATE builds SET build_current_port=NULL WHERE build_id=?",
                         [$build->getId()]
                 );
         } else {
                 $rc = $self->_doQuery(
-                        "UPDATE builds SET Build_Current_Port=? WHERE Build_Id=?",
+                        "UPDATE builds SET build_current_port=? WHERE build_id=?",
                         [$pkgname, $build->getId()]
                 );
         }
@@ -998,7 +998,7 @@ sub getBuildCompletionUsers {
         my $build = shift;
         croak "ERROR: Argument not of type build\n" if (ref($build) ne "Build");
 
-        my @users = $self->_getBuildUsers($build, "Email_On_Completion");
+        my @users = $self->_getBuildUsers($build, "email_on_completion");
 
         return @users;
 }
@@ -1008,7 +1008,7 @@ sub getBuildErrorUsers {
         my $build = shift;
         croak "ERROR: Argument not of type build\n" if (ref($build) ne "Build");
 
-        my @addrs = $self->_getBuildUsers($build, "Email_On_Error");
+        my @addrs = $self->_getBuildUsers($build, "email_on_error");
 
         return @addrs;
 }
@@ -1023,12 +1023,12 @@ sub _getBuildUsers {
         my $rc;
         if (defined($field)) {
                 $rc = $self->_doQueryHashRef(
-                        "SELECT * FROM  users WHERE User_Id IN (SELECT User_Id FROM build_users WHERE Build_Id=? AND $field=1)",
+                        "SELECT * FROM  users WHERE user_id IN (SELECT user_id FROM build_users WHERE build_id=? AND $field=1)",
                         \@results, $build->getId()
                 );
         } else {
                 $rc = $self->_doQueryHashRef(
-                        "SELECT * FROM  users WHERE User_Id IN (SELECT User_Id FROM build_users WHERE Build_Id=?)",
+                        "SELECT * FROM  users WHERE user_id IN (SELECT user_id FROM build_users WHERE build_id=?)",
                         \@results, $build->getId()
                 );
         }
@@ -1049,7 +1049,7 @@ sub isValidUser {
 
         my $rc =
             $self->_doQueryNumRows(
-                "SELECT User_Id FROM users WHERE User_Name=?", $username);
+                "SELECT user_id FROM users WHERE user_name=?", $username);
 
         return ($rc > 0) ? 1 : 0;
 }
@@ -1064,7 +1064,7 @@ sub isUserForBuild {
             if (ref($build) ne "Build");
 
         my $rc = $self->_doQueryNumRows(
-                "SELECT Build_User_Id FROM build_users WHERE Build_Id=? AND User_Id=?",
+                "SELECT build_user_id FROM build_users WHERE build_id=? AND user_id=?",
                 $build->getId(), $user->getId()
         );
 
@@ -1075,7 +1075,7 @@ sub getUserById {
         my $self   = shift;
         my $userid = shift;
 
-        my @results = $self->getObjects("User", {User_Id => $userid});
+        my @results = $self->getObjects("User", {user_id => $userid});
 
         if (!@results) {
                 return undef;
@@ -1088,7 +1088,7 @@ sub getUserByName {
         my $self     = shift;
         my $username = shift;
 
-        my @results = $self->getObjects("User", {User_Name => $username});
+        my @results = $self->getObjects("User", {user_name => $username});
 
         if (!@results) {
                 return undef;
@@ -1122,7 +1122,7 @@ sub getWwwAdmin {
 
         my @results;
         my $rc = $self->_doQueryHashRef(
-                "SELECT users.* FROM users,user_permissions WHERE users.User_Id=user_permissions.User_Id AND user_permissions.User_Permission_Object_Type='users' AND user_permissions.User_Permission_Object_Id=users.User_Id AND user_permissions.User_Permission=?",
+                "SELECT users.* FROM users,user_permissions WHERE users.user_id=user_permissions.user_id AND user_permissions.user_permission_object_type='users' AND user_permissions.user_permission_object_id=users.user_id AND user_permissions.user_permission=?",
                 \@results, 1
         );
 
@@ -1141,18 +1141,18 @@ sub setWwwAdmin {
         my $user = shift;
 
         my $rc = $self->_doQueryNumRows(
-                'SELECT User_Id FROM user_permissions where User_Permission=?',
+                'SELECT user_id FROM user_permissions where user_permission=?',
                 1
         );
 
         if (!$rc) {
                 $rc = $self->_doQuery(
-                        'INSERT INTO user_permissions (User_Id,Host_Id,User_Permission_Object_Type,User_Permission_Object_Id,User_Permission) VALUES (?, ? , ?, ?, ?)',
+                        'INSERT INTO user_permissions (user_id,host_id,user_permission_object_type,user_permission_object_id,user_permission) VALUES (?, ? , ?, ?, ?)',
                         [$user->getId(), '0', 'users', $user->getId(), 1]
                 );
         } else {
                 $rc = $self->_doQuery(
-                        'UPDATE user_permissions SET User_Id=?, User_Permission_Object_Id=? WHERE User_Permission=1',
+                        'UPDATE user_permissions SET user_id=?, user_permission_object_id=? WHERE user_permission=1',
                         [$user->getId(), $user->getId()]
                 );
         }
@@ -1169,7 +1169,7 @@ sub addUser {
         $hashPass = md5_hex($uCls->getPassword());
 
         my $rc = $self->_doQuery(
-                "INSERT INTO users (User_Name,User_Email,User_Password,User_Www_Enabled) VALUES (?, ?, ?, ?)",
+                "INSERT INTO users (user_name,user_email,user_password,user_www_enabled) VALUES (?, ?, ?, ?)",
                 [
                         $uCls->getName(), $uCls->getEmail(),
                         $hashPass,        $uCls->getWwwEnabled()
@@ -1203,7 +1203,7 @@ sub addUserForBuild {
         }
 
         my $rc = $self->_doQuery(
-                "INSERT into build_users (Build_Id, User_Id, Email_On_Completion, Email_On_Error) VALUES (?, ?, ?, ?)",
+                "INSERT into build_users (build_id, user_id, email_on_completion, email_on_error) VALUES (?, ?, ?, ?)",
                 [$build->getId(), $user->getId(), $onCompletion, $onError]
         );
 
@@ -1217,7 +1217,7 @@ sub addPortForBuild {
 
         my $rc =
             $self->_doQuery(
-                "INSERT INTO build_ports (Build_Id, Port_Id) VALUES (?, ?)",
+                "INSERT INTO build_ports (build_id, port_id) VALUES (?, ?)",
                 [$build->getId(), $port->getId()]);
 
         return $rc;
@@ -1228,7 +1228,7 @@ sub removeHost {
         my $host = shift;
 
         my $rc;
-        $rc = $self->_doQuery("DELETE FROM hosts WHERE Host_Id=?",
+        $rc = $self->_doQuery("DELETE FROM hosts WHERE host_id=?",
                 [$host->getId()]);
 
         return $rc;
@@ -1240,7 +1240,7 @@ sub removeBuildPortsQueue {
         croak "ERROR: Argument not of type Host\n" if (ref($host) ne "Host");
 
         my $rc;
-        $rc = $self->_doQuery("DELETE FROM build_ports_queue WHERE Host_Id=?",
+        $rc = $self->_doQuery("DELETE FROM build_ports_queue WHERE host_id=?",
                 [$host->getId()]);
 
         return $rc;
@@ -1253,7 +1253,7 @@ sub removeBuildPortsQueueEntry {
         my $rc;
         $rc =
             $self->_doQuery(
-                "DELETE FROM build_ports_queue WHERE Build_Ports_Queue_Id=?",
+                "DELETE FROM build_ports_queue WHERE build_ports_queue_id=?",
                 [$entry->getId()]);
 
         return $rc;
@@ -1264,14 +1264,14 @@ sub removePort {
         my $port = shift;
 
         my $rc;
-        $rc = $self->_doQuery("DELETE FROM build_ports WHERE Port_Id=?",
+        $rc = $self->_doQuery("DELETE FROM build_ports WHERE port_id=?",
                 [$port->getId()]);
 
         if (!$rc) {
                 return $rc;
         }
 
-        $rc = $self->_doQuery("DELETE FROM ports WHERE Port_Id=?",
+        $rc = $self->_doQuery("DELETE FROM ports WHERE port_id=?",
                 [$port->getId()]);
 
         return $rc;
@@ -1284,7 +1284,7 @@ sub removePortForBuild {
 
         my $rc =
             $self->_doQuery(
-                "DELETE FROM build_ports WHERE Port_Id=? AND Build_Id=?",
+                "DELETE FROM build_ports WHERE port_id=? AND build_id=?",
                 [$port->getId(), $build->getId()]);
 
         return $rc;
@@ -1296,14 +1296,14 @@ sub removeUser {
         croak "ERROR: Argument 1 is not of type user\n"
             if (ref($user) ne "User");
 
-        my $rc = $self->_doQuery("DELETE FROM build_users WHERE User_Id=?",
+        my $rc = $self->_doQuery("DELETE FROM build_users WHERE user_id=?",
                 [$user->getId()]);
 
         if (!$rc) {
                 return $rc;
         }
 
-        $rc = $self->_doQuery("DELETE FROM users WHERE User_Id=?",
+        $rc = $self->_doQuery("DELETE FROM users WHERE user_id=?",
                 [$user->getId()]);
 
         return $rc;
@@ -1320,7 +1320,7 @@ sub removeUserForBuild {
 
         my $rc =
             $self->_doQuery(
-                "DELETE FROM build_users WHERE Build_Id=? AND User_Id=?",
+                "DELETE FROM build_users WHERE build_id=? AND user_id=?",
                 [$build->getId(), $user->getId()]);
 
         return $rc;
@@ -1330,7 +1330,7 @@ sub removeJail {
         my $self = shift;
         my $jail = shift;
 
-        my $rc = $self->_doQuery("DELETE FROM jails WHERE Jail_Id=?",
+        my $rc = $self->_doQuery("DELETE FROM jails WHERE jail_id=?",
                 [$jail->getId()]);
 
         return $rc;
@@ -1341,7 +1341,7 @@ sub removePortsTree {
         my $portstree = shift;
 
         my $rc =
-            $self->_doQuery("DELETE FROM ports_trees WHERE Ports_Tree_Id=?",
+            $self->_doQuery("DELETE FROM ports_trees WHERE ports_tree_id=?",
                 [$portstree->getId()]);
 
         return $rc;
@@ -1352,21 +1352,21 @@ sub removeBuild {
         my $build = shift;
 
         my $rc;
-        $rc = $self->_doQuery("DELETE FROM build_ports WHERE Build_Id=?",
+        $rc = $self->_doQuery("DELETE FROM build_ports WHERE build_id=?",
                 [$build->getId()]);
 
         if (!$rc) {
                 return $rc;
         }
 
-        $rc = $self->_doQuery("DELETE FROM build_users WHERE Build_Id=?",
+        $rc = $self->_doQuery("DELETE FROM build_users WHERE build_id=?",
                 [$build->getId()]);
 
         if (!$rc) {
                 return $rc;
         }
 
-        $rc = $self->_doQuery("DELETE FROM builds WHERE Build_Id=?",
+        $rc = $self->_doQuery("DELETE FROM builds WHERE build_id=?",
                 [$build->getId()]);
 
         return $rc;
@@ -1378,7 +1378,7 @@ sub findBuildsForJail {
         my @jails = ();
 
         my @results;
-        my $rc = $self->_doQueryHashRef("SELECT * FROM builds WHERE Jail_Id=?",
+        my $rc = $self->_doQueryHashRef("SELECT * FROM builds WHERE jail_id=?",
                 \@results, $jail->getId());
 
         if (!$rc) {
@@ -1397,7 +1397,7 @@ sub findBuildsForPortsTree {
 
         my @results;
         my $rc =
-            $self->_doQueryHashRef("SELECT * FROM builds WHERE Ports_Tree_Id=?",
+            $self->_doQueryHashRef("SELECT * FROM builds WHERE ports_tree_id=?",
                 \@results, $portstree->getId());
 
         if (!$rc) {
@@ -1415,7 +1415,7 @@ sub isPortInDS {
 
         my $rc =
             $self->_doQueryNumRows(
-                "SELECT Port_Id FROM ports WHERE Port_Directory=?",
+                "SELECT port_id FROM ports WHERE port_directory=?",
                 $port->getDirectory());
 
         return (($rc > 0) ? 1 : 0);
@@ -1425,7 +1425,7 @@ sub isValidHost {
         my $self     = shift;
         my $hostname = shift;
 
-        my @results = $self->getObjects("Host", {Host_Name => $hostname});
+        my @results = $self->getObjects("Host", {host_name => $hostname});
 
         if (!@results) {
                 return 0;
@@ -1442,7 +1442,7 @@ sub isValidBuild {
         my $self      = shift;
         my $buildName = shift;
 
-        my @results = $self->getObjects("Build", {Build_Name => $buildName});
+        my @results = $self->getObjects("Build", {build_name => $buildName});
 
         if (!@results) {
                 return 0;
@@ -1459,7 +1459,7 @@ sub isValidJail {
         my $self     = shift;
         my $jailName = shift;
 
-        my @results = $self->getObjects("Jail", {Jail_Name => $jailName});
+        my @results = $self->getObjects("Jail", {jail_name => $jailName});
 
         if (!@results) {
                 return 0;
@@ -1477,7 +1477,7 @@ sub isValidPortsTree {
         my $portsTreeName = shift;
 
         my @results =
-            $self->getObjects("PortsTree", {Ports_Tree_Name => $portsTreeName});
+            $self->getObjects("PortsTree", {ports_tree_name => $portsTreeName});
 
         if (!@results) {
                 return 0;
@@ -1496,7 +1496,7 @@ sub isPortInBuild {
         my $build = shift;
 
         my $rc = $self->_doQueryNumRows(
-                "SELECT Port_Id FROM build_ports WHERE Port_Id=? AND Build_Id=?",
+                "SELECT port_id FROM build_ports WHERE port_id=? AND build_id=?",
                 $port->getId(), $build->getId()
         );
 
@@ -1511,23 +1511,12 @@ sub isPortForBuild {
 
         my @result;
         my $rc = $self->_doQueryHashRef(
-                "SELECT Build_Name FROM builds WHERE Build_Id IN (SELECT Build_Id FROM build_ports WHERE Port_Id=?)",
+                "SELECT build_name FROM builds WHERE build_id IN (SELECT build_id FROM build_ports WHERE port_id=?)",
                 \@result, $port->getId()
         );
 
         foreach (@result) {
-
-                # XXX Remove hack after schema is lowercased.
-                foreach my $key (keys %{$_}) {
-                        my $value = $_->{$key};
-                        delete $_->{$key};
-
-                        $key = ucfirst $key;
-                        $key =~ s/_(.)/_\u$1/g;
-
-                        $_->{$key} = $value;
-                }
-                if ($build->getName() eq $_->{'Build_Name'}) {
+                if ($build->getName() eq $_->{'build_name'}) {
                         $valid = 1;
                         last;
                 }
@@ -1754,7 +1743,7 @@ sub isLogCurrent {
         croak "ERROR: Argument not of type Build\n" if (ref($build) ne "Build");
 
         my $rc = $self->_doQueryNumRows(
-                "SELECT Build_Port_Id FROM build_ports WHERE Build_Id=? AND Last_Built_Version=?",
+                "SELECT build_port_id FROM build_ports WHERE build_id=? AND last_built_version=?",
                 $build->getId(),
                 substr($log, 0, -4)
         );

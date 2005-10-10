@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/failures.php,v 1.7 2005/06/28 05:47:56 adamw Exp $
+# $MCom: portstools/tinderbox/www/failures.php,v 1.8 2005/10/10 23:30:15 ade Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -42,7 +42,7 @@
 <body>
 <h1>All Build Failures</h1>
 	<?php
-	$builds = $ds->getBuildsDetailed(array("Last_Status" => "FAIL"));
+	$builds = $ds->getBuildsDetailed(array("last_status" => "FAIL"));
 
 	if ($builds) {
 
@@ -60,13 +60,13 @@
 		<?php
 		foreach ($builds as $build) {
 			echo "<tr>\n";
-			echo "<td><a href=\"showbuild.php?name=" . $build["Build_Name"] . "\">" . $build["Build_Name"] . "</a></td>\n";
-			echo "<td><a href=\"showport.php?id=" . $build["Port_Id"] . " \">" . $build["Port_Directory"] . "</a></td>\n";
-			echo "<td>" . $build["Last_Built_Version"] . "</td>\n";
+			echo "<td><a href=\"showbuild.php?name=" . $build["build_name"] . "\">" . $build["build_name"] . "</a></td>\n";
+			echo "<td><a href=\"showport.php?id=" . $build["port_id"] . " \">" . $build["port_directory"] . "</a></td>\n";
+			echo "<td>" . $build["last_built_version"] . "</td>\n";
 			echo "<td style=\"background-color: red\">&nbsp;</td>\n";
-			echo "<td><a href=\"" . $errorloguri . "/" . $build["Build_Name"] . "/" . $build["Last_Built_Version"] . ".log\">log</a></td>\n";
-			echo "<td>" . $ds->prettyDatetime($build["Last_Built"]) . "</td>\n";
-			echo "<td>" . $ds->prettyDatetime($build["Last_Successful_Built"]) . "</td>\n";
+			echo "<td><a href=\"" . $errorloguri . "/" . $build["build_name"] . "/" . $build["last_built_version"] . ".log\">log</a></td>\n";
+			echo "<td>" . $ds->prettyDatetime($build["last_built"]) . "</td>\n";
+			echo "<td>" . $ds->prettyDatetime($build["last_successful_built"]) . "</td>\n";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";

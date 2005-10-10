@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/lastbuilds.php,v 1.24 2005/07/26 16:47:07 pav Exp $
+# $MCom: portstools/tinderbox/www/lastbuilds.php,v 1.25 2005/10/10 23:30:15 ade Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -99,10 +99,10 @@
 			} else {
 				echo "<tr>\n";
 			}
-			echo "<td>" . $item["Host_Name"] . "</td>\n";
-			echo "<td><a href=\"showbuild.php?name=" . $item["Build_Name"] . "\">" . $item["Build_Name"] . "</a></td>\n";
-			echo "<td>" . $item["Port_Directory"] . "</td>\n";
-			echo "<td align=\"right\">" . $item["Priority"] . "</td>\n";
+			echo "<td>" . $item["host_name"] . "</td>\n";
+			echo "<td><a href=\"showbuild.php?name=" . $item["build_name"] . "\">" . $item["build_name"] . "</a></td>\n";
+			echo "<td>" . $item["port_directory"] . "</td>\n";
+			echo "<td align=\"right\">" . $item["priority"] . "</td>\n";
 			echo "</tr>\n";
 		}
 		?>
@@ -113,7 +113,7 @@
 	?>
 	<h1>Latest Builds<?= ($showbuild ? " in $showbuild" : "" ) ?></h1>
 	<?php
-	$builds = $ds->getBuildsDetailed(array("Build_Name" => $showbuild, "Last_Built" => 20));
+	$builds = $ds->getBuildsDetailed(array("build_name" => $showbuild, "last_built" => 20));
 
 	if ($builds) {
 
@@ -131,13 +131,13 @@
 		<?php
 		foreach ($builds as $build) {
 			echo "<tr>\n";
-			echo "<td><a href=\"showbuild.php?name=" . $build["Build_Name"] . "\">" . $build["Build_Name"] . "</a></td>\n";
-			echo "<td><a href=\"showport.php?id=" . $build["Port_Id"] . " \">" . $build["Port_Directory"] . "</a></td>\n";
-			echo "<td>" . $build["Last_Built_Version"] . "</td>\n";
-			echo $ds->getStatusCell($build["Last_Status"], $build["Build_Name"], $build["Last_Built_Version"]);
-			echo $ds->getLinksCell($build["Last_Status"], $build["Build_Name"], $build["Last_Built_Version"], $ds->getPackageSuffix($build["Jail_Id"]));
-			echo "<td>" . $ds->prettyDatetime($build["Last_Built"]) . "</td>\n";
-			echo "<td>" . $ds->prettyDatetime($build["Last_Successful_Built"]) . "</td>\n";
+			echo "<td><a href=\"showbuild.php?name=" . $build["build_name"] . "\">" . $build["build_name"] . "</a></td>\n";
+			echo "<td><a href=\"showport.php?id=" . $build["port_id"] . " \">" . $build["port_directory"] . "</a></td>\n";
+			echo "<td>" . $build["last_built_version"] . "</td>\n";
+			echo $ds->getStatusCell($build["last_status"], $build["build_name"], $build["last_built_version"]);
+			echo $ds->getLinksCell($build["last_status"], $build["build_name"], $build["last_built_version"], $ds->getPackageSuffix($build["jail_id"]));
+			echo "<td>" . $ds->prettyDatetime($build["last_built"]) . "</td>\n";
+			echo "<td>" . $ds->prettyDatetime($build["last_successful_built"]) . "</td>\n";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";

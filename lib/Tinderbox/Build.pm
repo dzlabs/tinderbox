@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/Build.pm,v 1.9 2005/08/22 00:50:44 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/Build.pm,v 1.10 2005/10/10 23:30:14 ade Exp $
 #
 
 package Build;
@@ -39,18 +39,18 @@ use vars qw(@ISA %STATUS_HASH);
         PORTBUILD => 2,
 );
 
-use constant BUILD_ID_FIELD => 'Build_Id';
+use constant BUILD_ID_FIELD => 'build_id';
 
 sub new {
         my $that        = shift;
         my $object_hash = {
-                Build_Id           => "",
-                Build_Name         => "",
-                Jail_Id            => "",
-                Ports_Tree_Id      => "",
-                Build_Status       => "",
-                Build_Description  => "",
-                Build_Current_Port => "",
+                build_id           => "",
+                build_name         => "",
+                jail_id            => "",
+                ports_tree_id      => "",
+                build_status       => "",
+                build_description  => "",
+                build_current_port => "",
         };
 
         my @args = ();
@@ -65,64 +65,64 @@ sub new {
 sub getId {
         my $self = shift;
 
-        return $self->{Build_Id};
+        return $self->{build_id};
 }
 
 sub getName {
         my $self = shift;
 
-        return $self->{Build_Name};
+        return $self->{build_name};
 }
 
 sub getJailId {
         my $self = shift;
 
-        return $self->{Jail_Id};
+        return $self->{jail_id};
 }
 
 sub getPortsTreeId {
         my $self = shift;
 
-        return $self->{Ports_Tree_Id};
+        return $self->{ports_tree_id};
 }
 
 sub getStatus {
         my $self = shift;
 
-        return $self->{Build_Status};
+        return $self->{build_status};
 }
 
 sub getDescription {
         my $self = shift;
 
-        return $self->{Build_Description};
+        return $self->{build_description};
 }
 
 sub getCurrentPort {
         my $self = shift;
 
-        return $self->{Build_Current_Port};
+        return $self->{build_current_port};
 }
 
 sub setName {
         my $self = shift;
         my $name = shift;
 
-        $self->{Build_Name} = $name;
+        $self->{build_name} = $name;
 }
 
 sub setJailId {
         my $self = shift;
         my $id   = shift;
 
-        $self->{Jail_Id} = $id;
+        $self->{jail_id} = $id;
 }
 
 sub setPortsTreeId {
         my $self = shift;
         my $id   = shift;
 
-        $self->{Ports_Tree_Id} = $id;
+        $self->{ports_tree_id} = $id;
 }
 
 sub setStatus {
@@ -130,7 +130,7 @@ sub setStatus {
         my $status = shift;
 
         if (defined($STATUS_HASH{$status})) {
-                $self->{Build_Status} = $status;
+                $self->{build_status} = $status;
         }
 }
 
@@ -138,14 +138,14 @@ sub setDescription {
         my $self  = shift;
         my $descr = shift;
 
-        $self->{Build_Description} = $descr;
+        $self->{build_description} = $descr;
 }
 
 sub setCurrentPort {
         my $self = shift;
         my $port = shift;
 
-        $self->{Build_Current_Port} = $port;
+        $self->{build_current_port} = $port;
 }
 
 1;

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/index.php,v 1.22 2005/09/17 02:23:59 marcus Exp $
+# $MCom: portstools/tinderbox/www/index.php,v 1.23 2005/10/10 23:30:15 ade Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -67,7 +67,7 @@
 	    }
 	    echo "<td><a href=\"showbuild.php?name=" . $build->getName() . "\">" . $build->getName() . "</a></td>\n";
 	    echo "<td>" . $build->getDescription() . "</td>\n";
-	    if ($stats["Fails"] > 0) {
+	    if ($stats["fails"] > 0) {
 		echo "<td align=\"center\">" . $stats["Fails"] . "</td>\n";
 	    } else {
 		echo "<td>&nbsp;</td>\n";

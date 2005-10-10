@@ -2,170 +2,170 @@ SET FOREIGN_KEY_CHECKS=0;
 
 DROP TABLE IF EXISTS ports;
 CREATE TABLE ports (
-  Port_Id int NOT NULL auto_increment,
-  Port_Directory varchar(255) NOT NULL,
-  Port_Name varchar(64),
-  Port_Maintainer varchar(128),
-  Port_Comment varchar(255),
-  PRIMARY KEY (Port_Id),
-  UNIQUE (Port_Directory),
-  INDEX Port_Directory_Idx (Port_Directory)
+  port_id int NOT NULL auto_increment,
+  port_directory varchar(255) NOT NULL,
+  port_name varchar(64),
+  port_maintainer varchar(128),
+  port_comment varchar(255),
+  PRIMARY KEY (port_id),
+  UNIQUE (port_directory),
+  INDEX port_directory_idx (port_directory)
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS jails;
 CREATE TABLE jails (
-  Jail_Id int NOT NULL auto_increment,
-  Jail_Name varchar(32) NOT NULL,
-  Jail_Tag varchar(32),
-  Jail_Last_Built datetime,
-  Jail_Update_Cmd varchar(255) DEFAULT 'CVSUP',
-  Jail_Description text,
-  Jail_Src_Mount text,
-  PRIMARY KEY (Jail_Id),
-  UNIQUE (Jail_Name),
-  INDEX Jail_Name_Idx (Jail_Name)
+  jail_id int NOT NULL auto_increment,
+  jail_name varchar(32) NOT NULL,
+  jail_tag varchar(32),
+  jail_last_built datetime,
+  jail_update_cmd varchar(255) DEFAULT 'CVSUP',
+  jail_description text,
+  jail_src_mount text,
+  PRIMARY KEY (jail_id),
+  UNIQUE (jail_name),
+  INDEX jail_name_idx (jail_name)
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS ports_trees;
 CREATE TABLE ports_trees (
-  Ports_Tree_Id int NOT NULL auto_increment,
-  Ports_Tree_Name varchar(32) NOT NULL,
-  Ports_Tree_Description text,
-  Ports_Tree_Last_Built datetime,
-  Ports_Tree_Update_Cmd varchar(255) DEFAULT 'CVSUP',
-  Ports_Tree_CVSweb_URL varchar(255),
-  Ports_Tree_Ports_Mount text,
-  PRIMARY KEY (Ports_Tree_Id),
-  UNIQUE (Ports_Tree_Name),
-  INDEX Ports_Tree_Name_Idx (Ports_Tree_Name)
+  ports_tree_id int NOT NULL auto_increment,
+  ports_tree_name varchar(32) NOT NULL,
+  ports_tree_description text,
+  ports_tree_last_built datetime,
+  ports_tree_update_cmd varchar(255) DEFAULT 'CVSUP',
+  ports_tree_cvsweb_url varchar(255),
+  ports_tree_ports_mount text,
+  PRIMARY KEY (ports_tree_id),
+  UNIQUE (ports_tree_name),
+  INDEX ports_tree_name_idx (ports_tree_name)
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS builds;
 CREATE TABLE builds (
-  Build_Id int NOT NULL auto_increment,
-  Build_Name varchar(32) NOT NULL,
-  Jail_Id int NOT NULL,
-  Ports_Tree_Id int NOT NULL,
-  Build_Description text,
-  Build_Status enum('IDLE','PREPARE','PORTBUILD') DEFAULT 'IDLE',
-  Build_Current_Port varchar(255),
-  PRIMARY KEY (Build_Id),
-  UNIQUE (Build_Name),
-  INDEX Build_Name_Idx (Build_Name),
-  INDEX (Jail_Id),
-  FOREIGN KEY (Jail_Id)
-    REFERENCES jails(Jail_Id)
+  build_id int NOT NULL auto_increment,
+  build_name varchar(32) NOT NULL,
+  jail_id int NOT NULL,
+  ports_tree_id int NOT NULL,
+  build_description text,
+  build_status enum('IDLE','PREPARE','PORTBUILD') DEFAULT 'IDLE',
+  build_current_port varchar(255),
+  PRIMARY KEY (build_id),
+  UNIQUE (build_name),
+  INDEX build_name_idx (build_name),
+  INDEX (jail_id),
+  FOREIGN KEY (jail_id)
+    REFERENCES jails(jail_id)
     ON UPDATE CASCADE ON DELETE RESTRICT,
-  INDEX (Ports_Tree_Id),
-  FOREIGN KEY (Ports_Tree_Id)
-    REFERENCES ports_trees(Ports_Tree_Id)
+  INDEX (ports_tree_id),
+  FOREIGN KEY (ports_tree_id)
+    REFERENCES ports_trees(ports_tree_id)
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
-  User_Id int NOT NULL auto_increment,
-  User_Name varchar(16) NOT NULL,
-  User_Email varchar(255),
-  User_Password varchar(41),
-  User_Www_Enabled tinyint(1) NOT NULL default '0',
-  PRIMARY KEY (User_Id),
-  UNIQUE (User_Name),
-  INDEX User_Name_Idx (User_Name)
+  user_id int NOT NULL auto_increment,
+  user_name varchar(16) NOT NULL,
+  user_email varchar(255),
+  user_password varchar(41),
+  user_www_enabled tinyint(1) NOT NULL default '0',
+  PRIMARY KEY (user_id),
+  UNIQUE (user_name),
+  INDEX user_name_idx (user_name)
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS user_permissions;
 CREATE TABLE IF NOT EXISTS user_permissions (
-  User_Id int(11) NOT NULL,
-  Host_Id int(11) NOT NULL,
-  User_Permission_Object_Type enum('builds','users') NOT NULL,
-  User_Permission_Object_Id int(11) NOT NULL default '0',
-  User_Permission int(11) NOT NULL default '0',
-  PRIMARY KEY  (User_Id,User_Permission_Object_Type,User_Permission_Object_Id,User_Permission,Host_Id),
-  INDEX (User_Id),
-  FOREIGN KEY (User_Id)
-    REFERENCES users(User_Id)
+  user_id int(11) NOT NULL,
+  host_id int(11) NOT NULL,
+  user_permission_object_type enum('builds','users') NOT NULL,
+  user_permission_object_id int(11) NOT NULL default '0',
+  user_permission int(11) NOT NULL default '0',
+  PRIMARY KEY  (user_id,user_permission_object_type,user_permission_object_id,user_permission,host_id),
+  INDEX (user_id),
+  FOREIGN KEY (user_id)
+    REFERENCES users(user_id)
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS build_users;
 CREATE TABLE build_users (
-  Build_User_Id int NOT NULL auto_increment,
-  Build_Id int NOT NULL,
-  User_Id int NOT NULL,
-  Email_On_Completion tinyint(1) DEFAULT 1,
-  Email_On_Error tinyint(1) DEFAULT 1,
-  PRIMARY KEY (Build_User_Id),
-  INDEX (Build_Id),
-  FOREIGN KEY (Build_Id)
-    REFERENCES builds(Build_Id)
+  build_user_id int NOT NULL auto_increment,
+  build_id int NOT NULL,
+  user_id int NOT NULL,
+  email_on_completion tinyint(1) DEFAULT 1,
+  email_on_error tinyint(1) DEFAULT 1,
+  PRIMARY KEY (build_user_id),
+  INDEX (build_id),
+  FOREIGN KEY (build_id)
+    REFERENCES builds(build_id)
     ON UPDATE CASCADE ON DELETE RESTRICT,
-  INDEX (User_Id),
-  FOREIGN KEY (User_Id)
-    REFERENCES users(User_Id)
+  INDEX (user_id),
+  FOREIGN KEY (user_id)
+    REFERENCES users(user_id)
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS build_ports;
 CREATE TABLE build_ports (
-  Build_Port_Id int NOT NULL auto_increment,
-  Build_Id int NOT NULL,
-  Port_Id int NOT NULL,
-  Last_Built datetime,
-  Last_Status enum('UNKNOWN','SUCCESS','FAIL','BROKEN', 'LEFTOVERS') DEFAULT 'UNKNOWN',
-  Last_Successful_Built datetime,
-  Last_Built_Version varchar(100),
-  PRIMARY KEY (Build_Port_Id),
-  INDEX (Build_Id),
-  FOREIGN KEY (Build_Id)
-    REFERENCES builds(Build_Id)
+  build_port_id int NOT NULL auto_increment,
+  build_id int NOT NULL,
+  port_id int NOT NULL,
+  last_built datetime,
+  last_status enum('UNKNOWN','SUCCESS','FAIL','BROKEN', 'LEFTOVERS') DEFAULT 'UNKNOWN',
+  last_successful_built datetime,
+  last_built_version varchar(100),
+  PRIMARY KEY (build_port_id),
+  INDEX (build_id),
+  FOREIGN KEY (build_id)
+    REFERENCES builds(build_id)
     ON UPDATE CASCADE ON DELETE RESTRICT,
-  INDEX (Port_Id),
-  FOREIGN KEY (Port_Id)
-    REFERENCES ports(Port_Id)
+  INDEX (port_id),
+  FOREIGN KEY (port_id)
+    REFERENCES ports(port_id)
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS hosts;
 CREATE TABLE hosts (
-  Host_Id int NOT NULL auto_increment,
-  Host_Name varchar(255) NOT NULL,
-  PRIMARY KEY (Host_Id),
-  KEY Host_Name (Host_Name)
+  host_id int NOT NULL auto_increment,
+  host_name varchar(255) NOT NULL,
+  PRIMARY KEY (host_id),
+  KEY host_name (host_name)
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS config;
 CREATE TABLE config (
-  Config_Option_Name varchar(255) NOT NULL,
-  Config_Option_Value text,
-  Host_Id int NOT NULL DEFAULT -1,
-  PRIMARY KEY (Config_Option_Name, Host_Id),
-  INDEX (Host_Id),
-  FOREIGN KEY (Host_Id)
-    REFERENCES hosts(Host_Id)
+  config_option_name varchar(255) NOT NULL,
+  config_option_value text,
+  host_id int NOT NULL DEFAULT -1,
+  PRIMARY KEY (config_option_name, host_id),
+  INDEX (host_id),
+  FOREIGN KEY (host_id)
+    REFERENCES hosts(host_id)
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) TYPE=INNODB;
 
 DROP TABLE IF EXISTS build_ports_queue;
 CREATE TABLE build_ports_queue (
-  Build_Ports_Queue_Id int(11) NOT NULL auto_increment,
-  Enqueue_Date datetime,
-  Completion_Date datetime,
-  Build_Id int NOT NULL,
-  User_Id int NOT NULL,
-  Port_Directory varchar(255) NOT NULL,
-  Priority int NOT NULL default '10',
-  Host_Id int NOT NULL,
-  Email_On_Completion tinyint(1) NOT NULL,
-  Status enum('ENQUEUED','PROCESSING','SUCCESS','FAIL') NOT NULL default 'ENQUEUED',
-  PRIMARY KEY (Build_Ports_Queue_Id),
-  KEY Host_Id (Host_Id),
-  KEY User_Id (User_Id),
-  FOREIGN KEY (Build_Id)
-    REFERENCES builds (Build_Id)
+  build_ports_queue_id int(11) NOT NULL auto_increment,
+  enqueue_date datetime,
+  completion_date datetime,
+  build_id int NOT NULL,
+  user_id int NOT NULL,
+  port_directory varchar(255) NOT NULL,
+  priority int NOT NULL default '10',
+  host_id int NOT NULL,
+  email_on_completion tinyint(1) NOT NULL,
+  status enum('ENQUEUED','PROCESSING','SUCCESS','FAIL') NOT NULL default 'ENQUEUED',
+  PRIMARY KEY (build_ports_queue_id),
+  KEY Host_Id (host_id),
+  KEY user_id (user_id),
+  FOREIGN KEY (build_id)
+    REFERENCES builds (build_id)
     ON UPDATE CASCADE,
-  FOREIGN KEY (Host_Id)
-    REFERENCES hosts (Host_Id)
+  FOREIGN KEY (host_id)
+    REFERENCES hosts (host_id)
     ON UPDATE CASCADE
 ) TYPE=INNODB;
 
@@ -176,7 +176,7 @@ INSERT INTO hosts VALUES (-1, '__ALL__');
 # __DSVERSION__ must be bumped.  Use micro version bumps for new config
 # commands, and minor version bumps for schema changes.
 ##
-INSERT INTO config VALUES ('__DSVERSION__', '2.1.1', -1);
+INSERT INTO config VALUES ('__DSVERSION__', '3.0', -1);
 INSERT INTO config VALUES ('CCACHE_ENABLED', '0', -1);
 INSERT INTO config VALUES ('CCACHE_DIR', '', -1);
 INSERT INTO config VALUES ('CCACHE_NOLINK', '1', -1);

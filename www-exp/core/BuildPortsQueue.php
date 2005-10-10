@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www-exp/core/BuildPortsQueue.php,v 1.6 2005/10/02 20:50:07 marcus Exp $
+# $MCom: portstools/tinderbox/www-exp/core/BuildPortsQueue.php,v 1.7 2005/10/10 23:30:16 ade Exp $
 #
 
     require_once 'TinderObject.php';
@@ -33,91 +33,91 @@
 
 	function BuildPortsQueue($argv = array()) {
 	    $object_hash = array(
-                'Build_Ports_Queue_Id' => '',
-		'Enqueue_Date' => '',
-		'Completion_Date'  => '',
-		'Host_Name' => '',
-		'Build_Id' => '',
-		'Build_Name' => '',
-		'User_Id' => '',
-		'User_Name' => '',
-		'Port_Directory' => '',
-		'Priority' => '',
-		'Host_Id' => '',
-		'Host_Name' => '',
-		'Email_On_Completion' => '',
-		'Status'  => ''
+                'build_ports_queue_id' => '',
+		'enqueue_date' => '',
+		'completion_date'  => '',
+		'host_name' => '',
+		'build_id' => '',
+		'build_name' => '',
+		'user_id' => '',
+		'user_name' => '',
+		'port_directory' => '',
+		'priority' => '',
+		'host_id' => '',
+		'host_name' => '',
+		'email_on_completion' => '',
+		'status'  => ''
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
 	}
 
 	function getId() {
-	    return $this->Build_Ports_Queue_Id;
+	    return $this->build_ports_queue_id;
 	}
 
 	function getEnqueueDate() {
-	    return $this->Enqueue_Date;
+	    return $this->enqueue_date;
 	}
 
 	function getCompletionDate() {
-	    return $this->Completion_Date;
+	    return $this->completion_date;
 	}
 
 	function getEmailOnCompletion() {
-	    return $this->_truth_array[$this->Email_On_Completion];
+	    return $this->_truth_array[$this->email_on_completion];
 	}
 
 	function getStatus() {
-	    return $this->Status;
+	    return $this->status;
 	}
 
 	function getPortDirectory() {
-	    return $this->Port_Directory;
+	    return $this->port_directory;
 	}
 
 	function getPriority() {
-	    return $this->Priority;
+	    return $this->priority;
 	}
 
 	function getBuildId() {
-	    return $this->Build_Id;
+	    return $this->build_id;
 	}
 
 	function getBuildName() {
-	    return $this->Build_Name;
+	    return $this->build_name;
 	}
 
 	function getHostId() {
-	    return $this->Host_Id;
+	    return $this->host_id;
 	}
 
 	function getHostName() {
-	    return $this->Host_Name;
+	    return $this->host_name;
 	}
 
 	function getUserId() {
-	    return $this->User_Id;
+	    return $this->user_id;
 	}
 
 	function getUserName() {
-	    return $this->User_Name;
+	    return $this->user_name;
 	}
 
 	function getBuildPortsQueueId() {
-	    return $this->Build_Ports_Queue_Id;
+	    return $this->build_ports_queue_id;
 	}
 
 	function setHostId( $host_id ) {
-	    return $this->Host_Id = $host_id;
+	    return $this->host_id = $host_id;
 	}
 
 	function setBuildId( $build_id ) {
-	    return $this->Build_Id = $build_id;
+	    return $this->build_id = $build_id;
 	}
 
 	function setPriority( $priority ) {
-	    return $this->Priority = $priority;
+	    return $this->priority = $priority;
 	}
 
 	function setEmailOnCompletion( $email_on_completion ) {
@@ -125,11 +125,11 @@
                 case '1':    $email_on_completion = 1; break;
                 default:     $email_on_completion = 0; break;
             }
-	    return $this->Email_On_Completion = $email_on_completion;
+	    return $this->email_on_completion = $email_on_completion;
 	}
 
 	function resetStatus() {
-	    return $this->Status='ENQUEUED';
+	    return $this->status='ENQUEUED';
 	}
     }
 ?>

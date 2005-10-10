@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/Jail.pm,v 1.9 2005/08/22 00:50:44 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/Jail.pm,v 1.10 2005/10/10 23:30:14 ade Exp $
 #
 
 package Jail;
@@ -33,18 +33,18 @@ use TinderObject;
 use vars qw(@ISA);
 @ISA = qw(TinderObject);
 
-use constant JAIL_ID_FIELD => 'Jail_Id';
+use constant JAIL_ID_FIELD => 'jail_id';
 
 sub new {
         my $that        = shift;
         my $object_hash = {
-                Jail_Id          => "",
-                Jail_Name        => "",
-                Jail_Tag         => "",
-                Jail_Last_Built  => "",
-                Jail_Update_Cmd  => "",
-                Jail_Description => "",
-                Jail_Src_Mount   => "",
+                jail_id          => "",
+                jail_name        => "",
+                jail_tag         => "",
+                jail_last_built  => "",
+                jail_update_cmd  => "",
+                jail_description => "",
+                jail_src_mount   => "",
         };
 
         my @args = ();
@@ -59,85 +59,85 @@ sub new {
 sub getId {
         my $self = shift;
 
-        return $self->{Jail_Id};
+        return $self->{jail_id};
 }
 
 sub getName {
         my $self = shift;
 
-        return $self->{Jail_Name};
+        return $self->{jail_name};
 }
 
 sub getTag {
         my $self = shift;
 
-        return $self->{Jail_Tag};
+        return $self->{jail_tag};
 }
 
 sub getLastBuilt {
         my $self = shift;
 
-        return $self->{Jail_Last_Built};
+        return $self->{jail_last_built};
 }
 
 sub getUpdateCmd {
         my $self = shift;
 
-        return $self->{Jail_Update_Cmd};
+        return $self->{jail_update_cmd};
 }
 
 sub getDescription {
         my $self = shift;
 
-        return $self->{Jail_Description};
+        return $self->{jail_description};
 }
 
 sub getSrcMount {
         my $self = shift;
 
-        return $self->{Jail_Src_Mount};
+        return $self->{jail_src_mount};
 }
 
 sub setName {
         my $self = shift;
         my $name = shift;
 
-        $self->{Jail_Name} = $name;
+        $self->{jail_name} = $name;
 }
 
 sub setTag {
         my $self = shift;
         my $tag  = shift;
 
-        $self->{Jail_Tag} = $tag;
+        $self->{jail_tag} = $tag;
 }
 
 sub setLastBuilt {
         my $self       = shift;
         my $updateTime = shift;
 
-        $self->{Jail_Last_Built} = $updateTime;
+        $self->{jail_last_built} = $updateTime;
 }
 
 sub setUpdateCmd {
         my $self      = shift;
         my $updateCmd = shift;
 
-        $self->{Jail_Update_Cmd} = $updateCmd;
+        $self->{jail_update_cmd} = $updateCmd;
 }
 
 sub setDescription {
         my $self  = shift;
         my $descr = shift;
 
-        $self->{Jail_Description} = $descr;
+        $self->{jail_description} = $descr;
 }
 
 sub setSrcMount {
         my $self  = shift;
         my $mount = shift;
 
-        $self->{Jail_Src_Mount} = $mount;
+        $self->{jail_src_mount} = $mount;
 }
 
 1;

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.19 2005/09/29 01:24:43 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.20 2005/10/10 23:30:16 ade Exp $
 #
 
     require_once 'DB.php';
@@ -101,7 +101,7 @@
         }
 
         function getAllPortsByPortID($portid) {
-            $query = "SELECT ports.*,build_ports.Build_Id,build_ports.Last_Built,build_ports.Last_Status,build_ports.Last_Successful_Built,Last_Built_Version FROM ports,build_ports WHERE ports.Port_Id = build_ports.Port_Id AND build_ports.Port_Id=$portid";
+            $query = "SELECT ports.*,build_ports.build_id,build_ports.last_built,build_ports.last_status,build_ports.last_successful_built,last_built_version FROM ports,build_ports WHERE ports.port_id = build_ports.port_id AND build_ports.port_id=$portid";
             $rc = $this->_doQueryHashRef($query, $results, array());
 
             if (!$rc) {
@@ -116,7 +116,7 @@
 
         function addUser($user) {
             $query = "INSERT INTO users
-                         (User_Name,User_Email,User_Password,User_Www_Enabled)
+                         (user_name,user_email,user_password,user_www_enabled)
                       VALUES
                          (?,?,?,?)";
 
@@ -135,7 +135,7 @@
                         $this->deleteBuildPortsQueueByUserId($user);
                 }
                 $query = "DELETE FROM users
-                                WHERE User_Name=?";
+                                WHERE user_name=?";
 
                 $rc = $this->_doQuery($query, array($user->getName()),$res);
 
@@ -150,8 +150,8 @@
 
         function updateUser($user) {
             $query = "UPDATE users
-                         SET User_Name=?,User_Email=?,User_Password=?,User_Www_Enabled=?
-                       WHERE User_Id=?";
+                         SET user_name=?,user_email=?,user_password=?,user_www_enabled=?
+                       WHERE user_id=?";
 
             $rc = $this->_doQuery($query, array($user->getName(),$user->getEmail(),$user->getPassword(),$user->getWwwEnabled(),$user->getId()),$res);
 
@@ -164,7 +164,7 @@
 
         function getUserByLogin($username,$password) {
 	    $hashPass = md5($password);
-            $query = "SELECT User_Id,User_Name,User_Email,User_Password,User_Www_Enabled FROM users WHERE User_Name=? AND User_Password=?";
+            $query = "SELECT user_id,user_name,user_email,user_password,user_www_enabled FROM users WHERE user_name=? AND user_password=?";
             $rc = $this->_doQueryHashRef($query, $results, array($username,$hashPass));
 
             if (!$rc) {
@@ -180,7 +180,7 @@
 
             $query = "
                 SELECT
-                CASE User_Permission
+                CASE user_permission
                    WHEN 1 THEN 'IS_WWW_ADMIN'
                    WHEN 2 THEN 'PERM_ADD_QUEUE'
                    WHEN 3 THEN 'PERM_MODIFY_OWN_QUEUE'
@@ -190,12 +190,12 @@
                    WHEN 7 THEN 'PERM_DELETE_OTHER_QUEUE'
                    ELSE 'PERM_UNKNOWN'
                 END
-                   AS User_Permission
+                   AS user_permission
                  FROM user_permissions
-                WHERE User_Id=?
-                  AND Host_Id=?
-                  AND User_Permission_Object_Type=?
-                  AND User_Permission_Object_Id=?";
+                WHERE user_id=?
+                  AND host_id=?
+                  AND user_permission_object_type=?
+                  AND user_permission_object_id=?";
 
             $rc = $this->_doQueryHashRef($query, $results, array($user_id,$host_id,$object_type,$object_id));
 
@@ -210,10 +210,10 @@
 
             $query = "
                 DELETE FROM user_permissions
-                      WHERE User_Id=?";
+                      WHERE user_id=?";
 
             if( $object_type )
-                $query .= " AND User_Permission_Object_Type='$object_type'";
+                $query .= " AND user_permission_object_type='$object_type'";
 
             $rc = $this->_doQuery($query, array($user->getId()), $res);
 
@@ -239,7 +239,7 @@
 
             $query = "
                 INSERT INTO user_permissions
-                    (User_Id,Host_Id,User_Permission_Object_Type,User_Permission_Object_Id,User_Permission)
+                    (user_id,host_id,user_permission_object_type,user_permission_object_id,user_permission)
                    VALUES
                     (?,?,?,?,?)";
 
@@ -253,14 +253,14 @@
         }
 
         function getBuildPortsQueueEntries($host_id,$build_id) {
-            $query = "SELECT build_ports_queue.*, builds.Build_Name AS Build_Name, users.User_Name AS User_Name, hosts.Host_Name AS Host_Name
+            $query = "SELECT build_ports_queue.*, builds.build_name AS build_name, users.user_name AS user_name, hosts.host_name AS host_name
                         FROM build_ports_queue, builds, users, hosts
-                       WHERE build_ports_queue.Host_Id=?
-                         AND build_ports_queue.Build_Id=?
-                         AND builds.Build_Id = build_ports_queue.Build_Id
-                         AND users.User_Id = build_ports_queue.User_Id
-                         AND hosts.Host_Id = build_ports_queue.Host_Id
-                    ORDER BY Priority ASC, Build_Ports_Queue_Id ASC";
+                       WHERE build_ports_queue.host_id=?
+                         AND build_ports_queue.build_id=?
+                         AND builds.build_id = build_ports_queue.build_id
+                         AND users.user_id = build_ports_queue.user_id
+                         AND hosts.host_id = build_ports_queue.host_id
+                    ORDER BY priority ASC, build_ports_queue_id ASC";
             $rc = $this->_doQueryHashRef($query, $results, array($host_id,$build_id));
 
             if (!$rc) {
@@ -274,7 +274,7 @@
 
         function deleteBuildPortsQueueEntry($entry_id) {
             $query = "DELETE FROM build_ports_queue
-                            WHERE Build_Ports_Queue_Id=?";
+                            WHERE build_ports_queue_id=?";
 
             $rc = $this->_doQuery($query, $entry_id, $res);
 
@@ -287,7 +287,7 @@
 
         function deleteBuildPortsQueueByUserId($user) {
             $query = "DELETE FROM build_ports_queue
-                            WHERE User_Id=?";
+                            WHERE user_id=?";
 
             $rc = $this->_doQuery($query, $user->getId(), $res);
 
@@ -304,14 +304,14 @@
                 default:     $email_on_completion = 0; break;
             }
 
-            $entries[] = array('Host_Id'        => $host_id,
-                               'Build_Id'       => $build_id,
-                               'Priority'       => $priority,
-                               'Port_Directory' => $port_directory,
-                               'User_Id'        => $user_id,
-			       'Enqueue_Date'   => date("Y-m-d H:i:s", time()),
-			       'Email_On_Completion' => $email_on_completion,
-			       'Status'         => 'ENQUEUED');
+            $entries[] = array('host_id'        => $host_id,
+                               'build_id'       => $build_id,
+                               'priority'       => $priority,
+                               'port_directory' => $port_directory,
+                               'user_id'        => $user_id,
+			       'enqueue_date'   => date("Y-m-d H:i:s", time()),
+			       'email_on_completion' => $email_on_completion,
+			       'status'         => 'ENQUEUED');
 
             $results = $this->_newFromArray("BuildPortsQueue",$entries);
 
@@ -321,8 +321,8 @@
         function updateBuildPortsQueueEntry($entry) {
 
             $query = "UPDATE build_ports_queue
-                         SET Host_Id=?, Build_id=?, Priority=?, Email_On_Completion=?, Status=?
-                       WHERE Build_Ports_Queue_Id=?";
+                         SET host_id=?, build_id=?, priority=?, email_on_completion=?, status=?
+                       WHERE build_ports_queue_id=?";
 
             $rc = $this->_doQuery($query, array($entry->getHostId(),$entry->getBuildId(),$entry->getPriority(),$entry->getEmailOnCompletion(),$entry->getStatus(),$entry->getId()), $res);
 
@@ -335,7 +335,7 @@
 
         function addBuildPortsQueueEntry($entry) {
             $query = "INSERT INTO build_ports_queue
-                         (Host_Id,Enqueue_Date,Build_id,Priority,Port_Directory,User_id,Email_On_Completion,Status)
+                         (host_id,enqueue_date,build_id,priority,port_directory,user_id,email_on_completion,status)
                       VALUES
                          (?,?,?,?,?,?,?,?)";
 
@@ -349,7 +349,7 @@
         }
 
         function getPortsForBuild($build) {
-            $query = "SELECT ports.*,build_ports.Last_Built,build_ports.Last_Status,build_ports.Last_Successful_Built,Last_Built_Version FROM ports,build_ports WHERE ports.Port_Id = build_ports.Port_Id AND Build_Id=? ORDER BY Port_Directory";
+            $query = "SELECT ports.*,build_ports.last_built,build_ports.last_status,build_ports.last_successful_built,last_built_version FROM ports,build_ports WHERE ports.port_id = build_ports.port_id AND build_id=? ORDER BY port_directory";
             $rc = $this->_doQueryHashRef($query, $results, $build->getId());
 
             if (!$rc) {
@@ -362,10 +362,10 @@
         }
 
         function getLatestPorts($build_id,$limit="") {
-            $query = "SELECT ports.*,build_ports.Build_Id,build_ports.Last_Built,build_ports.Last_Status,build_ports.Last_Successful_Built,Last_Built_Version FROM ports,build_ports WHERE ports.Port_Id = build_ports.Port_Id AND build_ports.Last_Built IS NOT NULL ";
+            $query = "SELECT ports.*,build_ports.build_id,build_ports.last_built,build_ports.last_status,build_ports.last_successful_built,last_built_version FROM ports,build_ports WHERE ports.port_id = build_ports.port_id AND build_ports.last_built IS NOT NULL ";
             if($build_id)
-                 $query .= "AND Build_Id=$build_id ";
-            $query .= " ORDER BY Last_Built DESC ";
+                 $query .= "AND build_id=$build_id ";
+            $query .= " ORDER BY last_built DESC ";
             if($limit)
                  $query .= " LIMIT $limit";
 
@@ -381,14 +381,14 @@
         }
 
         function getPortsByStatus($build_id,$maintainer,$status) {
-            $query = "SELECT ports.*,build_ports.Build_Id,build_ports.Last_Built,build_ports.Last_Status,build_ports.Last_Successful_Built,Last_Built_Version FROM ports,build_ports WHERE ports.Port_Id = build_ports.Port_Id ";
+            $query = "SELECT ports.*,build_ports.build_id,build_ports.last_built,build_ports.last_status,build_ports.last_successful_built,last_built_version FROM ports,build_ports WHERE ports.port_id = build_ports.port_id ";
             if($build_id)
-                 $query .= "AND Build_Id=$build_id ";
+                 $query .= "AND build_id=$build_id ";
             if($status)
-                 $query .= "AND Last_Status='$status' ";
+                 $query .= "AND last_status='$status' ";
             if($maintainer)
-                 $query .= "AND Port_Maintainer='$maintainer'";
-            $query .= " ORDER BY Last_Built DESC ";
+                 $query .= "AND port_maintainer='$maintainer'";
+            $query .= " ORDER BY last_built DESC ";
 
             $rc = $this->_doQueryHashRef($query, $results, array());
 
@@ -403,14 +403,14 @@
 
 
         function getBuildStats($build_id) {
-            $query = 'SELECT COUNT(*) AS Fails FROM build_ports WHERE Last_Status = \'FAIL\' AND Build_Id = ?';
+            $query = 'SELECT COUNT(*) AS fails FROM build_ports WHERE last_status = \'FAIL\' AND build_id = ?';
             $rc = $this->_doQueryHashRef($query, $results, $build_id);
             if (!$rc) return null;
             return $results[0];
         }
 
         function getPortById($id) {
-            $results = $this->getPorts(array( 'Port_Id' => $id ));
+            $results = $this->getPorts(array( 'port_id' => $id ));
 
             if (is_null($results)) {
                 return null;
@@ -468,7 +468,7 @@
         }
 
         function getBuildByName($name) {
-            $results = $this->getBuilds(array( 'Build_Name' => $name ));
+            $results = $this->getBuilds(array( 'build_name' => $name ));
 
             if (is_null($results)) {
                 return null;
@@ -478,7 +478,7 @@
         }
 
         function getBuildById($id) {
-            $results = $this->getBuilds(array( 'Build_Id' => $id ));
+            $results = $this->getBuilds(array( 'build_id' => $id ));
 
             if (is_null($results)) {
                 return null;
@@ -488,7 +488,7 @@
         }
 
         function getBuildPortsQueueEntryById($id) {
-            $results = $this->getBuildPortsQueue(array( 'Build_Ports_Queue_Id' => $id ));
+            $results = $this->getBuildPortsQueue(array( 'build_ports_queue_id' => $id ));
 
             if (is_null($results)) {
                  return null;
@@ -498,7 +498,7 @@
         }
 
         function getHostById($id) {
-            $results = $this->getHosts(array( 'Host_Id' => $id ));
+            $results = $this->getHosts(array( 'host_id' => $id ));
 
             if (is_null($results)) {
                 return null;
@@ -508,7 +508,7 @@
         }
 
         function getJailById($id) {
-            $results = $this->getJails(array( 'Jail_Id' => $id ));
+            $results = $this->getJails(array( 'jail_id' => $id ));
 
             if (is_null($results)) {
                 return null;
@@ -524,7 +524,7 @@
         }
 
         function getPortsTreeByName($name) {
-             $results = $this->getPortsTrees(array( 'Ports_Tree_Name' => $name ));
+             $results = $this->getPortsTrees(array( 'ports_tree_name' => $name ));
              if (is_null($results)) {
                  return null;
              }
@@ -533,7 +533,7 @@
         }
 
         function getPortsTreeById($id) {
-            $results = $this->getPortsTrees(array( 'Ports_Tree_Id' => $id ));
+            $results = $this->getPortsTrees(array( 'ports_tree_id' => $id ));
 
             if (is_null($results)) {
                  return null;
@@ -543,7 +543,7 @@
         }
 
         function getUserById($id) {
-            $results = $this->getUsers(array( 'User_Id' => $id ));
+            $results = $this->getUsers(array( 'user_id' => $id ));
 
             if (is_null($results)) {
                 return null;
@@ -553,7 +553,7 @@
         }
 
         function getUserByName($name) {
-            $results = $this->getUsers(array( 'User_Name' => $name ));
+            $results = $this->getUsers(array( 'user_name' => $name ));
 
             if (is_null($results)) {
                 return null;
@@ -593,7 +593,7 @@
         }
 
         function getAllHosts() {
-            $query = "SELECT * FROM hosts WHERE Host_Name NOT IN ('__ALL__')";
+            $query = "SELECT * FROM hosts WHERE host_name NOT IN ('__ALL__')";
 
             $rc = $this->_doQueryHashRef($query, $results, array());
 

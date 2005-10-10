@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/TinderboxDS.php,v 1.39 2005/09/15 18:21:41 marcus Exp $
+# $MCom: portstools/tinderbox/www/TinderboxDS.php,v 1.40 2005/10/10 23:30:15 ade Exp $
 #
 
     require_once 'DB.php';
@@ -71,7 +71,7 @@
 	}
 
 	function getPortsForBuild($build) {
-	    $query = "SELECT ports.*,build_ports.Last_Built,build_ports.Last_Status,build_ports.Last_Successful_Built,Last_Built_Version FROM ports,build_ports WHERE ports.Port_Id = build_ports.Port_Id AND Build_Id=? ORDER BY Port_Directory";
+	    $query = "SELECT ports.*,build_ports.last_built,build_ports.last_status,build_ports.last_successful_built,last_built_version FROM ports,build_ports WHERE ports.port_id = build_ports.port_id AND build_id=? ORDER BY port_directory";
 	    $rc = $this->_doQueryHashRef($query, $results, $build->getId());
 
 	    if (!$rc) {
@@ -84,14 +84,14 @@
 	}
 
 	function getBuildStats($build_id) {
-	    $query = 'SELECT COUNT(*) AS Fails FROM build_ports WHERE Last_Status = \'FAIL\' AND Build_Id = ?';
+	    $query = 'SELECT COUNT(*) AS fails FROM build_ports WHERE last_status = \'FAIL\' AND build_id = ?';
 	    $rc = $this->_doQueryHashRef($query, $results, $build_id);
 	    if (!$rc) return null;
 	    return $results[0];
 	}
 
 	function getPortById($id) {
-	    $results = $this->getPorts(array( 'Port_Id' => $id ));
+	    $results = $this->getPorts(array( 'port_id' => $id ));
 
 	    if (is_null($results)) {
 		return null;
@@ -101,7 +101,7 @@
 	}
 
 	function getPortByDirectory($dir) {
-	    $results = $this->getPorts(array( 'Port_Directory' => $dir ));
+	    $results = $this->getPorts(array( 'port_directory' => $dir ));
 
 	    if (is_null($results)) {
 		return null;
@@ -111,17 +111,17 @@
 	}
 
 	function getBuildsDetailed($params) {
-	    $query = "SELECT build_ports.*,builds.Build_Name,builds.Jail_Id,ports.Port_Directory,ports_trees.Ports_Tree_Name,ports_trees.Ports_Tree_CVSweb_URL ";
+	    $query = "SELECT build_ports.*,builds.build_name,builds.jail_id,ports.port_directory,ports_trees.ports_tree_name,ports_trees.ports_tree_cvsweb_url ";
 	    $query.= "FROM build_ports,builds,ports_trees,ports ";
-	    $query.= "WHERE build_ports.Build_Id = builds.Build_Id AND builds.Ports_Tree_Id = ports_trees.Ports_Tree_Id AND build_ports.Port_Id = ports.Port_Id ";
+	    $query.= "WHERE build_ports.build_id = builds.build_id AND builds.ports_tree_id = ports_trees.ports_tree_id AND build_ports.port_id = ports.port_id ";
 	    if (is_array($params)) {
 		foreach ($params as $key => $param) {
 		    if (!empty($param)) {
 			switch ($key) {
-				case "Build_Name": $query.= "AND Build_Name = '" . $param . "' "; break;
-				case "Port_Id": $query.= "AND build_ports.Port_Id = '" . $param . "' "; break;
-				case "Last_Status": $query.= "AND Last_Status = '" . $param . "' "; break;
-				case "Last_Built": $query.= "AND Last_Built IS NOT NULL ORDER BY Last_Built DESC LIMIT " . (int)$param; break;
+				case "build_name": $query.= "AND build_name = '" . $param . "' "; break;
+				case "port_id": $query.= "AND build_ports.port_id = '" . $param . "' "; break;
+				case "last_status": $query.= "AND last_status = '" . $param . "' "; break;
+				case "last_built": $query.= "AND last_built IS NOT NULL ORDER BY last_built DESC LIMIT " . (int)$param; break;
 			}
 		    }
 		}
@@ -184,7 +184,7 @@
 	}
 
 	function getJailByName($name) {
-	    $results = $this->getJails(array( 'Jail_Name' => $name ));
+	    $results = $this->getJails(array( 'jail_name' => $name ));
 
 	    if (is_null($results)) {
 		return null;
@@ -194,7 +194,7 @@
 	}
 
 	function getJailById($id) {
-	    $results = $this->getJails(array( 'Jail_Id' => $id ));
+	    $results = $this->getJails(array( 'jail_id' => $id ));
 
 	    if (is_null($results)) {
 		return null;
@@ -204,7 +204,7 @@
 	}
 
 	function getBuildByName($name) {
-	    $results = $this->getBuilds(array( 'Build_Name' => $name ));
+	    $results = $this->getBuilds(array( 'build_name' => $name ));
 
 	    if (is_null($results)) {
 		return null;
@@ -214,7 +214,7 @@
 	}
 
 	function getBuildById($id) {
-	    $results = $this->getBuilds(array( 'Build_Id' => $id ));
+	    $results = $this->getBuilds(array( 'build_id' => $id ));
 
 	    if (is_null($results)) {
 		return null;
@@ -230,7 +230,7 @@
 	}
 
 	function getPortsTreeByName($name) {
-	     $results = $this->getPortsTrees(array( 'Ports_Tree_Name' => $name ));
+	     $results = $this->getPortsTrees(array( 'ports_tree_name' => $name ));
 	     if (is_null($results)) {
 		 return null;
 	     }
@@ -239,7 +239,7 @@
 	}
 
 	function getPortsTreeById($id) {
-	    $results = $this->getPortsTrees(array( 'Ports_Tree_Id' => $id ));
+	    $results = $this->getPortsTrees(array( 'ports_tree_id' => $id ));
 
 	    if (is_null($results)) {
 	 	return null;
@@ -273,9 +273,9 @@
         }
 
 	function getQueue() {
-	    $query = "SELECT Port_Directory,Priority,build_ports_queue.Build_Id,Build_Name,Host_Name,Status FROM build_ports_queue,hosts,builds ";
-	    $query.= "WHERE build_ports_queue.Build_Id=builds.Build_ID AND build_ports_queue.Host_Id=hosts.Host_Id AND NOT (build_ports_queue.Status = 'SUCCESS') ";
-	    $query.= "ORDER BY Priority,Build_Ports_Queue_Id";
+	    $query = "SELECT port_directory,priority,build_ports_queue.build_id,build_name,host_name,status FROM build_ports_queue,hosts,builds ";
+	    $query.= "WHERE build_ports_queue.build_id=builds.build_id AND build_ports_queue.host_id=hosts.host_id AND NOT (build_ports_queue.status = 'SUCCESS') ";
+	    $query.= "ORDER BY priority,build_ports_queue_id";
 	    $rc = $this->_doQueryHashRef($query, $results);
 	    if (!$rc) {
 		return null;
@@ -320,8 +320,6 @@
 	    $results = array();
 	    while ($row = $res->fetchRow()) {
 	        foreach ($row as $key => $value) {
-		    unset($row[$key]);
-		    $key = str_replace(" ", "_", ucwords(str_replace("_", " ", $key)));
 		    $row[$key] = $value;
 	        }
 		array_push($results, $row);

@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/User.pm,v 1.7 2005/09/04 02:58:51 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/User.pm,v 1.8 2005/10/10 23:30:15 ade Exp $
 #
 
 package User;
@@ -33,16 +33,16 @@ use TinderObject;
 use vars qw(@ISA);
 @ISA = qw(TinderObject);
 
-use constant USER_ID_FIELD => 'User_Id';
+use constant USER_ID_FIELD => 'user_id';
 
 sub new {
         my $that        = shift;
         my $object_hash = {
-                User_Id          => "",
-                User_Name        => "",
-                User_Email       => "",
-                User_Password    => "",
-                User_Www_Enabled => "",
+                user_id          => "",
+                user_name        => "",
+                user_email       => "",
+                user_password    => "",
+                user_www_enabled => "",
         };
 
         my @args = ();
@@ -57,59 +57,59 @@ sub new {
 sub getId {
         my $self = shift;
 
-        return $self->{User_Id};
+        return $self->{user_id};
 }
 
 sub getName {
         my $self = shift;
 
-        return $self->{User_Name};
+        return $self->{user_name};
 }
 
 sub getEmail {
         my $self = shift;
 
-        return $self->{User_Email};
+        return $self->{user_email};
 }
 
 sub getPassword {
         my $self = shift;
 
-        return $self->{User_Password};
+        return $self->{user_password};
 }
 
 sub getWwwEnabled {
         my $self = shift;
 
-        return $self->{'_truth_array'}->{$self->{User_Www_Enabled}};
+        return $self->{'_truth_array'}->{$self->{user_www_enabled}};
 }
 
 sub setName {
         my $self = shift;
         my $name = shift;
 
-        $self->{User_Name} = $name;
+        $self->{user_name} = $name;
 }
 
 sub setEmail {
         my $self  = shift;
         my $email = shift;
 
-        $self->{User_Email} = $email;
+        $self->{user_email} = $email;
 }
 
 sub setPassword {
         my $self     = shift;
         my $password = shift;
 
-        $self->{User_Password} = $password;
+        $self->{user_password} = $password;
 }
 
 sub setWwwEnabled {
         my $self       = shift;
         my $wwwenabled = shift;
 
-        $self->{User_Www_Enabled} = $wwwenabled;
+        $self->{user_www_enabled} = $wwwenabled;
 }
 
 1;

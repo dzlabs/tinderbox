@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/BuildPortsQueue.pm,v 1.6 2005/09/04 02:58:51 marcus Exp $
+# $MCom: portstools/tinderbox/lib/BuildPortsQueue.pm,v 1.7 2005/10/10 23:30:14 ade Exp $
 #
 
 package BuildPortsQueue;
@@ -33,21 +33,21 @@ use TinderObject;
 use vars qw(@ISA);
 @ISA = qw(TinderObject);
 
-use constant BUILD_PORTS_QUEUE_ID_FIELD => 'Build_Ports_Queue_Id';
+use constant BUILD_PORTS_QUEUE_ID_FIELD => 'build_ports_queue_id';
 
 sub new {
         my $that        = shift;
         my $object_hash = {
-                Build_Ports_Queue_Id => "",
-                Enqueue_Date         => "",
-                Completion_Date      => "",
-                Build_Id             => "",
-                User_Id              => "",
-                Port_Directory       => "",
-                Priority             => "",
-                Host_Id              => "",
-                Email_On_Completion  => "",
-                Status               => "",
+                build_ports_queue_id => "",
+                enqueue_date         => "",
+                completion_date      => "",
+                build_id             => "",
+                user_id              => "",
+                port_directory       => "",
+                priority             => "",
+                host_id              => "",
+                email_on_completion  => "",
+                status               => "",
         };
 
         my @args = ();
@@ -62,50 +62,50 @@ sub new {
 sub getId {
         my $self = shift;
 
-        return $self->{Build_Ports_Queue_Id};
+        return $self->{build_ports_queue_id};
 }
 
 sub getBuildId {
         my $self = shift;
 
-        return $self->{Build_Id};
+        return $self->{build_id};
 }
 
 sub getCompletionDate {
         my $self = shift;
 
-        return $self->{Completion_Date};
+        return $self->{completion_date};
 }
 
 sub getEmailOnCompletion {
         my $self = shift;
 
-        return $self->{'_truth_array'}->{$self->{Email_On_Completion}};
+        return $self->{'_truth_array'}->{$self->{email_on_completion}};
 }
 
 sub getPortDirectory {
         my $self = shift;
 
-        return $self->{Port_Directory};
+        return $self->{port_directory};
 }
 
 sub getPriority {
         my $self = shift;
 
-        return $self->{Priority};
+        return $self->{priority};
 }
 
 sub getUserId {
         my $self = shift;
 
-        return $self->{User_Id};
+        return $self->{user_id};
 }
 
 sub setCompletionDate {
         my $self = shift;
         my $date = shift;
 
-        $self->{Completion_Date} = $date;
+        $self->{completion_date} = $date;
 }
 
 1;

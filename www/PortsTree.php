@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/PortsTree.php,v 1.4 2005/06/28 05:47:56 adamw Exp $
+# $MCom: portstools/tinderbox/www/PortsTree.php,v 1.5 2005/10/10 23:30:15 ade Exp $
 #
 
     require_once 'TinderObject.php';
@@ -33,50 +33,50 @@
 
 	function PortsTree($argv = array()) {
 	    $object_hash = array(
-		Ports_Tree_Id => "",
-		Ports_Tree_Name => "",
-		Ports_Tree_Description => "",
-		Ports_Tree_Last_Built => "",
-		Ports_Tree_Update_Cmd => ""
+		ports_tree_id => "",
+		ports_tree_name => "",
+		ports_tree_description => "",
+		ports_tree_last_built => "",
+		ports_tree_update_cmd => ""
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
 	}
 
 	function getId() {
-	    return $this->Ports_Tree_Id;
+	    return $this->ports_tree_id;
 	}
 
 	function getName() {
-	    return $this->Ports_Tree_Name;
+	    return $this->ports_tree_name;
 	}
 
 	function getDescription() {
-	    return $this->Ports_Tree_Description;
+	    return $this->ports_tree_description;
 	}
 
 	function getLastBuilt() {
-	    return $this->Ports_Tree_Last_Built;
+	    return $this->ports_tree_last_built;
 	}
 
 	function getUpdateCmd() {
-	    return $this->Ports_Tree_Update_Cmd;
+	    return $this->ports_tree_update_cmd;
 	}
 
 	function setName($name) {
-	    $this->Ports_Tree_Name = $name;
+	    $this->ports_tree_name = $name;
 	}
 
 	function setDescription($descr) {
-	    $this->Ports_Tree_Description = $descr;
+	    $this->ports_tree_description = $descr;
 	}
 
 	function setLastBuilt($time) {
-	    $this->Ports_Tree_Last_Built = $time;
+	    $this->ports_tree_last_built = $time;
 	}
 
 	function setUpdateCmd($cmd) {
-	    $this->Ports_Tree_Update_Cmd = $cmd;
+	    $this->ports_tree_update_cmd = $cmd;
 	}
     }
 ?>

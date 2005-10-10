@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/PortsTree.pm,v 1.8 2005/08/22 00:50:44 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/PortsTree.pm,v 1.9 2005/10/10 23:30:14 ade Exp $
 #
 
 package PortsTree;
@@ -33,18 +33,18 @@ use TinderObject;
 use vars qw(@ISA);
 @ISA = qw(TinderObject);
 
-use constant PORTS_TREE_ID_FIELD => 'Ports_Tree_Id';
+use constant PORTS_TREE_ID_FIELD => 'ports_tree_id';
 
 sub new {
         my $that        = shift;
         my $object_hash = {
-                Ports_Tree_Id          => "",
-                Ports_Tree_Name        => "",
-                Ports_Tree_Description => "",
-                Ports_Tree_Last_Built  => "",
-                Ports_Tree_Update_Cmd  => "",
-                Ports_Tree_CVSweb_URL  => "",
-                Ports_Tree_Ports_Mount => "",
+                ports_tree_id          => "",
+                ports_tree_name        => "",
+                ports_tree_description => "",
+                ports_tree_last_built  => "",
+                ports_tree_update_cmd  => "",
+                ports_tree_cvsweb_url  => "",
+                ports_tree_ports_mount => "",
         };
 
         my @args = ();
@@ -59,91 +59,85 @@ sub new {
 sub getId {
         my $self = shift;
 
-        return $self->{Ports_Tree_Id};
+        return $self->{ports_tree_id};
 }
 
 sub getName {
         my $self = shift;
 
-        return $self->{Ports_Tree_Name};
+        return $self->{ports_tree_name};
 }
 
 sub getDescription {
         my $self = shift;
 
-        return $self->{Ports_Tree_Description};
-}
-
-sub getTag {
-        my $self = shift;
-
-        return $self->{Ports_Tree_Tag};
+        return $self->{ports_tree_description};
 }
 
 sub getLastBuilt {
         my $self = shift;
 
-        return $self->{Ports_Tree_Last_Built};
+        return $self->{ports_tree_last_built};
 }
 
 sub getUpdateCmd {
         my $self = shift;
 
-        return $self->{Ports_Tree_Update_Cmd};
+        return $self->{ports_tree_update_cmd};
 }
 
 sub getCVSwebURL {
         my $self = shift;
 
-        return $self->{Ports_Tree_CVSweb_URL};
+        return $self->{ports_tree_cvsweb_url};
 }
 
 sub getPortsMount {
         my $self = shift;
 
-        return $self->{Ports_Tree_Ports_Mount};
+        return $self->{ports_tree_ports_mount};
 }
 
 sub setName {
         my $self = shift;
         my $name = shift;
 
-        $self->{Ports_Tree_Name} = $name;
+        $self->{ports_tree_name} = $name;
 }
 
 sub setDescription {
         my $self  = shift;
         my $descr = shift;
 
-        $self->{Ports_Tree_Description} = $descr;
+        $self->{ports_tree_description} = $descr;
 }
 
 sub setLastBuilt {
         my $self       = shift;
         my $updateTime = shift;
 
-        $self->{Ports_Tree_Last_Built} = $updateTime;
+        $self->{ports_tree_last_built} = $updateTime;
 }
 
 sub setUpdateCmd {
         my $self      = shift;
         my $updateCmd = shift;
 
-        $self->{Ports_Tree_Update_Cmd} = $updateCmd;
+        $self->{ports_tree_update_cmd} = $updateCmd;
 }
 
 sub setCVSwebURL {
         my $self = shift;
         my $url  = shift;
 
-        $self->{Ports_Tree_CVSweb_URL} = $url;
+        $self->{ports_tree_cvsweb_url} = $url;
 }
 
 sub setPortsMount {
         my $self  = shift;
         my $mount = shift;
 
-        $self->{Ports_Tree_Ports_Mount} = $mount;
+        $self->{ports_tree_ports_mount} = $mount;
 }
 
 1;

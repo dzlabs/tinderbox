@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/www/showport.php,v 1.23 2005/06/28 05:47:56 adamw Exp $
+# $MCom: portstools/tinderbox/www/showport.php,v 1.24 2005/10/10 23:30:15 ade Exp $
 #
 
     require_once 'TinderboxDS.php';
@@ -46,10 +46,10 @@
 ?>
 <h1><?= $tinderbox_title ?> - <?= $port->getName() ?></h1>
 <?php
-	$builds = $ds->getBuildsDetailed(array("Port_Id" => $id));
+	$builds = $ds->getBuildsDetailed(array("port_id" => $id));
 
 	foreach ($builds as $build) {
-		$ports_trees[$build["Ports_Tree_Name"]] = $build["Ports_Tree_CVSweb_URL"];
+		$ports_trees[$build["ports_tree_name"]] = $build["ports_tree_cvsweb_url"];
 	}
 
 	echo "<p>\n";
@@ -80,12 +80,12 @@
 		<?php
 		foreach ($builds as $build) {
 			echo "<tr>\n";
-			echo "<td><a href=\"showbuild.php?name=" . $build["Build_Name"] . "\">" . $build["Build_Name"] . "</a></td>\n";
-			echo "<td>" . $build["Last_Built_Version"] . "</td>\n";
-			echo $ds->getStatusCell($build["Last_Status"], $build["Build_Name"], $build["Last_Built_Version"]);
-			echo $ds->getLinksCell($build["Last_Status"], $build["Build_Name"], $build["Last_Built_Version"], $ds->getPackageSuffix($build["Jail_Id"]));
-			echo "<td>" . $ds->prettyDatetime($build["Last_Built"]) . "</td>\n";
-			echo "<td>" . $ds->prettyDatetime($build["Last_Successful_Built"]) . "</td>\n";
+			echo "<td><a href=\"showbuild.php?name=" . $build["build_name"] . "\">" . $build["build_name"] . "</a></td>\n";
+			echo "<td>" . $build["last_built_version"] . "</td>\n";
+			echo $ds->getStatusCell($build["last_status"], $build["build_name"], $build["last_built_version"]);
+			echo $ds->getLinksCell($build["last_status"], $build["build_name"], $build["last_built_version"], $ds->getPackageSuffix($build["jail_id"]));
+			echo "<td>" . $ds->prettyDatetime($build["last_built"]) . "</td>\n";
+			echo "<td>" . $ds->prettyDatetime($build["last_successful_built"]) . "</td>\n";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";

@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/Config.pm,v 1.3 2005/07/20 03:19:03 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/Config.pm,v 1.4 2005/10/10 23:30:14 ade Exp $
 #
 
 package TBConfig;
@@ -36,9 +36,9 @@ use vars qw(@ISA);
 sub new {
         my $that        = shift;
         my $object_hash = {
-                Config_Option_Name  => "",
-                Config_Option_Value => "",
-                Host_Id             => "",
+                config_option_name  => "",
+                config_option_value => "",
+                host_id             => "",
         };
 
         my @args = ();
@@ -50,40 +50,40 @@ sub new {
 sub getOptionName {
         my $self = shift;
 
-        return $self->{Config_Option_Name};
+        return $self->{config_option_name};
 }
 
 sub getOptionValue {
         my $self = shift;
 
-        return $self->{Config_Option_Value};
+        return $self->{config_option_value};
 }
 
 sub getHostId {
         my $self = shift;
 
-        return $self->{Host_Id};
+        return $self->{host_id};
 }
 
 sub setOptionName {
         my $self = shift;
         my $name = shift;
 
-        $self->{Config_Option_Name} = $name;
+        $self->{config_option_name} = $name;
 }
 
 sub setOptionValue {
         my $self  = shift;
         my $value = shift;
 
-        $self->{Config_Option_Value} = $value;
+        $self->{config_option_value} = $value;
 }
 
 sub setHostId {
         my $self   = shift;
         my $hostid = shift;
 
-        $self->{Host_Id} = $hostid;
+        $self->{host_id} = $hostid;
 }
 
 1;
