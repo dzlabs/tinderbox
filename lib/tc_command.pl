@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.67 2005/08/20 19:56:12 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.68 2005/10/11 18:04:27 marcus Exp $
 #
 
 BEGIN {
@@ -951,7 +951,6 @@ sub addPortsTree {
 
 sub addPort {
         my %requestMountArgs;
-        my %makecache;
 
         if (       (!$opts->{'b'} && !$opts->{'a'})
                 || ($opts->{'b'} && $opts->{'a'})
@@ -973,6 +972,7 @@ sub addPort {
         }
 
         foreach my $build (@builds) {
+                my %makecache;
                 my $jail      = $ds->getJailById($build->getJailId());
                 my $portstree = $ds->getPortsTreeById($build->getPortsTreeId());
                 my $tag       = $jail->getTag();
