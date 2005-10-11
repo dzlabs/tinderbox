@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/mkbuild,v 1.11 2005/07/20 03:36:55 marcus Exp $
+# $MCom: portstools/tinderbox/mkbuild,v 1.12 2005/10/11 02:23:46 ade Exp $
 #
 
 
@@ -77,3 +77,4 @@ rm -rf ${D}
 mkdir -p ${D}
 
 tar -C ${D} -xf ${pb}/jails/${jail}/${jail}.tar
+cp -f /etc/resolv.conf ${D}/etc
