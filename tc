@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.68 2005/10/11 18:04:27 marcus Exp $
+# $MCom: portstools/tinderbox/tc,v 1.69 2005/10/12 01:59:52 ade Exp $
 #
 
 BEGIN {
@@ -972,7 +972,6 @@ sub addPort {
         }
 
         foreach my $build (@builds) {
-                my %makecache;
                 my $jail      = $ds->getJailById($build->getJailId());
                 my $portstree = $ds->getPortsTreeById($build->getPortsTreeId());
                 my $tag       = $jail->getTag();
@@ -998,10 +997,8 @@ sub addPort {
                 $ENV{'PORT_DBDIR'} = "/nonexistentportdb";
                 $ENV{'LINUXBASE'}  = "/nonexistentlinux";
 
-                if (!defined($makecache{$ptname})) {
-                        $makecache{$ptname} =
-                            new MakeCache($ENV{'PORTSDIR'}, $ENV{'PKGSUFFIX'});
-                }
+		my $makecache = new MakeCache($ENV{'PORTSDIR'},
+					      $ENV{'PKGSUFFIX'});
 
                 if ($opts->{'r'}) {
                         my @deps = ($opts->{'d'});
@@ -1009,15 +1006,12 @@ sub addPort {
                         while (my $port = shift @deps) {
                                 if (!$seen{$port}) {
                                         addPorts($port, $build,
-                                                $makecache{$ptname}, \@deps);
+                                                 $makecache, \@deps);
                                         $seen{$port} = 1;
                                 }
                         }
                 } else {
-                        addPorts(
-                                $opts->{'d'},        $build,
-                                $makecache{$ptname}, undef
-                        );
+                        addPorts($opts->{'d'}, $build, $makecache, undef);
                 }
         }
 }
