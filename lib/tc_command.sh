@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.7 2005/10/13 21:53:21 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.8 2005/10/13 22:00:50 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -111,7 +111,7 @@ Setup () {
 
     # Now, check the optional pre-reqs (for web usage).
     missing=$(checkPreReqs ${OPT_PREREQS})
-    if [ $? != 0 ]; then   
+    if [ $? != 0 ]; then
 	tinderEcho "WARN: The following option dependencies are missing.  These are required to use the Tinderbox web front-ends."
 	tinderEcho "WARN:  ${missing}"
     fi
@@ -240,9 +240,9 @@ Upgrade () {
     # Now migrate rawenv if needed.
     echo ""
     if ! migRawEnv ${pb}/scripts/rawenv ; then
-	tinderExit "ERROR: Rawenv migration failed!  Consult the output above for more information." 1 
+	tinderExit "ERROR: Rawenv migration failed!  Consult the output above for more information." 1
     fi
-      
+
     # Finally, migrate any remaining file data.
     echo ""
     if ! migFiles ${pb}/scripts/rawenv ; then
@@ -804,7 +804,7 @@ tinderbuild_phase () {
     echo "ended at $(date)"
     end=$(date +%s)
 
-    echo "phase ${num} took $(date -u -j -r $((${end} - ${start})) | 
+    echo "phase ${num} took $(date -u -j -r $((${end} - ${start})) |
 		awk '{print $4}')"
     echo $(echo $(ls -1 ${PACKAGES}/All | wc -l) - 1 | bc) "packages built"
     echo $(echo $(du -sh ${PACKAGES} | awk '{print $1}')) " of packages"
@@ -833,9 +833,9 @@ tinderbuild () {
     #      friendly
 
     while [ $# -gt 0 ]; do
-	case "x$1" in 
+	case "x$1" in
 
-	x-b)	shift   
+	x-b)	shift
 		for _build in ${_builds}; do
 		    if [ "${_build}" = "$1" ]; then
 			build=$1
@@ -975,7 +975,7 @@ tinderbuild () {
 
     # We build the packages in two phases to make sure we get everything
     tinderbuild_phase 0
-    tinderbuild_phase 1   
+    tinderbuild_phase 1
 
     tinderbuild_cleanup 0
 }

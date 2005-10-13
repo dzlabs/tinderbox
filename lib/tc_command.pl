@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.70 2005/10/13 21:53:21 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.71 2005/10/13 22:01:38 marcus Exp $
 #
 
 my $pb;
@@ -39,7 +39,7 @@ BEGIN {
 	import lib "$pb/scripts";
 	import lib "$pb/scripts/lib";
 }
-  
+
 use strict;
 
 use TinderboxDS;
@@ -441,7 +441,7 @@ my $ds = new TinderboxDS();
 		help => "Upgrade an existing tinderbox",
 		usage => "",
 	},
-		
+
 	"createJail" => {
 		help => "Create a new jail",
 		usage => "-j <jailname> [-t <tag>] [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE [-I]",
@@ -529,7 +529,7 @@ sub failedShell {
 	my $command = shift;
  	usage($command);
 	cleanup($ds, 1, undef);
-}   
+}
 
 #---------------------------------------------------------------------------
 # Main dispatching function
