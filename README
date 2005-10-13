@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.40 2005/09/21 14:32:14 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.41 2005/10/13 21:53:20 ade Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -36,19 +36,21 @@ to be on, but does require the php4-session extension (www/php4-session).
 Installation:
 -------------
 
-By default, Tinderbox expects to do all of its work in /space.  This is
-completely configurable, however.  Hence forth, /space will be referred to
-as ${pb} (think: package build).  If you are using an alternative Tinderbox
-root, just substitute ${pb} with that root directory.
+Tinderbox now determines where to do all of its work relative to the
+location of the 'tc' program, passed around to other functions by means
+of the ${pb} environmental variable (think: package build).  Historically,
+this was the /space subdirectory (tc was usually found in /space/scripts/tc).
+
+Henceforth, the top-level directory will be referred to as ${pb}, which
+you should substitute for whatever root directory you're using.
 
 1. Create directories ${pb} and ${pb}/scripts.
 
 2. Extract the Tinderbox distribution into ${pb}/scripts.
 
-3. Run ${pb}/scripts/setup.sh to setup configuration files and initialize the
-   Tinderbox database:
+3. Run tc to setup configuration files and initialize the Tinderbox database:
 
-# cd ${pb}/scripts && ./setup.sh
+# cd ${pb}/scripts && ./tc Setup
 
    If your Tinderbox host does not have administrative access to the database
    server, you must perform the next few steps by hand.  Else, skip to step 7.
@@ -114,33 +116,33 @@ rpcbind_enable="YES"
 nfs_server_enable="YES"
 nfs_reserved_port_only="YES"
 
-12. Create the required Jails using the ${pb}/scripts/create
-    command.  A Jail is nothing more than a version of FreeBSD.  For example,
-    to create a jail for FreeBSD 5.4-RELEASE:
+12. Create the required Jails using the tc command.  A Jail is nothing
+    more than a version of FreeBSD.  For example, to create a jail for
+    FreeBSD 5.4-RELEASE:
 
-# cd ${pb}/scripts && ./create Jail -j 5.4 -d "FreeBSD 5.4-RELEASE" \
+# cd ${pb}/scripts && ./tc createJail -j 5.4 -d "FreeBSD 5.4-RELEASE" \
 	-t RELENG_5_4_0_RELEASE -u CVSUP
 
     Note: all Jail names _MUST_ begin with their FreeBSD major version number.
     That is, the following is an illegal jail name: ``FreeBSD-5.4''.
 
-13. Create the required PortsTrees using the ${pb}/scripts/create
-    command.  A PortsTree is a set of ports you wish to build.  A PortsTree
-    does not have to be a complete FreeBSD ports tree.  However, all ports
-    within a tree must have all of their dependencies within the same tree.
+13. Create the required PortsTrees using the tc command.  A PortsTree is
+    a set of ports you wish to build.  A PortsTree does not have to be a
+    complete FreeBSD ports tree.  However, all ports within a tree must
+    have all of their dependencies within the same tree.
 
     For example, to create a portstree that tracks the full FreeBSD ports
     tree:
 
-# cd ${pb}/scripts && ./create PortsTree -p FreeBSD \
+# cd ${pb}/scripts && ./tc createPortsTree -p FreeBSD \
 	-d "FreeBSD ports tree" -w http://www.freebsd.org/cgi/cvsweb.cgi/ports/
 
-14. Create the required Builds using the ${pb}/scripts/create
-    command.  A Build is a combination of a Jail and a PortsTree.  The
-    build is the object in which packages are created.  To create a build
-    that combines a 5.4-RELEASE Jail with the FreeBSD ports tree:
+14. Create the required Builds using the tc command.  A Build is a
+    combination of a Jail and a PortsTree.  The build is the object in
+    which packages are created.  To create a build that combines a
+    5.4-RELEASE Jail with the FreeBSD ports tree:
 
-# cd ${pb}/scripts && ./create Build -b 5.4-FreeBSD -j 5.4 -p FreeBSD \
+# cd ${pb}/scripts && ./tc createBuild -b 5.4-FreeBSD -j 5.4 -p FreeBSD \
 	-d "5.4-RELEASE with FreeBSD ports tree"
 
     Note: the recommended way to name Builds is ``Jail-PortsTree''.  All builds
@@ -153,7 +155,7 @@ the -H and -C command line arguments to the create script respectively.
 For example, to use cvsup2.freebsd.org and enable cvsup compression for
 all Jail updates, use the following command:
 
-# cd ${pb}/scripts && ./create Jail -j 5-STABLE -d "FreeBSD 5-STABLE" \
+# cd ${pb}/scripts && ./tc createJail -j 5-STABLE -d "FreeBSD 5-STABLE" \
 	-t RELENG_5 -u CVSUP -C -H cvsup2.freebsd.org
 
 Upgrading:
@@ -161,10 +163,9 @@ Upgrading:
 
 Tinderbox may undergo a variety of changes between versions.  In order to
 make sure your Tinderbox stays fully operational after copying over
-a new version's distribution, you should run the ${pb}/scripts/upgrade.sh
-command:
+a new version's distribution, you should run the following command:
 
-# cd ${pb}/scripts && ./upgrade.sh
+# cd ${pb}/scripts && ./tc Upgrade
 
 Note: This command may require administrative access to the database.  If such
 access is not available from your Tinderbox host, you may have to load an
@@ -191,13 +192,13 @@ Note: a port does not have to be added to the database for Tinderbox to
 build it.  If you just want to do a quick ad hoc port build, forgo the
 previously mentioned step.
 
-To start a Tinderbox build, use the ${pb}/scripts/tinderbuild command:
+To start a Tinderbox build, use the tc command:
 
-# cd ${pb}/scripts && ./tinderbuild -b {BUILD} {PORT DIRECTORY}
+# cd ${pb}/scripts && ./tc tinderbuild -b {BUILD} {PORT DIRECTORY}
 
 For example, to build the GNOME 2 Desktop for the Build 5.4-FreeBSD:
 
-# cd ${pb}/scripts && ./tinderbuild -b 5.4-FreeBSD x11/gnome2
+# cd ${pb}/scripts && ./tc tinderbuild -b 5.4-FreeBSD x11/gnome2
 
 TIP: The example above will run the build in the foreground with all messages
 and errors echoing to the terminal.  To capture all of this,  it is
@@ -205,15 +206,15 @@ recommended to redirect tinderbuild output to a log file.  For example:
 
 Bourne shell equivalents:
 
-# cd ${pb}/scripts && ./tinderbuild -b 5.4-FreeBSD x11/gnome2 \
+# cd ${pb}/scripts && ./tc tinderbuild -b 5.4-FreeBSD x11/gnome2 \
 	> ${pb}/builds/5.4-FreeBSD/build.log 2>&1 &
 
 C shell equivalents:
 
-# cd ${pb}/scripts && ./tinderbuild -b 5.4-FreeBSD x11/gnome2 \
+# cd ${pb}/scripts && ./tc tinderbuild -b 5.4-FreeBSD x11/gnome2 \
 	>& ${pb}/builds/5.4-FreeBSD/build.log &
 
-The tinderbuild script also accepts some additional command line arguments:
+The tinderbuild function also accepts some additional command line arguments:
 
  -init 		: updates the Jail then updates the Build
  -cleanpackages : removes all packages already built for the specified Build
@@ -227,9 +228,9 @@ The tinderbuild script also accepts some additional command line arguments:
 Maintenance:
 ------------
 
-To update existing Jails, use the ${pb}/scripts/mkjail command.  For example:
+To update existing Jails:
 
-# cd ${pb}/scripts && ./mkjail 5.4
+# cd ${pb}/scripts && ./tc makeJail -j 5.4
 
 The output of the Jail build will go to stdout.  The output of the update
 command (e.g. cvsup) will go to ${pb}/jails/{JAIL}/update.log (where
@@ -282,13 +283,13 @@ via nullfs or NFS from another location, use -m switch to create.
 
 Example for NFS:
 
-  ./create PortsTree -p FreeBSD -m server:/directory
-  ./create Jail -j 6-FreeBSD -m server:/directory
+  ./tc createPortsTree -p FreeBSD -m server:/directory
+  ./tc createJail -j 6-FreeBSD -m server:/directory
 
 Example for nullfs:
 
-  ./create PortsTree -p FreeBSD -m /directory
-  ./create Jail -j 6-FreeBSD -m /directory
+  ./tc createPortsTree -p FreeBSD -m /directory
+  ./tc createJail -j 6-FreeBSD -m /directory
 
 Tinderbuild will ensure that these file systems are correctly mounted so you do
 not need to mount them by your own before calling tinderbuild.

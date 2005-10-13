@@ -23,315 +23,549 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.18 2005/09/07 23:40:43 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.19 2005/10/13 21:53:21 ade Exp $
 #
 
-tinder_echo() {
-	echo "$1" | /usr/bin/fmt 75 79
+tinderEcho () {
+    echo "$1" | /usr/bin/fmt 75 79
 }
 
-tinder_exit() {
-	tinder_echo "$1"
-	if [ -n "$2" ] ; then
-		exit $2
-	else
-		exit 255
+tinderExit () {
+    tinderEcho "$1"
+
+    if [ -n "$2" ] ; then
+	exit $2
+    else
+	exit 255
+    fi
+}
+
+killMountProcesses () {
+    dir=$1
+
+    pids="XXX"
+    while [ ! -z "${pids}" ]; do
+	pids=$(fstat -f "${dir}" | tail +2 | awk '{print $3}' | sort -u)
+
+	if [ ! -z "${pids}" ]; then
+	    echo "Killing off pids in ${dir}"
+	    ps -p ${pids}
+	    kill -KILL ${pids} 2> /dev/null
+	    sleep 2
 	fi
+    done
 }
 
-kill_procs()
-{
-	dir=$1
+cleanupMount () {
+    mount=$1
 
-	pids="XXX"
-	while [ ! -z "${pids}" ]; do
-		pids=$(fstat -f "$dir" | tail +2 | awk '{print $3}' | sort -u)
-		if [ ! -z "${pids}" ]; then
-			echo "Killing off pids in ${dir}"
-			ps -p $pids
-			kill -KILL ${pids} 2> /dev/null
-			sleep 2
-		fi
-	done
-}
-
-cleanup_mount() {
-	mount=$1
-
-	if [ -d ${mount} ] ; then
-		if [ $(fstat -f ${mount} | wc -l) -gt 1 ] ; then
-			kill_procs ${mount}
-		fi
-		umount ${mount} || echo "Cleanup of ${chroot}${mount} failed!"
+    if [ -d ${mount} ] ; then
+	if [ $(fstat -f ${mount} | wc -l) -gt 1 ] ; then
+	    killMountProcesses ${mount}
 	fi
+	umount ${mount} || echo "Cleanup of ${chroot}${mount} failed!"
+    fi
 }
 
-cleanup_mounts() {
+cleanupMounts () {
+    _build=""
+    _jail=""
+    _portstree=""
+    _destination=""
+    _ARCH=${ARCH:=$(uname -m)}
 
-	_build=
-	_jail=
-	_portstree=
-	_destination=
+    while getopts d:b:p:j: OPT
+    do
+	case ${OPT} in
 
-	_ARCH=${ARCH:=$(uname -m)}
+	d)	  _destination=${OPTARG};;
+	b)	  _build=${OPTARG};;
+	p)	  _portstree=${OPTARG};;
+	j)	  _jail=${OPTARG};;
 
-	_pb=${pb:=/space}
-	# Just in case /space is a symlink
-	_pb=$(realpath ${_pb})
-
-	while getopts d:b:p:j: OPT ; do
-		case ${OPT} in
-			d)	  _destination=${OPTARG}
-				;;
-			b)	  _build=${OPTARG}
-				;;
-			p)	  _portstree=${OPTARG}
-				;;
-			j)	  _jail=${OPTARG}
-				;;
-		esac
-	done
-
-	case ${_destination} in
-		jail)
-			if [ -z "${_jail}" ] ; then
-				echo "jail has to be filled!" >&2
-				return 1
-			fi
-			_destination=${_pb}/jails/${_jail}
-			;;
-		portstree)
-			if [ -z "${_portstree}" ] ; then
-				echo "portstree has to be filled!" >&2
-				return 1
-			fi
-			_destination=${_pb}/portstrees/${_portstree}
-			;;
-		build)
-			if [ -z "${_build}" ] ; then
-				echo "build has to be filled!" >&2
-				return 1
-			fi
-			_destination=${_pb}/${_build}
-			if [ "${_ARCH}" = "i386" -o "${_ARCH}" = "amd64" ] ; then
-				umount -f ${_destination}/compat/linux/proc >/dev/null 2>&1
-			fi
-			;;
-		distcache)
-			if [ -z "${_build}" ] ; then
-				echo "build has to be filled!" >&2
-				return 1
-			fi
-			_destination=${_pb}/${_build}/distcache
-			;;
-		*)	  echo "unknown destination type!"
-			return 1
-			;;
 	esac
+    done
 
-	df | grep ' '${_destination}'[/$]' | sed 's|.* ||g' | sort -r | while read mountpoint ; do
-		cleanup_mount ${mountpoint}
+    case ${_destination} in
+
+    jail)	if [ -z "${_jail}" ] ; then
+		    echo "jail has to be filled!" >&2
+		    return 1
+		fi
+		_destination=${pb}/jails/${_jail}
+		;;
+
+    portstree)	if [ -z "${_portstree}" ] ; then
+		    echo "portstree has to be filled!" >&2
+		    return 1
+		fi
+		_destination=${pb}/portstrees/${_portstree}
+		;;
+
+    build)	if [ -z "${_build}" ] ; then
+		    echo "build has to be filled!" >&2
+		    return 1
+		fi
+		_destination=${pb}/${_build}
+		if [ "${_ARCH}" = "i386" -o "${_ARCH}" = "amd64" ] ; then
+		    umount -f ${_destination}/compat/linux/proc >/dev/null 2>&1
+		fi
+		;;
+
+    distcache)	if [ -z "${_build}" ] ; then
+		    echo "build has to be filled!" >&2
+		    return 1
+		fi
+		_destination=${pb}/${_build}/distcache
+		;;
+
+    *)		echo "unknown destination type!"
+		return 1
+		;;
+
+    esac
+
+    df | grep ' '${_destination}'[/$]' | sed 's|.* ||g' | sort -r | \
+   	while read mountpoint ; do
+	    cleanupMount ${mountpoint}
 	done
 
+    return 0
+}
+
+requestMount () {
+    _source=""
+    _destination=""
+    _nullfs=0
+    _readonly=0
+    _build=""
+    _jail=""
+    _portstree=""
+    _fq_source=0
+    _quiet=0
+    _ccache_dir=${CCACHE_DIR:=/ccache}
+    _nullfs=0
+
+    while getopts qnrs:d:b:p:j: OPT
+    do
+	case ${OPT} in
+
+	n)	_nullfs=1;;
+	r)	_readonly=1;;
+	s)	_source=${OPTARG};;
+	d)	_destination=${OPTARG};;
+	b)	_build=${OPTARG};;
+	p)	_portstree=${OPTARG};;
+	j)	_jail=${OPTARG};;
+	q)	_quiet=1;;
+
+	esac
+    done
+
+    case ${_destination} in
+
+    jail)	if [ -z "${_jail}" ] ; then
+		    echo "jail has to be filled!" >&2
+		    return 1
+		fi
+		_destination=${pb}/jails/${_jail}/src
+		if [ -z "${_source}" ] ; then
+		    _source=$(${pb}/scripts/tc getSrcMount -j ${_jail})
+		fi
+		_fq_source=1
+		;;
+
+    portstree)	if [ -z "${_portstree}" ] ; then
+		    echo "portstree has to be filled!" >&2
+		    return 1
+		fi
+		_destination=${pb}/portstrees/${_portstree}/ports
+		if [ -z "${_source}" ] ; then
+		    _source=$(${pb}/scripts/tc getPortsMount -p ${_portstree})
+		fi
+		_fq_source=1
+		;;
+
+    buildsrc)	if [ -z "${_build}" ] ; then
+		    echo "build has to be filled!" >&2
+		    return 1
+		fi
+		_jail=$(${pb}/scripts/tc getJailForBuild -b ${_build})
+		_destination=${pb}/${_build}/usr/src
+		if [ -z "${_source}" ] ; then
+		    _source=$(${pb}/scripts/tc getSrcMount -j ${_jail})
+		    if [ -z "${_source}" ] ; then
+			_source=${_source:=${pb}/jails/${_jail}/src}
+		    else
+			_fq_source=1
+		    fi
+		fi
+		;;
+
+    buildports)	if [ -z "${_build}" ] ; then
+		    echo "build has to be filled!" >&2
+		    return 1
+		fi
+		_portstree=$(${pb}/scripts/tc getPortsTreeForBuild -b ${_build})
+		_destination=${pb}/${_build}/a/ports
+		if [ -z "${_source}" ] ; then
+		    _source=$(${pb}/scripts/tc getPortsMount -p ${_portstree})
+		    if [ -z "${_source}" ] ; then
+			_source=${_source:=${pb}/portstrees/${_portstree}/ports}
+		    else
+			_fq_source=1
+		    fi
+		fi
+		;;
+
+    distcache)	_destination=${pb}/${_build}/distcache
+		_fq_source=1
+		;;
+
+    ccache)	_destination=${pb}/${_build}/${_ccache_dir}
+		;;
+
+    *)		echo "unknown destination type!"
+		return 1
+		;;
+
+    esac
+
+    if [ -z "${_source}" ] ; then
+	[ ${_quiet} -ne 1 ] && echo "source has to be filled!" >&2
+	return 1
+    fi
+
+    if [ -z "${_destination}" ] ; then
+	echo "destination has to be filled!" >&2
+	return 1
+    fi
+
+    # is the filesystem already mounted?
+    filesystem=$(df ${_destination} | awk '{a=$1}  END {print a}')
+    mountpoint=$(df ${_destination} | awk '{a=$NF} END {print a}')
+
+    if [ "${filesystem}" = "${_source}" -a \
+	 "${mountpoint}" = "${_destination}" ] ; then
 	return 0
-}
+    fi
 
-request_mount() {
+    # is _nullfs mount specified?
+    if [ ${_nullfs} -eq 1 -a ${_fq_source} -ne 1 ] ; then
+	_options="-t nullfs"
+    else
+	# it probably has to be a nfs mount then
+	# lets check what kind of _source we have. If it is allready in
+	# a nfs format, we don't need to adjust anything
+	case ${_source} in
 
-	_source=
-	_destination=
-	_nullfs=0
-	_readonly=0
-	_build=
-	_jail=
-	_portstree=
-	_fq_source=0
-	_quiet=0
+	[a-zA-Z0-9\.-_]*:/*)
+		_options="-o nfsv3,intr"
+		;;
 
-	_pb=${pb:=/space}
-	# Just in case /space is a symlink
-	_pb=$(realpath ${_pb})
-	_ccache_dir=${CCACHE_DIR:=/ccache}
+	*)
+		if [ ${_fq_source} -eq 1 ] ; then
+		    # some _source's are full qualified sources, means
+		    # don't try to detect sth. or fallback to localhost.
+		    # The user wants exactly what he specified as _source
+		    # don't modify anything. If it's not a nfs mount, it has
+		    # to be a nullfs mount.
+		    _options="-t nullfs"
+		else
+		    _options="-o nfsv3,intr"
 
-	_nullfs=0
+		    # find out the filesystem the requested source is in
+		    filesystem=$(df ${_source} | awk '{a=$1}  END {print a}')
+		    mountpoint=$(df ${_source} | awk '{a=$NF} END {print a}')
+		    # determine if the filesystem the requested source
+		    # is a nfs mount, or a local filesystem
 
-	while getopts qnrs:d:b:p:j: OPT ; do
-		case ${OPT} in
-			n)	_nullfs=1
-				;;
-			r)	_readonly=1
-				;;
-			s)	_source=${OPTARG}
-				;;
-			d)	_destination=${OPTARG}
-				;;
-			b)	_build=${OPTARG}
-				;;
-			p)	_portstree=${OPTARG}
-				;;
-			j)	_jail=${OPTARG}
-				;;
-			q)	_quiet=1
-				;;
-		esac
-	done
+		    case ${filesystem} in
 
-	case ${_destination} in
-		jail)
-			if [ -z "${_jail}" ] ; then
-				echo "jail has to be filled!" >&2
-				return 1
-			fi
-			_destination=${_pb}/jails/${_jail}/src
-			if [ -z "${_source}" ] ; then
-				_source=$(${_pb}/scripts/tc getSrcMount -j ${_jail})
-			fi
-			_fq_source=1
+		    [a-zA-Z0-9\.-_]*:/*)
+			# maybe our destination is a subdirectory of the
+			# mountpoint and not the mountpoint itself.
+			# if that is the case, add the subdir to the mountpoint
+			_source="${filesystem}/$(echo $_source | \
+					sed 's|'${mountpoint}'||')"
 			;;
-		portstree)
-			if [ -z "${_portstree}" ] ; then
-				echo "portstree has to be filled!" >&2
-				return 1
-			fi
-			_destination=${_pb}/portstrees/${_portstree}/ports
-			if [ -z "${_source}" ] ; then
-				_source=$(${_pb}/scripts/tc getPortsMount -p ${_portstree})
-			fi
-			_fq_source=1
+
+		    *)
+			# not a nfs mount, nullfs not specified, so
+			# mount it as nfs from localhost
+			_source="localhost:/${_source}"
 			;;
-		buildsrc)
-			if [ -z "${_build}" ] ; then
-				echo "build has to be filled!" >&2
-				return 1
-			fi
-			_jail=$(${_pb}/scripts/tc getJailForBuild -b ${_build})
-			_destination=${_pb}/${_build}/usr/src
-			if [ -z "${_source}" ] ; then
-				_source=$(${_pb}/scripts/tc getSrcMount -j ${_jail})
-				if [ -z "${_source}" ] ; then
-					_source=${_source:=${_pb}/jails/${_jail}/src}
-				else
-					_fq_source=1
-				fi
-			fi
-			;;
-		buildports)
-			if [ -z "${_build}" ] ; then
-				echo "build has to be filled!" >&2
-				return 1
-			fi
-			_portstree=$(${_pb}/scripts/tc getPortsTreeForBuild -b ${_build})
-			_destination=${_pb}/${_build}/a/ports
-			if [ -z "${_source}" ] ; then
-				_source=$(${_pb}/scripts/tc getPortsMount -p ${_portstree})
-				if [ -z "${_source}" ] ; then
-					_source=${_source:=${_pb}/portstrees/${_portstree}/ports}
-				else
-					_fq_source=1
-				fi
-			fi
-			;;
-		distcache)
-			_destination=${_pb}/${_build}/distcache
-			_fq_source=1
-			;;
-		ccache)
-			_destination=${_pb}/${_build}/${_ccache_dir}
-			;;
-		*)	echo "unknown destination type!"
-			return 1
-			;;
+
+		    esac
+
+		fi
+		;;
 	esac
+    fi
 
-	if [ -z "${_source}" ] ; then
-			[ ${_quiet} -ne 1 ] && echo "source has to be filled!" >&2
-		return 1
-	fi
-	if [ -z "${_destination}" ] ; then
-			echo "destination has to be filled!" >&2
-		return 1
-	fi
+    if [ ${_readonly} -eq 1 ] ; then
+	options="${_options} -r"
+    fi
 
-	# is the filesystem already mounted?
-	filesystem=$(df ${_destination} | awk '{a=$1}  END {print a}')
-	mountpoint=$(df ${_destination} | awk '{a=$NF} END {print a}')
-	if [ "${filesystem}" = "${_source}" -a "${mountpoint}" = "${_destination}" ] ; then
-		return 0
-	fi
+    # Sanity check, and make sure the destination directory exists
+    if [ ! -d ${_destination} ]; then
+	mkdir -p ${_destination}
+    fi
 
-	# is _nullfs mount specified?
-	if [ ${_nullfs} -eq 1 -a ${_fq_source} -ne 1 ] ; then
-		_options="-t nullfs"
-	else # it probably has to be a nfs mount then
-		# lets check what kind of _source we have. If it is allready in
-		# a nfs format, we don't need to adjust anything
-		case ${_source} in
-			[a-zA-Z0-9\.-_]*:/*)
-				_options="-o nfsv3,intr"
-				;;
-			*)
-				if [ ${_fq_source} -eq 1 ] ; then
-					# some _source's are full qualified sources, means
-					# don't try to detect sth. or fallback to localhost.
-					# The user wants exactly what he specified as _source
-					# don't modify anything. If it's not a nfs mount, it has
-					# to be a nullfs mount.
-					_options="-t nullfs"
-				else
-					_options="-o nfsv3,intr"
-					# find out the filesystem the requested source is in
-					filesystem=$(df ${_source} | awk '{a=$1}  END {print a}')
-					mountpoint=$(df ${_source} | awk '{a=$NF} END {print a}')
-					# determine if the filesystem the requested source
-					# is a nfs mount, or a local filesystem
-					case ${filesystem} in
-						[a-zA-Z0-9\.-_]*:/*)
-							# maybe our destination is a subdirectory of the mountpoint
-							# and not the mountpoint itself
-							# if that is the case, add the subdir to the mountpoint (sed)
-							_source="${filesystem}/$(echo $_source | sed 's|'${mountpoint}'||')"
-							;;
-						*)
-							# not a nfs mount, nullfs not specified - mount it as nfs
-							# from localhost
-							_source="localhost:/${_source}"
-							;;
-					esac
-				fi
-				;;
-		esac
-	fi
-
-	if [ ${_readonly} -eq 1 ] ; then
-		options="${_options} -r"
-	fi
-
-	mount ${_options} ${_source} ${_destination}
-
-	return ${?}
+    mount ${_options} ${_source} ${_destination}
+    return ${?}
 }
 
 buildenv () {
-	pb=$1
-	build=$2
-	jail=$3
-	portstree=$4
+    pb=$1
+    build=$2
+    jail=$3
+    portstree=$4
 
-	major_version=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
-
-	save_IFS=${IFS}
-	IFS='
+    major_version=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
+    save_IFS=${IFS}
+    IFS='
 '
-	for _tb_var in `cat ${pb}/scripts/rawenv ; ${pb}/scripts/tc configGet`; do
-		var=$(echo ${_tb_var} | sed \
-			-e "s|^#${major_version}||; \
-			    s|##PB##|${pb}|g; \
-			    s|##BUILD##|${build}|g; \
-			    s|##JAIL##|${jail}|g; \
-			    s|##PORTSTREE##|${portstree}|g" \
-			-E -e 's|\^\^([^\^]+)\^\^|${\1}|g')
-		eval "export ${var}" > /dev/null 2>&1
-	done
+    for _tb_var in `cat ${pb}/scripts/rawenv ; ${pb}/scripts/tc configGet`
+    do
+	var=$(echo ${_tb_var} | sed \
+		-e "s|^#${major_version}||; \
+		    s|##PB##|${pb}|g; \
+		    s|##BUILD##|${build}|g; \
+		    s|##JAIL##|${jail}|g; \
+		    s|##PORTSTREE##|${portstree}|g" \
+		-E -e 's|\^\^([^\^]+)\^\^|${\1}|g')
+	eval "export ${var}" > /dev/null 2>&1
+    done
 
-	IFS=${save_IFS}
+    IFS=${save_IFS}
+}
+
+#---------------------------------------------------------------------------
+# code from lib/setup_shlib.sh
+#---------------------------------------------------------------------------
+callTc () {
+	echo "INFO: calling ${pb}/scripts/tc $@"
+	${pb}/scripts/tc "$@"
+}
+
+getDbDriver () {
+    db_drivers="mysql pgsql"
+    finished=0
+    db_driver=""
+
+    while [ ${finished} != 1 ]; do
+        read -p "Enter database driver (${db_drivers}): " db_driver
+
+	if echo ${db_drivers} | grep -qw "${db_driver}"; then
+	    finished=1
+	else
+	    echo 1>&2 "Invalid database driver, ${db_driver}."
+	fi
+    done
+
+    echo ${db_driver}
+}
+
+getDbInfo () {
+    db_driver=$1
+
+    db_host=""
+    db_name=""
+    db_admin=""
+
+    read -p "Does this host have access to connect to the Tinderbox database as a database administrator? (y/n)" option
+
+    finished=0
+    while [ ${finished} != 1 ]; do
+        case "${option}" in
+            [Yy]|[Yy][Ee][Ss])
+	        read -p "Enter database admin user [root]: " db_admin
+                read -p "Enter database host [localhost]: " db_host
+	        read -p "Enter database name [tinderbox]: " db_name
+	        ;;
+            *)
+	        return 1
+	        ;;
+        esac
+
+        if [ -z "${db_admin}" ]; then
+	    db_admin="root"
+        fi
+
+        if [ -z "${db_host}" ]; then
+	    db_host="localhost"
+        fi
+
+        if [ -z "${db_name}" ]; then
+	    db_name="tinderbox"
+        fi
+
+	echo 1>&2 "Are these settings corrrect:"
+	echo 1>&2 "    Database Administrative User : ${db_admin}"
+	echo 1>&2 "    Database Host                : ${db_host}"
+	echo 1>&2 "    Database Name                : ${db_name}"
+	read -p "(y/n)" option
+
+	case "${option}" in
+	    [Yy]|[Yy][Ee][Ss])
+	        finished=1
+		;;
+        esac
+	option="YES"
+    done
+
+    echo "${db_admin}:${db_host}:${db_name}"
+
+    return 0
+}
+
+loadSchema () {
+    schema_file=$1
+    db_driver=$2
+    db_admin=$3
+    db_host=$4
+    db_name=$5
+
+    MYSQL_LOAD='/usr/local/bin/mysql -u${db_admin} -p -h ${db_host} ${db_name} < "${schema_file}"'
+    MYSQL_LOAD_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
+
+    PGSQL_LOAD='/usr/local/bin/psql -U ${db_admin} -W -h ${db_host} -d ${db_name} < "${schema_file}"'
+    PGSQL_LOAD_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
+
+    rc=0
+    case "${db_driver}" in
+	mysql)
+	    eval ${MYSQL_LOAD_PROMPT}
+	    eval ${MYSQL_LOAD}
+	    rc=$?
+	    ;;
+	pgsql)
+	    eval ${PGSQL_LOAD_PROMPT}
+	    eval ${PGSQL_LOAD}
+	    rc=$?
+	    ;;
+	*)
+	    echo "Unsupported database driver: ${db_driver}"
+	    return 1
+	    ;;
+    esac
+
+    return ${rc}
+}
+
+checkPreReqs () {
+    reqs="$@"
+    error=0
+    missing=""
+
+    for r in ${reqs} ; do
+	if [ -z $(pkg_info -Q -O ${r}) ]; then
+	    missing="${missing} ${r}"
+	    error=1
+	fi
+    done
+
+    echo "${missing}"
+
+    return ${error}
+}
+
+#---------------------------------------------------------------------------
+# code from upgrade/mig_shlib.sh
+#---------------------------------------------------------------------------
+
+migRawEnv () {
+    rawenv=$1
+    tinderEcho "INFO: Migrating ${rawenv} ..."
+
+    if [ ! -f "${rawenv}" ] ; then
+	tinderEcho "INFO: ${rawenv} does not exist."
+    else
+	first_line=$(head -1 "${rawenv}")
+	if [ x"${first_line}" = x"${RAWNEV_HEADER}" ]; then
+	    return 0
+	fi
+
+	while read line ; do
+	    var=${line%=*}
+	    value=$(echo ${line#*=} | sed 's/"//g')
+
+	    case "${var}" in
+
+	    CCACHE_ENABLED)		callTc configCcache -e;;
+	    CCACHE_DIR)			callTc configCcache -c "${value}";;
+	    CCACHE_MAX_SIZE)		callTc configCcache -s "${value}";;
+	    CCACHE_LOGFILE)		callTc configCcache -l "${value}";;
+	    CCACHE_JAIL)		callTc configCcache -j;;
+	    DISTFILE_CACHE)		callTc configDistfile -c "${value}";;
+	    \#TINDERD_SLEEPTIME)	callTc configTinderd -t "${value}";;
+	    \#MOUNT_PORTSTREE*)		name=${var#*_*_}
+					callTc setPortsMount -p "${name}" \
+						 -m "${value}";;
+	    \#MOUNT_JAIL*)		name=${var#*_*_}
+					callTc setSrcMount -j "${name}" \
+						-m "${value}";;
+	    esac
+	done < "${rawenv}"
+
+	cp -p "${rawenv}" "${rawenv}.bak"
+	rm -f "${rawenv}"
+    fi
+
+    tinderEcho "DONE."
+    return 0
+}
+
+migDb () {
+    do_load=$1
+    db_driver=$2
+    db_host=$3
+    db_name=$4
+    mig_file=${pb}/scripts/upgrade/mig_${db_driver}_tinderbox-${MIG_VERSION_FROM}_to_${MIG_VERSION_TO}.sql
+
+    if [ -s "${mig_file}" ]; then
+	if [ ${do_load} = 1 ]; then
+	    tinderEcho "INFO: Migrating database schema from ${MIG_VERSION_FROM} to ${MIG_VERSION_TO} ..."
+	    if ! loadSchema "${mig_file}" ${db_driver} ${db_host} ${db_name} ; then
+	        tinderEcho "ERROR: Failed to load upgrade database schema."
+	        return 2
+	    fi
+	    tinderEcho "DONE."
+	else
+	    tinderEcho "WARN: You must load ${mig_file} to complete your upgrade."
+	fi
+    else
+	return 1
+    fi
+
+    return 0
+}
+
+migFiles () {
+    rawenv=$1
+
+    tinderEcho "INFO: Migrating files ..."
+
+    if [ ! -f "${rawenv}.dist" ] ; then
+        tinderEcho "ERROR: ${rawenv}.dist does not exist!"
+	return 1
+    else
+        if [ ! -f "${rawenv}" ]; then
+            cp "${rawenv}.dist" "${rawenv}"
+        else
+            if ! cmp -s "${rawenv}.dist" "${rawenv}" ; then
+                cp -p "${rawenv}" "${rawenv}.bak"
+               cp "${rawenv}.dist" "${rawenv}"
+            fi
+        fi
+    fi
+
+    for d in ${REMOVE_FILES} ; do
+	rm -f ${d}
+    done
+
+    tinderEcho "DONE."
+
+    return 0
 }

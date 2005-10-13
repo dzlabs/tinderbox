@@ -24,24 +24,22 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.69 2005/10/12 01:59:52 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.70 2005/10/13 21:53:21 ade Exp $
 #
 
-BEGIN {
-        my $scripts;
-        if ($0 !~ m|/|) {
-                $scripts = '.';
-        } else {
-                $scripts = $0;
-                $scripts =~ s|/[^/]+$||;
-        }
-        push @INC, $scripts;
-        push @INC, "$scripts/lib";
-        require lib;
-        import lib $scripts;
-        import lib "$scripts/lib";
-}
+my $pb;
 
+BEGIN {
+	$pb = $ENV{'pb'};
+
+	push @INC, "$pb/scripts";
+	push @INC, "$pb/scripts/lib";
+
+	require lib;
+	import lib "$pb/scripts";
+	import lib "$pb/scripts/lib";
+}
+  
 use strict;
 
 use TinderboxDS;
@@ -49,15 +47,6 @@ use MakeCache;
 use Getopt::Std;
 use vars qw(
     %COMMANDS
-    $BUILD_ROOT
-    $TINDER_BIN
-    $ERROR_DIR
-    $LOG_DIR
-    $BUILDS_DIR
-    $JAILS_DIR
-    $PKGS_DIR
-    $PORTSTREES_DIR
-    $WRKDIRS_DIR
     $SUBJECT
     $SMTP_HOST
     $SERVER_HOST
@@ -70,6 +59,8 @@ use vars qw(
 
 require "tinderbox.ph";
 require "tinderlib.pl";
+
+my $ds = new TinderboxDS();
 
 %COMMANDS = (
         "init" => {
@@ -436,39 +427,150 @@ require "tinderlib.pl";
                     "Cleanup old build logs, and prune old database entries for which no package exists",
                 usage => "",
         },
+
+# The following commands are actually handled by shell code, but we put
+# them in here (with a NULL function) to consolidate the usage handling,
+# and niceties such as command listing/completion.
+
+	"Setup" => {
+		help => "Set up a new tinderbox",
+		usage => "",
+	},
+
+	"Upgrade" => {
+		help => "Upgrade an existing tinderbox",
+		usage => "",
+	},
+		
+	"createJail" => {
+		help => "Create a new jail",
+		usage => "-j <jailname> [-t <tag>] [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE [-I]",
+		optstr => 'j:t:d:CH:m:u:I',
+	},
+
+	"createPortsTree" => {
+		help => "Create a new portstree",
+		usage => "-p <portstreename> [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE [-w <cvsweburl>]",
+		optstr => 'p:d:CH:m:u:w:',
+	},
+
+	"createBuild" => {
+		help => "Create a new build",
+		usage => "-b <buildname> -j <jailname> -p <portstreename> [-d <description>] [-i]",
+		optstr => 'b:j:p:d:',
+	},
+
+	"makeJail" => {
+		help => "Update and build an existing jail",
+		usage => "-j <jailname>",
+		optstr => 'j:',
+	},
+
+	"makeBuild" => {
+		help => "Populate a build prior to tinderbuild",
+		usage => "-b <buildname>",
+		optstr => 'b:',
+	},
+
+	"tinderbuild" => {
+		help => "Generate packages from an installed Build",
+		usage => "-b <build name> [-init] [-cleanpackages] [-updateports] [-skipmake] [-noclean] [-noduds] [-plistcheck] [-nullfs] [-cleandistfiles] [-fetch-original] [portdir/portname [...]]",
+		optstr => 'b:',
+	},
+
 );
+
+#---------------------------------------------------------------------------
+# Helper functions
+#---------------------------------------------------------------------------
+
+sub usage {
+        my $cmd = shift;
+
+        print STDERR "usage: tc ";
+
+        if (!defined($cmd) || !defined($COMMANDS{$cmd})) {
+                my $max   = 0;
+                my $match = 0;
+                foreach (keys %COMMANDS) {
+                        if ((length $_) > $max) {
+                                $max = length $_;
+                        }
+                }
+                print STDERR "<command>\n";
+                print STDERR "Where <command> is one of:\n";
+                foreach my $key (sort keys %COMMANDS) {
+                        if (!defined($cmd)) {
+                                printf STDERR "  %-${max}s: %s\n", $key,
+                                    $COMMANDS{$key}->{'help'};
+                                $match++;
+                        } else {
+                                if ($key =~ /^$cmd/) {
+                                        printf STDERR "  %-${max}s: %s\n", $key,
+                                            $COMMANDS{$key}->{'help'};
+                                        $match++;
+                                }
+                        }
+                }
+                if (!$match) {
+                        foreach my $key (sort keys %COMMANDS) {
+                                printf STDERR "  %-${max}s: %s\n", $key,
+                                    $COMMANDS{$key}->{'help'};
+                        }
+                }
+        } else {
+                print STDERR "$cmd " . $COMMANDS{$cmd}->{'usage'} . "\n";
+        }
+
+        cleanup($ds, 1, undef);
+}
+
+sub failedShell {
+	my $command = shift;
+ 	usage($command);
+	cleanup($ds, 1, undef);
+}   
+
+#---------------------------------------------------------------------------
+# Main dispatching function
+#---------------------------------------------------------------------------
 
 if (!scalar(@ARGV)) {
         usage();
 }
 
-my $ds = new TinderboxDS();
-
+my $ds      = new TinderboxDS();
+my $opts    = {};
 my $command = $ARGV[0];
 shift;
-
-my $opts = {};
 
 if (defined($COMMANDS{$command})) {
         if ($COMMANDS{$command}->{'optstr'}) {
                 getopts($COMMANDS{$command}->{'optstr'}, $opts)
                     or usage($command);
         }
-        &{$COMMANDS{$command}->{'func'}}();
+	if (defined($COMMANDS{$command}->{'func'})) {
+		&{$COMMANDS{$command}->{'func'}}();
+	} else {
+		failedShell($command);
+	}
 } else {
         usage($command);
 }
 
 cleanup($ds, 0, undef);
 
+#---------------------------------------------------------------------------
+# Tinderbox commands from here on
+#---------------------------------------------------------------------------
+
 sub init {
-        system("mkdir -p $JAILS_DIR");
-        system("mkdir -p $BUILDS_DIR");
-        system("mkdir -p $PORTSTREES_DIR");
-        system("mkdir -p $ERROR_DIR");
-        system("mkdir -p $LOG_DIR");
-        system("mkdir -p $PKGS_DIR");
-        system("mkdir -p $WRKDIRS_DIR");
+	my @subdirs = ( 'builds', 'errors', 'logs', 'packages',
+			'portstrees', 'wrkdirs' );
+
+	foreach my $subdir (@subdirs) {
+		system("mkdir -p ${pb}/${subdir}");
+	}
 }
 
 sub dsversion {
@@ -985,12 +1087,12 @@ sub addPort {
                 $requestMountArgs{'portstree'} = $ptname;
 
                 $requestMountArgs{'destination'} = "portstree";
-                requestMount($BUILD_ROOT, %requestMountArgs);
+                requestMount($pb, %requestMountArgs);
 
                 $requestMountArgs{'destination'} = "jail";
-                requestMount($BUILD_ROOT, %requestMountArgs);
+                requestMount($pb, %requestMountArgs);
 
-                buildenv($BUILD_ROOT, $bname, $jname, $ptname);
+                buildenv($pb, $bname, $jname, $ptname);
                 $ENV{'LOCALBASE'}  = "/nonexistentlocal";
                 $ENV{'X11BASE'}    = "/nonexistentx";
                 $ENV{'PKG_DBDIR'}  = "/nonexistentdb";
@@ -1180,11 +1282,11 @@ sub getSrcUpdateCmd {
 
         if ($update_cmd eq "CVSUP") {
                 $update_cmd =
-                    "/usr/local/bin/cvsup -g $BUILD_ROOT/jails/$jail_name/src-supfile";
+                    "/usr/local/bin/cvsup -g $pb/jails/$jail_name/src-supfile";
         } elsif ($update_cmd eq "NONE") {
                 $update_cmd = "";
         } else {
-                $update_cmd = "$BUILD_ROOT/scripts/$update_cmd $jail_name";
+                $update_cmd = "$pb/scripts/$update_cmd $jail_name";
         }
 
         print $update_cmd . "\n";
@@ -1295,11 +1397,11 @@ sub getPortsUpdateCmd {
 
         if ($update_cmd eq "CVSUP") {
                 $update_cmd =
-                    "/usr/local/bin/cvsup -g $BUILD_ROOT/portstrees/$portstree_name/ports-supfile";
+                    "/usr/local/bin/cvsup -g $pb/portstrees/$portstree_name/ports-supfile";
         } elsif ($update_cmd eq "NONE") {
                 $update_cmd = "";
         } else {
-                $update_cmd = "$BUILD_ROOT/scripts/$update_cmd $portstree_name";
+                $update_cmd = "$pb/scripts/$update_cmd $portstree_name";
         }
 
         print $update_cmd . "\n";
@@ -1500,11 +1602,12 @@ sub rmPort {
                 if (my $version = $ds->getPortLastBuiltVersion($port, $build)) {
                         my $jail    = $ds->getJailById($build->getJailId());
                         my $sufx    = $ds->getPackageSuffix($jail);
-                        my $pkgdir  = join("/", $PKGS_DIR, $build->getName());
-                        my $logpath =
-                            join("/", $LOG_DIR, $build->getName(), $version);
-                        my $errpath =
-                            join("/", $ERROR_DIR, $build->getName(), $version);
+                        my $pkgdir  = join("/", $pb, 'jails',
+					   $build->getName());
+                        my $logpath = join("/", $pb, 'logs',
+					   $build->getName(), $version);
+                        my $errpath = join("/", $pb, 'errors',
+					   $build->getName(), $version);
                         if (-d $pkgdir) {
                                 print
                                     "Removing all packages matching ${version}${sufx} starting from $pkgdir.\n";
@@ -1729,7 +1832,7 @@ sub updatePortsTree {
                         );
                 }
                 $update_cmd =
-                    "/usr/local/bin/cvsup -g $BUILD_ROOT/portstrees/$name/ports-supfile";
+                    "/usr/local/bin/cvsup -g $pb/portstrees/$name/ports-supfile";
         } elsif ($update_cmd eq "NONE") {
                 $update_cmd = "";
         } else {
@@ -2317,47 +2420,6 @@ sub _updateBuildUser {
         }
 }
 
-sub usage {
-        my $cmd = shift;
-
-        print STDERR "usage: $0 ";
-
-        if (!defined($cmd) || !defined($COMMANDS{$cmd})) {
-                my $max   = 0;
-                my $match = 0;
-                foreach (keys %COMMANDS) {
-                        if ((length $_) > $max) {
-                                $max = length $_;
-                        }
-                }
-                print STDERR "<command>\n";
-                print STDERR "Where <command> is one of:\n";
-                foreach my $key (sort keys %COMMANDS) {
-                        if (!defined($cmd)) {
-                                printf STDERR "  %-${max}s: %s\n", $key,
-                                    $COMMANDS{$key}->{'help'};
-                                $match++;
-                        } else {
-                                if ($key =~ /^$cmd/) {
-                                        printf STDERR "  %-${max}s: %s\n", $key,
-                                            $COMMANDS{$key}->{'help'};
-                                        $match++;
-                                }
-                        }
-                }
-                if (!$match) {
-                        foreach my $key (sort keys %COMMANDS) {
-                                printf STDERR "  %-${max}s: %s\n", $key,
-                                    $COMMANDS{$key}->{'help'};
-                        }
-                }
-        } else {
-                print STDERR "$cmd " . $COMMANDS{$cmd}->{'usage'} . "\n";
-        }
-
-        cleanup($ds, 1, undef);
-}
-
 sub addPorts {
         my $port  = shift;
         my $build = shift;
@@ -2422,7 +2484,7 @@ sub tbcleanup {
                 my $package_suffix = $ds->getPackageSuffix($jail);
 
                 # Delete unreferenced log files.
-                my $dir = join("/", $LOG_DIR, $build->getName());
+                my $dir = join("/", $pb, 'logs', $build->getName());
                 opendir(DIR, $dir) || die "Failed to open $dir: $!\n";
 
                 while (my $file_name = readdir(DIR)) {
@@ -2445,7 +2507,8 @@ sub tbcleanup {
                         if ($ds->getPortLastBuiltVersion($port, $build)) {
                                 my $path = join(
                                         "/",
-                                        $PKGS_DIR,
+					$pb,
+					'packages',
                                         $build->getName(),
                                         "All",
                                         $ds->getPortLastBuiltVersion($port,

@@ -12,10 +12,9 @@ cleanup()
     error=$3
     cleandirs=$4
     pkgname=$5
-    pb=$6
-    branch=$7
+    branch=$6
 
-    cleanup_mounts -d build -b $(basename $chroot)
+    cleanupMounts -d build -b $(basename $chroot)
 
     if [ -n "${DISTFILE_CACHE}" ]; then
 	if [ -f ${chroot}${DISTCACHE}/.lock ]; then
@@ -47,14 +46,7 @@ cleanup()
     exit $error
 }
 
-# Configurable variables
-pb=$0
-[ -z "$(echo "${pb}" | sed 's![^/]!!g')" ] && \
-pb=$(type "$pb" | sed 's/^.* //g')
-pb=$(realpath $(dirname $pb))
-pb=${pb%%/scripts}
-
-. ${pb}/scripts/lib/tinderbox_shlib.sh
+. ${pb}/scripts/lib/tinderlib.sh
 
 error=0
 init=0
@@ -172,7 +164,7 @@ export USA_RESIDENT=yes
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/X11R6/bin
 
 # Just to be shure we start in a clean build-tree
-cleanup_mounts -d build -b ${branch}
+cleanupMounts -d build -b ${branch}
 
 if [ x"${CCACHE_ENABLED}" = x"1" ]; then
     # XXX We need to do this since certain ports (e.g. cdrtools) don't
@@ -245,7 +237,7 @@ fi
 
 echo ${OSREL}-${BRANCH} > ${chroot}/usr/bin/UNAME_VERSION
 
-trap  "cleanup ${chroot} ${noclean} ${error} \"${cleandirs}\" ${pkgname} ${pb} ${branch}" 1 2 3 9 10 11 15
+trap  "cleanup ${chroot} ${noclean} ${error} \"${cleandirs}\" ${pkgname} ${branch}" 1 2 3 9 10 11 15
 
 if [ -n "${DISTFILE_CACHE}" ]; then
     export DISTCACHE=/distcache
@@ -264,7 +256,7 @@ echo "building ${pkgname} in directory ${chroot}" | tee ${chroot}/tmp/${pkgname}
 
 # If we're using a central distfile repository, mount it now
 if [ -n "${DISTFILE_CACHE}" ] ; then
-	request_mount -d distcache -b ${branch} -s "${DISTFILE_CACHE}"
+	requestMount -d distcache -b ${branch} -s "${DISTFILE_CACHE}"
 fi
 
 # intentionally set up ${PORTSDIR} with symlink to catch broken ports
@@ -272,9 +264,9 @@ mkdir -p ${chroot}/a/ports
 rm -rf ${chroot}/usr/ports
 
 if [ ${nullfs} -eq 1 ] ; then
-	request_mount -n -r -d buildports -b ${branch}
+	requestMount -n -r -d buildports -b ${branch}
 else
-	request_mount -r -d buildports -b ${branch}
+	requestMount -r -d buildports -b ${branch}
 fi
 
 ln -sf ../a/ports ${chroot}/usr/ports
@@ -288,9 +280,9 @@ mkdir -p ${chroot}/${WRKDIRPREFIX}
 mkdir -p ${chroot}/usr/src
 
 if [ ${nullfs} -eq 1 ] ; then
-	request_mount -n -r -d buildsrc -b ${branch}
+	requestMount -n -r -d buildsrc -b ${branch}
 else
-	request_mount -r -d buildsrc -b ${branch}
+	requestMount -r -d buildsrc -b ${branch}
 fi
 
 mount -t devfs foo ${chroot}/dev
@@ -300,15 +292,15 @@ if [ x"${CCACHE_ENABLED}" = x"1" ]; then
     mkdir -p ${chroot}/${CCACHE_DIR}
     if [ x"${CCACHE_JAIL}" = x"1" ]; then
 	if [ ${nullfs} -eq 1 ] ; then
-		request_mount -n -d ccache -s ${pb}/${CCACHE_DIR}/${jail} -b ${branch}
+		requestMount -n -d ccache -s ${pb}/${CCACHE_DIR}/${jail} -b ${branch}
 	else
-		request_mount -d ccache -s ${pb}/${CCACHE_DIR}/${jail} -b ${branch}
+		requestMount -d ccache -s ${pb}/${CCACHE_DIR}/${jail} -b ${branch}
 	fi
     else
 	if [ ${nullfs} -eq 1 ] ; then
-		request_mount -n -d ccache -s ${pb}/${CCACHE_DIR}/${branch} -b ${branch}
+		requestMount -n -d ccache -s ${pb}/${CCACHE_DIR}/${branch} -b ${branch}
 	else
-		request_mount -d ccache -s ${pb}/${CCACHE_DIR}/${branch} -b ${branch}
+		requestMount -d ccache -s ${pb}/${CCACHE_DIR}/${branch} -b ${branch}
 	fi
     fi
     if [ -n "${CCACHE_MAX_SIZE}" ]; then
@@ -380,13 +372,13 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-if ! cp -p ${pb}/scripts/buildscript ${chroot}; then
+if ! cp -p ${pb}/scripts/lib/buildscript ${chroot}; then
     error=3
-    cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${pb} ${branch}
+    cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${branch}
 fi
-if ! cc -o ${chroot}/pnohang -static ${pb}/scripts/pnohang.c; then
+if ! cc -o ${chroot}/pnohang -static ${pb}/scripts/lib/pnohang.c; then
     error=4
-    cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${pb} ${branch}
+    cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${branch}
 fi
 
 chroot ${chroot} /buildscript ${dirname} 1 "$ED" "$PD" "$FD" "$BD" "$RD" 2>&1 | tee -a ${chroot}/tmp/${pkgname}.log
@@ -481,4 +473,4 @@ else
     ${pb}/scripts/tc sendBuildErrorMail -d ${portdir} -b ${branch}
 fi
 
-cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${pb} ${branch}
+cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${branch}
