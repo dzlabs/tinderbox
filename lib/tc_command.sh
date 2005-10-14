@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.8 2005/10/13 22:00:50 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.9 2005/10/14 06:18:15 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -978,4 +978,17 @@ tinderbuild () {
     tinderbuild_phase 1
 
     tinderbuild_cleanup 0
+}
+
+#---------------------------------------------------------------------------
+# Initialize tinderbox directories
+#---------------------------------------------------------------------------
+
+init () {
+    for dir in builds errors logs packages portstrees wrkdirs
+    do
+	mkdir -p ${pb}/${dir}
+    done
+
+    return 0
 }

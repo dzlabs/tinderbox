@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.71 2005/10/13 22:01:38 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.72 2005/10/14 06:18:15 ade Exp $
 #
 
 my $pb;
@@ -64,7 +64,6 @@ my $ds = new TinderboxDS();
 
 %COMMANDS = (
         "init" => {
-                func  => \&init,
                 help  => "Initialize a tinderbox environment",
                 usage => "",
         },
@@ -563,15 +562,6 @@ cleanup($ds, 0, undef);
 #---------------------------------------------------------------------------
 # Tinderbox commands from here on
 #---------------------------------------------------------------------------
-
-sub init {
-	my @subdirs = ( 'builds', 'errors', 'logs', 'packages',
-			'portstrees', 'wrkdirs' );
-
-	foreach my $subdir (@subdirs) {
-		system("mkdir -p ${pb}/${subdir}");
-	}
-}
 
 sub dsversion {
         my $version = $ds->getDSVersion()
