@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup-pgsql.sh,v 1.8 2005/10/13 21:53:21 ade Exp $
+# $MCom: portstools/tinderbox/lib/setup-pgsql.sh,v 1.9 2005/10/15 19:44:50 marcus Exp $
 #
 
 DB_MAN_PREREQS="databases/p5-DBD-Pg databases/postgresql*-client"
@@ -112,7 +112,7 @@ if [ ${do_db} = 1 ]; then
 
     tinderEcho "INFO: Creating user ${db_user} on host ${db_host} ..."
     tinderEcho "INFO: The next prompt will be for the new user's (${db_user}) password on the database server ${db_host}.  The prompt after that will be for ${db_admin}'s password."
-    su -l pgsql -c "createuser -E -h ${db_host} -U ${db_admin} -W -P ${db_user}"
+    createuser -E -h ${db_host} -U ${db_admin} -W -P ${db_user}
 
     if [ $? != 0 ]; then
 	tinderExit "ERROR: User creation failed!  Consult the output above for more information." $?
@@ -123,7 +123,7 @@ if [ ${do_db} = 1 ]; then
 
     tinderEcho "INFO: Creating database ${db_name} on ${db_host} and assigning ownership to ${db_user} ..."
     tinderEcho "INFO: The next prompt will be for ${db_admin}'s password on the database server ${db_host}."
-    su -l pgsql -c "createdb -O ${db_user} -h ${db_host} -U ${db_admin} -W ${db_name}"
+    createdb -O ${db_user} -h ${db_host} -U ${db_admin} -W ${db_name}
 
     if [ $? != 0 ]; then
 	tinderExit "ERROR: Database creation failed!  Consult the output above for more information." $?
