@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.41 2005/10/13 21:53:20 ade Exp $
+$MCom: portstools/tinderbox/README,v 1.42 2005/10/16 04:54:43 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -216,14 +216,24 @@ C shell equivalents:
 
 The tinderbuild function also accepts some additional command line arguments:
 
- -init 		: updates the Jail then updates the Build
- -cleanpackages : removes all packages already built for the specified Build
- -updateports 	: updates the Build's PortsTree (NOTE: dangerous if doing
-                  parallel runs with the same PortsTree)
- -skipmake 	: skips the Makefile generation stage (NOTE: only use this
-                  option if a good Makefile already exists)
- -noduds	: skips the duds file generation stage (NOTE: packages which
-                  are forbidden or ignored will be built)
+ -init 		 : updates the Jail then updates the Build
+ -nullfs         : uses nullfs instead of NFS to mount Jail and PortsTree
+                   file systems
+ -cleanpackages  : removes all packages already built for the specified Build
+ -updateports 	 : updates the Build's PortsTree (NOTE: dangerous if doing
+                   parallel runs with the same PortsTree)
+ -skipmake 	 : skips the Makefile generation stage (NOTE: only use this
+                   option if a good Makefile already exists)
+ -noduds	 : skips the duds file generation stage (NOTE: packages which
+                   are forbidden or ignored will be built)
+ -noclean        : does not clean up the Build hierarchy after the port
+                   build completes
+ -plistcheck     : makes any plist verification problems (e.g. leftover
+                   files) fatal
+ -cleandistfiles : removes all files and directories in the distfile cache
+                   prior to starting the build
+ -fetch-original : ignores the distfile cache, and fetches all distfiles
+                   from their respective sources
 
 Maintenance:
 ------------
