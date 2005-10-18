@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.57 2005/10/10 23:30:14 ade Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.58 2005/10/18 04:57:05 marcus Exp $
 #
 
 package TinderboxDS;
@@ -570,7 +570,7 @@ sub getObjects {
                 my @ands = ();
                 foreach my $andcond (keys %{$param}) {
                         if ($andcond eq "_ORDER_" && !$orderseen) {
-                                $order = "ORDER BY " . $param->{$andcond};
+                                $order = " ORDER BY " . $param->{$andcond};
                                 $orderseen++;
                         } elsif ($andcond eq "_ORDER_" && $orderseen) {
                                 carp
@@ -584,7 +584,9 @@ sub getObjects {
                                 push @values, $param->{$andcond};
                         }
                 }
-                push @conds, "(" . (join(" AND ", @ands)) . ")";
+                if (@ands) {
+                        push @conds, "(" . (join(" AND ", @ands)) . ")";
+                }
         }
 
         $condition = join(" OR ", @conds);
