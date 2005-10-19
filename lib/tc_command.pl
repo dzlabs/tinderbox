@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.76 2005/10/19 07:28:21 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.77 2005/10/19 23:46:15 marcus Exp $
 #
 
 my $pb;
@@ -132,12 +132,14 @@ my $ds = new TinderboxDS();
                 func => \&listPortFailPatterns,
                 help =>
                     "List all port failure patterns, their reasons, and regular expressions",
-                usage => "",
+                usage  => "[-i <ID>]",
+                optstr => 'i:',
         },
         "listPortFailReasons" => {
                 func  => \&listPortFailReasons,
                 help  => "List all port failure reasons and their descriptions",
-                usage => "",
+                usage => "[-t <tag>]",
+                optstr => 't:',
         },
         "reorgBuildPortsQueue" => {
                 func   => \&reorgBuildPortsQueue,
@@ -185,6 +187,20 @@ my $ds = new TinderboxDS();
                 usage =>
                     "-b <build name> -d <port directory> [-h <hostname>] [-p <priority>]",
                 optstr => 'b:d:h:p:',
+        },
+        "addPortFailPattern" => {
+                func  => \&addPortFailPattern,
+                help  => "Add a port failure pattern to the datastore",
+                usage =>
+                    "-i <ID> -r <reason tag> -e <expression> [-p <parent ID>]",
+                optstr => 'i:r:e:p:',
+        },
+        "addPortFailReason" => {
+                func  => \&addPortFailReason,
+                help  => "Add a port failure reason to the datastore",
+                usage =>
+                    "-t <tag> [-d <description>] [-y COMMON|RARE|TRANSIENT]",
+                optstr => 't:d:y:',
         },
         "getJailForBuild" => {
                 func   => \&getJailForBuild,
@@ -922,18 +938,33 @@ sub listPortsTrees {
 }
 
 sub listPortFailPatterns {
-        my @portFailPatterns = $ds->getAllPortFailPatterns();
+        if ($opts->{'i'}) {
+                my $pattern = $ds->getPortFailPatternById($opts->{'i'});
 
-        if (@portFailPatterns) {
-                foreach my $pattern (@portFailPatterns) {
-                        my $id     = $pattern->getId();
-                        my $reason = $pattern->getReason();
-                        my $expr   = $pattern->getExpr();
-                        format PATTERN_TOP =
+                if (!defined($pattern)) {
+                        cleanup($ds, 1,
+                                "Failed to find port failure pattern with the ID "
+                                    . $opts->{'i'}
+                                    . " in the datastore.\n");
+                }
+
+                print "ID        : " . $pattern->getId() . "\n";
+                print "Reason    : " . $pattern->getReason() . "\n";
+                print "Expression:\n";
+                print $pattern->getExpr() . "\n";
+        } else {
+                my @portFailPatterns = $ds->getAllPortFailPatterns();
+
+                if (@portFailPatterns) {
+                        foreach my $pattern (@portFailPatterns) {
+                                my $id     = $pattern->getId();
+                                my $reason = $pattern->getReason();
+                                my $expr   = $pattern->getExpr();
+                                format PATTERN_TOP =
 ID           Reason                 Expression
 -------------------------------------------------------------------------------
 .
-                        format PATTERN =
+                                format PATTERN =
 @<<<<<<<<<<  @<<<<<<<<<<<<<<<<<<<   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 $id          $reason                $expr
 ~                                   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -959,74 +990,89 @@ $id          $reason                $expr
 ~                                   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<...
                                     $expr
 .
-                        $~ = "PATTERN";
-                        $^ = "PATTERN_TOP";
-                        write;
-                }
-        } elsif (defined($ds->getError())) {
-                cleanup($ds, 1,
-                              "Failed to list port failure patterns: "
-                            . $ds->getError()
-                            . "\n");
-        } else {
-                cleanup(
-                        $ds, 1,
-                        "There are no port failure patterns configured in
+                                $~ = "PATTERN";
+                                $^ = "PATTERN_TOP";
+                                write;
+                        }
+                } elsif (defined($ds->getError())) {
+                        cleanup($ds, 1,
+                                      "Failed to list port failure patterns: "
+                                    . $ds->getError()
+                                    . "\n");
+                } else {
+                        cleanup(
+                                $ds, 1,
+                                "There are no port failure patterns configured in
 the datastore.\n"
-                );
+                        );
+                }
         }
 }
 
 sub listPortFailReasons {
-        my @portFailReasons = $ds->getAllPortFailReasons();
+        if ($opts->{'t'}) {
+                my $reason = $ds->getPortFailReasonByTag($opts->{'t'});
 
-        if (@portFailReasons) {
-                foreach my $reason (@portFailReasons) {
-                        my $tag   = $reason->getTag();
-                        my $descr = $reason->getDescr();
-                        next if $tag =~ /^__.+__$/;
-                        format REASON_TOP =
-Tag                    Description
+                if (!defined($reason)) {
+                        cleanup($ds, 1,
+                                "Failed to find port failure reason with tag "
+                                    . $opts->{'t'}
+                                    . " in the datastore.\n");
+                }
+
+                print "Tag        : " . $reason->getTag() . "\n";
+                print "Type       : " . $reason->getType() . "\n";
+                print "Description:\n";
+                print $reason->getDescr() . "\n";
+        } else {
+                my @portFailReasons = $ds->getAllPortFailReasons();
+
+                if (@portFailReasons) {
+                        foreach my $reason (@portFailReasons) {
+                                my $tag   = $reason->getTag();
+                                my $descr = $reason->getDescr();
+                                next if $tag =~ /^__.+__$/;
+                                format REASON_TOP =
+Tag                    Type           Description
 -------------------------------------------------------------------------------
 .
-                        format REASON =
-@<<<<<<<<<<<<<<<<<<<   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-$tag                   $descr
-~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                       $descr
-~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                       $descr
-~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                       $descr
-~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                       $descr
-~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                       $descr
-~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                       $descr
-~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                       $descr
-~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                       $descr
-~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                       $descr
-~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<...
-                       $descr
+                                format REASON =
+@<<<<<<<<<<<<<<<<<<<   @<<<<<<<<<     ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+$tag                   $type          $descr
+~                                     ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                      $descr
+~                                     ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                      $descr
+~                                     ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                      $descr
+~                                     ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                      $descr
+~                                     ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                      $descr
+~                                     ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                      $descr
+~                                     ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                      $descr
+~                                     ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                      $descr
+~                                     ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<...
+                                      $descr
 
 .
-                        $~ = "REASON";
-                        $^ = "REASON_TOP";
-                        write;
+                                $~ = "REASON";
+                                $^ = "REASON_TOP";
+                                write;
+                        }
+                } elsif (defined($ds->getError())) {
+                        cleanup($ds, 1,
+                                      "Failed to list port failure reasons: "
+                                    . $ds->getError()
+                                    . "\n");
+                } else {
+                        cleanup($ds, 1,
+                                "There are no port failure reasons configured in the datastore.\n"
+                        );
                 }
-        } elsif (defined($ds->getError())) {
-                cleanup($ds, 1,
-                              "Failed to list port failure reasons: "
-                            . $ds->getError()
-                            . "\n");
-        } else {
-                cleanup($ds, 1,
-                        "There are no port failure reasons configured in the datastore.\n"
-                );
         }
 }
 
@@ -1281,6 +1327,102 @@ sub addBuildPortsQueueEntry {
 
         $ds->addBuildPortsQueueEntry($build, $opts->{'d'}, $host, $priority,
                 $user_id);
+}
+
+sub addPortFailPattern {
+        my $parent;
+        my $pattern;
+
+        if (!$opts->{'e'} || !$opts->{'r'} || !$opts->{'i'}) {
+                usage("addPortFailPattern");
+        }
+
+        $parent = $opts->{'p'} ? $opts->{'p'} : 0;
+
+        if ($opts->{'i'} % 100 == 0) {
+                cleanup($ds, 1,
+                        "IDs that are evenly divisible by 100 are reserved for system patterns.\n"
+                );
+        }
+
+        if ($opts->{'i'} > 2147483647 || $opts->{'i'} < 0) {
+                cleanup($ds, 1,
+                        "IDs must be greater than 0, and less than 2147483647.\n"
+                );
+        }
+
+        if ($ds->isValidPortFailPattern($opts->{'i'})) {
+                cleanup($ds, 1,
+                              "A pattern with the ID "
+                            . $opts->{'i'}
+                            . " already exists in the datastore.\n");
+        }
+
+        if (!$ds->isValidPortFailPattern($parent)) {
+                cleanup($ds, 1, "No such parent pattern ID, $parent.\n");
+        }
+
+        if (!$ds->isValidPortFailReason($opts->{'r'})) {
+                cleanup($ds, 1, "No such reason tag, " . $opts->{'r'} . ".\n");
+        }
+
+        if (!eval { 'tinderbox' =~ /$opts->{'e'}/, 1 }) {
+                cleanup($ds, 1,
+                        "Bad regular expression, '" . $opts->{'e'} . "': $@\n");
+        }
+
+        $pattern = new PortFailPattern();
+        $pattern->setId($opts->{'i'});
+        $pattern->setReason($opts->{'r'});
+        $pattern->setParent($parent);
+        $pattern->setExpr($opts->{'e'});
+
+        my $rc = $ds->addPortFailPattern($pattern);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to add pattern "
+                            . $opts->{'i'}
+                            . " to the datastore: "
+                            . $ds->getError()
+                            . ".\n");
+        }
+}
+
+sub addPortFailReason {
+        my $descr;
+        my $type;
+        my $reason;
+
+        if (!$opts->{'t'}) {
+                usage("addPortFailReason");
+        }
+
+        $descr = $opts->{'d'} ? $opts->{'d'} : "";
+        $type  = $opts->{'y'} ? $opts->{'y'} : "COMMON";
+
+        if ($ds->isValidPortFailReason($opts->{'t'})) {
+                cleanup($ds, 1,
+                              "There is already a reason with tag, "
+                            . $opts->{'t'}
+                            . " in the datastore.\n");
+        }
+
+        $reason = new PortFailReason();
+        $reason->setTag($opts->{'t'});
+        $reason->setDescr($descr);
+        $reason->setType($type);
+
+        my $rc = $ds->addPortFailReason($reason);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to add reason "
+                            . $opts->{'t'}
+                            . " to the datastore: "
+                            . $ds->getError()
+                            . ".\n");
+        }
 }
 
 sub listBuildPortsQueue {

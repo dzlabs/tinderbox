@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.60 2005/10/19 06:39:26 marcus Exp $
+# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.61 2005/10/19 23:46:15 marcus Exp $
 #
 
 package TinderboxDS;
@@ -505,6 +505,20 @@ sub getPortFailReasonByTag {
         return $results[0];
 }
 
+sub getPortFailPatternById {
+        my $self = shift;
+        my $id   = shift;
+
+        my @results =
+            $self->getObjects("PortFailPattern", {port_fail_pattern_id => $id});
+
+        if (!@results) {
+                return undef;
+        }
+
+        return $results[0];
+}
+
 sub getJailById {
         my $self = shift;
         my $id   = shift;
@@ -708,6 +722,20 @@ sub addPort {
         return $rc;
 }
 
+sub addPortFailPattern {
+        my $self    = shift;
+        my $pattern = shift;
+        my $pCls    = (ref($pattern) eq "REF") ? $$pattern : $pattern;
+
+        my $rc = $self->_addObject($pCls);
+
+        if (ref($pattern) eq "REF") {
+                $$pattern = $self->getPortFailPatternById($pCls->getId());
+        }
+
+        return $rc;
+}
+
 sub updateBuildUser {
         my $self         = shift;
         my $build        = shift;
@@ -843,7 +871,7 @@ sub updatePortLastSuccessfulBuilt {
 
 sub updatePortLastFailReason {
         my $self = shift;
-        return $self->updatePortLastBuilts(@_, "Last_Fail_Reason");
+        return $self->updatePortLastBuilts(@_, "last_fail_reason");
 }
 
 sub updatePortLastBuilts {
@@ -1515,13 +1543,32 @@ sub isValidPortsTree {
         return 0;
 }
 
-sub isValidReason {
+sub isValidPortFailReason {
         my $self      = shift;
         my $reasonTag = shift;
 
         my @results =
             $self->getObjects("PortFailReason",
                 {port_fail_reason_tag => $reasonTag});
+
+        if (!@results) {
+                return 0;
+        }
+
+        if (scalar(@results)) {
+                return 1;
+        }
+
+        return 0;
+}
+
+sub isValidPortFailPattern {
+        my $self      = shift;
+        my $patternId = shift;
+
+        my @results =
+            $self->getObjects("PortFailPattern",
+                {port_fail_pattern_id => $patternId});
 
         if (!@results) {
                 return 0;
