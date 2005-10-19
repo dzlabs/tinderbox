@@ -108,7 +108,7 @@ CREATE TABLE build_users (
 
 DROP TABLE IF EXISTS port_fail_reasons;
 CREATE TABLE port_fail_reasons (
-  port_fail_reason_tag varchar(64) NOT NULL,
+  port_fail_reason_tag varchar(20) NOT NULL,
   port_fail_reason_descr text,
   port_fail_reason_type enum('COMMON','RARE','TRANSIENT') NOT NULL DEFAULT 'COMMON',
   PRIMARY KEY (port_fail_reason_tag)
@@ -121,7 +121,7 @@ CREATE TABLE build_ports (
   port_id int NOT NULL,
   last_built datetime,
   last_status enum('UNKNOWN','SUCCESS','FAIL','BROKEN', 'LEFTOVERS') DEFAULT 'UNKNOWN',
-  last_fail_reason varchar(64) NOT NULL DEFAULT '__nofail__',
+  last_fail_reason varchar(20) NOT NULL DEFAULT '__nofail__',
   last_successful_built datetime,
   last_built_version varchar(100),
   PRIMARY KEY (build_port_id),
@@ -186,7 +186,7 @@ DROP TABLE IF EXISTS port_fail_patterns;
 CREATE TABLE port_fail_patterns (
   port_fail_pattern_id int NOT NULL,
   port_fail_pattern_expr text NOT NULL,
-  port_fail_pattern_reason varchar(64) NOT NULL DEFAULT '__nofail__',
+  port_fail_pattern_reason varchar(20) NOT NULL DEFAULT '__nofail__',
   port_fail_pattern_parent int NOT NULL DEFAULT 0,
   PRIMARY KEY (port_fail_pattern_id),
   INDEX port_fail_pattern_parent_idx (port_fail_pattern_parent),
