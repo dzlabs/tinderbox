@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.31 2005/10/13 21:53:20 ade Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.32 2005/10/19 02:00:32 ade Exp $
 
 VERSION=	3.0.0
 
@@ -14,17 +14,13 @@ ETCRCDATA=	tinderd.sh
 MIGDATA=	
 MAN1DATA=	tc-configCcache.1 tc-configDistfile.1 tc-configGet.1 \
 		tc-configJail.1 tc-configTinderd.1 tc-init.1
-WWWDATA=	Build.php Jail.php Port.php PortsTree.php TinderObject.php \
-		TinderboxDS.php inc_ds.php failures.php index.php \
-		lastbuilds.php showbuild.php showport.php inc_tinderbox.php \
-		tinderstyle.css Makefile
-WWWEXPDATA=	inc_ds.php inc_tinderbox.php index.php
-WWWEXPCDATA=	Build.php BuildPortsQueue.php Host.php Jail.php Port.php \
+WEBUIDATA=	inc_ds.php inc_tinderbox.php index.php
+WEBUICDATA=	Build.php BuildPortsQueue.php Host.php Jail.php Port.php \
 		PortsTree.php TinderObject.php TinderboxDS.php User.php
-WWWEXPMDATA=	module.php moduleBuildPorts.php moduleBuilds.php \
+WEBUIMDATA=	module.php moduleBuildPorts.php moduleBuilds.php \
 		moduleHosts.php modulePorts.php moduleSession.php \
 		moduleTinderd.php moduleUsers.php
-WWWEXPTDATA=	current_buildports.tpl describe_port.tpl display_login.tpl \
+WEBUITDATA=	current_buildports.tpl describe_port.tpl display_login.tpl \
 		failed_buildports.tpl latest_buildports.tpl list_buildports.tpl \
 		list_builds.tpl list_tinderd_queue.tpl messages.inc \
 		please_login.tpl tinderstyle.css user_admin.tpl \
@@ -37,25 +33,21 @@ release:
 .for f in ${DATA}
 	cp ${f} ${.CURDIR}/tinderbox-${VERSION}
 .endfor
-	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/www
-.for wf in ${WWWDATA}
-	cp ${.CURDIR}/www/${wf} ${.CURDIR}/tinderbox-${VERSION}/www
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/webui
+.for wef in ${WEBUIDATA}
+	cp ${.CURDIR}/webui/${wef} ${.CURDIR}/tinderbox-${VERSION}/webui
 .endfor
-	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/www-exp
-.for wef in ${WWWEXPDATA}
-	cp ${.CURDIR}/www-exp/${wef} ${.CURDIR}/tinderbox-${VERSION}/www-exp
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/webui/core
+.for wecf in ${WEBUICDATA}
+	cp ${.CURDIR}/webui/core/${wecf} ${.CURDIR}/tinderbox-${VERSION}/webui/core
 .endfor
-	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/www-exp/core
-.for wecf in ${WWWEXPCDATA}
-	cp ${.CURDIR}/www-exp/core/${wecf} ${.CURDIR}/tinderbox-${VERSION}/www-exp/core
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/webui/module
+.for wemf in ${WEBUIMDATA}
+	cp ${.CURDIR}/webui/module/${wemf} ${.CURDIR}/tinderbox-${VERSION}/webui/module
 .endfor
-	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/www-exp/module
-.for wemf in ${WWWEXPMDATA}
-	cp ${.CURDIR}/www-exp/module/${wemf} ${.CURDIR}/tinderbox-${VERSION}/www-exp/module
-.endfor
-	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/www-exp/templates/default
-.for wetf in ${WWWEXPTDATA}
-	cp ${.CURDIR}/www-exp/templates/default/${wetf} ${.CURDIR}/tinderbox-${VERSION}/www-exp/templates/default
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/webui/templates/default
+.for wetf in ${WEBUITDATA}
+	cp ${.CURDIR}/webui/templates/default/${wetf} ${.CURDIR}/tinderbox-${VERSION}/webui/templates/default
 .endfor
 	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/lib
 .for lf in ${LIBDATA}

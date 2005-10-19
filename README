@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.42 2005/10/16 04:54:43 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.43 2005/10/19 02:00:32 ade Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -25,13 +25,12 @@ If MySQL is used, the MySQL Perl module must also be installed
 (databases/p5-DBD-mysql41).  Is PostgreSQL is used, the Pg Perl module
 must also be installed (databases/p5-DBD-Pg).
 
-The web front-ends require php4 (lang/php4), php4-mysql extension
-(databases/php4-mysql), and PEAR::DB (databases/pear-DB).
-
-The standard web front-end (found in the ``www'' subdirectory) requires you
-have "register_globals=on" in your php.ini.  The experimental web front-end
-(found in the ``www-exp'' subdirectory) does not require register_globals
-to be on, but does require the php4-session extension (www/php4-session).
+The web front-end (found in the ``webui'' subdirectory) require php4
+(lang/php4), PEAR::DB (databases/pear-DB), php4-session (www/php4-session),
+and one of php4-mysql (databases/php4-mysql) or php4-pgsql
+(databases/php4-pgsql) depending on your choice of backend database above.
+This code should not require "register_globals=on" in your php.ini, but
+there have been sporadic reports of it failing without this set.
 
 Installation:
 -------------
@@ -396,9 +395,6 @@ To add a port to the queue. tinderd will automatically pick it up, run a
 tinderbuild on it, and will delete the entry after tinderbuild completed.
 (Where {BUILD} is a Build name, and {PORT DIRECTORY} is a directory under
 {BUILDS}'s PortsTree (e.g. x11/gnome2).)
-
-NOTE: You must be running the ``www-exp'' web front-end to take advantage
-of the following.
 
 To use tinderd scheduling via the web you must first create a User:
 

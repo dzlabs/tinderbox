@@ -3,7 +3,7 @@
 $rootdir = '/home/tbox';
 
 $wwwrooturi  = '/exp';
-$wwwrootdir  = $rootdir.'/scripts/www-exp';
+$wwwrootdir  = $rootdir.'/scripts/webui';
 $pkguri      = '/packages';
 $pkgdir      = $rootdir.'/packages';
 $loguri      = '/logs';
