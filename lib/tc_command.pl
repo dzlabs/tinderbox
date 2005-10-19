@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.77 2005/10/19 23:46:15 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.78 2005/10/19 23:50:34 marcus Exp $
 #
 
 my $pb;
@@ -2722,7 +2722,7 @@ sub updatePortLastFailReason {
                             . "\n");
         }
 
-        if (!$ds->isValidReason($opts->{'r'})) {
+        if (!$ds->isValidPortFailReason($opts->{'r'})) {
                 cleanup($ds, 1,
                         "Unknown failure reason, " . $opts->{'r'} . "\n");
         }
