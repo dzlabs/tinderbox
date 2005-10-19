@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.73 2005/10/19 03:29:17 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.74 2005/10/19 06:39:26 marcus Exp $
 #
 
 my $pb;
@@ -127,6 +127,11 @@ my $ds = new TinderboxDS();
                 help   => "Lists the Ports to Build Queue",
                 usage  => "[-h <host>] [-r] [-s <status>]",
                 optstr => 'h:s:r',
+        },
+        "listPortFailReasons" => {
+                func  => \&listPortFailReasons,
+                help  => "List all port failure reasons and their descriptions",
+                usage => "",
         },
         "reorgBuildPortsQueue" => {
                 func   => \&reorgBuildPortsQueue,
@@ -906,6 +911,57 @@ sub listPortsTrees {
         } else {
                 cleanup($ds, 1,
                         "There are no portstrees configured in the datastore.\n"
+                );
+        }
+}
+
+sub listPortFailReasons {
+        my @portFailReasons = $ds->getAllPortFailReasons();
+
+        if (@portFailReasons) {
+                foreach my $reason (@portFailReasons) {
+                        my $tag   = $reason->getTag();
+                        my $descr = $reason->getDescr();
+                        next if $tag =~ /^__.+__$/;
+                        format STDOUT_TOP =
+Tag                    Description
+-------------------------------------------------------------------------------
+.
+                        format STDOUT =
+@<<<<<<<<<<<<<<<<<<<   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+$tag                   $descr
+~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                       $descr
+~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                       $descr
+~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                       $descr
+~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                       $descr
+~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                       $descr
+~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                       $descr
+~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                       $descr
+~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                       $descr
+~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                       $descr
+~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<...
+                       $descr
+
+.
+                        write;
+                }
+        } elsif (defined($ds->getError())) {
+                cleanup($ds, 1,
+                              "Failed to list port failure reasons: "
+                            . $ds->getError()
+                            . "\n");
+        } else {
+                cleanup($ds, 1,
+                        "There are no port failure reasons configured in the datastore.\n"
                 );
         }
 }

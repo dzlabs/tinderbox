@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.59 2005/10/19 03:29:17 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.60 2005/10/19 06:39:26 marcus Exp $
 #
 
 package TinderboxDS;
@@ -1595,6 +1595,17 @@ sub getAllPortsTrees {
         @portstrees = $self->getObjects("PortsTree");
 
         return @portstrees;
+}
+
+sub getAllPortFailReasons {
+        my $self            = shift;
+        my @portFailReasons = ();
+
+        @portFailReasons =
+            $self->getObjects("PortFailReason",
+                {_ORDER_ => 'port_fail_reason_tag'});
+
+        return @portFailReasons;
 }
 
 sub getAllPortFailPatterns {
