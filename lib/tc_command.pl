@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.75 2005/10/19 07:08:31 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.76 2005/10/19 07:28:21 marcus Exp $
 #
 
 my $pb;
@@ -127,6 +127,12 @@ my $ds = new TinderboxDS();
                 help   => "Lists the Ports to Build Queue",
                 usage  => "[-h <host>] [-r] [-s <status>]",
                 optstr => 'h:s:r',
+        },
+        "listPortFailPatterns" => {
+                func => \&listPortFailPatterns,
+                help =>
+                    "List all port failure patterns, their reasons, and regular expressions",
+                usage => "",
         },
         "listPortFailReasons" => {
                 func  => \&listPortFailReasons,
@@ -911,6 +917,62 @@ sub listPortsTrees {
         } else {
                 cleanup($ds, 1,
                         "There are no portstrees configured in the datastore.\n"
+                );
+        }
+}
+
+sub listPortFailPatterns {
+        my @portFailPatterns = $ds->getAllPortFailPatterns();
+
+        if (@portFailPatterns) {
+                foreach my $pattern (@portFailPatterns) {
+                        my $id     = $pattern->getId();
+                        my $reason = $pattern->getReason();
+                        my $expr   = $pattern->getExpr();
+                        format PATTERN_TOP =
+ID           Reason                 Expression
+-------------------------------------------------------------------------------
+.
+                        format PATTERN =
+@<<<<<<<<<<  @<<<<<<<<<<<<<<<<<<<   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+$id          $reason                $expr
+~                                   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                    $expr
+~                                   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                    $expr
+~                                   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                    $expr
+~                                   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                    $expr
+~                                   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                    $expr
+~                                   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                    $expr
+~                                   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                    $expr
+~                                   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                    $expr
+~                                   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                    $expr
+~                                   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                    $expr
+~                                   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<...
+                                    $expr
+.
+                        $~ = "PATTERN";
+                        $^ = "PATTERN_TOP";
+                        write;
+                }
+        } elsif (defined($ds->getError())) {
+                cleanup($ds, 1,
+                              "Failed to list port failure patterns: "
+                            . $ds->getError()
+                            . "\n");
+        } else {
+                cleanup(
+                        $ds, 1,
+                        "There are no port failure patterns configured in
+the datastore.\n"
                 );
         }
 }
