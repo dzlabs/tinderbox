@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.9 2005/10/14 06:18:15 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.10 2005/10/19 05:05:15 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -825,6 +825,7 @@ tinderbuild () {
     cleandistfiles=0
     skipmake=0
     fetchorig=0
+    nolog=0
     error=2
 
     # argument processing
@@ -858,6 +859,7 @@ tinderbuild () {
 	x-nullfs)		nullfs=1;;
 	x-cleandistfiles)	cleandistfiles=1;;
 	x-fetch-original)	fetchorig=1;;
+	x-nolog)		nolog=1;;
 	-*)			return 1;;
 	*)			ports="${ports} $1";;
 
@@ -951,6 +953,9 @@ tinderbuild () {
 	fi
 	if [ "$fetchorig" = "1" ]; then
 	    export FETCHORIG=1
+	fi
+	if [ "$nolog" = "1" ]; then
+	    export NOLOG=1
 	fi
 
         ${pb}/scripts/lib/makemake ${duds} ${build} ${ports}

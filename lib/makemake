@@ -24,20 +24,20 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/makemake,v 1.37 2005/10/13 21:53:21 ade Exp $
+# $MCom: portstools/tinderbox/lib/makemake,v 1.38 2005/10/19 05:05:15 marcus Exp $
 #
 
 my $pb;
 
 BEGIN {
-	$pb = $ENV{'pb'};
+        $pb = $ENV{'pb'};
 
-	push @INC, "$pb/scripts";
-	push @INC, "$pb/scripts/lib";
+        push @INC, "$pb/scripts";
+        push @INC, "$pb/scripts/lib";
 
-	require lib;
-	import lib "$pb/scripts";
-	import lib "$pb/scripts/lib";
+        require lib;
+        import lib "$pb/scripts";
+        import lib "$pb/scripts/lib";
 }
 
 use strict;
@@ -87,6 +87,7 @@ push @flarr, "-noclean"        if (defined($ENV{'NOCLEAN'}));
 push @flarr, "-plistcheck"     if (defined($ENV{'PLISTCHECK'}));
 push @flarr, "-nullfs"         if (defined($ENV{'NULLFS'}));
 push @flarr, "-fetch-original" if (defined($ENV{'FETCHORIG'}));
+push @flarr, "-nolog"          if (defined($ENV{'NOLOG'}));
 my $pbflags = join(" ", @flarr);
 
 @PORTS = ();
@@ -239,11 +240,11 @@ foreach my $key (keys %pkgdir) {
         my $bdeplst  = makeList(\%pkgdir, 0, $makecache, @{$pkgbdeps{$key}});
         my $rdeplst  = makeList(\%pkgdir, 0, $makecache, @{$pkgrdeps{$key}});
 
-        printf MK "all: %s\n",          $pname;
-        printf MK "%s: %s\n",           $pkgdir{$key}, $pname;
-        printf MK "%s: %s\n",           $pname, $pkgnames;
+        printf MK "all: %s\n", $pname;
+        printf MK "%s: %s\n",  $pkgdir{$key}, $pname;
+        printf MK "%s: %s\n",  $pname, $pkgnames;
         printf MK "\t@%s/scripts/lib/portbuild %s %s %s %s %s ", $pb,
-	    $BUILD_NAME, $JAIL_NAME, $PORTSTREE_NAME, $pbflags;
+            $BUILD_NAME, $JAIL_NAME, $PORTSTREE_NAME, $pbflags;
         printf MK "\"%s\" \"%s\" \"%s\" \"%s\" \"%s\" ", $edeplst, $pdeplst,
             $fdeplst, $bdeplst, $rdeplst;
         printf MK "%s /usr/ports/%s\n", $pname, $key;

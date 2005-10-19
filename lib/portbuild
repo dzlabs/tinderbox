@@ -1,7 +1,7 @@
 #!/bin/sh
 
 usage () {
-    echo "usage: $0 <build name> <jail name> <portstree name> [-noclean] [-plistcheck] [-nullfs] [-fetch-original] ED PD FD BD RD pkgname dirname"
+    echo "usage: $0 <build name> <jail name> <portstree name> [-noclean] [-plistcheck] [-nullfs] [-fetch-original] [-nolog] ED PD FD BD RD pkgname dirname"
     exit 1
 }
 
@@ -53,6 +53,7 @@ init=0
 noclean=0
 nullfs=0
 fetchorig=0
+nolog=0
 
 # check parameter count
 if [ $# -lt 10 ]; then
@@ -88,6 +89,11 @@ fi
 
 if [ "x$1" = "x-fetch-original" ]; then
     fetchorig=1
+    shift
+fi
+
+if [ "x$1" = "x-nolog" ]; then
+    nolog=1
     shift
 fi
 
@@ -456,8 +462,13 @@ if [ "${error}" = 0 ]; then
 	${pb}/scripts/tc updatePortLastSuccessfulBuilt -d ${portdir} -b ${branch}
 	${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${branch} -s ${status}
 	${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${branch} -v ${pkgname}
+	${pb}/scripts/tc updatePortLastFailReason -d ${portdir} -b ${branch} -r "__nofail__"
     else
 	cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${branch}/${pkgname}.log
+	if [ ${nolog} = 0 ]; then
+	    reason=$(${pb}/scripts/tc processLog -l ${pb}/errors/${branch}/${pkgname}.log)
+	    ${pb}/scripts/tc updatePortLastFailReason -d ${portdir} -b ${branch} -r ${reason}
+	fi
 	${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${branch}
 	${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${branch} -s FAIL
 	${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${branch} -v ${pkgname}
@@ -467,6 +478,10 @@ else
     cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${branch}/${pkgname}.log
     cp ${chroot}/tmp/${pkgname}.log ${pb}/logs/${branch}/${pkgname}.log
 
+    if [ ${nolog} = 0 ]; then
+        reason=$(${pb}/scripts/tc processLog -l ${pb}/errors/${branch}/${pkgname}.log)
+        ${pb}/scripts/tc updatePortLastFailReason -d ${portdir} -b ${branch} -r ${reason}
+    fi
     ${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${branch}
     ${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${branch} -s FAIL
     ${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${branch} -v ${pkgname}
