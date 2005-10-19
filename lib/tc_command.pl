@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.74 2005/10/19 06:39:26 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.75 2005/10/19 07:08:31 marcus Exp $
 #
 
 my $pb;
@@ -923,11 +923,11 @@ sub listPortFailReasons {
                         my $tag   = $reason->getTag();
                         my $descr = $reason->getDescr();
                         next if $tag =~ /^__.+__$/;
-                        format STDOUT_TOP =
+                        format REASON_TOP =
 Tag                    Description
 -------------------------------------------------------------------------------
 .
-                        format STDOUT =
+                        format REASON =
 @<<<<<<<<<<<<<<<<<<<   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 $tag                   $descr
 ~                      ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -952,6 +952,8 @@ $tag                   $descr
                        $descr
 
 .
+                        $~ = "REASON";
+                        $^ = "REASON_TOP";
                         write;
                 }
         } elsif (defined($ds->getError())) {
