@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.58 2005/10/18 04:57:05 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.59 2005/10/19 03:29:17 marcus Exp $
 #
 
 package TinderboxDS;
@@ -37,6 +37,8 @@ use Build;
 use User;
 use Host;
 use TBConfig;
+use PortFailPattern;
+use PortFailReason;
 use DBI;
 use Carp;
 use Digest::MD5 qw(md5_hex);
@@ -59,6 +61,8 @@ use vars qw(
         "User"            => "users",
         "Host"            => "hosts",
         "TBConfig"        => "config",
+        "PortFailReason"  => "port_fail_reasons",
+        "PortFailPattern" => "port_fail_patterns",
 );
 
 require "ds.ph";
@@ -487,6 +491,20 @@ sub getBuildByName {
         return $results[0];
 }
 
+sub getPortFailReasonByTag {
+        my $self = shift;
+        my $tag  = shift;
+
+        my @results =
+            $self->getObjects("PortFailReason", {port_fail_reason_tag => $tag});
+
+        if (!@results) {
+                return undef;
+        }
+
+        return $results[0];
+}
+
 sub getJailById {
         my $self = shift;
         my $id   = shift;
@@ -821,6 +839,11 @@ sub updatePortLastBuilt {
 sub updatePortLastSuccessfulBuilt {
         my $self = shift;
         return $self->updatePortLastBuilts(@_, "last_successful_built");
+}
+
+sub updatePortLastFailReason {
+        my $self = shift;
+        return $self->updatePortLastBuilts(@_, "Last_Fail_Reason");
 }
 
 sub updatePortLastBuilts {
@@ -1492,6 +1515,25 @@ sub isValidPortsTree {
         return 0;
 }
 
+sub isValidReason {
+        my $self      = shift;
+        my $reasonTag = shift;
+
+        my @results =
+            $self->getObjects("PortFailReason",
+                {port_fail_reason_tag => $reasonTag});
+
+        if (!@results) {
+                return 0;
+        }
+
+        if (scalar(@results)) {
+                return 1;
+        }
+
+        return 0;
+}
+
 sub isPortInBuild {
         my $self  = shift;
         my $port  = shift;
@@ -1553,6 +1595,17 @@ sub getAllPortsTrees {
         @portstrees = $self->getObjects("PortsTree");
 
         return @portstrees;
+}
+
+sub getAllPortFailPatterns {
+        my $self             = shift;
+        my @portFailPatterns = ();
+
+        @portFailPatterns =
+            $self->getObjects("PortFailPattern",
+                {_ORDER_ => 'port_fail_pattern_id'});
+
+        return @portFailPatterns;
 }
 
 sub getError {

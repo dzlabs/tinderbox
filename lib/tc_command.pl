@@ -24,20 +24,20 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.72 2005/10/14 06:18:15 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.73 2005/10/19 03:29:17 marcus Exp $
 #
 
 my $pb;
 
 BEGIN {
-	$pb = $ENV{'pb'};
+        $pb = $ENV{'pb'};
 
-	push @INC, "$pb/scripts";
-	push @INC, "$pb/scripts/lib";
+        push @INC, "$pb/scripts";
+        push @INC, "$pb/scripts/lib";
 
-	require lib;
-	import lib "$pb/scripts";
-	import lib "$pb/scripts/lib";
+        require lib;
+        import lib "$pb/scripts";
+        import lib "$pb/scripts/lib";
 }
 
 use strict;
@@ -319,6 +319,13 @@ my $ds = new TinderboxDS();
                     "-d <port directory> -b <build name> -s <UNKNOWN|SUCCESS|FAIL>",
                 optstr => 'd:b:s:',
         },
+        "updatePortLastFailReason" => {
+                func => \&updatePortLastFailReason,
+                help =>
+                    "Update the specified port's last build failure reason for the specified build",
+                usage  => "-d <port directory> -b <build name> -r <reason tag>",
+                optstr => 'd:b:r:',
+        },
         "updatePortLastBuiltVersion" => {
                 func => \&updatePortLastBuiltVersion,
                 help =>
@@ -420,6 +427,12 @@ my $ds = new TinderboxDS();
                 usage  => "-b <build name>",
                 optstr => 'b:',
         },
+        "processLog" => {
+                func   => \&processLog,
+                help   => "Analyze a logfile to find the failure reason",
+                usage  => "-l <logfile>",
+                optstr => 'l:',
+        },
         "tbcleanup" => {
                 func => \&tbcleanup,
                 help =>
@@ -427,55 +440,59 @@ my $ds = new TinderboxDS();
                 usage => "",
         },
 
-# The following commands are actually handled by shell code, but we put
-# them in here (with a NULL function) to consolidate the usage handling,
-# and niceties such as command listing/completion.
+        # The following commands are actually handled by shell code, but we put
+        # them in here (with a NULL function) to consolidate the usage handling,
+        # and niceties such as command listing/completion.
 
-	"Setup" => {
-		help => "Set up a new tinderbox",
-		usage => "",
-	},
+        "Setup" => {
+                help  => "Set up a new tinderbox",
+                usage => "",
+        },
 
-	"Upgrade" => {
-		help => "Upgrade an existing tinderbox",
-		usage => "",
-	},
+        "Upgrade" => {
+                help  => "Upgrade an existing tinderbox",
+                usage => "",
+        },
 
-	"createJail" => {
-		help => "Create a new jail",
-		usage => "-j <jailname> [-t <tag>] [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE [-I]",
-		optstr => 'j:t:d:CH:m:u:I',
-	},
+        "createJail" => {
+                help  => "Create a new jail",
+                usage =>
+                    "-j <jailname> [-t <tag>] [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE [-I]",
+                optstr => 'j:t:d:CH:m:u:I',
+        },
 
-	"createPortsTree" => {
-		help => "Create a new portstree",
-		usage => "-p <portstreename> [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE [-w <cvsweburl>]",
-		optstr => 'p:d:CH:m:u:w:',
-	},
+        "createPortsTree" => {
+                help  => "Create a new portstree",
+                usage =>
+                    "-p <portstreename> [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE [-w <cvsweburl>]",
+                optstr => 'p:d:CH:m:u:w:',
+        },
 
-	"createBuild" => {
-		help => "Create a new build",
-		usage => "-b <buildname> -j <jailname> -p <portstreename> [-d <description>] [-i]",
-		optstr => 'b:j:p:d:',
-	},
+        "createBuild" => {
+                help  => "Create a new build",
+                usage =>
+                    "-b <buildname> -j <jailname> -p <portstreename> [-d <description>] [-i]",
+                optstr => 'b:j:p:d:',
+        },
 
-	"makeJail" => {
-		help => "Update and build an existing jail",
-		usage => "-j <jailname>",
-		optstr => 'j:',
-	},
+        "makeJail" => {
+                help   => "Update and build an existing jail",
+                usage  => "-j <jailname>",
+                optstr => 'j:',
+        },
 
-	"makeBuild" => {
-		help => "Populate a build prior to tinderbuild",
-		usage => "-b <buildname>",
-		optstr => 'b:',
-	},
+        "makeBuild" => {
+                help   => "Populate a build prior to tinderbuild",
+                usage  => "-b <buildname>",
+                optstr => 'b:',
+        },
 
-	"tinderbuild" => {
-		help => "Generate packages from an installed Build",
-		usage => "-b <build name> [-init] [-cleanpackages] [-updateports] [-skipmake] [-noclean] [-noduds] [-plistcheck] [-nullfs] [-cleandistfiles] [-fetch-original] [portdir/portname [...]]",
-		optstr => 'b:',
-	},
+        "tinderbuild" => {
+                help  => "Generate packages from an installed Build",
+                usage =>
+                    "-b <build name> [-init] [-cleanpackages] [-updateports] [-skipmake] [-noclean] [-noduds] [-plistcheck] [-nullfs] [-cleandistfiles] [-fetch-original] [portdir/portname [...]]",
+                optstr => 'b:',
+        },
 
 );
 
@@ -525,9 +542,9 @@ sub usage {
 }
 
 sub failedShell {
-	my $command = shift;
- 	usage($command);
-	cleanup($ds, 1, undef);
+        my $command = shift;
+        usage($command);
+        cleanup($ds, 1, undef);
 }
 
 #---------------------------------------------------------------------------
@@ -548,11 +565,11 @@ if (defined($COMMANDS{$command})) {
                 getopts($COMMANDS{$command}->{'optstr'}, $opts)
                     or usage($command);
         }
-	if (defined($COMMANDS{$command}->{'func'})) {
-		&{$COMMANDS{$command}->{'func'}}();
-	} else {
-		failedShell($command);
-	}
+        if (defined($COMMANDS{$command}->{'func'})) {
+                &{$COMMANDS{$command}->{'func'}}();
+        } else {
+                failedShell($command);
+        }
 } else {
         usage($command);
 }
@@ -1089,16 +1106,18 @@ sub addPort {
                 $ENV{'PORT_DBDIR'} = "/nonexistentportdb";
                 $ENV{'LINUXBASE'}  = "/nonexistentlinux";
 
-		my $makecache = new MakeCache($ENV{'PORTSDIR'},
-					      $ENV{'PKGSUFFIX'});
+                my $makecache =
+                    new MakeCache($ENV{'PORTSDIR'}, $ENV{'PKGSUFFIX'});
 
                 if ($opts->{'r'}) {
                         my @deps = ($opts->{'d'});
                         my %seen = ();
                         while (my $port = shift @deps) {
                                 if (!$seen{$port}) {
-                                        addPorts($port, $build,
-                                                 $makecache, \@deps);
+                                        addPorts(
+                                                $port,      $build,
+                                                $makecache, \@deps
+                                        );
                                         $seen{$port} = 1;
                                 }
                         }
@@ -1590,14 +1609,13 @@ sub rmPort {
         }
         foreach my $build (@builds) {
                 if (my $version = $ds->getPortLastBuiltVersion($port, $build)) {
-                        my $jail    = $ds->getJailById($build->getJailId());
-                        my $sufx    = $ds->getPackageSuffix($jail);
-                        my $pkgdir  = join("/", $pb, 'jails',
-					   $build->getName());
-                        my $logpath = join("/", $pb, 'logs',
-					   $build->getName(), $version);
-                        my $errpath = join("/", $pb, 'errors',
-					   $build->getName(), $version);
+                        my $jail   = $ds->getJailById($build->getJailId());
+                        my $sufx   = $ds->getPackageSuffix($jail);
+                        my $pkgdir = join("/", $pb, 'jails', $build->getName());
+                        my $logpath =
+                            join("/", $pb, 'logs', $build->getName(), $version);
+                        my $errpath = join("/",
+                                $pb, 'errors', $build->getName(), $version);
                         if (-d $pkgdir) {
                                 print
                                     "Removing all packages matching ${version}${sufx} starting from $pkgdir.\n";
@@ -2364,6 +2382,98 @@ sub listBuildUsers {
         }
 }
 
+sub processLog {
+        my $log_text = "";
+        my @patterns;
+        my %parents = ();
+        my $reason  = '__nofail__';
+
+        if (!$opts->{'l'}) {
+                usage("processLog");
+        }
+
+        unless (open(LOG, $opts->{'l'})) {
+                cleanup($ds, 1,
+                              "Failed to open "
+                            . $opts->{'l'}
+                            . " for reading: $!.\n");
+        }
+
+        while (<LOG>) {
+                $log_text .= $_;
+        }
+
+        close(LOG);
+
+        @patterns = $ds->getAllPortFailPatterns();
+        $parents{'0'} = 1;
+
+        study $log_text;
+
+        foreach my $pattern (@patterns) {
+                next if $pattern->getId() <= 0;
+                my $expr = $pattern->getExpr();
+                if ($log_text =~ /$expr/m) {
+                        if ($pattern->getReason() eq '__parent__') {
+                                $parents{$pattern->getId()} = 1;
+                        } else {
+                                if ($parents{$pattern->getParent()}) {
+                                        $reason = $pattern->getReason();
+                                        last;
+                                }
+                        }
+                }
+        }
+
+        print $reason . "\n";
+}
+
+sub updatePortLastFailReason {
+        my $port;
+        my $build;
+        my $reason;
+
+        if (!$opts->{'d'} || !$opts->{'b'} || !$opts->{'r'}) {
+                usage("updatePortLastFailReason");
+        }
+
+        $port = $ds->getPortByDirectory($opts->{'d'});
+        if (!defined($port)) {
+                cleanup($ds, 1,
+                              "Port, "
+                            . $opts->{'d'}
+                            . " is not in the datastore.\n");
+        }
+
+        if (!$ds->isValidBuild($opts->{'b'})) {
+                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
+        }
+
+        $build = $ds->getBuildByName($opts->{'b'});
+
+        if (!$ds->isPortForBuild($port, $build)) {
+                cleanup($ds, 1,
+                              "Port, "
+                            . $opts->{'d'}
+                            . " is not a valid port for build, "
+                            . $opts->{'b'}
+                            . "\n");
+        }
+
+        if (!$ds->isValidReason($opts->{'r'})) {
+                cleanup($ds, 1,
+                        "Unknown failure reason, " . $opts->{'r'} . "\n");
+        }
+
+        $reason = $ds->getPortFailReasonByTag($opts->{'r'});
+
+        $ds->updatePortLastFailReason($port, $build, $reason)
+            or cleanup($ds, 1,
+                "Failed to update last failure reason value in the datastore: "
+                    . $ds->getError()
+                    . "\n");
+}
+
 sub _updateBuildUser {
         my $opts     = shift;
         my $function = shift;
@@ -2496,9 +2606,8 @@ sub tbcleanup {
                 foreach my $port (@ports) {
                         if ($ds->getPortLastBuiltVersion($port, $build)) {
                                 my $path = join(
-                                        "/",
-					$pb,
-					'packages',
+                                        "/", $pb,
+                                        'packages',
                                         $build->getName(),
                                         "All",
                                         $ds->getPortLastBuiltVersion($port,
