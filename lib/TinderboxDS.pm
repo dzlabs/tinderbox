@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.62 2005/10/20 04:56:31 marcus Exp $
+# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.63 2005/10/20 06:11:15 marcus Exp $
 #
 
 package TinderboxDS;
@@ -795,6 +795,23 @@ sub updateUser {
 
         if (ref($user) eq "REF") {
                 $$user = $self->getUserByName($uCls->getName());
+        }
+
+        return $rc;
+}
+
+sub updatePortFailReason {
+        my $self   = shift;
+        my $reason = shift;
+        my $rCls   = (ref($reason) eq "REF") ? $$reason : $reason;
+
+        my $rc = $self->_doQuery(
+                "UPDATE port_fail_reasons SET port_fail_reason_type=?, port_fail_reason_descr=? WHERE port_fail_reason_tag=?",
+                [$rCls->getType(), $rCls->getDescr(), $rCls->getTag()]
+        );
+
+        if (ref($reason) eq "REF") {
+                $$reason = $self->getPortFailReasonByTag($rCls->getTag());
         }
 
         return $rc;

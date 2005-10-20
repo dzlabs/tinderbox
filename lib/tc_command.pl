@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.81 2005/10/20 04:56:31 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.82 2005/10/20 06:11:15 marcus Exp $
 #
 
 my $pb;
@@ -427,6 +427,13 @@ my $ds = new TinderboxDS();
                 usage =>
                     "-u <username> [-e <emailaddress>] [-p <password>] [-w]",
                 optstr => 'u:e:p:w',
+        },
+        "updatePortFailReason" => {
+                func => \&updatePortFailReason,
+                help =>
+                    "Update the type or description of a port failure reason",
+                usage  => "-t <tag> <[-d <descr>] | [-y <type>]>",
+                optstr => 't:d:y:',
         },
         "setWwwAdmin" => {
                 func   => \&setWwwAdmin,
@@ -2678,6 +2685,33 @@ sub updateUser {
         if (!$rc) {
                 cleanup($ds, 1,
                               "Failed to update user preferences: "
+                            . $ds->getError()
+                            . "\n");
+        }
+}
+
+sub updatePortFailReason {
+        my $reason;
+
+        if (!$opts->{'t'} || (!$opts->{'y'} && !$opts->{'d'})) {
+                usage("updatePortFailReason");
+        }
+
+        if (!$ds->isValidPortFailReason($opts->{'t'})) {
+                cleanup($ds, 1,
+                        "Unknown port failure reason, " . $opts->{'t'} . ".\n");
+        }
+
+        $reason = $ds->getPortFailReasonByTag($opts->{'t'});
+
+        $reason->setType($opts->{'y'})  if $opts->{'y'};
+        $reason->setDescr($opts->{'d'}) if $opts->{'d'};
+
+        my $rc = $ds->updatePortFailReason($reason);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to update port failure reason: "
                             . $ds->getError()
                             . "\n");
         }
