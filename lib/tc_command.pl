@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.78 2005/10/19 23:50:34 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.79 2005/10/20 04:35:15 marcus Exp $
 #
 
 my $pb;
@@ -1966,7 +1966,9 @@ sub rmJail {
                 $rc = $ds->removeBuild($build);
                 if (!$rc) {
                         cleanup($ds, 1,
-                                "Failed to remove build $build as part of removing jail "
+                                      "Failed to remove build "
+                                    . $build->getName()
+                                    . " as part of removing jail "
                                     . $opts->{'j'} . ": "
                                     . $ds->getError()
                                     . "\n");
