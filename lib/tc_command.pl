@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.79 2005/10/20 04:35:15 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.80 2005/10/20 04:39:11 marcus Exp $
 #
 
 my $pb;
@@ -2016,7 +2016,9 @@ sub rmPortsTree {
                 $rc = $ds->removeBuild($build);
                 if (!$rc) {
                         cleanup($ds, 1,
-                                "Failed to remove build $build as part of removing portstree "
+                                      "Failed to remove build "
+                                    . $build->getName()
+                                    . " as part of removing portstree "
                                     . $opts->{'p'} . ": "
                                     . $ds->getError()
                                     . "\n");
