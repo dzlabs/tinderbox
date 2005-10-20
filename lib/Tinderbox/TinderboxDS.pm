@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.61 2005/10/19 23:46:15 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.62 2005/10/20 04:56:31 marcus Exp $
 #
 
 package TinderboxDS;
@@ -736,6 +736,20 @@ sub addPortFailPattern {
         return $rc;
 }
 
+sub addPortFailReason {
+        my $self   = shift;
+        my $reason = shift;
+        my $rCls   = (ref($reason) eq "REF") ? $$reason : $reason;
+
+        my $rc = $self->_addObject($rCls);
+
+        if (ref($reason) eq "REF") {
+                $$reason = $self->getPortFailReasonByTag($rCls->getTag());
+        }
+
+        return $rc;
+}
+
 sub updateBuildUser {
         my $self         = shift;
         my $build        = shift;
@@ -1425,6 +1439,30 @@ sub removeBuild {
         return $rc;
 }
 
+sub removePortFailPattern {
+        my $self    = shift;
+        my $pattern = shift;
+
+        my $rc =
+            $self->_doQuery(
+                "DELETE FROM port_fail_patterns WHERE port_fail_pattern_id=?",
+                [$pattern->getId()]);
+
+        return $rc;
+}
+
+sub removePortFailReason {
+        my $self   = shift;
+        my $reason = shift;
+
+        my $rc =
+            $self->_doQuery(
+                "DELETE FROM port_fail_reasons WHERE port_fail_reason_tag=?",
+                [$reason->getTag()]);
+
+        return $rc;
+}
+
 sub findBuildsForJail {
         my $self  = shift;
         my $jail  = shift;
@@ -1460,6 +1498,26 @@ sub findBuildsForPortsTree {
         @portstrees = $self->_newFromArray("PortsTree", @results);
 
         return @portstrees;
+}
+
+sub findPortFailPatternsWithReason {
+        my $self     = shift;
+        my $reason   = shift;
+        my @patterns = ();
+
+        my @results;
+        my $rc = $self->_doQueryHashRef(
+                "SELECT * FROM port_fail_patterns WHERE port_fail_pattern_reason=?",
+                \@results, $reason->getTag()
+        );
+
+        if (!$rc) {
+                return ();
+        }
+
+        @patterns = $self->_newFromArray("PortFailPattern", @results);
+
+        return @patterns;
 }
 
 sub isPortInDS {

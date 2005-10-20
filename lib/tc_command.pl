@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.80 2005/10/20 04:39:11 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.81 2005/10/20 04:56:31 marcus Exp $
 #
 
 my $pb;
@@ -300,6 +300,18 @@ my $ds = new TinderboxDS();
                 help   => "Remove a jail from the datastore",
                 usage  => "-j <jail name> [-f]",
                 optstr => 'j:f',
+        },
+        "rmPortFailPattern" => {
+                func   => \&rmPortFailPattern,
+                help   => "Remove a port failure pattern from the datastore",
+                usage  => "-i <ID> [-f]",
+                optstr => 'i:f',
+        },
+        "rmPortFailReason" => {
+                func   => \&rmPortFailReason,
+                help   => "Remove a port failure reason from the datastore",
+                usage  => "-t <tag> [-f]",
+                optstr => 't:f',
         },
         "updatePortsTree" => {
                 func => \&updatePortsTree,
@@ -2083,6 +2095,105 @@ sub rmUser {
         }
 }
 
+sub rmPortFailPattern {
+        my $pattern;
+
+        if (!$opts->{'i'}) {
+                usage("rmPortFailPattern");
+        }
+
+        $pattern = $ds->getPortFailPatternById($opts->{'i'});
+
+        if (!defined($pattern)) {
+                cleanup($ds, 1,
+                              "Unknown port failure pattern ID, "
+                            . $opts->{'i'}
+                            . ".\n");
+        }
+
+        if ($opts->{'i'} % 100 == 0) {
+                cleanup($ds, 1,
+                              "Cannot remove system defined pattern "
+                            . $opts->{'i'}
+                            . ".\n");
+        }
+
+        unless ($opts->{'f'}) {
+                print "Really remove port failure pattern "
+                    . $opts->{'i'} . "? ";
+                my $response = <STDIN>;
+                print "\n";
+                cleanup($ds, 0, undef) unless ($response =~ /^y/i);
+        }
+
+        my $rc = $ds->removePortFailPattern($pattern);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to remove port failure pattern: "
+                            . $ds->getError()
+                            . "\n");
+        }
+}
+
+sub rmPortFailReason {
+        my $reason;
+        my @patterns;
+
+        if (!$opts->{'t'}) {
+                usage("rmPortFailReason");
+        }
+
+        $reason = $ds->getPortFailReasonByTag($opts->{'t'});
+
+        if (!defined($reason)) {
+                cleanup($ds, 1,
+                              "Unknown port failure reason tag, "
+                            . $opts->{'t'}
+                            . ".\n");
+        }
+
+        @patterns = $ds->findPortFailPatternsWithReason($reason);
+
+        unless ($opts->{'f'}) {
+                if (@patterns) {
+                        print
+                            "Removing this port failure reason will also remove the following port failure patterns:\n";
+                        foreach my $pattern (@patterns) {
+                                print "\t" . $pattern->getId() . "\n";
+                        }
+                }
+                print "Really remove port failure reason "
+                    . $opts->{'t'} . "? ";
+                my $response = <STDIN>;
+                cleanup($ds, 0, undef) unless ($response =~ /^y/i);
+        }
+
+        my $rc;
+        foreach my $pattern (@patterns) {
+                $rc = $ds->removePortFailPattern($pattern);
+                if (!$rc) {
+                        cleanup($ds, 1,
+                                      "Failed to remove port failure pattern "
+                                    . $pattern->getId()
+                                    . " as part of removing port failure reason "
+                                    . $opts->{'t'} . ": "
+                                    . $ds->getError()
+                                    . "\n");
+                }
+        }
+
+        $rc = $ds->removePortFailReason($reason);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to remove port failure reason . "
+                            . $opts->{'t'} . ": "
+                            . $ds->getError()
+                            . "\n");
+        }
+}
+
 sub updatePortsTree {
         if (!$opts->{'p'}) {
                 usage("updatePortsTree");
@@ -2673,8 +2784,6 @@ sub processLog {
 
         @patterns = $ds->getAllPortFailPatterns();
         $parents{'0'} = 1;
-
-        study $log_text;
 
         foreach my $pattern (@patterns) {
                 next if $pattern->getId() <= 0;
