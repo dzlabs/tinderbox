@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/makemake,v 1.38 2005/10/19 05:05:15 marcus Exp $
+# $MCom: portstools/tinderbox/lib/makemake,v 1.39 2005/10/20 17:47:14 marcus Exp $
 #
 
 my $pb;
@@ -88,6 +88,7 @@ push @flarr, "-plistcheck"     if (defined($ENV{'PLISTCHECK'}));
 push @flarr, "-nullfs"         if (defined($ENV{'NULLFS'}));
 push @flarr, "-fetch-original" if (defined($ENV{'FETCHORIG'}));
 push @flarr, "-nolog"          if (defined($ENV{'NOLOG'}));
+push @flarr, "-trybroken"      if (defined($ENV{'TRYBROKEN'}));
 my $pbflags = join(" ", @flarr);
 
 @PORTS = ();

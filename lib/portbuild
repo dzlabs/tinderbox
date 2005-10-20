@@ -1,7 +1,7 @@
 #!/bin/sh
 
 usage () {
-    echo "usage: $0 <build name> <jail name> <portstree name> [-noclean] [-plistcheck] [-nullfs] [-fetch-original] [-nolog] ED PD FD BD RD pkgname dirname"
+    echo "usage: $0 <build name> <jail name> <portstree name> [-noclean] [-plistcheck] [-nullfs] [-fetch-original] [-nolog] [-trybroken] ED PD FD BD RD pkgname dirname"
     exit 1
 }
 
@@ -94,6 +94,11 @@ fi
 
 if [ "x$1" = "x-nolog" ]; then
     nolog=1
+    shift
+fi
+
+if [ "x$1" = "x-trybroken" ]; then
+    export TRYBROKEN=1
     shift
 fi
 
