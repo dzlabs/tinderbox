@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.20 2005/10/10 23:30:16 ade Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.21 2005/10/21 22:40:14 oliver Exp $
 #
 
     require_once 'DB.php';
@@ -34,6 +34,7 @@
     require_once 'Jail.php';
     require_once 'Port.php';
     require_once 'PortsTree.php';
+    require_once 'PortFailReason.php';
     require_once 'User.php';
     require_once 'inc_ds.php';
     require_once 'inc_tinderbox.php';
@@ -45,6 +46,7 @@
         "Jail"  => "jails",
         "Port"  => "ports",
         "PortsTree" => "ports_trees",
+        "PortFailReason" => "port_fail_reasons",
         "User"  => "users",
     );
 
@@ -56,9 +58,9 @@
         function TinderboxDS() {
             global $DB_HOST, $DB_DRIVER, $DB_NAME, $DB_USER, $DB_PASS;
 
-	    # XXX: backwards compatibility
-	    if ($DB_DRIVER == "")
-		$DB_DRIVER = "mysql";
+            # XXX: backwards compatibility
+            if ($DB_DRIVER == "")
+                $DB_DRIVER = "mysql";
 
             $dsn = "$DB_DRIVER://$DB_USER:$DB_PASS@$DB_HOST/$DB_NAME";
 
@@ -163,7 +165,7 @@
         }
 
         function getUserByLogin($username,$password) {
-	    $hashPass = md5($password);
+            $hashPass = md5($password);
             $query = "SELECT user_id,user_name,user_email,user_password,user_www_enabled FROM users WHERE user_name=? AND user_password=?";
             $rc = $this->_doQueryHashRef($query, $results, array($username,$hashPass));
 
@@ -309,9 +311,9 @@
                                'priority'       => $priority,
                                'port_directory' => $port_directory,
                                'user_id'        => $user_id,
-			       'enqueue_date'   => date("Y-m-d H:i:s", time()),
-			       'email_on_completion' => $email_on_completion,
-			       'status'         => 'ENQUEUED');
+                               'enqueue_date'   => date("Y-m-d H:i:s", time()),
+                               'email_on_completion' => $email_on_completion,
+                               'status'         => 'ENQUEUED');
 
             $results = $this->_newFromArray("BuildPortsQueue",$entries);
 
@@ -349,7 +351,18 @@
         }
 
         function getPortsForBuild($build) {
-            $query = "SELECT ports.*,build_ports.last_built,build_ports.last_status,build_ports.last_successful_built,last_built_version FROM ports,build_ports WHERE ports.port_id = build_ports.port_id AND build_id=? ORDER BY port_directory";
+            $query = 'SELECT p.*,
+                             bp.last_built,
+                             bp.last_status,
+                             bp.last_successful_built,
+                             bp.last_built_version,
+                             bp.last_fail_reason
+                        FROM ports p,
+                             build_ports bp
+                       WHERE p.port_id = bp.port_id
+                         AND bp.build_id=?
+                    ORDER BY p.port_directory';
+
             $rc = $this->_doQueryHashRef($query, $results, $build->getId());
 
             if (!$rc) {
@@ -362,10 +375,20 @@
         }
 
         function getLatestPorts($build_id,$limit="") {
-            $query = "SELECT ports.*,build_ports.build_id,build_ports.last_built,build_ports.last_status,build_ports.last_successful_built,last_built_version FROM ports,build_ports WHERE ports.port_id = build_ports.port_id AND build_ports.last_built IS NOT NULL ";
+            $query = 'SELECT p.*,
+                             bp.build_id,
+                             bp.last_built,
+                             bp.last_status,
+                             bp.last_successful_built,
+                             bp.Last_built_version,
+                             bp.last_fail_reason
+                        FROM ports p,
+                             build_ports bp
+                       WHERE p.port_id = bp.port_id
+                         AND bp.last_built IS NOT NULL ';
             if($build_id)
-                 $query .= "AND build_id=$build_id ";
-            $query .= " ORDER BY last_built DESC ";
+                 $query .= "AND bp.build_id=$build_id ";
+            $query .= " ORDER BY bp.last_built DESC ";
             if($limit)
                  $query .= " LIMIT $limit";
 
@@ -381,14 +404,24 @@
         }
 
         function getPortsByStatus($build_id,$maintainer,$status) {
-            $query = "SELECT ports.*,build_ports.build_id,build_ports.last_built,build_ports.last_status,build_ports.last_successful_built,last_built_version FROM ports,build_ports WHERE ports.port_id = build_ports.port_id ";
+            $query = 'SELECT p.*,
+                             bp.build_id,
+                             bp.last_built,
+                             bp.last_status,
+                             bp.last_successful_built,
+                             bp.Last_built_version,
+                             bp.last_fail_reason
+                        FROM ports p,
+                             build_ports bp
+                       WHERE p.port_id = bp.port_id ';
+
             if($build_id)
-                 $query .= "AND build_id=$build_id ";
+                 $query .= "AND bp.build_id=$build_id ";
             if($status)
-                 $query .= "AND last_status='$status' ";
+                 $query .= "AND bp.last_status='$status' ";
             if($maintainer)
-                 $query .= "AND port_maintainer='$maintainer'";
-            $query .= " ORDER BY last_built DESC ";
+                 $query .= "AND p.port_maintainer='$maintainer'";
+            $query .= " ORDER BY bp.last_built DESC ";
 
             $rc = $this->_doQueryHashRef($query, $results, array());
 
@@ -562,6 +595,10 @@
             return $results[0];
         }
 
+        function getPortFailReasons($params = array()) {
+            return $this->getObjects("PortFailReason", $params);
+        }
+
         function getBuilds($params = array()) {
             return $this->getObjects("Build", $params);
         }
@@ -584,6 +621,12 @@
 
         function getUsers($params = array()) {
             return $this->getObjects("User", $params);
+        }
+
+        function getAllPortFailReasons() {
+            $results = $this->getPortFailReasons();
+
+            return $results;
         }
 
         function getAllBuilds() {
@@ -756,7 +799,7 @@
         }
 
         function prettyEmail($input) {
-		return eregi_replace("@FreeBSD.org", "", $input);
+            return eregi_replace("@FreeBSD.org", "", $input);
         }
 
    }

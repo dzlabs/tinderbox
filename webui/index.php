@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.9 2005/07/21 11:28:28 oliver Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.10 2005/10/21 22:40:15 oliver Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -40,18 +40,20 @@ function get_var( $var ) {
 require_once 'module/moduleBuilds.php';
 require_once 'module/moduleBuildPorts.php';
 require_once 'module/modulePorts.php';
+require_once 'module/modulePortFailureReasons.php';
 require_once 'module/moduleSession.php';
 require_once 'module/moduleTinderd.php';
 require_once 'module/moduleUsers.php';
 
 require_once $templatesdir.'/messages.inc';
 
-$moduleBuilds		= new moduleBuilds();
-$moduleBuildPorts	= new moduleBuildPorts();
-$modulePorts		= new modulePorts();
-$moduleSession		= new moduleSession();
-$moduleTinderd		= new moduleTinderd();
-$moduleUsers		= new moduleUsers();
+$moduleBuilds			= new moduleBuilds();
+$moduleBuildPorts		= new moduleBuildPorts();
+$modulePorts			= new modulePorts();
+$modulePortFailureReasons	= new modulePortFailureReasons();
+$moduleSession			= new moduleSession();
+$moduleTinderd			= new moduleTinderd();
+$moduleUsers			= new moduleUsers();
 
 $moduleSession->start();
 if( isset($_POST['do_login']) ) {
@@ -133,6 +135,9 @@ switch( $action ) {
 						case '1':	unset( $display ); header( 'Location: index.php' ); break;
 						case '0':	$display = $moduleUsers->display_modify_user( 0, $user_id, $user_name, $user_email, $user_pwd, $www_enabled, $perm_obj ); break;
 					}
+					break;
+	case 'display_failure_reasons':	$failure_reason_tag  = get_var( 'failure_reason_tag' );
+					$display    = $modulePortFailureReasons->display_failure_reasons( $failure_reason_tag );
 					break;
 	case 'list_builds':
 	default:			$display    = $moduleBuilds->display_list_builds();

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.5 2005/07/25 19:52:42 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.6 2005/10/21 22:40:15 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -51,6 +51,12 @@ class moduleBuildPorts extends module {
 			$this->template_assign( 'no_list', true );
 		}
 
+		foreach( $this->TinderboxDS->getAllPortFailReasons() as $reason ) {
+			$port_fail_reasons[$reason->getTag()]['descr']=$reason->getDescr();
+			$port_fail_reasons[$reason->getTag()]['type']=$reason->getType();
+		}
+
+		$this->template_assign( 'port_fail_reasons',      $port_fail_reasons );
 		$this->template_assign( 'maintainers',            $this->TinderboxDS->getAllMaintainers() );
 		$this->template_assign( 'build_description',      $build->getDescription() );
 		$this->template_assign( 'build_name',             $build_name );
@@ -82,6 +88,12 @@ class moduleBuildPorts extends module {
 			$this->template_assign( 'no_list', true );
 		}
 
+		foreach( $this->TinderboxDS->getAllPortFailReasons() as $reason ) {
+			$port_fail_reasons[$reason->getTag()]['descr']=$reason->getDescr();
+			$port_fail_reasons[$reason->getTag()]['type']=$reason->getType();
+		}
+
+		$this->template_assign( 'port_fail_reasons',      $port_fail_reasons );
 		$this->template_assign( 'build_name', $build_name );
 		$this->template_assign( 'maintainer', $maintainer );
 		$this->template_assign( 'local_time', $this->TinderboxDS->prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
@@ -109,6 +121,12 @@ class moduleBuildPorts extends module {
 			$this->template_assign( 'no_list', true );
 		}
 
+		foreach( $this->TinderboxDS->getAllPortFailReasons() as $reason ) {
+			$port_fail_reasons[$reason->getTag()]['descr']=$reason->getDescr();
+			$port_fail_reasons[$reason->getTag()]['type']=$reason->getType();
+		}
+
+		$this->template_assign( 'port_fail_reasons',      $port_fail_reasons );
 		$this->template_assign( 'current_builds',         $current_builds );
 		$this->template_assign( 'build_name',             $build_name );
 		$this->template_assign( 'local_time',             $this->TinderboxDS->prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
