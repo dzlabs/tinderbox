@@ -145,12 +145,12 @@ INSERT INTO config VALUES ('DISTFILE_CACHE', '', -1);
 INSERT INTO config VALUES ('TINDERD_SLEEPTIME', '120', -1);
 INSERT INTO config VALUES ('JAIL_OBJDIR', '', -1);
 
-##
-# Port failure reasons.  These are reasons why a port may fail to build.
-# One reason may have multiple supporting patterns.  The tag column should
-# be a short identifier for the given reason description.  Changes to the
-# reasons list require a micro version bump to __DSVERSION__.
-##
+----
+-- Port failure reasons.  These are reasons why a port may fail to build.
+-- One reason may have multiple supporting patterns.  The tag column should
+-- be a short identifier for the given reason description.  Changes to the
+-- reasons list require a micro version bump to __DSVERSION__.
+----
 INSERT INTO port_fail_reasons VALUES ('__parent__', 'This is a parent reason.', 'COMMON');
 INSERT INTO port_fail_reasons VALUES ('__nofail__', 'The port was built successfully.', 'COMMON');
 INSERT INTO port_fail_reasons VALUES ('gcc_bug', 'You have tickled a bug in gcc itself. See the GNU bug report documentation for further information.', 'RARE');
@@ -221,13 +221,13 @@ INSERT INTO port_fail_reasons VALUES ('NFS', 'There was either a temporary NFS e
 INSERT INTO port_fail_reasons VALUES ('PLIST', 'There is a missing item in the PLIST. Note that this is often caused by an earlier error that went undetected. In this case, you should fix the error and also the build process so it will fail upon an error instead of continuing, since that makes debugging that much harder.', 'COMMON');
 INSERT INTO port_fail_reasons VALUES ('???', 'The automated script cannot even guess what is wrong with your port. Either the script is really stupid (more likely), or your port has ventured into unknown lands (congratulations!).', 'COMMON');
 
-##
-# Port failure patterns.  Port error logs are searched for matches to these
-# patterns in an attempt to put a simple reason behind why a port failed
-# to build correctly.  Order is important here.  The order number field
-# is the first field, and there should be a difference of 100 between
-# patterns.  Changes here require a micro version bump to __DSVERSION__.
-##
+----
+-- Port failure patterns.  Port error logs are searched for matches to these
+-- patterns in an attempt to put a simple reason behind why a port failed
+-- to build correctly.  Order is important here.  The order number field
+-- is the first field, and there should be a difference of 100 between
+-- patterns.  Changes here require a micro version bump to __DSVERSION__.
+----
 INSERT INTO port_fail_patterns VALUES (0, '.*', '__parent__', 0);
 INSERT INTO port_fail_patterns VALUES (100, 'See <URL:http://gcc.gnu.org/bugs.html> for instructions.', 'gcc_bug', 0);
 INSERT INTO port_fail_patterns VALUES (200, 'See <URL:http://www.gnu.org/software/gcc/bugs.html> for instructions.', 'gcc_bug', 0);
