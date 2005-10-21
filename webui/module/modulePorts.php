@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.5 2005/10/21 22:40:15 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.6 2005/10/21 23:12:24 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -127,7 +127,7 @@ class modulePorts extends module {
 						'port_last_built_version'    => $port_last_built_version,
 						'port_last_built'            => $this->TinderboxDS->prettyDatetime( $port->getLastBuilt() ),
 						'port_last_successful_built' => $port->getLastSuccessfulBuilt(),
-						'port_last_fail_reason'      => $port->getLastFailReason(),
+						'port_last_fail_reason'      => htmlentities($port->getLastFailReason()),
 						'port_link_logfile'          => $port_link_logfile,
 						'port_link_package'          => $port_link_package,
 						'status_field_class'         => $status_field_class,

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/modulePortFailureReasons.php,v 1.1 2005/10/21 22:40:14 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/modulePortFailureReasons.php,v 1.2 2005/10/21 23:12:24 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -38,9 +38,9 @@ class modulePortFailureReasons extends module {
 	function display_failure_reasons( $reason_tag ) {
 
 		foreach( $this->TinderboxDS->getAllPortFailReasons() as $reason ) {
-			$port_fail_reasons[$reason->getTag()]['tag']=$reason->getTag();
-			$port_fail_reasons[$reason->getTag()]['descr']=$reason->getDescr();
-			$port_fail_reasons[$reason->getTag()]['type']=$reason->getType();
+			$port_fail_reasons[$reason->getTag()]['tag']   = htmlentities($reason->getTag());
+			$port_fail_reasons[$reason->getTag()]['descr'] = htmlentities($reason->getDescr());
+			$port_fail_reasons[$reason->getTag()]['type']  = $reason->getType();
 		}
 
 		$this->template_assign( 'port_fail_reasons',      $port_fail_reasons );

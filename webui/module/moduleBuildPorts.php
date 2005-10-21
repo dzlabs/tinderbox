@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.6 2005/10/21 22:40:15 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.7 2005/10/21 23:12:24 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -52,8 +52,9 @@ class moduleBuildPorts extends module {
 		}
 
 		foreach( $this->TinderboxDS->getAllPortFailReasons() as $reason ) {
-			$port_fail_reasons[$reason->getTag()]['descr']=$reason->getDescr();
-			$port_fail_reasons[$reason->getTag()]['type']=$reason->getType();
+			$port_fail_reasons[$reason->getTag()]['tag']   = htmlentities($reason->getTag());
+			$port_fail_reasons[$reason->getTag()]['descr'] = htmlentities($reason->getDescr());
+			$port_fail_reasons[$reason->getTag()]['type']  = $reason->getType();
 		}
 
 		$this->template_assign( 'port_fail_reasons',      $port_fail_reasons );
@@ -89,8 +90,9 @@ class moduleBuildPorts extends module {
 		}
 
 		foreach( $this->TinderboxDS->getAllPortFailReasons() as $reason ) {
-			$port_fail_reasons[$reason->getTag()]['descr']=$reason->getDescr();
-			$port_fail_reasons[$reason->getTag()]['type']=$reason->getType();
+			$port_fail_reasons[$reason->getTag()]['tag']   = htmlentities($reason->getTag());
+			$port_fail_reasons[$reason->getTag()]['descr'] = htmlentities($reason->getDescr());
+			$port_fail_reasons[$reason->getTag()]['type']  = $reason->getType();
 		}
 
 		$this->template_assign( 'port_fail_reasons',      $port_fail_reasons );
@@ -122,8 +124,9 @@ class moduleBuildPorts extends module {
 		}
 
 		foreach( $this->TinderboxDS->getAllPortFailReasons() as $reason ) {
-			$port_fail_reasons[$reason->getTag()]['descr']=$reason->getDescr();
-			$port_fail_reasons[$reason->getTag()]['type']=$reason->getType();
+			$port_fail_reasons[$reason->getTag()]['tag']   = htmlentities($reason->getTag());
+			$port_fail_reasons[$reason->getTag()]['descr'] = htmlentities($reason->getDescr());
+			$port_fail_reasons[$reason->getTag()]['type']  = $reason->getType();
 		}
 
 		$this->template_assign( 'port_fail_reasons',      $port_fail_reasons );
