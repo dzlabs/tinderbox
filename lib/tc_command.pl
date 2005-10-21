@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.83 2005/10/20 14:45:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.84 2005/10/21 00:54:24 marcus Exp $
 #
 
 my $pb;
@@ -2841,7 +2841,6 @@ sub processLog {
 sub updatePortLastFailReason {
         my $port;
         my $build;
-        my $reason;
 
         if (!$opts->{'d'} || !$opts->{'b'} || !$opts->{'r'}) {
                 usage("updatePortLastFailReason");
@@ -2875,13 +2874,13 @@ sub updatePortLastFailReason {
                         "Unknown failure reason, " . $opts->{'r'} . "\n");
         }
 
-        $reason = $ds->getPortFailReasonByTag($opts->{'r'});
-
-        $ds->updatePortLastFailReason($port, $build, $reason)
-            or cleanup($ds, 1,
+        $ds->updatePortLastFailReason($port, $build, $opts->{'r'})
+            or cleanup(
+                $ds,
+                1,
                 "Failed to update last failure reason value in the datastore: "
-                    . $ds->getError()
-                    . "\n");
+                    . $ds->getError() . "\n"
+            );
 }
 
 sub _updateBuildUser {
