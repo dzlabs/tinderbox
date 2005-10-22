@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/latest_buildports.tpl,v 1.3 2005/10/21 22:40:15 oliver Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/latest_buildports.tpl,v 1.4 2005/10/22 00:13:38 oliver Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -35,7 +35,7 @@
 				<td class="<?=$row['status_field_class']?>"><?=$row['status_field_letter']?></td>
 				<?$reason=$row['port_last_fail_reason']?>
 				<td class="<?="fail_reason_".$port_fail_reasons[$reason]['type']?>">
-					<a href="index.php?action=display_failure_reasons&amp;failure_reason_tag=<?=$reason?>#<?=$reason?>"><?=$reason?></a>
+					<a href="index.php?action=display_failure_reasons&amp;failure_reason_tag=<?=$reason?>#<?=$reason?>" class="<?="fail_reason_".$port_fail_reasons[$reason]['type']?>" title="<?=$port_fail_reasons[$reason]['descr']?>"><?=$reason?></a>
 				</td>
 				<td>
 					<?if($row['port_link_logfile']){?>
