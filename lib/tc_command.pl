@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.84 2005/10/21 00:54:24 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.85 2005/10/22 05:29:06 marcus Exp $
 #
 
 my $pb;
@@ -2162,6 +2162,14 @@ sub rmPortFailReason {
         }
 
         @patterns = $ds->findPortFailPatternsWithReason($reason);
+
+        foreach my $pattern (@patterns) {
+                if ($pattern->getId() % 100 == 0) {
+                        cleanup($ds, 1,
+                                "This port failure reason is referenced by system-defined port failure patterns, and cannot be removed.\n"
+                        );
+                }
+        }
 
         unless ($opts->{'f'}) {
                 if (@patterns) {
