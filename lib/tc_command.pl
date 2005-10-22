@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.86 2005/10/22 05:37:01 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.87 2005/10/22 05:38:02 marcus Exp $
 #
 
 my $pb;
