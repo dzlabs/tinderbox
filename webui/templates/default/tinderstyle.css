@@ -1,4 +1,4 @@
-<!-- $MCom: portstools/tinderbox/webui/templates/default/tinderstyle.css,v 1.5 2005/10/22 00:13:38 oliver Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/tinderstyle.css,v 1.6 2005/10/22 00:41:00 oliver Exp $ //-->
 
 body { background-color: white }
 table { border: 2px solid black; border-collapse: collapse }
@@ -25,7 +25,7 @@ td.queue_entry_processing { background-color: green }
 td.queue_entry_success { background-color: #E8FFE8 }
 td.queue_entry_fail { background-color: red }
 
-td.fail_reason_COMMON { background-color: red }
+td.fail_reason_COMMON { background-color: red; color: white}
 a.fail_reason_COMMON { color: white }
 td.fail_reason_RARE { background-color: orange }
 td.fail_reason_TRANSIENT { background-color: yellow }
