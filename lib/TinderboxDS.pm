@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.63 2005/10/20 06:11:15 marcus Exp $
+# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.64 2005/10/23 23:00:30 marcus Exp $
 #
 
 package TinderboxDS;
@@ -237,12 +237,9 @@ sub isValidBuildPortsQueueId {
         my $self = shift;
         my $id   = shift;
 
-        my $rc = $self->_doQueryNumRows(
-                "SELECT build_ports_queue_id FROM build_ports_queue WHERE build_ports_queue_id=?",
-                $id
-        );
+        my $queue = $self->getBuildPortsQueueById($id);
 
-        return ($rc > 0) ? 1 : 0;
+        return (defined($queue));
 }
 
 sub updateBuildPortsQueueEntryCompletionDate {
@@ -1131,11 +1128,9 @@ sub isValidUser {
         my $self     = shift;
         my $username = shift;
 
-        my $rc =
-            $self->_doQueryNumRows(
-                "SELECT user_id FROM users WHERE user_name=?", $username);
+        my $user = $self->getUserByName($username);
 
-        return ($rc > 0) ? 1 : 0;
+        return (defined($user));
 }
 
 sub isUserForBuild {
@@ -1553,107 +1548,54 @@ sub isValidHost {
         my $self     = shift;
         my $hostname = shift;
 
-        my @results = $self->getObjects("Host", {host_name => $hostname});
+        my $host = $self->getHostByName($hostname);
 
-        if (!@results) {
-                return 0;
-        }
-
-        if (scalar(@results)) {
-                return 1;
-        }
-
-        return 0;
+        return (defined($host));
 }
 
 sub isValidBuild {
         my $self      = shift;
         my $buildName = shift;
 
-        my @results = $self->getObjects("Build", {build_name => $buildName});
+        my $build = $self->getBuildByName($buildName);
 
-        if (!@results) {
-                return 0;
-        }
-
-        if (scalar(@results)) {
-                return 1;
-        }
-
-        return 0;
+        return (defined($build));
 }
 
 sub isValidJail {
         my $self     = shift;
         my $jailName = shift;
 
-        my @results = $self->getObjects("Jail", {jail_name => $jailName});
+        my $jail = $self->getJailByName($jailName);
 
-        if (!@results) {
-                return 0;
-        }
-
-        if (scalar(@results)) {
-                return 1;
-        }
-
-        return 0;
+        return (defined($jail));
 }
 
 sub isValidPortsTree {
         my $self          = shift;
         my $portsTreeName = shift;
 
-        my @results =
-            $self->getObjects("PortsTree", {ports_tree_name => $portsTreeName});
+        my $portstree = $self->getPortsTreeByName($portsTreeName);
 
-        if (!@results) {
-                return 0;
-        }
-
-        if (scalar(@results)) {
-                return 1;
-        }
-
-        return 0;
+        return (defined($portstree));
 }
 
 sub isValidPortFailReason {
         my $self      = shift;
         my $reasonTag = shift;
 
-        my @results =
-            $self->getObjects("PortFailReason",
-                {port_fail_reason_tag => $reasonTag});
+        my $portFailReason = $self->getPortFailReasonByTag($reasonTag);
 
-        if (!@results) {
-                return 0;
-        }
-
-        if (scalar(@results)) {
-                return 1;
-        }
-
-        return 0;
+        return (defined($portFailReason));
 }
 
 sub isValidPortFailPattern {
         my $self      = shift;
         my $patternId = shift;
 
-        my @results =
-            $self->getObjects("PortFailPattern",
-                {port_fail_pattern_id => $patternId});
+        my $portFailPattern = $self->getPortFailPatternById($patternId);
 
-        if (!@results) {
-                return 0;
-        }
-
-        if (scalar(@results)) {
-                return 1;
-        }
-
-        return 0;
+        return (defined($portFailPattern));
 }
 
 sub isPortInBuild {
