@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.21 2005/10/21 22:40:14 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.22 2005/10/23 21:13:15 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -380,7 +380,7 @@
                              bp.last_built,
                              bp.last_status,
                              bp.last_successful_built,
-                             bp.Last_built_version,
+                             bp.last_built_version,
                              bp.last_fail_reason
                         FROM ports p,
                              build_ports bp
@@ -409,7 +409,7 @@
                              bp.last_built,
                              bp.last_status,
                              bp.last_successful_built,
-                             bp.Last_built_version,
+                             bp.last_built_version,
                              bp.last_fail_reason
                         FROM ports p,
                              build_ports bp
