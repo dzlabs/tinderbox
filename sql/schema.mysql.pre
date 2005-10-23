@@ -95,6 +95,7 @@ CREATE TABLE hosts (
 	host_id SERIAL PRIMARY KEY,
 	host_name VARCHAR(255) NOT NULL
 );
+CREATE INDEX hosts_host_name_idx ON hosts(host_name);
 
 DROP TABLE IF EXISTS config;
 CREATE TABLE config (
