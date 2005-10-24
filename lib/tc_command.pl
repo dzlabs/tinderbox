@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.88 2005/10/23 20:45:04 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.89 2005/10/24 04:08:29 marcus Exp $
 #
 
 my $pb;
@@ -908,7 +908,7 @@ sub configJail {
 
         $ds->updateConfig("jail", $host, @config)
             or cleanup($ds, 1,
-                      "Failed to update tinderd configuration: "
+                      "Failed to update jail configuration: "
                     . $ds->getError()
                     . "\n");
 }
