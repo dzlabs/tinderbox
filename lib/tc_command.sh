@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.11 2005/10/20 17:47:14 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.12 2005/10/24 04:07:56 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -790,6 +790,7 @@ tinderbuild_cleanup () {
 
 tinderbuild_phase () {
     num=$1
+    jobs=$2
 
     echo "================================================"
     echo "building packages (phase ${num})"
@@ -799,7 +800,7 @@ tinderbuild_phase () {
     start=$(date +%s)
 
     cd ${PACKAGES}/All && \
-	make -k -j1 all > ${pb}/builds/${build}/make.${num} 2>&1 </dev/null
+	make -k -j${jobs} all > ${pb}/builds/${build}/make.${num} 2>&1 </dev/null
 
     echo "ended at $(date)"
     end=$(date +%s)
@@ -827,6 +828,7 @@ tinderbuild () {
     fetchorig=0
     nolog=0
     trybroken=0
+    jobs=1
     error=2
 
     # argument processing
@@ -849,7 +851,17 @@ tinderbuild () {
 		    exit 1
 		fi
 		;;
+	x-jobs)	shift
+		if ! expr -- "$1" : "^[[:digit:]]\{1,\}$" >/dev/null 2>&1 ; then
+		    echo "ERROR: The argument to -jobs must be a number."
+		    exit 1
+		elif [ $1 -lt 1 ]; then
+		    echo "ERROR: The argument to -jobs must be a number greater than or equal to 1."
+		    exit 1
+		fi
 
+		jobs=$1
+		;;
 	x-init)			init=1;;
 	x-updateports)		updateports=1;;
 	x-cleanpackages)	cleanpackages=1;;
@@ -984,8 +996,8 @@ tinderbuild () {
     ${pb}/scripts/tc updateBuildStatus -b ${build} -s PORTBUILD
 
     # We build the packages in two phases to make sure we get everything
-    tinderbuild_phase 0
-    tinderbuild_phase 1
+    tinderbuild_phase 0 ${jobs}
+    tinderbuild_phase 1 ${jobs}
 
     tinderbuild_cleanup 0
 }
