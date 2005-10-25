@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.22 2005/10/23 21:13:15 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.23 2005/10/25 14:02:22 oliver Exp $
 #
 
     require_once 'DB.php';
@@ -351,17 +351,21 @@
         }
 
         function getPortsForBuild($build) {
-            $query = 'SELECT p.*,
+            $query = "SELECT p.*,
                              bp.last_built,
                              bp.last_status,
                              bp.last_successful_built,
                              bp.last_built_version,
-                             bp.last_fail_reason
+                        CASE bp.last_fail_reason
+                           WHEN '__nofail__' THEN ''
+                           ELSE bp.last_fail_reason
+                        END
+		          AS last_fail_reason
                         FROM ports p,
                              build_ports bp
                        WHERE p.port_id = bp.port_id
                          AND bp.build_id=?
-                    ORDER BY p.port_directory';
+                    ORDER BY p.port_directory";
 
             $rc = $this->_doQueryHashRef($query, $results, $build->getId());
 
@@ -375,17 +379,21 @@
         }
 
         function getLatestPorts($build_id,$limit="") {
-            $query = 'SELECT p.*,
+            $query = "SELECT p.*,
                              bp.build_id,
                              bp.last_built,
                              bp.last_status,
                              bp.last_successful_built,
                              bp.last_built_version,
-                             bp.last_fail_reason
+                        CASE bp.last_fail_reason
+                           WHEN '__nofail__' THEN ''
+                           ELSE bp.last_fail_reason
+                        END
+		          AS last_fail_reason
                         FROM ports p,
                              build_ports bp
                        WHERE p.port_id = bp.port_id
-                         AND bp.last_built IS NOT NULL ';
+                         AND bp.last_built IS NOT NULL ";
             if($build_id)
                  $query .= "AND bp.build_id=$build_id ";
             $query .= " ORDER BY bp.last_built DESC ";
@@ -404,16 +412,20 @@
         }
 
         function getPortsByStatus($build_id,$maintainer,$status) {
-            $query = 'SELECT p.*,
+            $query = "SELECT p.*,
                              bp.build_id,
                              bp.last_built,
                              bp.last_status,
                              bp.last_successful_built,
                              bp.last_built_version,
-                             bp.last_fail_reason
+                        CASE bp.last_fail_reason
+                           WHEN '__nofail__' THEN ''
+                           ELSE bp.last_fail_reason
+                        END
+		          AS last_fail_reason
                         FROM ports p,
                              build_ports bp
-                       WHERE p.port_id = bp.port_id ';
+                       WHERE p.port_id = bp.port_id ";
 
             if($build_id)
                  $query .= "AND bp.build_id=$build_id ";
