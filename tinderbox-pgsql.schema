@@ -367,7 +367,7 @@ INSERT INTO port_fail_patterns VALUES (12900, 'requires.*thread support', 'threa
 INSERT INTO port_fail_patterns VALUES (13000, '/usr/bin/ld: cannot find -lpthread', 'threads', 0);
 INSERT INTO port_fail_patterns VALUES (13100, '/usr/bin/ld: cannot find -lXThrStub', 'threads', 0);
 INSERT INTO port_fail_patterns VALUES (13200, '<varargs.h> is obsolete with this version of GCC', 'varargs', 0);
-INSERT INTO port_fail_patterns VALUES (13300, 'Cannot stat: ', 'configure_error', 0);
+INSERT INTO port_fail_patterns VALUES (13300, 'pkg_create: make_dist: tar command failed with code', 'PLIST', 0);
 INSERT INTO port_fail_patterns VALUES (13400, 'cd: can.t cd to', 'NFS', 0);
-INSERT INTO port_fail_patterns VALUES (13500, 'pkg_create: make_dist: tar command failed with code', 'PLIST', 0);
+INSERT INTO port_fail_patterns VALUES (13500, 'Cannot stat: ', 'configure_error', 0);
 INSERT INTO port_fail_patterns VALUES (2147483647, '.*', '???', 0);
