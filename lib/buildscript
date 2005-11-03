@@ -164,8 +164,12 @@ EOF
   mtree -X /tmp/mtree.exclude -xcn -k uid,gid,mode -p / > /tmp/mtree
   cd $dir
   if /pnohang $TIMEOUT /tmp/make.log5 ${pkgname} make package; then
-    cat /tmp/make.log5
     echo "0" > /tmp/status
+  else
+    echo "1" > /tmp/status
+  fi
+
+    cat /tmp/make.log5
     prefix=$(make -V PREFIX)
     del_pkg ${pkgname}
 
@@ -215,9 +219,6 @@ EOF
         echo "1" > /tmp/status
       fi
     fi
-  else
-    cleanup 5
-  fi
 
   if [ ${xvfb} = 1 ]; then
     kill $(jobid %1)
