@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.15 2005/10/13 21:53:21 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.16 2005/11/03 21:39:33 ade Exp $
 #
 
 use strict;
@@ -170,49 +170,6 @@ sub getHostname {
         my $hostname = hostname();
 
         return $hostname;
-}
-
-sub requestMount {
-        my $pb        = shift;
-        my %arguments = @_;
-        my $args      = undef;
-
-        if ($arguments{'quiet'}) {
-                $args .= ' -q ';
-        }
-
-        if ($arguments{'readonly'}) {
-                $args .= ' -r ';
-        }
-
-        if ($arguments{'jail'}) {
-                $args .= ' -j ' . $arguments{'jail'};
-        }
-
-        if ($arguments{'portstree'}) {
-                $args .= ' -p ' . $arguments{'portstree'};
-        }
-
-        if ($arguments{'build'}) {
-                $args .= ' -b ' . $arguments{'build'};
-        }
-
-        if ($arguments{'nullfs'}) {
-                $args .= ' -n ';
-        }
-
-        if ($arguments{'destination'}) {
-                $args .= ' -d ' . $arguments{'destination'};
-        }
-
-        if ($arguments{'source'}) {
-                $args .= ' -s ' . $arguments{'source'};
-        }
-
-        $ENV{'pb'} = $pb;
-        `sh -c '. $pb/scripts/lib/tinderlib.sh ; requestMount $args'`;
-        delete $ENV{'pb'};
-        return 0;
 }
 
 1;

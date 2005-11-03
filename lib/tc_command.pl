@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.89 2005/10/24 04:08:29 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.90 2005/11/03 21:39:33 ade Exp $
 #
 
 my $pb;
@@ -175,12 +175,17 @@ my $ds = new TinderboxDS();
                 optstr => 'm:p:u:d:w:',
         },
         "addPort" => {
-                func => \&addPort,
                 help =>
                     "Add a port, and optionally, its dependencies, to the datastore",
                 usage  => "{-b <build name> | -a} -d <port directory> [-r]",
                 optstr => 'ab:d:r',
         },
+	"addPortToOneBuild" => {
+		func   => \&addPortToOneBuild,
+		help   => "INTERNAL function only",
+		usage  => "",
+		optstr => 'b:d:r',
+	},
         "addBuildPortsQueueEntry" => {
                 func  => \&addBuildPortsQueueEntry,
                 help  => "Adds a Port to the Ports to Build Queue",
@@ -1244,72 +1249,23 @@ sub addPortsTree {
         }
 }
 
-sub addPort {
-        my %requestMountArgs;
+# Internal function: do NOT call directly, but only from addPort
+# This code assumes its mount points and environment have been set up
+sub addPortToOneBuild {
+	my $build     = $ds->getBuildByName($opts->{'b'});
+	my $makecache = new MakeCache($ENV{'PORTSDIR'}, $ENV{'PKGSUFFIX'});
 
-        if (       (!$opts->{'b'} && !$opts->{'a'})
-                || ($opts->{'b'} && $opts->{'a'})
-                || !$opts->{'d'})
-        {
-                usage("addPort");
-        }
-
-        my $buildname = $opts->{'b'};
-        if ($buildname && !$ds->isValidBuild($buildname)) {
-                cleanup($ds, 1, "Unknown build, $buildname\n");
-        }
-
-        my @builds = ();
-        if ($opts->{'a'}) {
-                @builds = $ds->getAllBuilds();
-        } else {
-                push @builds, $ds->getBuildByName($buildname);
-        }
-
-        foreach my $build (@builds) {
-                my $jail      = $ds->getJailById($build->getJailId());
-                my $portstree = $ds->getPortsTreeById($build->getPortsTreeId());
-                my $tag       = $jail->getTag();
-                my $bname     = $build->getName();
-                my $jname     = $jail->getName();
-                my $ptname    = $portstree->getName();
-
-                $requestMountArgs{'quiet'}     = 1;
-                $requestMountArgs{'build'}     = $bname;
-                $requestMountArgs{'jail'}      = $jname;
-                $requestMountArgs{'portstree'} = $ptname;
-
-                $requestMountArgs{'destination'} = "portstree";
-                requestMount($pb, %requestMountArgs);
-
-                $requestMountArgs{'destination'} = "jail";
-                requestMount($pb, %requestMountArgs);
-
-                buildenv($pb, $bname, $jname, $ptname);
-                $ENV{'LOCALBASE'}  = "/nonexistentlocal";
-                $ENV{'X11BASE'}    = "/nonexistentx";
-                $ENV{'PKG_DBDIR'}  = "/nonexistentdb";
-                $ENV{'PORT_DBDIR'} = "/nonexistentportdb";
-                $ENV{'LINUXBASE'}  = "/nonexistentlinux";
-
-                my $makecache =
-                    new MakeCache($ENV{'PORTSDIR'}, $ENV{'PKGSUFFIX'});
-
-                if ($opts->{'r'}) {
-                        my @deps = ($opts->{'d'});
-                        my %seen = ();
-                        while (my $port = shift @deps) {
-                                if (!$seen{$port}) {
-                                        addPorts(
-                                                $port,      $build,
-                                                $makecache, \@deps
-                                        );
-                                        $seen{$port} = 1;
-                                }
-                        }
-                } else {
-                        addPorts($opts->{'d'}, $build, $makecache, undef);
-                }
+	if ($opts->{'r'}) {
+		my @deps = ($opts->{'d'});
+		my %seen =();
+		while (my $port = shift @deps) {
+			if (!$seen{$port}) {
+				addPorts($port, $build, $makecache, \@deps);
+				$seen{$port} = 1;
+			}
+		}
+	} else {
+		addPorts($opts->{'d'}, $build, $makecache, undef);
         }
 }
 

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.12 2005/10/24 04:07:56 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.13 2005/11/03 21:39:33 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -1011,6 +1011,89 @@ init () {
     do
 	mkdir -p ${pb}/${dir}
     done
+
+    return 0
+}
+
+#---------------------------------------------------------------------------
+# add port to builds
+#---------------------------------------------------------------------------
+
+addPortToBuild () {
+    build=$1
+    portDir=$2
+    recursive=$3
+
+    jail=$(${pb}/scripts/tc getJailForBuild -b ${build})
+    portsTree=$(${pb}/scripts/tc getPortsTreeForBuild -b ${build})
+
+    requestMount -q -r -d portstree -p ${portsTree}
+    requestMount -q -r -d jail -j ${jail}
+
+    buildenv ${pb} ${build} ${jail} ${portsTree}
+    export LOCALBASE=/nonexistentlocal
+    export X11BASE=/nonexistentx
+    export PKG_DBDIR=/nonexistentdb
+    export PORT_DBDIR=/nonexistentportdb
+    export LINUXBASE=/nonexistentlinux
+
+    ${pb}/scripts/tc addPortToOneBuild -b ${build} -d ${portDir} ${recursive}
+
+    cleanupMounts -d jail -j ${jail}
+    cleanupMounts -d portstree -p ${portsTree}
+}
+
+addPort () {
+    # set up defaults
+    build=""
+    allBuilds=0
+    portDir=""
+    recursive=""
+
+    # argument handling
+    while getopts ab:d:r arg >/dev/null 2>&1
+    do
+	case "${arg}" in
+
+	a)	allBuilds=1;;
+	b)	build="${OPTARG}";;
+	d)	portDir="${OPTARG}";;
+	r)	recursive="-r";;
+	?)	return 1;;
+
+	esac
+    done
+
+    # argument validation
+    if [ -z "${portDir}" ]; then
+	echo "addPort: no port specified"
+	return 1
+    fi
+
+    if [ ${allBuilds} = 1 ]; then
+	if [ ! -z "${build}" ]; then
+	    echo "addPort: -a and -b are mutually exclusive"
+	    return 1
+	fi
+
+	allBuilds=$(${pb}/scripts/tc listBuilds 2>/dev/null)
+	if [ -z "${allBuilds}" ]; then
+	    echo "addPort: no builds are configured"
+	    return 1
+	fi
+
+	for build in ${allBuilds}
+	do
+	    addPortToBuild ${build} ${portDir} ${recursive}
+	done
+    else
+	if ! tcExists Builds ${build}; then
+	    echo "addPort: no such build: ${build}"
+	    return 1
+	fi
+
+	addPortToBuild ${build} ${portDir} ${recursive}
+    fi
 
     return 0
 }
