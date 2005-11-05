@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.90 2005/11/03 21:39:33 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.91 2005/11/05 08:06:47 oliver Exp $
 #
 
 my $pb;
@@ -481,8 +481,8 @@ my $ds = new TinderboxDS();
         "processLog" => {
                 func   => \&processLog,
                 help   => "Analyze a logfile to find the failure reason",
-                usage  => "-l <logfile>",
-                optstr => 'l:',
+                usage  => "-l <logfile> [-v]",
+                optstr => 'vl:',
         },
         "tbcleanup" => {
                 func => \&tbcleanup,
@@ -2765,9 +2765,16 @@ sub processLog {
         my @patterns;
         my %parents = ();
         my $reason  = '__nofail__';
+        my $verbose = 0;
+        my $id;
+        my $expr;
 
         if (!$opts->{'l'}) {
                 usage("processLog");
+        }
+
+        if ($opts->{'v'}) {
+                $verbose = 1;
         }
 
         unless (open(LOG, $opts->{'l'})) {
@@ -2788,20 +2795,27 @@ sub processLog {
 
         foreach my $pattern (@patterns) {
                 next if $pattern->getId() <= 0;
-                my $expr = $pattern->getExpr();
+                $expr = $pattern->getExpr();
                 if ($log_text =~ /$expr/m) {
                         if ($pattern->getReason() eq '__parent__') {
                                 $parents{$pattern->getId()} = 1;
                         } else {
                                 if ($parents{$pattern->getParent()}) {
                                         $reason = $pattern->getReason();
+                                        $id     = $pattern->getId();
                                         last;
                                 }
                         }
                 }
         }
 
-        print $reason . "\n";
+        if ($verbose eq 1) {
+                print "id:     " . $id . "\n";
+                print "expr:   " . $expr . "\n";
+                print "reason: " . $reason . "\n";
+        } else {
+                print $reason . "\n";
+        }
 }
 
 sub updatePortLastFailReason {
