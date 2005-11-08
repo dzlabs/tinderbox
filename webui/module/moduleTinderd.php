@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.4 2005/07/18 17:38:19 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.5 2005/11/08 23:46:54 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -179,10 +179,11 @@ class moduleTinderd extends module {
 				}
 			}
 
-			if( is_array( $entries ) && count( $entries ) > 0 ) {
+			if( !empty($entries) && is_array( $entries ) && count( $entries ) > 0 ) {
 				$this->template_assign( 'entries', $entries );
+				$this->template_assign( 'no_list', false );
 			} else {
-				$this->template_assign( 'no_list', 1 );
+				$this->template_assign( 'no_list', true );
 			}
 
 			$this->template_assign( 'all_prio', array( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ) );
