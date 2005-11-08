@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.32 2005/10/19 02:00:32 ade Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.33 2005/11/08 23:31:34 marcus Exp $
 
 VERSION=	3.0.0
 
@@ -11,7 +11,7 @@ LIBDATA=	Build.pm BuildPortsQueue.pm Host.pm Jail.pm MakeCache.pm \
 		setup-mysql.sh setup-pgsql.sh \
 		tc_commands.pl tc_commands.sh tinderlib.pl tinderlib.sh
 ETCRCDATA=	tinderd.sh
-MIGDATA=	
+MIGDATA=
 MAN1DATA=	tc-configCcache.1 tc-configDistfile.1 tc-configGet.1 \
 		tc-configJail.1 tc-configTinderd.1 tc-init.1
 WEBUIDATA=	inc_ds.php inc_tinderbox.php index.php
