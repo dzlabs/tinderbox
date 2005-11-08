@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.24 2005/10/30 11:51:33 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.25 2005/11/08 23:45:59 oliver Exp $
 #
 
     require_once 'DB.php';
@@ -103,7 +103,22 @@
         }
 
         function getAllPortsByPortID($portid) {
-            $query = "SELECT ports.*,build_ports.build_id,build_ports.last_built,build_ports.last_status,build_ports.last_successful_built,last_built_version FROM ports,build_ports WHERE ports.port_id = build_ports.port_id AND build_ports.port_id=$portid";
+            $query = "SELECT p.*,
+                             bp.build_id,
+                             bp.last_built,
+                             bp.last_status,
+                             bp.last_successful_built,
+                             bp.last_built_version,
+                        CASE bp.last_fail_reason
+                           WHEN '__nofail__' THEN ''
+                           ELSE bp.last_fail_reason
+                        END
+		          AS last_fail_reason
+                        FROM ports p,
+                             build_ports bp
+                       WHERE p.port_id = bp.port_id
+                         AND bp.port_id=$portid";
+
             $rc = $this->_doQueryHashRef($query, $results, array());
 
             if (!$rc) {
