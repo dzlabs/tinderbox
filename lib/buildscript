@@ -146,6 +146,17 @@ else
   fi
 
   cd $dir
+
+  if [ -f .sleepme ]; then
+      set > .set
+      touch .sleep
+      while [ -f .sleep ]; do
+	  echo "Sleeping for 60 seconds."
+	  sleep 60
+      done
+      rm -f .set
+  fi
+
   /pnohang $TIMEOUT /tmp/make.log4 ${pkgname} make build || cleanup 4
   cat /tmp/make.log4
 
