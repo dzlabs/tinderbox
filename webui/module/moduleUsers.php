@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.10 2005/07/21 11:28:29 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.11 2005/11/08 23:48:06 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -96,7 +96,7 @@ class moduleUsers extends module {
 				foreach( $all_builds as $build ) {
 					$build = $build['build_id'];
 					foreach( $this->TinderboxDS->getUserPermissions( $user->getId(), $host, 'builds', $build ) as $perm ) {
-						$permission_object[$host][$build][$perm['User_Permission']] = 'on';
+						$permission_object[$host][$build][$perm['user_permission']] = 'on';
 					}
 				}
 			}
@@ -321,7 +321,7 @@ class moduleUsers extends module {
 		if( $this->is_logged_in() ) {
 			$user = $moduleSession->getAttribute( 'user' );
 			foreach( $this->TinderboxDS->getUserPermissions( $user->getId(), $host_id, $object_type, $object_id ) as $perm ) {
-				$this->permissions[$host_id][$object_type][$object_id][$perm['User_Permission']] = 1;
+				$this->permissions[$host_id][$object_type][$object_id][$perm['user_permission']] = 1;
 			}
 			$this->permissions[$host_id][$object_type][$object_id]['set'] = 1;
 			return true;
