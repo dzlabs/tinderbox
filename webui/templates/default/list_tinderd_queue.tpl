@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.6 2005/11/08 23:50:05 oliver Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.7 2005/11/09 18:21:30 oliver Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -148,7 +148,7 @@ Build
 				<br />
 					<select name="new_host_id">
 						<?foreach($all_hosts as $host) {?>
-							<option value="<?=$host['host_id']?>" <?if (!empty($new_host_id) && $new_host_id == $host['host_id']) {?>selected<?}?>><?=$host['host_name']?></option>
+							<option value="<?=$host['host_id']?>" <?if ($new_host_id == $host['host_id']) {?>selected<?}?>><?=$host['host_name']?></option>
 						<?}?>
 					</select>
 				</td>
@@ -156,7 +156,7 @@ Build
 				<br />
 					<select name="new_build_id">
 						<?foreach($all_builds as $build) {?>
-							<option value="<?=$build['build_id']?>" <?if (!empty($new_build_id) && $new_build_id == $build['build_id']) {?>selected<?}?> ><?=$build['build_name']?></option>
+							<option value="<?=$build['build_id']?>" <?if ($new_build_id == $build['build_id']) {?>selected<?}?> ><?=$build['build_name']?></option>
 						<?}?>
 					</select>
 				</td>
@@ -164,15 +164,15 @@ Build
 				<br />
 					<select name="new_priority">
 						<?foreach($all_prio as $prio) {?>
-							<option value="<?=$prio?>" <?if (!empty($new_priority) && $new_priority == $prio) {?>selected<?}?> ><?=$prio?></option>
+							<option value="<?=$prio?>" <?if ($new_priority == $prio) {?>selected<?}?> ><?=$prio?></option>
 						<?}?>
 					</select>
 				</td>
-				<td><br /><input type="text" size="20" name="new_port_directory" value="<?if(!empty($new_port_directory)){?><?=$new_port_directory?><?}?>" /></td>
+				<td><br /><input type="text" size="20" name="new_port_directory" value="<?=$new_port_directory?>" /></td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 				<td align="center">
-					<input type="checkbox" name="new_email_on_completion" value="1" <?if(!empty($new_email_on_completion) && $new_email_on_completion == 1 ) {?>checked="checked"<?}?> />
+					<input type="checkbox" name="new_email_on_completion" value="1" <?if($new_email_on_completion == 1 ) {?>checked="checked"<?}?> />
 				</td>
 				<td colspan="3"><br /><input type="submit" name="add_tinderd_queue" value="add" /></td>
 			</tr>
