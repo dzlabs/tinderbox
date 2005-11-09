@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.5 2005/11/08 23:46:54 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.6 2005/11/09 18:23:13 oliver Exp $
 #
 
 require_once 'module/module.php';
@@ -114,6 +114,11 @@ class moduleTinderd extends module {
 			$this->template_assign( 'all_builds', $this->moduleBuilds->get_all_builds() );
 			$this->template_assign( 'host_id',    $host_id );
 			$this->template_assign( 'build_id',   $build_id );
+			$this->template_assign( 'new_host_id', '' );
+			$this->template_assign( 'new_build_id', '' );
+			$this->template_assign( 'new_priority', '' );
+			$this->template_assign( 'new_port_directory', '' );
+			$this->template_assign( 'new_email_on_completion', '' );
 
 			if( !empty( $host_id ) ) {
 				$hosts[0]  = $this->TinderboxDS->getHostById( $host_id );
@@ -219,7 +224,7 @@ class moduleTinderd extends module {
 					$this->host_id  = $host_id;
 					$this->build_id = $build_id;
 					if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'modify' ) ) {
-						if( $build_ports_queue_entry->getPriority() != $priority && $priority < 5 && !$this->checkQueueEntryAccess( $entry, 'priolower5' ) ) {
+						if( $build_ports_queue_entry->getPriority() != $priority && $priority < 5 && !$this->checkQueueEntryAccess( $build_ports_queue_entry, 'priolower5' ) ) {
 							$this->TinderboxDS->addError( build_ports_queue_priority_to_low );
 						} else {
 							$build_ports_queue_entry->setHostId( $host_id );
@@ -244,27 +249,31 @@ class moduleTinderd extends module {
 		if( !$this->moduleUsers->is_logged_in() ) {
 			return $this->template_parse( 'please_login.tpl' );
 		} else {
-			$build_ports_queue_entry = $this->TinderboxDS->createBuildPortsQueueEntry( $host_id, $build_id, $priority, $port_directory, $this->moduleUsers->get_id(), $email_on_completion );
-			$this->host_id  = $host_id;
-			$this->build_id = $build_id;
-			if( $action == 'add' ) {
-				if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'add' ) ) {
-					if( $priority < 5 && !$this->checkQueueEntryAccess( $entry, 'priolower5' ) ) {
+			if( empty( $host_id ) || empty( $build_id ) || empty( $priority ) || empty( $port_directory ) ) {
+				$this->TinderboxDS->addError( mandatory_input_fields_are_empty );
+			} else {
+				$build_ports_queue_entry = $this->TinderboxDS->createBuildPortsQueueEntry( $host_id, $build_id, $priority, $port_directory, $this->moduleUsers->get_id(), $email_on_completion );
+				$this->host_id  = $host_id;
+				$this->build_id = $build_id;
+				if( $action == 'add' ) {
+					if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'add' ) ) {
+						if( $priority < 5 && !$this->checkQueueEntryAccess( $entry, 'priolower5' ) ) {
+							$this->template_assign( 'new_host_id', $host_id );
+							$this->template_assign( 'new_build_id', $build_id );
+							$this->template_assign( 'new_priority', $priority );
+							$this->template_assign( 'new_port_directory', $port_directory );
+							$this->template_assign( 'new_email_on_completion', $email_on_completion );
+							$this->TinderboxDS->addError( build_ports_queue_priority_to_low );
+						} else {
+							$this->TinderboxDS->addBuildPortsQueueEntry( $build_ports_queue_entry );
+						}
+					} else {
 						$this->template_assign( 'new_host_id', $host_id );
 						$this->template_assign( 'new_build_id', $build_id );
 						$this->template_assign( 'new_priority', $priority );
 						$this->template_assign( 'new_port_directory', $port_directory );
-						$this->template_assign( 'new_email_on_completion', $email_on_completion );
-						$this->TinderboxDS->addError( build_ports_queue_priority_to_low );
-					} else {
-						$this->TinderboxDS->addBuildPortsQueueEntry( $build_ports_queue_entry );
+						$this->TinderboxDS->addError( build_ports_queue_not_allowed_to_add );
 					}
-				} else {
-					$this->template_assign( 'new_host_id', $host_id );
-					$this->template_assign( 'new_build_id', $build_id );
-					$this->template_assign( 'new_priority', $priority );
-					$this->template_assign( 'new_port_directory', $port_directory );
-					$this->TinderboxDS->addError( build_ports_queue_not_allowed_to_add );
 				}
 			}
 		}
