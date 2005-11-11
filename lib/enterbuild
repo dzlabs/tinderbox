@@ -24,13 +24,14 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/enterbuild,v 1.1 2005/11/08 23:35:00 marcus Exp $
+# $MCom: portstools/tinderbox/lib/enterbuild,v 1.2 2005/11/11 03:39:22 marcus Exp $
 #
 
 portDir=$1
+sleepName=$(echo ${portDir} | sed -e 'y/\//_/')
 
 cd /usr/ports/${portDir}
-. ./.set
+. /tmp/.set_${sleepName}
 for i in $(set | grep = | awk -F= '{ print $1 }') ; do
     export ${i}
 done

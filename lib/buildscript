@@ -146,15 +146,16 @@ else
   fi
 
   cd $dir
+  portdir=$(echo ${dir} | sed -e 's|^/usr/ports/||' -e 'y/\//_/')
 
   if [ -f .sleepme ]; then
-      set > .set
-      touch .sleep
-      while [ -f .sleep ]; do
+      set > /tmp/.set_${portdir}
+      touch /tmp/.sleep_${portdir}
+      while [ -f /tmp/.sleep_${portdir} ]; do
 	  echo "Sleeping for 60 seconds."
 	  sleep 60
       done
-      rm -f .set
+      rm -f /tmp/.set_${portdir}
   fi
 
   /pnohang $TIMEOUT /tmp/make.log4 ${pkgname} make build || cleanup 4

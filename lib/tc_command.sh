@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.14 2005/11/08 23:35:00 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.15 2005/11/11 03:35:16 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -1103,6 +1103,7 @@ enterbuild () {
     portDir=""
     autoSleep=0
     resp="n"
+    sleepName=""
 
     while getopts b:d: arg >/dev/null 2>&1
     do
@@ -1135,6 +1136,8 @@ enterbuild () {
 	return 1
     fi
 
+    sleepName=$(echo ${portDir} | sed -e 'y/\//_/')
+
     if [ ! -d ${pb}/${build}/usr/ports/${portDir} ]; then
 	echo "enterbuild: Build environment does not exist yet, sleeping."
 	while [ ! -d ${pb}/${build}/usr/ports/${portDir} ]; do
@@ -1145,17 +1148,21 @@ enterbuild () {
     if [ ! -f ${pb}/${build}/usr/ports/${portDir}/.sleepme ]; then
 	echo "enterbuild: Build not marked for sleeping. Marking it."
 	touch ${pb}/${build}/usr/ports/${portDir}/.sleepme
+	if [ ! -f ${pb}/${build}/usr/ports/${portDir}/.sleepme ]; then
+	    echo "enterbuild: cannot touch ${pb}/${build}/usr/ports/${portDir}/.sleepme."
+	    return 1
+	fi
 	autoSleep=1
     fi
 
-    while [ ! -f ${pb}/${build}/usr/ports/${portDir}/.sleep ]; do
+    while [ ! -f ${pb}/${build}/tmp/.sleep_${sleepName} ]; do
 	echo "enterbuild: Build not yet sleeping, waiting 15 seconds."
 	sleep 15
     done
 
     cp ${pb}/scripts/lib/enterbuild ${pb}/${build}/root
     chroot ${pb}/${build} /root/enterbuild ${portDir}
-    rm ${pb}/${build}/usr/ports/${portDir}/.sleep
+    rm -f ${pb}/${build}/tmp/.sleep_${sleepName}
 
     echo "enterbuild: Continuing port build."
 
@@ -1166,7 +1173,11 @@ enterbuild () {
 	read resp
     fi
     if [ "${resp}" = "y" ]; then
-	rm ${pb}/$build}/usr/ports/${portDir}/.sleepme
-	echo "enterbuild: .sleepme removed."
+	rm -f ${pb}/$build}/usr/ports/${portDir}/.sleepme
+	if [ -f ${pb}/$build}/usr/ports/${portDir}/.sleepme ]; then
+	    echo "enterbuild: failed to remove ${pb}/$build}/usr/ports/${portDir}/.sleepme!"
+	else
+	    echo "enterbuild: .sleepme removed."
+	fi
     fi
 }
