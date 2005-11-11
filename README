@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.47 2005/11/08 23:34:59 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.48 2005/11/11 03:36:31 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -289,13 +289,12 @@ Build name).
 When it becomes too difficult to figure out the problem based on the
 wrkdir, it may become necessary to access the Build itself.  To do this,
 touch a file called ``.sleepme'' in the port's directory.  The moment
-the ``.sleepme'' file is detected by the build system, a file called
-``.sleep'' will be created, and the port build will suspend just before
+the ``.sleepme'' file is detected by the build system, the port build will
+suspend just before
 executing ``make build.''  You can access the Build with the command:
         ./tc enterbuild -b ${BUILD} -d ${PORT_DIRECTORY}
-When you have finished, remove the ``.sleep'' file, and the port build
-will continue.  Be sure to remove the ``.sleepme'' file as well if it
-still exists.
+When you have finished, remove the ``.sleepme'' file, and the port build
+will continue.
 
 ==============================================================================
 
