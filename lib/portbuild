@@ -12,7 +12,7 @@ cleanup()
     error=$3
     cleandirs=$4
     pkgname=$5
-    branch=$6
+    build=$6
 
     cleanupMounts -d build -b $(basename $chroot)
 
@@ -41,7 +41,7 @@ cleanup()
     echo -n "$pkgname done at "
     date
 
-    ${pb}/scripts/tc updateBuildCurrentPort -b ${branch}
+    ${pb}/scripts/tc updateBuildCurrentPort -b ${build}
 
     exit $error
 }
@@ -60,7 +60,7 @@ if [ $# -lt 10 ]; then
     usage
 fi
 
-branch=$1
+build=$1
 shift
 jail=$1
 shift
@@ -108,7 +108,7 @@ FD=$3
 BD=$4
 RD=$5
 
-buildenv ${pb} ${branch} ${jail} ${portstree}
+buildenv ${pb} ${build} ${jail} ${portstree}
 unset DISPLAY
 
 pkgname=$(basename $6 ${PKGSUFFIX})
@@ -118,8 +118,8 @@ shift 2
 echo ${pkgname}
 echo ${dirname}
 
-if [ -f ${pb}/builds/${branch}/duds ]; then
-    if grep -qxF ${pkgname} ${pb}/builds/${branch}/duds; then
+if [ -f ${pb}/builds/${build}/duds ]; then
+    if grep -qxF ${pkgname} ${pb}/builds/${build}/duds; then
         echo "skipping ${pkgname} (found in duds)"
         exit 1
     fi
@@ -175,7 +175,7 @@ export USA_RESIDENT=yes
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/X11R6/bin
 
 # Just to be shure we start in a clean build-tree
-cleanupMounts -d build -b ${branch}
+cleanupMounts -d build -b ${build}
 
 if [ x"${CCACHE_ENABLED}" = x"1" ]; then
     # XXX We need to do this since certain ports (e.g. cdrtools) don't
@@ -188,14 +188,14 @@ fi
 [ -f ${pb}/jails/${jail}/jail.env ] && . ${pb}/jails/${jail}/jail.env
 [ -f ${pb}/portstrees/${portstree}/portstree.env ] && \
 	. ${pb}/portstrees/${portstree}/portstree.env
-[ -f ${pb}/builds/${branch}/build.env ] && . ${pb}/builds/${branch}/build.env
+[ -f ${pb}/builds/${build}/build.env ] && . ${pb}/builds/${build}/build.env
 
 echo "building $pkgname in $chroot"
 
-${pb}/scripts/tc updateBuildCurrentPort -b ${branch} -n ${pkgname}
+${pb}/scripts/tc updateBuildCurrentPort -b ${build} -n ${pkgname}
 
-chroot=${pb}/${branch}
-packages=${pb}/packages/${branch}
+chroot=${pb}/${build}
+packages=${pb}/packages/${build}
 
 major_version=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
 
@@ -248,7 +248,7 @@ fi
 
 echo ${OSREL}-${BRANCH} > ${chroot}/usr/bin/UNAME_VERSION
 
-trap  "cleanup ${chroot} ${noclean} ${error} \"${cleandirs}\" ${pkgname} ${branch}" 1 2 3 9 10 11 15
+trap  "cleanup ${chroot} ${noclean} ${error} \"${cleandirs}\" ${pkgname} ${build}" 1 2 3 9 10 11 15
 
 if [ -n "${DISTFILE_CACHE}" ]; then
     export DISTCACHE=/distcache
@@ -267,7 +267,7 @@ echo "building ${pkgname} in directory ${chroot}" | tee ${chroot}/tmp/${pkgname}
 
 # If we're using a central distfile repository, mount it now
 if [ -n "${DISTFILE_CACHE}" ] ; then
-	requestMount -d distcache -b ${branch} -s "${DISTFILE_CACHE}"
+	requestMount -d distcache -b ${build} -s "${DISTFILE_CACHE}"
 fi
 
 # intentionally set up ${PORTSDIR} with symlink to catch broken ports
@@ -275,9 +275,9 @@ mkdir -p ${chroot}/a/ports
 rm -rf ${chroot}/usr/ports
 
 if [ ${nullfs} -eq 1 ] ; then
-	requestMount -n -r -d buildports -b ${branch}
+	requestMount -n -r -d buildports -b ${build}
 else
-	requestMount -r -d buildports -b ${branch}
+	requestMount -r -d buildports -b ${build}
 fi
 
 ln -sf ../a/ports ${chroot}/usr/ports
@@ -291,27 +291,27 @@ mkdir -p ${chroot}/${WRKDIRPREFIX}
 mkdir -p ${chroot}/usr/src
 
 if [ ${nullfs} -eq 1 ] ; then
-	requestMount -n -r -d buildsrc -b ${branch}
+	requestMount -n -r -d buildsrc -b ${build}
 else
-	requestMount -r -d buildsrc -b ${branch}
+	requestMount -r -d buildsrc -b ${build}
 fi
 
 mount -t devfs foo ${chroot}/dev
 
 if [ x"${CCACHE_ENABLED}" = x"1" ]; then
-    mkdir -p ${pb}/${CCACHE_DIR}/${branch}
+    mkdir -p ${pb}/${CCACHE_DIR}/${build}
     mkdir -p ${chroot}/${CCACHE_DIR}
     if [ x"${CCACHE_JAIL}" = x"1" ]; then
 	if [ ${nullfs} -eq 1 ] ; then
-		requestMount -n -d ccache -s ${pb}/${CCACHE_DIR}/${jail} -b ${branch}
+		requestMount -n -d ccache -s ${pb}/${CCACHE_DIR}/${jail} -b ${build}
 	else
-		requestMount -d ccache -s ${pb}/${CCACHE_DIR}/${jail} -b ${branch}
+		requestMount -d ccache -s ${pb}/${CCACHE_DIR}/${jail} -b ${build}
 	fi
     else
 	if [ ${nullfs} -eq 1 ] ; then
-		requestMount -n -d ccache -s ${pb}/${CCACHE_DIR}/${branch} -b ${branch}
+		requestMount -n -d ccache -s ${pb}/${CCACHE_DIR}/${build} -b ${build}
 	else
-		requestMount -d ccache -s ${pb}/${CCACHE_DIR}/${branch} -b ${branch}
+		requestMount -d ccache -s ${pb}/${CCACHE_DIR}/${build} -b ${build}
 	fi
     fi
     if [ -n "${CCACHE_MAX_SIZE}" ]; then
@@ -385,11 +385,11 @@ done
 
 if ! cp -p ${pb}/scripts/lib/buildscript ${chroot}; then
     error=3
-    cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${branch}
+    cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${build}
 fi
 if ! cc -o ${chroot}/pnohang -static ${pb}/scripts/lib/pnohang.c; then
     error=4
-    cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${branch}
+    cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${build}
 fi
 
 chroot ${chroot} /buildscript ${dirname} 1 "$ED" "$PD" "$FD" "$BD" "$RD" 2>&1 | tee -a ${chroot}/tmp/${pkgname}.log
@@ -399,7 +399,7 @@ else
     error=255
 fi
 
-last_version=$(${pb}/scripts/tc getPortLastBuiltVersion -d ${portdir} -b ${branch})
+last_version=$(${pb}/scripts/tc getPortLastBuiltVersion -d ${portdir} -b ${build})
 
 if [ "${error}" = 0 ]; then
     ln -sf ${pkgname}.log2 ${chroot}/tmp/make.log
@@ -433,14 +433,14 @@ if [ "${error}" = 0 ]; then
     cat ${chroot}/tmp/${pkgname}.log2 >> ${chroot}/tmp/${pkgname}.log
     rm ${chroot}/tmp/${pkgname}.log2
 
-    cp ${chroot}/tmp/${pkgname}.log ${pb}/logs/${branch}/${pkgname}.log
+    cp ${chroot}/tmp/${pkgname}.log ${pb}/logs/${build}/${pkgname}.log
     error=$(cat ${chroot}/tmp/status)
 
     rm -rf ${chroot}/${WRKDIRPREFIX}
 
     if [ -e ${chroot}/tmp/work.tbz ]; then
-	mkdir -p ${pb}/wrkdirs/${branch}
-	cp ${chroot}/tmp/work.tbz ${pb}/wrkdirs/${branch}/${pkgname}.tbz
+	mkdir -p ${pb}/wrkdirs/${build}
+	cp ${chroot}/tmp/work.tbz ${pb}/wrkdirs/${build}/${pkgname}.tbz
     fi
 
     if [ "${error}" = 0 ]; then
@@ -455,42 +455,42 @@ if [ "${error}" = 0 ]; then
 		tar --unlink -C ${packages} -xvf -
 	[ -f ${packages}/All/${pkgname}${PKGSUFFIX} ] && \
 		touch ${packages}/All/${pkgname}${PKGSUFFIX}
-	rm -f ${pb}/errors/${branch}/${pkgname}.log
-	if grep -q "${pkgname} is marked as broken: " ${pb}/logs/${branch}/${pkgname}.log ; then
+	rm -f ${pb}/errors/${build}/${pkgname}.log
+	if grep -q "${pkgname} is marked as broken: " ${pb}/logs/${build}/${pkgname}.log ; then
 	    status="BROKEN"
-	elif [ $(grep -A 1 '^=== Checking filesystem state' ${pb}/logs/${branch}/${pkgname}.log | grep -c '^====') -eq 0 ] ; then
+	elif [ $(grep -A 1 '^=== Checking filesystem state' ${pb}/logs/${build}/${pkgname}.log | grep -c '^====') -eq 0 ] ; then
 	    status="LEFTOVERS"
 	else
 	    status="SUCCESS"
 	fi
-	${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${branch}
-	${pb}/scripts/tc updatePortLastSuccessfulBuilt -d ${portdir} -b ${branch}
-	${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${branch} -s ${status}
-	${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${branch} -v ${pkgname}
-	${pb}/scripts/tc updatePortLastFailReason -d ${portdir} -b ${branch} -r "__nofail__"
+	${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${build}
+	${pb}/scripts/tc updatePortLastSuccessfulBuilt -d ${portdir} -b ${build}
+	${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${build} -s ${status}
+	${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
+	${pb}/scripts/tc updatePortLastFailReason -d ${portdir} -b ${build} -r "__nofail__"
     else
-	cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${branch}/${pkgname}.log
+	cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${build}/${pkgname}.log
 	if [ ${nolog} = 0 ]; then
-	    reason=$(${pb}/scripts/tc processLog -l ${pb}/errors/${branch}/${pkgname}.log)
-	    ${pb}/scripts/tc updatePortLastFailReason -d ${portdir} -b ${branch} -r ${reason}
+	    reason=$(${pb}/scripts/tc processLog -l ${pb}/errors/${build}/${pkgname}.log)
+	    ${pb}/scripts/tc updatePortLastFailReason -d ${portdir} -b ${build} -r ${reason}
 	fi
-	${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${branch}
-	${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${branch} -s FAIL
-	${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${branch} -v ${pkgname}
-        ${pb}/scripts/tc sendBuildErrorMail -d ${portdir} -b ${branch}
+	${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${build}
+	${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${build} -s FAIL
+	${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
+        ${pb}/scripts/tc sendBuildErrorMail -d ${portdir} -b ${build}
     fi
 else
-    cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${branch}/${pkgname}.log
-    cp ${chroot}/tmp/${pkgname}.log ${pb}/logs/${branch}/${pkgname}.log
+    cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${build}/${pkgname}.log
+    cp ${chroot}/tmp/${pkgname}.log ${pb}/logs/${build}/${pkgname}.log
 
     if [ ${nolog} = 0 ]; then
-        reason=$(${pb}/scripts/tc processLog -l ${pb}/errors/${branch}/${pkgname}.log)
-        ${pb}/scripts/tc updatePortLastFailReason -d ${portdir} -b ${branch} -r ${reason}
+        reason=$(${pb}/scripts/tc processLog -l ${pb}/errors/${build}/${pkgname}.log)
+        ${pb}/scripts/tc updatePortLastFailReason -d ${portdir} -b ${build} -r ${reason}
     fi
-    ${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${branch}
-    ${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${branch} -s FAIL
-    ${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${branch} -v ${pkgname}
-    ${pb}/scripts/tc sendBuildErrorMail -d ${portdir} -b ${branch}
+    ${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${build}
+    ${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${build} -s FAIL
+    ${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
+    ${pb}/scripts/tc sendBuildErrorMail -d ${portdir} -b ${build}
 fi
 
-cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${branch}
+cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${build}
