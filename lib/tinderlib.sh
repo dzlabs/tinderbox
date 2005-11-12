@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.20 2005/11/12 21:23:14 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.21 2005/11/12 21:39:29 ade Exp $
 #
 
 tinderEcho () {
@@ -359,8 +359,14 @@ buildenv () {
     done
 
     IFS=${save_IFS}
+}
 
-    # One final tweak that we can't easily handle with a file
+buildenvNoHost () {
+    eval "export LOCALBASE=/nonexistentlocal" >/dev/null 2>&1
+    eval "export X11BASE=/nonexistentx" >/dev/null 2>&1
+    eval "export PKG_DBDIR=/nonexistentdb" >/dev/null 2>&1
+    eval "export PORT_DBDIR=/nonexistentportdb" >/dev/null 2>&1
+    eval "export LINUXBASE=/nonexistentlinux" >/dev/null 2>&1
     eval "unset DISPLAY" >/dev/null 2>&1
 }
 

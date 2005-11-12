@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.16 2005/11/12 21:23:14 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.17 2005/11/12 21:39:29 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -961,7 +961,12 @@ tinderbuild () {
 	    export TRYBROKEN=1
 	fi
 
-        ${pb}/scripts/lib/makemake ${duds} ${build} ${ports}
+	# Need to do this in a subshell so as to only hide the host
+	# environment during makefile creation
+	(
+	    buildenvNoHost
+	    ${pb}/scripts/lib/makemake ${duds} ${build} ${ports}
+	)
 	if [ $? != 0 ]; then
 	    echo "ERROR: Failed to generate Makefile for ${build}"
 	    tinderbuild_cleanup 1
@@ -1017,6 +1022,7 @@ addPortToBuild () {
     requestMount -q -r -d jail -j ${jail}
 
     buildenv ${jail} ${portsTree} ${build}
+    buildenvNoHost
 
     ${pb}/scripts/tc addPortToOneBuild -b ${build} -d ${portDir} ${recursive}
 
