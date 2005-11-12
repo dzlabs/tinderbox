@@ -108,8 +108,7 @@ FD=$3
 BD=$4
 RD=$5
 
-buildenv ${pb} ${build} ${jail} ${portstree}
-unset DISPLAY
+buildenv ${jail} ${portstree} ${build}
 
 pkgname=$(basename $6 ${PKGSUFFIX})
 dirname=$7

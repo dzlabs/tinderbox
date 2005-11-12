@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.19 2005/10/13 21:53:21 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.20 2005/11/12 21:23:14 ade Exp $
 #
 
 tinderEcho () {
@@ -316,17 +316,37 @@ requestMount () {
     return ${?}
 }
 
+buildenvlist () {
+    jail=$1
+    portstree=$2
+    build=$3
+
+    ${pb}/scripts/tc configGet
+
+    cat ${pb}/scripts/lib/tinderbox.env
+
+    if [ -n "${jail}" ]; then
+	cat ${pb}/jails/${jail}/jail.env 2>/dev/null
+    fi
+    if [ -n "${portstree}" ]; then
+	cat ${pb}/portstrees/${portstree}/portstree.env 2>/dev/null
+    fi
+    if [ -n "${build}" ]; then
+	cat ${pb}/builds/${build}/build.env 2>/dev/null
+    fi
+}
+
 buildenv () {
-    pb=$1
-    build=$2
-    jail=$3
-    portstree=$4
+    jail=$1
+    portstree=$2
+    build=$3
 
     major_version=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
     save_IFS=${IFS}
     IFS='
 '
-    for _tb_var in `cat ${pb}/scripts/rawenv ; ${pb}/scripts/tc configGet`
+
+    for _tb_var in `buildenvlist "${jail} "${portstree}" "${build}"`
     do
 	var=$(echo ${_tb_var} | sed \
 		-e "s|^#${major_version}||; \
@@ -335,18 +355,13 @@ buildenv () {
 		    s|##JAIL##|${jail}|g; \
 		    s|##PORTSTREE##|${portstree}|g" \
 		-E -e 's|\^\^([^\^]+)\^\^|${\1}|g')
-	eval "export ${var}" > /dev/null 2>&1
+	eval "export ${var}" >/dev/null 2>&1
     done
 
     IFS=${save_IFS}
-}
 
-#---------------------------------------------------------------------------
-# code from lib/setup_shlib.sh
-#---------------------------------------------------------------------------
-callTc () {
-	echo "INFO: calling ${pb}/scripts/tc $@"
-	${pb}/scripts/tc "$@"
+    # One final tweak that we can't easily handle with a file
+    eval "unset DISPLAY" >/dev/null 2>&1
 }
 
 getDbDriver () {
@@ -389,17 +404,9 @@ getDbInfo () {
 	        ;;
         esac
 
-        if [ -z "${db_admin}" ]; then
-	    db_admin="root"
-        fi
-
-        if [ -z "${db_host}" ]; then
-	    db_host="localhost"
-        fi
-
-        if [ -z "${db_name}" ]; then
-	    db_name="tinderbox"
-        fi
+	db_admin=${db_admin:-"root"}
+	db_host=${db_host:-"localhost"}
+	db_name=${db_name:-"tinderbox"}
 
 	echo 1>&2 "Are these settings corrrect:"
 	echo 1>&2 "    Database Administrative User : ${db_admin}"
@@ -471,52 +478,6 @@ checkPreReqs () {
     return ${error}
 }
 
-#---------------------------------------------------------------------------
-# code from upgrade/mig_shlib.sh
-#---------------------------------------------------------------------------
-
-migRawEnv () {
-    rawenv=$1
-    tinderEcho "INFO: Migrating ${rawenv} ..."
-
-    if [ ! -f "${rawenv}" ] ; then
-	tinderEcho "INFO: ${rawenv} does not exist."
-    else
-	first_line=$(head -1 "${rawenv}")
-	if [ x"${first_line}" = x"${RAWNEV_HEADER}" ]; then
-	    return 0
-	fi
-
-	while read line ; do
-	    var=${line%=*}
-	    value=$(echo ${line#*=} | sed 's/"//g')
-
-	    case "${var}" in
-
-	    CCACHE_ENABLED)		callTc configCcache -e;;
-	    CCACHE_DIR)			callTc configCcache -c "${value}";;
-	    CCACHE_MAX_SIZE)		callTc configCcache -s "${value}";;
-	    CCACHE_LOGFILE)		callTc configCcache -l "${value}";;
-	    CCACHE_JAIL)		callTc configCcache -j;;
-	    DISTFILE_CACHE)		callTc configDistfile -c "${value}";;
-	    \#TINDERD_SLEEPTIME)	callTc configTinderd -t "${value}";;
-	    \#MOUNT_PORTSTREE*)		name=${var#*_*_}
-					callTc setPortsMount -p "${name}" \
-						 -m "${value}";;
-	    \#MOUNT_JAIL*)		name=${var#*_*_}
-					callTc setSrcMount -j "${name}" \
-						-m "${value}";;
-	    esac
-	done < "${rawenv}"
-
-	cp -p "${rawenv}" "${rawenv}.bak"
-	rm -f "${rawenv}"
-    fi
-
-    tinderEcho "DONE."
-    return 0
-}
-
 migDb () {
     do_load=$1
     db_driver=$2
@@ -538,34 +499,6 @@ migDb () {
     else
 	return 1
     fi
-
-    return 0
-}
-
-migFiles () {
-    rawenv=$1
-
-    tinderEcho "INFO: Migrating files ..."
-
-    if [ ! -f "${rawenv}.dist" ] ; then
-        tinderEcho "ERROR: ${rawenv}.dist does not exist!"
-	return 1
-    else
-        if [ ! -f "${rawenv}" ]; then
-            cp "${rawenv}.dist" "${rawenv}"
-        else
-            if ! cmp -s "${rawenv}.dist" "${rawenv}" ; then
-                cp -p "${rawenv}" "${rawenv}.bak"
-               cp "${rawenv}.dist" "${rawenv}"
-            fi
-        fi
-    fi
-
-    for d in ${REMOVE_FILES} ; do
-	rm -f ${d}
-    done
-
-    tinderEcho "DONE."
 
     return 0
 }

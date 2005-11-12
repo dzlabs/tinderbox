@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.16 2005/11/03 21:39:33 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.17 2005/11/12 21:23:14 ade Exp $
 #
 
 use strict;
@@ -43,97 +43,6 @@ sub cleanup {
         print STDERR $msg if (defined($msg));
 
         exit($code);
-}
-
-sub buildenv {
-        my $pb        = shift;
-        my $build     = shift;
-        my $jail      = shift;
-        my $portstree = shift;
-
-        my ($major_version) = ($jail =~ /(^\d)/);
-        my (@rawenv, @tbconfig) = ();
-
-        my @envfiles = (
-                "$pb/jails/$jail/jail.env",
-                "$pb/portstrees/$portstree/portstree.env",
-                "$pb/builds/$build/build.env",
-        );
-
-        open(RAWENV, "$pb/scripts/rawenv")
-            or die "ERROR: Cannot open $pb/scripts/rawenv for reading: $!\n";
-        @rawenv = <RAWENV>;
-
-        close(RAWENV);
-
-        @tbconfig = `$pb/scripts/tc configGet`
-            or die "ERROR: Cannot execute $pb/scripts/tc configGet: $?\n";
-
-        push @rawenv, @tbconfig;
-
-        foreach (@rawenv) {
-                chomp;
-                s/^#$major_version//;
-                next if /^#/;
-                s|##PB##|$pb|g;
-                s|##BUILD##|$build|g;
-                s|##JAIL##|$jail|g;
-                s|##PORTSTREE##|$portstree|g;
-                s|\^\^([^\^]+)\^\^|$ENV{$1}|g;
-                my ($var, $expr) = split(/=/, $_, 2);
-                my @words = split(/\s+/, $expr);
-                my @cmd = (), my @value = ();
-                my $exec = 0;
-            WORD: foreach my $word (@words) {
-
-                        if ($word !~ /^`/ && !$exec) {
-                                push @value, $word;
-                        } else {
-                                $exec = 1;
-                                $word =~ s/^`//;
-                                if ($word !~ /`$/) {
-                                        push @cmd, $word;
-                                        next WORD;
-                                }
-                                $word =~ s/`$//;
-                                push @cmd, $word;
-                                my $cmd_string = join(" ", @cmd);
-                                my $eval = `$cmd_string`;
-                                chomp $eval;
-                                push @value, $eval;
-                                $exec = 0;
-                                @cmd  = ();
-                        }
-                }
-                $ENV{$var} = join(" ", @value);
-        }
-
-        foreach my $efile (@envfiles) {
-                if (-f $efile) {
-                        next unless open(INPUT, $efile);
-
-                        my @contents = <INPUT>;
-
-                        close(INPUT);
-
-                        foreach my $line (@contents) {
-                                $line =~ s/^\s+//;
-                                $line =~ s/\s+$//;
-                                next unless length $line;
-                                next if ($line =~ /^#/);
-                                next unless ($line =~ /=/);
-
-                                $line =~ s/^export\s+//;
-                                my ($name, $value) = split(/=/, $line, 2);
-                                if ($value =~ /(^["'])/) {
-                                        my $fchar = $1;
-                                        $value =~ s/($fchar.*$fchar).*$/$1/;
-                                }
-
-                                $ENV{$name} = $value;
-                        }
-                }
-        }
 }
 
 # This function sends email based on the given parameters.

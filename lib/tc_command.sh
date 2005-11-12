@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.15 2005/11/11 03:35:16 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.16 2005/11/12 21:23:14 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -88,7 +88,7 @@ cleanDirs () {
 Setup () {
     MAN_PREREQS="lang/perl5.8 net/p5-Net security/p5-Digest-MD5"
     OPT_PREREQS="lang/php[45] databases/pear-DB www/php[45]-session"
-    PREF_FILES="rawenv tinderbox.ph"
+    PREF_FILES="tinderbox.ph"
     README="${pb}/scripts/README"
     TINDERBOX_URL="http://tinderbox.marcuscom.com/"
 
@@ -170,7 +170,6 @@ Upgrade () {
     # new version numbers
     DB_MIGRATION_PATH="${VERSION}"
 
-    RAWENV_HEADER="## rawenv TB v3 -- DO NOT EDIT"
     REMOVE_FILES=""
     TINDERBOX_URL="http://tinderbox.marcuscom.com/"
 
@@ -235,18 +234,6 @@ Upgrade () {
 	*)			tinderExit "INFO: Upgrade aborted by user.";;
 
 	esac
-    fi
-
-    # Now migrate rawenv if needed.
-    echo ""
-    if ! migRawEnv ${pb}/scripts/rawenv ; then
-	tinderExit "ERROR: Rawenv migration failed!  Consult the output above for more information." 1
-    fi
-
-    # Finally, migrate any remaining file data.
-    echo ""
-    if ! migFiles ${pb}/scripts/rawenv ; then
-	tinderExit "ERROR: Files migration failed!  Consult the output above for more information." 1
     fi
 
     echo ""
@@ -613,8 +600,7 @@ makeJail () {
 	return 1
     fi
 
-    # We only care about SRCBASE, so the other parameters can be anything
-    buildenv ${pb} "NULL" ${jailName} "NULL"
+    buildenv ${jailName} "" ""
 
     # Mount the source directory, if appropriate
     requestMount -q -r -d jail -j ${jailName}
@@ -911,7 +897,7 @@ tinderbuild () {
     portstree=$(${pb}/scripts/tc getPortsTreeForBuild -b ${build})
 
     # Setup the environment for this jail.
-    buildenv ${pb} ${build} ${jail} ${portstree}
+    buildenv ${jail} ${portstree} ${build}
 
     # Remove the make logs.
     rm -f ${pb}/builds/${build}/make.*
@@ -1030,12 +1016,7 @@ addPortToBuild () {
     requestMount -q -r -d portstree -p ${portsTree}
     requestMount -q -r -d jail -j ${jail}
 
-    buildenv ${pb} ${build} ${jail} ${portsTree}
-    export LOCALBASE=/nonexistentlocal
-    export X11BASE=/nonexistentx
-    export PKG_DBDIR=/nonexistentdb
-    export PORT_DBDIR=/nonexistentportdb
-    export LINUXBASE=/nonexistentlinux
+    buildenv ${jail} ${portsTree} ${build}
 
     ${pb}/scripts/tc addPortToOneBuild -b ${build} -d ${portDir} ${recursive}
 
