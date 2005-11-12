@@ -1,8 +1,8 @@
 <?php
 
-$rootdir = '/home/tbox';
+$rootdir = '/space';
 
-$wwwrooturi  = '/exp';
+$wwwrooturi  = '/tb';
 $wwwrootdir  = $rootdir.'/scripts/webui';
 $pkguri      = '/packages';
 $pkgdir      = $rootdir.'/packages';
@@ -14,8 +14,8 @@ $errorlogdir = $rootdir.'/errors';
 $templatesdir = $wwwrootdir.'/templates/default';
 $templatesuri = $wwwrooturi.'/templates/default';
 
-$tinderbox_name  = 'Lovett Tinderbox';
-$tinderbox_title = 'Lovett Tinderbox';
+$tinderbox_name  = 'Ports Tinderbox';
+$tinderbox_title = 'Ports Tinderbox';
 
 #$with_timer = 1;
 ?>
