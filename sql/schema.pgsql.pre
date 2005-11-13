@@ -6,6 +6,7 @@ CREATE TABLE ports (
 	port_maintainer VARCHAR(128),
 	port_comment VARCHAR(255)
 );
+CREATE INDEX ports_port_maintainer_idx ON ports(port_maintainer);
 
 -- DROP TABLE jails CASCADE;
 CREATE TABLE jails (
@@ -86,6 +87,7 @@ CREATE TABLE build_ports (
 	last_successful_built TIMESTAMP,
 	last_built_version VARCHAR(100)
 );
+CREATE INDEX build_ports_build_id_idx ON build_ports(build_id);
 
 -- DROP TABLE hosts CASCADE;
 CREATE TABLE hosts (
