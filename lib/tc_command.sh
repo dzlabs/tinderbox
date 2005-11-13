@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.17 2005/11/12 21:39:29 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.18 2005/11/13 04:39:47 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -1085,7 +1085,7 @@ addPort () {
     return 0
 }
 
-enterbuild () {
+enterBuild () {
     build=""
     portDir=""
     autoSleep=0
@@ -1104,46 +1104,46 @@ enterbuild () {
     done
 
     if [ -z "${portDir}" ]; then
-	echo "enterbuild: no port specified"
+	echo "enterBuild: no port specified"
 	return 1
     fi
 
     if [ -z "${build}" ]; then
-	echo "enterbuild: no build specified"
+	echo "enterBuild: no build specified"
 	return 1
     fi
 
     if ! tcExists Builds ${build}; then
-	echo "enterbuild: no such build: ${build}"
+	echo "enterBuild: no such build: ${build}"
 	return 1
     fi
 
     if [ ! -f ${pb}/${build} ]; then
-	echo "enterbuild: Build directory (${pb}/${build}) does not exist"
+	echo "enterBuild: Build directory (${pb}/${build}) does not exist"
 	return 1
     fi
 
     sleepName=$(echo ${portDir} | sed -e 'y/\//_/')
 
     if [ ! -d ${pb}/${build}/usr/ports/${portDir} ]; then
-	echo "enterbuild: Build environment does not exist yet, sleeping."
+	echo "enterBuild: Build environment does not exist yet, sleeping."
 	while [ ! -d ${pb}/${build}/usr/ports/${portDir} ]; do
 	    sleep 1
 	done
     fi
 
     if [ ! -f ${pb}/${build}/usr/ports/${portDir}/.sleepme ]; then
-	echo "enterbuild: Build not marked for sleeping. Marking it."
+	echo "enterBuild: Build not marked for sleeping. Marking it."
 	touch ${pb}/${build}/usr/ports/${portDir}/.sleepme
 	if [ ! -f ${pb}/${build}/usr/ports/${portDir}/.sleepme ]; then
-	    echo "enterbuild: cannot touch ${pb}/${build}/usr/ports/${portDir}/.sleepme."
+	    echo "enterBuild: cannot touch ${pb}/${build}/usr/ports/${portDir}/.sleepme."
 	    return 1
 	fi
 	autoSleep=1
     fi
 
     while [ ! -f ${pb}/${build}/tmp/.sleep_${sleepName} ]; do
-	echo "enterbuild: Build not yet sleeping, waiting 15 seconds."
+	echo "enterBuild: Build not yet sleeping, waiting 15 seconds."
 	sleep 15
     done
 
@@ -1151,7 +1151,7 @@ enterbuild () {
     chroot ${pb}/${build} /root/enterbuild ${portDir}
     rm -f ${pb}/${build}/tmp/.sleep_${sleepName}
 
-    echo "enterbuild: Continuing port build."
+    echo "enterBuild: Continuing port build."
 
     if [ ${autoSleep} = 1 ]; then
         resp="y"
@@ -1162,9 +1162,9 @@ enterbuild () {
     if [ "${resp}" = "y" ]; then
 	rm -f ${pb}/$build}/usr/ports/${portDir}/.sleepme
 	if [ -f ${pb}/$build}/usr/ports/${portDir}/.sleepme ]; then
-	    echo "enterbuild: failed to remove ${pb}/$build}/usr/ports/${portDir}/.sleepme!"
+	    echo "enterBuild: failed to remove ${pb}/$build}/usr/ports/${portDir}/.sleepme!"
 	else
-	    echo "enterbuild: .sleepme removed."
+	    echo "enterBuild: .sleepme removed."
 	fi
     fi
 }
