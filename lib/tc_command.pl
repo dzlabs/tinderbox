@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.91 2005/11/05 08:06:47 oliver Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.92 2005/11/13 06:18:51 ade Exp $
 #
 
 my $pb;
@@ -47,14 +47,14 @@ use MakeCache;
 use Getopt::Std;
 use vars qw(
     %COMMANDS
+    $TINDERBOX_HOST
+    $TINDERBOX_URI
     $SUBJECT
-    $SMTP_HOST
-    $SERVER_HOST
-    $SERVER_PROTOCOL
     $SENDER
+    $SMTP_HOST
+    $LOG_URI
     $SHOWBUILD_URI
     $SHOWPORT_URI
-    $LOG_URI
 );
 
 require "tinderbox.ph";
@@ -2526,7 +2526,7 @@ sub sendBuildErrorMail {
 Port $portdir failed for build $buildname on $now.  The error log can be
 found at:
 
-${SERVER_PROTOCOL}://${SERVER_HOST}${LOG_URI}/$buildname/${version}.log
+${TINDERBOX_HOST}${LOG_URI}/$buildname/${version}.log
 
 EOD
         if (defined($port)) {
@@ -2534,7 +2534,7 @@ EOD
                 $data .= <<EOD;
 More details can be found at:
 
-${SERVER_PROTOCOL}://${SERVER_HOST}${SHOWPORT_URI}$portid
+${TINDERBOX_HOST}${SHOWPORT_URI}$portid
 
 EOD
         }
@@ -2580,7 +2580,7 @@ sub sendBuildCompletionMail {
         my $data    = <<EOD;
 Build $buildname completed on $now.  Details can be found at:
 
-${SERVER_PROTOCOL}://${SERVER_HOST}${SHOWBUILD_URI}$buildname
+${TINDERBOX_HOST}${SHOWBUILD_URI}$buildname
 
 Please do not reply to this email.
 EOD

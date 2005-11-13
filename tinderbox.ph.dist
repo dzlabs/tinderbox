@@ -1,28 +1,13 @@
-$BUILD_ROOT      = '/space';
-$TINDER_BIN      = $BUILD_ROOT . '/scripts';
-$SUBJECT         = 'Marcus Tinderbox:';
-$SENDER          = 'marcus@marcuscom.com';
-$SMTP_HOST       = 'custard.marcuscom.com';
-$SERVER_PROTOCOL = 'http';
-$SERVER_HOST     = 'www.marcuscom.com';
+# Configurable options
+$TINDERBOX_HOST	 = 'http://tinderbox.example.com';
+$TINDERBOX_URI	 = '/tb';
+$SUBJECT	 = 'Example Tinderbox:';
+$SENDER		 = 'tinderbox@example.com';
+$SMTP_HOST	 = 'mail.example.com';
 
-$TINDERBOX_URI           = '/tinderbox';
-$TINDERBOX_DATA_URI      = '/tb';
-$TINDERBOX_DATA_URI_SUFX = '';
-$LOG_URI                 = $TINDERBOX_DATA_URI . '/logs' . $TINDERBOX_DATA_URI_SUFX;
-
-$SHOWBUILD_URI	= $TINDERBOX_URI . '/index.php?action=list_buildports&build=';
-$SHOWPORT_URI	= $TINDERBOX_URI . '/index.php?action=describe_port&id=';
-
-$ERROR_DIR      = $BUILD_ROOT . '/errors';
-$LOG_DIR        = $BUILD_ROOT . '/logs';
-$BUILDS_DIR     = $BUILD_ROOT . '/builds';
-$JAILS_DIR      = $BUILD_ROOT . '/jails';
-$PKGS_DIR       = $BUILD_ROOT . '/packages';
-$WRKDIRS_DIR    = $BUILD_ROOT . '/wrkdirs';
-$PORTSTREES_DIR = $BUILD_ROOT . '/portstrees';
-
-$MKJAIL    = $TINDER_BIN . '/mkjail';
-$PORTBUILD = $TINDER_BIN . '/portbuild';
+# These should probably be left alone
+$LOG_URI	 = $TINDERBOX_URI . '/logs';
+$SHOWBUILD_URI	 = $TINDERBOX_URI . '/index.php?action=list_buildports&build=';
+$SHOWPORT_URI	 = $TINDERBOX_URI . '/index.php?action=describe_port&id=';
 
 1;

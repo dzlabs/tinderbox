@@ -1,21 +1,21 @@
 <?php
 
-$rootdir = '/space';
+# Configurable options
+$tinderbox_name	 = 'Example Tinderbox';
+$tinderbox_title = 'Example Tinderbox';
+$rootdir	 = '/space';
+$wwwrooturi	 = '/tb';
+$template_dir	 = 'default';
 
-$wwwrooturi  = '/tb';
-$wwwrootdir  = $rootdir.'/scripts/webui';
-$pkguri      = '/packages';
-$pkgdir      = $rootdir.'/packages';
-$loguri      = '/logs';
-$logdir      = $rootdir.'/logs';
-$errorloguri = '/errors';
-$errorlogdir = $rootdir.'/errors';
+# These should probably be left alone
+$pkguri		 = '/packages';
+$pkgdir		 = $rootdir.'/packages';
+$loguri		 = '/logs';
+$logdir		 = $rootdir.'/logs';
+$errorloguri	 = '/errors';
+$errorlogdir	 = $rootdir.'/errors';
+$templatesdir	 = $rootdir.'/scripts/webui/templates/'.$template_dir;
+$templatesuri	 = $wwwrooturi.'/templates/'.$template_dir;
+#$with_timer	 = 1;
 
-$templatesdir = $wwwrootdir.'/templates/default';
-$templatesuri = $wwwrooturi.'/templates/default';
-
-$tinderbox_name  = 'Ports Tinderbox';
-$tinderbox_title = 'Ports Tinderbox';
-
-#$with_timer = 1;
 ?>
