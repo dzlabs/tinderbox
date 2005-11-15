@@ -24,12 +24,13 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.25 2005/11/08 23:45:59 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.26 2005/11/15 19:42:56 oliver Exp $
 #
 
     require_once 'DB.php';
     require_once 'Build.php';
     require_once 'BuildPortsQueue.php';
+    require_once 'Config.php';
     require_once 'Host.php';
     require_once 'Jail.php';
     require_once 'Port.php';
@@ -42,6 +43,7 @@
     $objectMap = array(
         "Build" => "builds",
         "BuildPortsQueue" => "build_ports_queue",
+        "Config" => "config",
         "Host"  => "hosts",
         "Jail"  => "jails",
         "Port"  => "ports",
@@ -622,8 +624,8 @@
             return $results[0];
         }
 
-        function getPortFailReasons($params = array()) {
-            return $this->getObjects("PortFailReason", $params);
+        function getConfig($params = array()) {
+            return $this->getObjects("Config", $params);
         }
 
         function getBuilds($params = array()) {
@@ -642,6 +644,10 @@
             return $this->getObjects("Jail", $params);
         }
 
+        function getPortFailReasons($params = array()) {
+            return $this->getObjects("PortFailReason", $params);
+        }
+
         function getPortsTrees($params = array()) {
             return $this->getObjects("PortsTree", $params);
         }
@@ -650,10 +656,10 @@
             return $this->getObjects("User", $params);
         }
 
-        function getAllPortFailReasons() {
-            $results = $this->getPortFailReasons();
+        function getAllConfig() {
+            $config = $this->getConfig();
 
-            return $results;
+            return $config;
         }
 
         function getAllBuilds() {
@@ -680,6 +686,18 @@
             $jails = $this->getJails();
 
             return $jails;
+        }
+
+        function getAllPortFailReasons() {
+            $results = $this->getPortFailReasons();
+
+            return $results;
+        }
+
+        function getAllPortsTrees() {
+            $ports_trees = $this->getPortsTrees();
+
+            return $ports_trees;
         }
 
         function getAllUsers() {

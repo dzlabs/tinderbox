@@ -38,6 +38,7 @@
 				<table class="noborder">
 					<tr><td class="noborder"><a href="index.php?action=list_tinderd_queue" style="margin-left:10px">Tinderd Queue</a></td></tr>
 					<?if($is_www_admin==1){?>
+					<tr><td class="noborder"><a href="index.php?action=config" style="margin-left:10px">Tinderbox Config</a></td></tr>
 					<tr><td class="noborder">
 						<input type="hidden" name="action" value="display_modify_user" />
 						<select name="modify_user_id" style="margin-left:10px">

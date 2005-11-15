@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/Jail.php,v 1.3 2005/10/10 23:30:16 ade Exp $
+# $MCom: portstools/tinderbox/webui/core/Jail.php,v 1.4 2005/11/15 19:42:56 oliver Exp $
 #
 
     require_once 'TinderObject.php';
@@ -38,7 +38,8 @@
 		'jail_tag' => '',
 		'jail_last_built' => '',
 		'jail_update_cmd' => '',
-		'jail_description' => ''
+		'jail_description' => '',
+		'jail_src_mount' => ''
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
@@ -66,6 +67,10 @@
 
 	function getDescription() {
 	    return $this->jail_description;
+	}
+
+	function getSrcMount() {
+	    return $this->jail_src_mount;
 	}
 
 	function setName($name) {
