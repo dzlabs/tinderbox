@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/makemake,v 1.40 2005/11/12 21:23:14 ade Exp $
+# $MCom: portstools/tinderbox/lib/makemake,v 1.41 2005/11/16 01:07:14 ade Exp $
 #
 
 my $pb;
@@ -81,15 +81,6 @@ if (scalar(@ARGV) < 1) {
 my $opts = {};
 getopts('n', $opts);
 my $noduds = $opts->{'n'} ? 1 : 0;
-
-my @flarr;
-push @flarr, "-noclean"        if (defined($ENV{'NOCLEAN'}));
-push @flarr, "-plistcheck"     if (defined($ENV{'PLISTCHECK'}));
-push @flarr, "-nullfs"         if (defined($ENV{'NULLFS'}));
-push @flarr, "-fetch-original" if (defined($ENV{'FETCHORIG'}));
-push @flarr, "-nolog"          if (defined($ENV{'NOLOG'}));
-push @flarr, "-trybroken"      if (defined($ENV{'TRYBROKEN'}));
-my $pbflags = join(" ", @flarr);
 
 @PORTS = ();
 $BUILD = $ds->getBuildByName($ARGV[0]);
@@ -231,7 +222,7 @@ foreach my $key (keys %pkgdir) {
         printf MK "%s: %s\n",  $pkgdir{$key}, $pname;
         printf MK "%s: %s\n",  $pname, $pkgnames;
         printf MK "\t@%s/scripts/lib/portbuild %s %s %s %s %s ", $pb,
-            $BUILD_NAME, $JAIL_NAME, $PORTSTREE_NAME, $pbflags;
+            $BUILD_NAME, $JAIL_NAME, $PORTSTREE_NAME, $ENV{'PORTBUILD_ARGS'};
         printf MK "\"%s\" \"%s\" \"%s\" \"%s\" \"%s\" ", $edeplst, $pdeplst,
             $fdeplst, $bdeplst, $rdeplst;
         printf MK "%s /usr/ports/%s\n", $pname, $key;

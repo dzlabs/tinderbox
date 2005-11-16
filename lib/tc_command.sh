@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.18 2005/11/13 04:39:47 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.19 2005/11/16 01:07:14 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -79,6 +79,36 @@ cleanDirs () {
 	fi
     done
     echo "done."
+}
+
+updateTree () {
+    what=$1 
+    name=$2
+    flag=$3
+    dir=$4
+    shift 4
+    cmd="$*"
+
+    if [ -z "${cmd}" -o "${cmd}" = "NONE" ]; then
+	return 0
+    fi
+
+    echo "updateTree: updating ${what} ${name}"
+
+    if ! requestMount -t ${what} ${flag} ${name}; then
+	echo "updateTree: ${what} ${name}: mount failed"
+	exit 1
+    fi
+
+    eval ${cmd} > ${dir}/update.log 2>&1
+    if $? != 0 ]; then
+	echo "updateTree: ${what} ${name}: update failed"
+	echo "    see ${dir}/update.log for more details"
+	cleanupMounts -t ${what} ${flag} ${name}
+	exit 1
+    fi
+
+    cleanupMounts -t ${what} ${flag} ${name}
 }
 
 #---------------------------------------------------------------------------
@@ -241,8 +271,225 @@ Upgrade () {
 }
 
 #---------------------------------------------------------------------------
-# Jail creation
+# Jail handling
 #---------------------------------------------------------------------------
+
+updateJail () {
+    # set up defaults
+    jailName=""
+
+    # argument handling
+    while getopts j: arg >/dev/null 2>&1
+    do
+	case "${arg}" in
+
+	j)	jailName="${OPTARG}";;
+	?)	return 1;;
+
+	esac
+    done
+
+    # argument validation
+    if [ -z "${jailName}" ]; then
+	echo "updateJail: no jail name specified"
+	return 1
+    fi
+
+    if ! tcExists Jails ${jailName}; then
+	echo "updateJail: jail \"${jailName}\" doesn't exist"
+	return 1
+    fi
+
+    updateCmdName=$(${pb}/scripts/tc getUpdateCmd -j ${jailName})
+    jailDir=${pb}/jails/${jailName}
+
+    case "${updateCmdName}" in
+
+    CVSUP)	updateCmd="${cvsupProg} -g ${jailDir}/src-supfile";;
+    NONE)	updateCmd="NONE";;
+    "^/.*")	updateCmd="${updateCmdName} ${jailName}";;
+    *)		updateCmd="${pb}/scripts/${updateCmd} ${jailName}";;
+
+    esac
+
+    updateTree jail ${jailName} -j ${jailDir} ${updateCmd}
+    return 0
+}
+
+buildJailCleanup () {
+    cd ${pb}
+    cleanupMounts -t jail -j $2 -d $3
+    exit $1
+}
+
+buildJail () {
+    # set up defaults
+    jailName=""
+
+    # argument handling
+    while getopts j: arg >/dev/null 2>&1
+    do
+	case "${arg}" in
+
+	j)	jailName="${OPTARG}";;
+	?)	return 1;;
+
+	esac
+    done
+
+    # argument validation
+    if [ -z "${jailName}" ]; then
+	echo "buildJail: no jail name specified"
+	return 1
+    fi
+
+    if ! tcExists Jails ${jailName}; then
+	echo "buildJail: jail \"${jailName}\" doesn't exist"
+	return 1
+    fi
+
+    # Hackery to set SRCBASE accordingly for all combinations
+    jailSrcMt=$(${pb}/scripts/tc getSrcMount -j ${jailName})
+    jailObj=$(${pb}/scripts/tc configGet | awk -F= '/^JAIL_OBJDIR/ {print $2}')
+    jailBase=${pb}/jails/${jailName}
+
+    if [ -z "${jailObj}" ]; then
+	J_OBJDIR=${jailBase}/obj
+	J_SRCDIR=${jailBase}/src
+	J_TMPDIR=${jailBase}/tmp
+	if [ -n "${jailSrcMt}" ]; then
+	    reqmt="-r"
+	fi
+    else
+	J_OBJDIR=${jailObj}/${jailName}/obj
+	J_TMPDIR=${jailObj}/${jailName}/tmp
+	if [ -n "${jailSrcMt}" ]; then
+	    J_SRCDIR=${jailObj}/${jailName}/src
+	    reqmt="-r -d ${J_SRCDIR}"
+	else
+	    J_SRCDIR=${jailBase}/src
+	fi
+    fi
+
+    if [ -n "${reqmt}" ]; then
+	if ! requestMount -t jail -j ${jailName} ${reqmt}; then
+	    echo "buildJail: cant mount source directory"
+	    return 1
+	fi
+    fi
+    trap "buildJailCleanup 1 ${jailName} ${J_SRCDIR}" 1 2 3 9 10 11 15
+
+    export SRCBASE=${J_SRCDIR}
+    export MAKEOBJDIRPREFIX=${J_OBJDIR}
+    buildenv ${jailName} "" ""
+
+    # clean up after any previous build attempts
+    cleanDirs ${jailName} ${J_TMPDIR} ${J_OBJDIR}
+
+    # Set up environment
+    # Certain locales cause build failures when trying to build older
+    # jails on newer host machines
+
+    unset LC_ALL
+    unset LC_TIME
+    unset LC_CTYPE
+    unset LC_MONETARY
+    unset LC_COLLATE
+    unset LC_MESSAGES
+    unset LC_NUMERIC
+    unset LANG
+
+    # We don't want the host environment getting in the way
+    export __MAKE_CONF=/dev/null
+
+    # Make world
+    echo "${jailName}: making world"
+    cd ${SRCBASE} && env DESTDIR=${J_TMPDIR} \
+	make world > ${jailBase}/world.log 2>&1
+    if [ $? != 0 ]; then
+	echo "ERROR: world failed - see ${jailBase}/world.log"
+	exit 1
+    fi
+
+    # Make a complete distribution
+    echo "${jailName}: making distribution"
+    cd ${SRCBASE}/etc && env DESTDIR=${J_TMPDIR} \
+	make distribution > ${jailBase}/distribution.log 2>&1
+    if [ $? != 0 ]; then
+	echo "ERROR: distribution failed - see ${jailBase}/distribution.log"
+	exit 1
+    fi
+
+    # Various hacks to keep the ports building environment happy
+    ln -sf dev/null ${J_TMPDIR}/kernel		# XXX: still needed?
+    ln -sf aj ${J_TMPDIR}/etc/malloc.conf
+    touch -f ${J_TMPDIR}/etc/fstab
+    touch -f ${J_TMPDIR}/etc/wall_cmos_clock
+
+    MTREE_DIR=${SRCBASE}/etc/mtree
+    mtree -deU -f ${MTREE_DIR}/BSD.root.dist \
+	  -p ${J_TMPDIR}/ >/dev/null 2>&1
+    mtree -deU -f ${MTREE_DIR}/BSD.var.dist \
+	  -p ${J_TMPDIR}/var >/dev/null 2>&1
+    mtree -deU -f ${MTREE_DIR}/BSD.usr.dist \
+	  -p ${J_TMPDIR}/usr >/dev/null 2>&1
+    mtree -deU -f ${MTREE_DIR}/BSD.local.dist \
+	  -p ${J_TMPDIR}/usr/local >/dev/null 2>&1
+
+    date '+%Y%m%d' > ${J_TMPDIR}/var/db/port.mkversion
+    mkdir -p ${J_TMPDIR}/var/run
+
+    rm -f ${J_TMPDIR}/usr/lib/aout/lib*_p.a
+
+    # Create the jail tarball
+    echo "${jailName}: creating tarball"
+    mkdir -p ${pb}/jails/${jailName}
+    TARBALL=${pb}/jails/${jailName}/${jailName}.tar
+    tar -C ${J_TMPDIR} -cf ${TARBALL}.new . && \
+	mv -f ${TARBALL}.new ${TARBALL}
+    if [ $? != 0 ]; then
+	echo "ERROR: tarball creation failed."
+        exit 1
+    fi
+
+    # Update the last-built time
+    ${pb}/scripts/tc updateJailLastBuilt -j ${jailName}
+
+    # Finally, clean up
+    cleanDirs ${jailName} ${J_TMPDIR} ${J_OBJDIR}
+
+    buildJailCleanup 0 ${jailName} ${J_SRCDIR}
+}
+
+makeJail () {
+    # set up defaults
+    jailName=""
+
+    # argument handling
+    while getopts j: arg >/dev/null 2>&1
+    do
+        case "${arg}" in
+
+	j)	jailName="${OPTARG}";;
+	?)	return 1;;
+
+	esac
+    done
+
+    # argument validation
+    if [ -z "${jailName}" ]; then
+	echo "makeJail: no jail name specified"
+	return 1
+    fi
+
+    if ! tcExists Jails ${jailName}; then
+	echo "makeJail: jail \"${jailName}\" doesn't exist"
+	return 1
+    fi
+
+    updateJail -j ${jailName}
+    buildJail  -j ${jailName}
+}
 
 createJail () {
     # set up defaults
@@ -302,7 +549,7 @@ createJail () {
 
     # clean out any previous directories
     basedir=${pb}/jails/${jailName}
-    cleanupMounts -d jail -j ${jailName}
+    cleanupMounts -t jail -j ${jailName}
     cleanDirs ${jailName} ${basedir}
 
     # set up the directory
@@ -359,8 +606,50 @@ createJail () {
 }
 
 #---------------------------------------------------------------------------
-# PortsTree creation
+# PortsTree handling
 #---------------------------------------------------------------------------
+
+updatePortsTree () {
+    # set up defaults
+    portsTreeName=""
+
+    # argument handling
+    while getopts p: arg >/dev/null 2>&1
+    do
+	case "${arg}" in
+
+	p)	portsTreeName="${OPTARG}";;
+	?)	return 1;;
+
+	esac
+    done
+
+    # argument validation
+    if [ -z "${portsTreeName}" ]; then
+	echo "updatePortsTree: no portstree name specified"
+	return 1
+    fi
+
+    if ! tcExists PortsTrees ${portsTreeName}; then
+	echo "updatePortsTree: portstree \"${portsTreeName}\" doesn't exist"
+	return 1
+    fi
+
+    updateCmdName=$(${pb}/scripts/tc getUpdateCmd -p ${portsTreeName})
+    portsTreeDir=${pb}/portstrees/${portsTreeName}
+
+    case "${updateCmdName}" in
+
+    CVSUP)	updateCmd="${cvsupProg} -g ${portsTreeDir}/ports-supfile";;
+    NONE)	updateCmd="NONE";;
+    "^/.*")	updateCmd="${updateCmdName} ${portsTreeName}";;
+    *)		updateCmd="${pb}/scripts/${updateCmd} ${portsTreeName}";;
+
+    esac
+
+    updateTree portstree ${portsTreeName} -p ${portsTreeDir} ${updateCmd}
+    return 0
+}
 
 createPortsTree () {
     # set up defaults
@@ -368,12 +657,13 @@ createPortsTree () {
     cvsupCompress=0
     cvswebUrl=""
     descr=""
+    init=1
     mountSrc=""
     portsTreeName=""
     updateCmd="CVSUP"
 
     # argument handling
-    while getopts d:m:p:u:w:CH: arg >/dev/null 2>&1
+    while getopts d:m:p:u:w:CH:I arg >/dev/null 2>&1
     do
 	case "${arg}" in
 
@@ -384,6 +674,7 @@ createPortsTree () {
 	w)	cvswebUrl="${OPTARG}";;
 	C)	cvsupCompress=1;;
 	H)	cvsupHost="${OPTARG}";;
+	I)	init=0;;
 	?)	return 1;;
 
 	esac
@@ -407,7 +698,7 @@ createPortsTree () {
 
     # clean out any previous directories
     basedir=${pb}/portstrees/${portsTreeName}
-    cleanupMounts -d portstree -p ${portsTreeName}
+    cleanupMounts -t portstree -p ${portsTreeName}
     cleanDirs ${portsTreeName} ${basedir}
 
     # set up the directory
@@ -452,36 +743,155 @@ createPortsTree () {
     fi
     echo "done."
 
-    # mount ports/ if required, to verify it exists
-    if [ ! -z "${mountSrc}" ]; then
-	echo -n "${portsTreeName}: verifying mount point... "
-	requestMount -q -d portstree -p ${portsTreeName}
-	if [ $? != 0 ]; then
-	    echo "FAILED."
-	    exit 1
-	fi
-	echo "done."
+    if [ ${init} = 1 ]; then
+	updatePortsTree -p ${portsTreeName}
     fi
 
-    # update ports tree if requested
-    if [ "${updateProg}" != "NONE" ]; then
-	echo "${portsTreeName}: updating portstree with ${updateProg}..."
-	eval ${updateProg} >/dev/null 2>&1
-	if [ $? != 0 ]; then
-	    echo "FAILED."
-	    exit 1
-	fi
-	echo "done."
-    fi
-
-    # finished
-    cleanupMounts -d portstree -p ${portsTreeName}
     return 0
 }
 
 #---------------------------------------------------------------------------
-# Build creation
+# Build handling
 #---------------------------------------------------------------------------
+
+enterBuild () {
+    build=""
+    portDir=""
+    autoSleep=0
+    resp="n"
+    sleepName=""
+
+    while getopts b:d: arg >/dev/null 2>&1
+    do
+	case "${arg}" in
+
+	b)	build="${OPTARG}";;
+	d)	portDir="${OPTARG}";;
+	?)	return 1;;
+
+        esac
+    done
+
+    if [ -z "${portDir}" ]; then
+	echo "enterBuild: no port specified"
+	return 1
+    fi
+
+    if [ -z "${build}" ]; then
+	echo "enterBuild: no build specified"
+	return 1
+    fi
+
+    if ! tcExists Builds ${build}; then
+	echo "enterBuild: no such build: ${build}"
+	return 1
+    fi
+
+    if [ ! -f ${pb}/${build} ]; then
+	echo "enterBuild: Build directory (${pb}/${build}) does not exist"
+	return 1
+    fi
+
+    sleepName=$(echo ${portDir} | sed -e 'y/\//_/')
+
+    if [ ! -d ${pb}/${build}/usr/ports/${portDir} ]; then
+	echo "enterBuild: Build environment does not exist yet, sleeping."
+	while [ ! -d ${pb}/${build}/usr/ports/${portDir} ]; do
+	    sleep 1
+	done
+    fi
+
+    if [ ! -f ${pb}/${build}/usr/ports/${portDir}/.sleepme ]; then
+	echo "enterBuild: Build not marked for sleeping. Marking it."
+	touch ${pb}/${build}/usr/ports/${portDir}/.sleepme
+	if [ ! -f ${pb}/${build}/usr/ports/${portDir}/.sleepme ]; then
+	    echo "enterBuild: cannot touch ${pb}/${build}/usr/ports/${portDir}/.sleepme."
+	    return 1
+	fi
+	autoSleep=1
+    fi
+
+    while [ ! -f ${pb}/${build}/tmp/.sleep_${sleepName} ]; do
+	echo "enterBuild: Build not yet sleeping, waiting 15 seconds."
+	sleep 15
+    done
+
+    cp ${pb}/scripts/lib/enterbuild ${pb}/${build}/root
+    chroot ${pb}/${build} /root/enterbuild ${portDir}
+    rm -f ${pb}/${build}/tmp/.sleep_${sleepName}
+
+    echo "enterBuild: Continuing port build."
+
+    if [ ${autoSleep} = 1 ]; then
+        resp="y"
+    else
+	echo -n "Remove .sleepme too? [yN] "
+	read resp
+    fi
+    if [ "${resp}" = "y" ]; then
+	rm -f ${pb}/$build}/usr/ports/${portDir}/.sleepme
+	if [ -f ${pb}/$build}/usr/ports/${portDir}/.sleepme ]; then
+	    echo "enterBuild: failed to remove ${pb}/$build}/usr/ports/${portDir}/.sleepme!"
+	else
+	    echo "enterBuild: .sleepme removed."
+	fi
+    fi
+}
+
+makeBuild () {
+    # set up defaults
+    buildName=""
+
+    # argument handling
+    while getopts b: arg >/dev/null 2>&1
+    do
+	case "${arg}" in
+
+	b)	buildName="${OPTARG}";;
+	?)	return 1;;
+
+	esac
+    done
+
+    # argument validation
+    if [ -z "${buildName}" ]; then
+	echo "makeBuild: no buildname specified"
+	return 1
+    fi
+
+    if ! tcExists Builds ${buildName}; then
+	echo "makeBuild: build \"${buildName}\" doesn't exist"
+	return 1
+    fi
+
+    # Find the jail associated with the build
+    jailName=$(${pb}/scripts/tc getJailForBuild -b ${buildName})
+
+    BUILD_DIR=${pb}/${buildName}
+    JAIL_TARBALL=${pb}/jails/${jailName}/${jailName}.tar
+
+    if [ ! -f ${JAIL_TARBALL} ]; then
+	echo "ERROR: tarball for jail \"${jailName}\" doesn't exist."
+	echo "ERROR: run \"tc makeJail -j ${jailName}\" first."
+	exit 1
+    fi
+
+    # Clean up any previous build tree
+    cleanupMounts -t buildsrc -b ${buildName}
+    cleanupMounts -t buildports -b ${buildName}
+    cleanupMounts -t ccache -b ${buildName}
+    cleanupMounts -t distcache -b ${buildName}
+    cleanDirs ${buildName} ${BUILD_DIR}
+
+    # Extract the tarball
+    echo "makeBuild: extracting jail tarball"
+    tar -C ${BUILD_DIR} -xpf ${JAIL_TARBALL}
+
+    # Finalize environment
+    cp -f /etc/resolv.conf ${BUILD_DIR}/etc
+
+    return 0
+}
 
 createBuild () {
     # set up defaults
@@ -571,207 +981,160 @@ createBuild () {
 }
 
 #---------------------------------------------------------------------------
-# Make a Jail [previously mkjail]
-#---------------------------------------------------------------------------
-
-makeJail () {
-    # set up defaults
-    jailName=""
-
-    # argument handling
-    while getopts j: arg >/dev/null 2>&1
-    do
-	case "${arg}" in
-
-	j)	jailName="${OPTARG}";;
-	?)	return 1;;
-
-	esac
-    done
-
-    # argument validation
-    if [ -z "${jailName}" ]; then
-	echo "makeJail: no jail name specified"
-	return 1
-    fi
-
-    if ! tcExists Jails ${jailName}; then
-	echo "makeJail: jail \"${jailName}\" doesn't exist"
-	return 1
-    fi
-
-    buildenv ${jailName} "" ""
-
-    # Mount the source directory, if appropriate
-    requestMount -q -r -d jail -j ${jailName}
-
-    # Update the source tree, if requested
-    update_cmd=$(${pb}/scripts/tc getSrcUpdateCmd -j ${jailName})
-    if [ ! -z "${update_cmd}" ]; then
-	echo "INFO: Updating jail with command ${update_cmd}"
-	eval ${update_cmd} > ${pb}/jails/${jailName}/update.log 2>&1
-	if [ $? != 0 ]; then
-	    echo "ERROR: Jail update failed"
-	    exit 1
-	fi
-    fi
-
-    # Use a specific object directory if so requested.  In this case,
-    # we also use a subdirectory for the temporary copy of the installed
-    # OS image
-    if [ -n "${JAIL_OBJDIR}" ]; then
-        export MAKEOBJDIRPREFIX=${JAIL_OBJDIR}
-	JAIL_TMPDIR=${JAIL_OBJDIR}/tmp/${jailName}
-    else
-	JAIL_TMPDIR=${pb}/jails/${jailName}/tmp
-    fi
-
-    # clean up after any previous build attempts
-    cleanDirs ${jailName} ${JAIL_TMPDIR}
-
-    # Set up environment
-    # Certain locales cause build failures when trying to build older
-    # jails on newer host machines
-
-    unset LC_ALL
-    unset LC_TIME
-    unset LC_CTYPE
-    unset LC_MONETARY
-    unset LC_COLLATE
-    unset LC_MESSAGES
-    unset LC_NUMERIC
-    unset LANG
-
-    # We don't want the host environment getting in the way
-    export __MAKE_CONF=/dev/null
-
-    # Use a specific object directory if so requested
-    if [ -n "${JAIL_OBJDIR}" ]; then
-	export MAKEOBJDIRPREFIX=${JAIL_OBJDIR}
-    fi
-
-    # Make world
-    cd ${SRCBASE} && env DESTDIR=${JAIL_TMPDIR} make world
-    if [ $? != 0 ]; then
-	echo "ERROR: make world failed.  See above output."
-	exit 1
-    fi
-
-    # Make a complete distribution
-    cd ${SRCBASE}/etc && env DESTDIR=${JAIL_TMPDIR} make distribution
-    if [ $? != 0 ]; then
-	echo "ERROR: make distribution failed.  See above output."
-	exit 1
-    fi
-
-    # Various hacks to keep the ports building environment happy
-    ln -sf dev/null ${JAIL_TMPDIR}/kernel
-    ln -sf aj ${JAIL_TMPDIR}/etc/malloc.conf
-    touch -f ${JAIL_TMPDIR}/etc/fstab
-    touch -f ${JAIL_TMPDIR}/etc/wall_cmos_clock
-
-    MTREE_DIR=${SRCBASE}/etc/mtree
-    mtree -deU -f ${MTREE_DIR}/BSD.root.dist  -p ${JAIL_TMPDIR}/
-    mtree -deU -f ${MTREE_DIR}/BSD.var.dist   -p ${JAIL_TMPDIR}/var
-    mtree -deU -f ${MTREE_DIR}/BSD.usr.dist   -p ${JAIL_TMPDIR}/usr
-    mtree -deU -f ${MTREE_DIR}/BSD.local.dist -p ${JAIL_TMPDIR}/usr/local
-
-    date '+%Y%m%d' > ${JAIL_TMPDIR}/var/db/port.mkversion
-    mkdir -p ${JAIL_TMPDIR}/var/run
-
-    rm -f ${JAIL_TMPDIR}/usr/lib/aout/lib*_p.a
-
-    # Create the jail tarball
-    TARBALL=${pb}/jails/${jailName}/${jailName}.tar
-    tar -C ${JAIL_TMPDIR} -cf ${TARBALL}.new . && \
-	mv -f ${TARBALL}.new ${TARBALL}
-    if [ $? != 0 ]; then
-	echo "ERROR: tarball creation failed.  See above output."
-        exit 1
-    fi
-
-    # Update the last-built time
-    ${pb}/scripts/tc updateJailLastBuilt -j ${jailName}
-
-    # Finally, clean up
-    cleanDirs ${jailName} ${JAIL_TMPDIR}
-
-    cd ${pb}		# so we don't end up killing ourselves
-    cleanupMounts -d jail -j ${jailName}
-
-    return 0
-}
-
-#---------------------------------------------------------------------------
-# Make a Build [previously mkbuild]
-# XXX: the only consumer of this appears to be tinderbuild further on
-#      down, so it's possible we don't need this as a public function
-#---------------------------------------------------------------------------
-
-makeBuild () {
-    # set up defaults
-    buildName=""
-
-    # argument handling
-    while getopts b: arg >/dev/null 2>&1
-    do
-	case "${arg}" in
-
-	b)	buildName="${OPTARG}";;
-	?)	return 1;;
-
-	esac
-    done
-
-    # argument validation
-    if [ -z "${buildName}" ]; then
-	echo "makeBuild: no buildname specified"
-	return 1
-    fi
-
-    if ! tcExists Builds ${buildName}; then
-	echo "makeBuild: build \"${buildName}\" doesn't exist"
-	return 1
-    fi
-
-    # Find the jail associated with the build
-    jailName=$(${pb}/scripts/tc getJailForBuild -b ${buildName})
-
-    BUILD_DIR=${pb}/${buildName}
-    JAIL_TARBALL=${pb}/jails/${jailName}/${jailName}.tar
-
-    if [ ! -f ${JAIL_TARBALL} ]; then
-	echo "ERROR: tarball for jail \"${jailName}\" doesn't exist."
-	echo "ERROR: run \"tc makeJail -j ${jailName}\" first."
-	exit 1
-    fi
-
-    # Clean up any previous build tree
-    cleanupMounts -d build -b ${buildName}
-    cleanDirs ${buildName} ${BUILD_DIR}
-
-    # Extract the tarball
-    tar -C ${BUILD_DIR} -xpf ${JAIL_TARBALL}
-
-    # Finalize environment
-    cp -f /etc/resolv.conf ${BUILD_DIR}/etc
-
-    return 0
-}
-
-#---------------------------------------------------------------------------
 # Build one or more packages
 #---------------------------------------------------------------------------
+
+tinderbuild_reset () {
+    cleanupMounts -t buildsrc -b $1
+    cleanupMounts -t buildports -b $1
+    cleanupMounts -t ccache -b $1
+    cleanupMounts -t distcache -b $1
+    umount -f ${pb}/$1/dev >/dev/null 2>&1
+    umount -f ${pb}/$1/compat/linux/proc >/dev/null 2>&1
+}
 
 tinderbuild_cleanup () {
     rm -f ${lock}
     ${pb}/scripts/tc updateBuildStatus -b ${build} -s IDLE
     ${pb}/scripts/tc sendBuildCompletionMail -b ${build}
-
-    cleanupMounts -d jail -j ${jail}
-    cleanupMounts -d portstree -p ${portstree}
+    tinderbuild_reset ${build}
 
     exit $1
+}
+
+tinderbuild_setup () {
+    # Make sure everything is dismounted, clean out the build tree
+    # and recreate it from scratch
+    echo "INFO: Creating build directory for ${build}"
+    tinderbuild_reset ${build}
+    makeBuild -b ${build}
+
+    # set up the rest of the chrooted environment, we really do
+    # not need to be doing this every single time portbuild is called
+
+    chroot=${pb}/${build}
+    echo "INFO: Finalizing chroot environment"
+
+    # Mount ports/
+    if ! requestMount -t buildports -b ${build} -r ${nullfs}; then
+	echo "tinderbuild: cant mount ports source"
+	tinderbuild_cleanup 1
+    fi
+    ln -sf ../a/ports ${pb}/${build}/usr/ports
+
+    # Mount src/
+    if ! requestMount -t buildsrc -b ${build} -r ${nullfs}; then
+	echo "tinderbuild: cant mount jail source"
+	tinderbuild_cleanup 1
+    fi
+
+    # handle OS version dependent bits and pieces
+    libc_hackery=""
+    case ${osmajor} in
+
+    4)
+	mkdir -p ${chroot}/libexec
+	mkdir -p ${chroot}/lib
+	if [ "${ARCH}" = "i386" -o "${ARCH}" = "amd64" ]; then
+	    cp -p /sbin/mount_linprocfs /sbin/mount /sbin/umount ${chroot}/sbin
+	    cp -p /lib/libufs.so.[0-9]* ${chroot}/lib
+	fi
+	cp -p /libexec/ld-elf.so.1 ${chroot}/libexec
+	cp -p /lib/libkvm.so.[0-9]* /lib/libm.so.[0-9]* ${chroot}/lib
+	if [ -f /lib/libc.so.6 ]; then
+	    libc_hackery="libc.so.6"
+	elif [ -f /lib/libc.so.5 ]; then
+	    libc_hackery="libc.so.5"
+	fi
+	;;
+
+    5)
+	if [ -f /lib/libc.so.6 ]; then
+	    libc_hackery="libc.so.6"
+	fi
+	;;
+
+    6|7)
+	if [ -f /lib/libc.so.5 ]; then
+	    libc_hackery="libc.so.5"
+	fi
+	;;
+
+    esac
+
+    if [ -n "${libc_hackery}" ]; then
+	chflags noschg ${chroot}/lib/${libc_hackery} >/dev/null 2>&1
+	cp -p /lib/${libc_hackery} ${chroot}/lib
+    fi
+
+    # For use by pnohang
+    # XXX: though killall may not work since it's a dynamic executable
+    cp -p /rescue/ps ${chroot}/bin
+    cp -p /usr/bin/killall ${chroot}/bin
+
+    # Mount /dev, since we're going to be chrooting shortly
+    mount -t devfs devfs ${chroot}/dev >/dev/null 2>&1
+
+    # Some linux-related ports need linprocfs
+    if [ ${ARCH} = "i386" -o ${ARCH} = "amd64" ]; then
+	mkdir -p ${chroot}/compat/linux/proc
+	mount_linprocfs linprocfs ${chroot}/compat/linux/proc
+    fi
+
+    # Install a couple of tinderbox binaries
+    if ! cp -p ${pb}/scripts/lib/buildscript ${chroot}; then
+	echo "ERROR: cant copy buildscript"
+	tinderbuild_cleanup 1
+    fi
+
+    if ! cc -o ${chroot}/pnohang -static ${pb}/scripts/lib/pnohang.c; then
+	echo "ERROR: cant compile pnohang"
+	tinderbuild_cleanup 1
+    fi
+
+    # Hack to fix some recent pkg_add problems in some releases
+    if [ -f ${pb}/jails/${jail}/pkg_install.tar ]; then
+	tar -C ${chroot} -xf ${pb}/jails/${jail}/pkg_install.tar
+    fi
+
+    # Handle the distfile cache
+    if [ -n "${DISTFILE_CACHE}" ]; then
+	if ! requestMount -t distcache -b ${build} -s ${DISTFILE_CACHE}; then
+	    echo "tinderbuild: cant mount distfile cache"
+	    tinderbuild_cleanup 1
+	fi
+
+	if [ ${cleandistfiles} = 1 ]; then
+	    echo "INFO: Cleaning out distfile cache"
+	    rm -rf ${chroot}/distcache/*
+	fi
+    fi
+
+    # Handle ccache
+    if [ ${CCACHE_ENABLED} = 1 ]; then
+
+	# per-build, or per-jail, ccache?
+	if [ ${CCACHE_JAIL} = 1 ]; then
+	    ccacheDir=${pb}/${CCACHE_DIR}/${jail}
+	else
+	    ccacheDir=${pb}/${CCACHE_DIR}/${build}
+	fi
+
+	# create directories if need be
+	mkdir -p ${ccacheDir} ${pb}/${build}/ccache
+
+	if ! requestMount -t ccache -b ${build} -s ${ccacheDir} ${nullfs}; then
+	    echo "tinderbuild: cant mount ccache"
+	    tinderbuild_cleanup 1
+	fi
+
+	if [ -f ${pb}/jails/${jail}/ccache.tar ]; then
+	    tar -C ${chroot} -xf ${pb}/jails/${jail}/ccache.tar
+	    if [ -n "${CCACHE_MAX_SIZE}" ]; then
+		chroot ${chroot} /opt/ccache -M ${CCACHE_MAX_SIZE}
+	    fi
+	fi
+    fi
 }
 
 tinderbuild_phase () {
@@ -785,8 +1148,8 @@ tinderbuild_phase () {
     echo "started at $(date)"
     start=$(date +%s)
 
-    cd ${PACKAGES}/All && \
-	make -k -j${jobs} all > ${pb}/builds/${build}/make.${num} 2>&1 </dev/null
+    cd ${PACKAGES}/All && make -k -j${jobs} all \
+	> ${pb}/builds/${build}/make.${num} 2>&1 </dev/null
 
     echo "ended at $(date)"
     end=$(date +%s)
@@ -798,68 +1161,59 @@ tinderbuild_phase () {
 }
 
 tinderbuild () {
-    # set defaults
-    _builds=$(${pb}/scripts/tc listBuilds)
+    # set up defaults
     build=""
     ports=""
-    init=0
-    cleanpackages=0
-    updateports=0
-    noduds=0
-    noclean=0
-    plistcheck=0
-    nullfs=0
     cleandistfiles=0
-    skipmake=0
-    fetchorig=0
-    nolog=0
-    trybroken=0
+    cleanpackages=0
+    init=0
     jobs=1
-    error=2
+    noduds=""
+    nullfs=""
+    pbargs=""
+    skipmake=0
+    updateports=0
 
     # argument processing
-    # XXX: at least for now, we're keeping the code the same here,
-    #      though it should probably be rewritten to be more getopts
-    #      friendly
-
     while [ $# -gt 0 ]; do
 	case "x$1" in
 
-	x-b)	shift
-		for _build in ${_builds}; do
-		    if [ "${_build}" = "$1" ]; then
-			build=$1
-			break
-		    fi
-		done
-		if [ "x${build}" = "x" ]; then
-		    echo "ERROR: Build, \"$1\" is not a valid build."
-		    exit 1
-		fi
-		;;
-	x-jobs)	shift
-		if ! expr -- "$1" : "^[[:digit:]]\{1,\}$" >/dev/null 2>&1 ; then
-		    echo "ERROR: The argument to -jobs must be a number."
-		    exit 1
-		elif [ $1 -lt 1 ]; then
-		    echo "ERROR: The argument to -jobs must be a number greater than or equal to 1."
-		    exit 1
-		fi
+	x-b)
+    	    shift
+	    if ! tcExists Builds $1; then
+		echo "ERROR: Build, \"$1\" is not a valid build."
+		exit 1
+	    fi
+	    build=$1
+	    ;;
 
-		jobs=$1
-		;;
-	x-init)			init=1;;
-	x-updateports)		updateports=1;;
-	x-cleanpackages)	cleanpackages=1;;
-	x-skipmake)		skipmake=1;;
-	x-noduds)		noduds=1;;
-	x-noclean)		noclean=1;;
-	x-plistcheck)		plistcheck=1;;
-	x-nullfs)		nullfs=1;;
+	x-jobs)
+	    shift
+	    if ! expr -- "$1" : "^[[:digit:]]\{1,\}$" >/dev/null 2>&1 ; then
+		echo "ERROR: The argument to -jobs must be a number."
+		exit 1
+	    elif [ $1 -lt 1 ]; then
+		echo "ERROR: The argument to -jobs must be a number >= 1."
+		exit 1
+	    fi
+	    jobs=$1
+	    ;;
+
 	x-cleandistfiles)	cleandistfiles=1;;
-	x-fetch-original)	fetchorig=1;;
-	x-nolog)		nolog=1;;
-	x-trybroken)		trybroken=1;;
+	x-cleanpackages)	cleanpackages=1;;
+	x-init)			init=1;;
+	x-skipmake)		skipmake=1;;
+	x-updateports)		updateports=1;;
+
+	# various arguments passed through to makemake and portbuild
+	x-noduds)		noduds="-n";;
+
+	x-fetch-original)	pbargs="${pbargs} -fetch-original";;
+	x-noclean)		pbargs="${pbargs} -noclean";;
+	x-nolog)		pbargs="${pbargs} -nolog";;
+	x-nullfs)		pbargs="${pbargs} -nullfs"; nullfs="-n";;
+	x-plistcheck)		pbargs="${pbargs} -plistcheck";;
+
 	-*)			return 1;;
 	*)			ports="${ports} $1";;
 
@@ -868,8 +1222,7 @@ tinderbuild () {
 	shift
     done
 
-
-    if [ "x${build}" = "x" ]; then
+    if [ -z "${build}" ]; then
 	return 1
     fi
 
@@ -888,16 +1241,18 @@ tinderbuild () {
     # Let the datastore known what we're doing.
     ${pb}/scripts/tc updateBuildStatus -b ${build} -s PREPARE
 
-    trap "tinderbuild_cleanup ${error}" 1 2 3 9 10 11 15
+    trap "tinderbuild_cleanup 2" 1 2 3 9 10 11 15
 
-    # XXX This is a crude hack to normalize ${ports}
+    # XXX: This is a crude hack to normalize ${ports}
     ports=$(echo ${ports})
 
+    # Setup the environment for this jail
     jail=$(${pb}/scripts/tc getJailForBuild -b ${build})
     portstree=$(${pb}/scripts/tc getPortsTreeForBuild -b ${build})
 
-    # Setup the environment for this jail.
+    requestMount -t jail -j ${jail}
     buildenv ${jail} ${portstree} ${build}
+    cleanupMounts -t jail -j ${jail}
 
     # Remove the make logs.
     rm -f ${pb}/builds/${build}/make.*
@@ -912,84 +1267,68 @@ tinderbuild () {
 	fi
     done
 
-    # First we check to see if we need to clean out old packages.
-    if [ "$cleanpackages" = "1" ]; then
+    # Clean out all old packages if requested
+    if [ ${cleanpackages} = 1 ]; then
 	rm -rf ${PACKAGES}
 	rm -rf ${pb}/logs/${build}
 	rm -rf ${pb}/errors/${build}
     fi
 
-    if [ -n "${DISTFILE_CACHE}" -a "$cleandistfiles" = "1" ]; then
-	requestMount -d distcache -b ${build} -s ${DISTFILE_CACHE}
-	rm -rf ${pb}/${build}/distcache/*
-	cleanupMounts -d distcache -b ${build}
-    fi
-
-    requestMount -q -r -d portstree -p ${portstree}
-    requestMount -q -r -d jail -j ${jail}
-
+    # Make the package directories
     mkdir -p ${PACKAGES}
     mkdir -p ${pb}/logs/${build}
     mkdir -p ${pb}/errors/${build}
 
-    if [ "$updateports" = "1" ]; then
-	echo "INFO: Running ${update_cmd} to update the ports tree"
+    # (Re)create jail if needed
+    if [ ${init} = 1 -o \( ! -d ${pb}/${build} -a \
+			   ! -f ${pb}/jails/${jail}/${jail}.tar \) ]; then
+	echo "INFO: Updating ${jail} jail for ${build}"
+	${pb}/scripts/tc makeJail -j ${jail}
+    fi
+
+    # Update ports tree if required
+    if [ ${updateports} = 1 ]; then
+	echo "INFO: Updating ${portstree} portstree for ${build}"
 	${pb}/scripts/tc updatePortsTree -p ${portstree}
     fi
 
-    if [ "$skipmake" = "0" ]; then
-	duds=
-	if [ "$noduds" = "1" ]; then
-	    duds="-n"
-	fi
-	if [ "$noclean" = "1" ]; then
-	    export NOCLEAN=1
-	fi
-	if [ "$plistcheck" = "1" ]; then
-	    export PLISTCHECK=1
-	fi
-	if [ "$nullfs" = "1" ]; then
-	    export NULLFS=1
-	fi
-	if [ "$fetchorig" = "1" ]; then
-	    export FETCHORIG=1
-	fi
-	if [ "$nolog" = "1" ]; then
-	    export NOLOG=1
-	fi
-	if [ "$trybroken" = "1" ]; then
-	    export TRYBROKEN=1
-	fi
+    # Create makefile if required
+    if [ ${skipmake} = 0 ]; then
+	echo "INFO: creating makefile..."
 
 	# Need to do this in a subshell so as to only hide the host
 	# environment during makefile creation
 	(
+	    export PORTBUILD_ARGS="$(echo ${pbargs})"
 	    buildenvNoHost
-	    ${pb}/scripts/lib/makemake ${duds} ${build} ${ports}
+	    if ! requestMount -t portstree -p ${portstree}; then
+		echo "tinderbuild: cant mount portstree: ${portstree}"
+		exit 1
+	    fi
+	    ${pb}/scripts/lib/makemake ${noduds} ${build} ${ports}
 	)
 	if [ $? != 0 ]; then
-	    echo "ERROR: Failed to generate Makefile for ${build}"
+	    echo "ERROR: failed to generate Makefile for ${build}"
+	    cleanupMounts -t portstree -p ${portstree}
 	    tinderbuild_cleanup 1
+	else
+	    cleanupMounts -t portstree -p ${portstree}
 	fi
     fi
 
-    # Then we check to see if we need to create our jail directory.
-    if [ "$init" = "1" -o \( ! -d ${pb}/${build} -a \
-			     ! -f ${pb}/jails/${jail}/${jail}.tar \) ]; then
-	echo "INFO: Initializing a new build directory for ${build}..."
-	${pb}/scripts/tc makeJail -j ${jail}
-	${pb}/scripts/tc makeBuild -b ${build}
-    else
-	echo "INFO: Creating build directory for ${build} from repository..."
-	${pb}/scripts/tc makeBuild -b ${build}
-    fi
+    # Set up the chrooted environment
+    osmajor=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
+    case ${osmajor} in
+    4|5|6|7)	tinderbuild_setup;;
+    *)		echo "ERROR: tinderbox: unhandled OS version: ${osmajor}"
+		tinderbuild_cleanup 1
+		;;
+    esac
 
+    # Seatbelts off.  Away we go.
     ${pb}/scripts/tc updateBuildStatus -b ${build} -s PORTBUILD
-
-    # We build the packages in two phases to make sure we get everything
     tinderbuild_phase 0 ${jobs}
     tinderbuild_phase 1 ${jobs}
-
     tinderbuild_cleanup 0
 }
 
@@ -1018,16 +1357,22 @@ addPortToBuild () {
     jail=$(${pb}/scripts/tc getJailForBuild -b ${build})
     portsTree=$(${pb}/scripts/tc getPortsTreeForBuild -b ${build})
 
-    requestMount -q -r -d portstree -p ${portsTree}
-    requestMount -q -r -d jail -j ${jail}
+    if ! requestMount -t jail -j ${jail} -r; then
+	echo "addPortToBuild: cant mount jail source"
+	exit 1
+    fi
+    if ! requestMount -t portstree -p ${portsTree} -r; then
+	echo "addPortToBuild: cant mount portstree source"
+	exit 1
+    fi
 
     buildenv ${jail} ${portsTree} ${build}
     buildenvNoHost
 
     ${pb}/scripts/tc addPortToOneBuild -b ${build} -d ${portDir} ${recursive}
 
-    cleanupMounts -d jail -j ${jail}
-    cleanupMounts -d portstree -p ${portsTree}
+    cleanupMounts -t jail -j ${jail}
+    cleanupMounts -t portstree -p ${portsTree}
 }
 
 addPort () {
@@ -1083,88 +1428,4 @@ addPort () {
     fi
 
     return 0
-}
-
-enterBuild () {
-    build=""
-    portDir=""
-    autoSleep=0
-    resp="n"
-    sleepName=""
-
-    while getopts b:d: arg >/dev/null 2>&1
-    do
-	case "${arg}" in
-
-	b)	build="${OPTARG}";;
-	d)	portDir="${OPTARG}";;
-	?)	return 1;;
-
-        esac
-    done
-
-    if [ -z "${portDir}" ]; then
-	echo "enterBuild: no port specified"
-	return 1
-    fi
-
-    if [ -z "${build}" ]; then
-	echo "enterBuild: no build specified"
-	return 1
-    fi
-
-    if ! tcExists Builds ${build}; then
-	echo "enterBuild: no such build: ${build}"
-	return 1
-    fi
-
-    if [ ! -f ${pb}/${build} ]; then
-	echo "enterBuild: Build directory (${pb}/${build}) does not exist"
-	return 1
-    fi
-
-    sleepName=$(echo ${portDir} | sed -e 'y/\//_/')
-
-    if [ ! -d ${pb}/${build}/usr/ports/${portDir} ]; then
-	echo "enterBuild: Build environment does not exist yet, sleeping."
-	while [ ! -d ${pb}/${build}/usr/ports/${portDir} ]; do
-	    sleep 1
-	done
-    fi
-
-    if [ ! -f ${pb}/${build}/usr/ports/${portDir}/.sleepme ]; then
-	echo "enterBuild: Build not marked for sleeping. Marking it."
-	touch ${pb}/${build}/usr/ports/${portDir}/.sleepme
-	if [ ! -f ${pb}/${build}/usr/ports/${portDir}/.sleepme ]; then
-	    echo "enterBuild: cannot touch ${pb}/${build}/usr/ports/${portDir}/.sleepme."
-	    return 1
-	fi
-	autoSleep=1
-    fi
-
-    while [ ! -f ${pb}/${build}/tmp/.sleep_${sleepName} ]; do
-	echo "enterBuild: Build not yet sleeping, waiting 15 seconds."
-	sleep 15
-    done
-
-    cp ${pb}/scripts/lib/enterbuild ${pb}/${build}/root
-    chroot ${pb}/${build} /root/enterbuild ${portDir}
-    rm -f ${pb}/${build}/tmp/.sleep_${sleepName}
-
-    echo "enterBuild: Continuing port build."
-
-    if [ ${autoSleep} = 1 ]; then
-        resp="y"
-    else
-	echo -n "Remove .sleepme too? [yN] "
-	read resp
-    fi
-    if [ "${resp}" = "y" ]; then
-	rm -f ${pb}/$build}/usr/ports/${portDir}/.sleepme
-	if [ -f ${pb}/$build}/usr/ports/${portDir}/.sleepme ]; then
-	    echo "enterBuild: failed to remove ${pb}/$build}/usr/ports/${portDir}/.sleepme!"
-	else
-	    echo "enterBuild: .sleepme removed."
-	fi
-    fi
 }

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# usage: $0 DIRNAME PHASE ED PD FD BD RD
+# usage: $0 DIRNAME PHASE ED PD FD BD RD [PLISTCHECK]
 #   PHASE is 1 (checksum) or 2 (package)
 
 cleanup() {
@@ -79,6 +79,7 @@ PD=$4
 FD=$5
 BD=$6
 RD=$7
+PLISTCHECK=$8
 
 if [ $phase = 1 ]; then
 
@@ -192,7 +193,7 @@ EOF
       grep ' extra$' /tmp/list3 | awk '{print $1}' | xargs -J % find % -ls > /tmp/list4
       grep ' missing$' /tmp/list3 > /tmp/list5
       grep -vE ' (extra|missing)$' /tmp/list3 > /tmp/list6
-      if [ "x${PLISTCHECK}" != "x" ]; then
+      if [ -n "${PLISTCHECK}" ]; then
 	if grep -qE 'usr/(local|X11R6)/(bin/|include/|man/|sbin/|share/|share/|lib/|libdata/|libexec/)' /tmp/list4; then
           echo "1" > /tmp/status
 	fi
@@ -227,7 +228,7 @@ EOF
     if [ -s /tmp/list6 ]; then
       echo "list of filesystem changes from before and after port installation and deinstallation"
       cat /tmp/list6
-      if [ "x${PLISTCHECK}" != "x" ]; then
+      if [ -n "${PLISTCHECK}" ]; then
         echo "1" > /tmp/status
       fi
     fi

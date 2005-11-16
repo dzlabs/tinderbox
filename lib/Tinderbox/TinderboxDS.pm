@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.64 2005/10/23 23:00:30 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.65 2005/11/16 01:07:14 ade Exp $
 #
 
 package TinderboxDS;
@@ -1756,8 +1756,10 @@ sub _doQuery {
 
         my $_sth;              # This is the real statement handler.
 
-        #print STDERR "XXX: query = $query\n";
-        #print STDERR "XXX: values = " . (join(", ", @{$params})) . "\n";
+	if (defined($ENV{'TINDERBOX_QUERY_DEBUG'})) {
+		printf STDERR "TINDERBOX_SQL:\n\tquery = %s\n\tvalues = %s\n",
+			$query, join(', ', @{$params});
+	}
 
         $_sth = $self->{'dbh'}->prepare($query);
 

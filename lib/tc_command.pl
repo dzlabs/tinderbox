@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.92 2005/11/13 06:18:51 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.93 2005/11/16 01:07:14 ade Exp $
 #
 
 my $pb;
@@ -164,14 +164,14 @@ my $ds = new TinderboxDS();
                 func  => \&addJail,
                 help  => "Add a jail to the datastore",
                 usage =>
-                    "-j <jail name> -t <jail tag> [-d <jail description>] [-m <src mount source>] [-u <jail update command|CVSUP|NONE>]",
+                    "-j <jail name> -t <jail tag> [-d <jail description>] [-m <src mount source>] [-u <updatecommand>|CVSUP|NONE>]",
                 optstr => 'm:j:t:u:d:',
         },
         "addPortsTree" => {
                 func  => \&addPortsTree,
                 help  => "Add a portstree to the datastore",
                 usage =>
-                    "-p <portstree name> [-d <portstree description>] [-m <ports mount source>] [-u <portstree update command|NONE|CVSUP>] [-w <CVSweb URL>]",
+                    "-p <portstree name> [-d <portstree description>] [-m <ports mount source>] [-u <updatecommand>|CVSUP|NONE>] [-w <CVSweb URL>]",
                 optstr => 'm:p:u:d:w:',
         },
         "addPort" => {
@@ -225,17 +225,11 @@ my $ds = new TinderboxDS();
                 usage  => "-j <jail name>",
                 optstr => 'j:',
         },
-        "getSrcUpdateCmd" => {
-                func   => \&getSrcUpdateCmd,
-                help   => "Get the update command for the given jail",
-                usage  => "-j <jail name>",
-                optstr => 'j:',
-        },
-        "getPortsUpdateCmd" => {
-                func   => \&getPortsUpdateCmd,
-                help   => "Get the update command for the given portstree",
-                usage  => "-p <portstree name>",
-                optstr => 'p:',
+        "getUpdateCmd" => {
+                func   => \&getUpdateCmd,
+                help   => "Get the update command for the given object",
+                usage  => "-j <jail name>|-p <portstreename>",
+                optstr => 'j:p:',
         },
         "getSrcMount" => {
                 func   => \&getSrcMount,
@@ -319,7 +313,6 @@ my $ds = new TinderboxDS();
                 optstr => 't:f',
         },
         "updatePortsTree" => {
-                func => \&updatePortsTree,
                 help =>
                     "Run the configured update command on the specified portstree",
                 usage  => "-p <portstree name> [-l <last built timestamp>]",
@@ -508,14 +501,14 @@ my $ds = new TinderboxDS();
         "createJail" => {
                 help  => "Create a new jail",
                 usage =>
-                    "-j <jailname> [-t <tag>] [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE [-I]",
+                    "-j <jailname> [-t <tag>] [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE> [-I]",
                 optstr => 'j:t:d:CH:m:u:I',
         },
 
         "createPortsTree" => {
                 help  => "Create a new portstree",
                 usage =>
-                    "-p <portstreename> [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE [-w <cvsweburl>]",
+                    "-p <portstreename> [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE> [-w <cvsweburl>] [-I]",
                 optstr => 'p:d:CH:m:u:w:',
         },
 
@@ -1512,31 +1505,28 @@ sub getTagForJail {
         print $jail->getTag() . "\n";
 }
 
-sub getSrcUpdateCmd {
-        if (!$opts->{'j'}) {
-                usage("getSrcUpdateCmd");
-        }
+sub getUpdateCmd {
+	if ($opts->{'j'}) {
+		my $jailName = $opts->{'j'};
 
-        my $jail_name = $opts->{'j'};
+		cleanup($ds, 1, "Unknown jail, $jailName\n")
+			if (!$ds->isValidJail($jailName));
 
-        if (!$ds->isValidJail($jail_name)) {
-                cleanup($ds, 1, "Unknown jail, $jail_name\n");
-        }
+		my $jail = $ds->getJailByName($jailName);
+		print $jail->getUpdateCmd() . "\n";
 
-        my $jail = $ds->getJailByName($jail_name);
+	} elsif ($opts->{'p'}) {
+		my $portsTreeName = $opts->{'p'};
 
-        my $update_cmd = $jail->getUpdateCmd();
+		cleanup($ds, 1, "Unknown portstree, $portsTreeName\n")
+			if (!$ds->isValidPortsTree($portsTreeName));
 
-        if ($update_cmd eq "CVSUP") {
-                $update_cmd =
-                    "/usr/local/bin/cvsup -g $pb/jails/$jail_name/src-supfile";
-        } elsif ($update_cmd eq "NONE") {
-                $update_cmd = "";
-        } else {
-                $update_cmd = "$pb/scripts/$update_cmd $jail_name";
-        }
+		my $portsTree = $ds->getPortsTreeByName($portsTreeName);
+		print $portsTree->getUpdateCmd() . "\n";
 
-        print $update_cmd . "\n";
+	} else {
+		usage("getUpdateCmd");
+	}
 }
 
 sub getSrcMount {
@@ -1625,33 +1615,6 @@ sub setPortsMount {
                             . $ds->getError()
                             . "\n");
         }
-}
-
-sub getPortsUpdateCmd {
-        if (!$opts->{'p'}) {
-                usage("getPortsUpdateCmd");
-        }
-
-        my $portstree_name = $opts->{'p'};
-
-        if (!$ds->isValidPortsTree($portstree_name)) {
-                cleanup($ds, 1, "Unknown portstree, $portstree_name\n");
-        }
-
-        my $portstree = $ds->getPortsTreeByName($portstree_name);
-
-        my $update_cmd = $portstree->getUpdateCmd();
-
-        if ($update_cmd eq "CVSUP") {
-                $update_cmd =
-                    "/usr/local/bin/cvsup -g $pb/portstrees/$portstree_name/ports-supfile";
-        } elsif ($update_cmd eq "NONE") {
-                $update_cmd = "";
-        } else {
-                $update_cmd = "$pb/scripts/$update_cmd $portstree_name";
-        }
-
-        print $update_cmd . "\n";
 }
 
 sub reorgBuildPortsQueue {
@@ -2165,56 +2128,6 @@ sub rmPortFailReason {
                             . $opts->{'t'} . ": "
                             . $ds->getError()
                             . "\n");
-        }
-}
-
-sub updatePortsTree {
-        if (!$opts->{'p'}) {
-                usage("updatePortsTree");
-        }
-
-        my $name = $opts->{'p'};
-
-        if (!$ds->isValidPortsTree($name)) {
-                cleanup($ds, 1, "Unknown portstree $name\n");
-        }
-
-        my $portstree  = $ds->getPortsTreeByName($name);
-        my $update_cmd = $portstree->getUpdateCmd();
-
-        $portstree->setLastBuilt($opts->{'l'});
-
-        if ($update_cmd eq "CVSUP") {
-                if (!-x "/usr/local/bin/cvsup") {
-                        cleanup($ds, 1,
-                                "Failed to find executable cvsup in /usr/local/bin.\n"
-                        );
-                }
-                $update_cmd =
-                    "/usr/local/bin/cvsup -g $pb/portstrees/$name/ports-supfile";
-        } elsif ($update_cmd eq "NONE") {
-                $update_cmd = "";
-        } else {
-                $update_cmd .= " $name";
-        }
-
-        my $rc = 0;    # Allow null update commands to succeed.
-        if ($update_cmd) {
-                $rc = system($update_cmd);
-        }
-
-        if (!$rc) {
-
-                # The command completed successfully, so update the
-                # Last_Built time.
-                $ds->updatePortsTreeLastBuilt($portstree)
-                    or cleanup($ds, 1,
-                        "Failed to update last built value in the datastore: "
-                            . $ds->getError()
-                            . "\n");
-        } else {
-                cleanup($ds, 1,
-                        "Failed to update the portstree.  See output above.\n");
         }
 }
 

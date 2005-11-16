@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.21 2005/11/12 21:39:29 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.22 2005/11/16 01:07:14 ade Exp $
 #
 
 tinderEcho () {
@@ -56,218 +56,255 @@ killMountProcesses () {
     done
 }
 
-cleanupMount () {
-    mount=$1
-
-    if [ -d ${mount} ] ; then
-	if [ $(fstat -f ${mount} | wc -l) -gt 1 ] ; then
-	    killMountProcesses ${mount}
-	fi
-	umount ${mount} || echo "Cleanup of ${chroot}${mount} failed!"
-    fi
-}
-
 cleanupMounts () {
+    # set up defaults
     _build=""
     _jail=""
     _portstree=""
-    _destination=""
-    _ARCH=${ARCH:=$(uname -m)}
+    _type=""
+    _dstloc=""
+    _srcloc=""
 
-    while getopts d:b:p:j: OPT
+    # argument processing
+    while getopts b:d:j:p:t: arg
     do
-	case ${OPT} in
+	case ${arg} in
 
-	d)	  _destination=${OPTARG};;
-	b)	  _build=${OPTARG};;
-	p)	  _portstree=${OPTARG};;
-	j)	  _jail=${OPTARG};;
+	b)	_build=${OPTARG};;
+	d)	_dstloc=${OPTARG};;
+	j)	_jail=${OPTARG};;
+	p)	_portstree=${OPTARG};;
+	t)	_type=${OPTARG};;
+	?)	return 1;;
 
 	esac
     done
 
-    case ${_destination} in
+    case ${_type} in
 
-    jail)	if [ -z "${_jail}" ] ; then
-		    echo "jail has to be filled!" >&2
-		    return 1
-		fi
-		_destination=${pb}/jails/${_jail}
-		;;
+    buildports)
+	if [ -z "${_build}" ]; then
+	    echo "cleanupMounts: ${_type}: missing build"
+	    return 1
+	fi
+	_dstloc=${_dstloc:-${pb}/${_build}/a/ports}
+	;;
 
-    portstree)	if [ -z "${_portstree}" ] ; then
-		    echo "portstree has to be filled!" >&2
-		    return 1
-		fi
-		_destination=${pb}/portstrees/${_portstree}
-		;;
+    buildsrc)
+        if [ -z "${_build}" ]; then
+	    echo "cleanupMounts: ${_type}: missing build"
+	    return 1
+	fi
+	_dstloc=${_dstloc:-${pb}/${_build}/usr/src}
+	;;
 
-    build)	if [ -z "${_build}" ] ; then
-		    echo "build has to be filled!" >&2
-		    return 1
-		fi
-		_destination=${pb}/${_build}
-		if [ "${_ARCH}" = "i386" -o "${_ARCH}" = "amd64" ] ; then
-		    umount -f ${_destination}/compat/linux/proc >/dev/null 2>&1
-		fi
-		;;
+    ccache)
+	if [ -z "${_build}" ]; then
+	    echo "cleanupMounts: ${_type}: missing build"
+	    return 1
+	fi
+	_dstloc=${_dstloc:-${pb}/${_build}/ccache}
+	;;
 
-    distcache)	if [ -z "${_build}" ] ; then
-		    echo "build has to be filled!" >&2
-		    return 1
-		fi
-		_destination=${pb}/${_build}/distcache
-		;;
+    distcache)
+	if [ -z "${_build}" ]; then
+	    echo "cleanupMounts: ${_type}: missing build"
+	    return 1
+	fi
+	_dstloc=${_dstloc:-${pb}/${_build}/distcache}
+	;;
 
-    *)		echo "unknown destination type!"
-		return 1
-		;;
+    jail)
+	if [ -z "${_jail}" ]; then
+	    echo "cleanupMounts: ${_type}: missing jail"
+	    return 
+	fi
+	_dstloc=${_dstloc:-${pb}/jails/${_jail}/src}
+	_srcloc=$(${pb}/scripts/tc getSrcMount -j ${_jail})
+	;;
+
+    portstree)
+	if [ -z "${_portstree}" ]; then
+	    echo "cleanupMounts: ${_type}: missing portstree"
+	    return 1
+	fi
+	_dstloc=${_dstloc:-${pb}/portstrees/${_portstree}/ports}
+	_srcloc=$(${pb}/scripts/tc getPortsMount -p ${_portstree})
+	;;
+
+    *)
+	echo "cleanupMounts: ${_type}: unknown type"
+	return 1
+	;;
 
     esac
 
-    df | grep ' '${_destination}'[/$]' | sed 's|.* ||g' | sort -r | \
-   	while read mountpoint ; do
-	    cleanupMount ${mountpoint}
-	done
+    if [ -n "${_dstloc}" ]; then
+	mtpt=$(df | awk '$NF == mtpt { print $NF }' mtpt=${_dstloc})
+    fi
+    if [ -z "${mtpt}" -a -n "${_srcloc}" ]; then
+	mtpt=$(df | awk '$1 == mtpt { print $NF }' mtpt=${_srcloc})
+    fi
+
+    if [ -n "${mtpt}" ]; then
+	killMountProcesses ${mtpt}
+	if ! umount ${mtpt}; then
+	    echo "cleanupMounts: ${chroot}${mtpt} failed"
+	    return 1
+	fi
+    fi
 
     return 0
 }
 
 requestMount () {
-    _source=""
-    _destination=""
+    # set up defaults
+    _type=""
+    _srcloc=""
+    _dstloc=""
     _nullfs=0
     _readonly=0
     _build=""
     _jail=""
     _portstree=""
-    _fq_source=0
-    _quiet=0
-    _ccache_dir=${CCACHE_DIR:=/ccache}
-    _nullfs=0
+    _fqsrcloc=0
 
-    while getopts qnrs:d:b:p:j: OPT
+    # argument processing
+    while getopts b:d:j:np:rs:t: arg
     do
-	case ${OPT} in
+	case ${arg} in
 
-	n)	_nullfs=1;;
-	r)	_readonly=1;;
-	s)	_source=${OPTARG};;
-	d)	_destination=${OPTARG};;
 	b)	_build=${OPTARG};;
-	p)	_portstree=${OPTARG};;
+	d)	_dstloc=${OPTARG};;
 	j)	_jail=${OPTARG};;
-	q)	_quiet=1;;
+	n)	_nullfs=1;;
+	p)	_portstree=${OPTARG};;
+	r)	_readonly=1;;
+	s)	_srcloc=${OPTARG};;
+	t)	_type=${OPTARG};;
+	?)	return 1;;
 
 	esac
     done
 
-    case ${_destination} in
+    case ${_type} in
 
-    jail)	if [ -z "${_jail}" ] ; then
-		    echo "jail has to be filled!" >&2
-		    return 1
-		fi
-		_destination=${pb}/jails/${_jail}/src
-		if [ -z "${_source}" ] ; then
-		    _source=$(${pb}/scripts/tc getSrcMount -j ${_jail})
-		fi
-		_fq_source=1
-		;;
+    buildports)
+	if [ -z "${_build}" ] ; then
+	    echo "requestMount: ${_type}: missing build"
+	    return 1
+	fi
+	_portstree=$(${pb}/scripts/tc getPortsTreeForBuild -b ${_build})
+	_dstloc=${_dstloc:-${pb}/${_build}/a/ports}
 
-    portstree)	if [ -z "${_portstree}" ] ; then
-		    echo "portstree has to be filled!" >&2
-		    return 1
-		fi
-		_destination=${pb}/portstrees/${_portstree}/ports
-		if [ -z "${_source}" ] ; then
-		    _source=$(${pb}/scripts/tc getPortsMount -p ${_portstree})
-		fi
-		_fq_source=1
-		;;
+	if [ -z "${_srcloc}" ] ; then
+	    _srcloc=$(${pb}/scripts/tc getPortsMount -p ${_portstree})
+	    if [ -z "${_srcloc}" ] ; then
+		_srcloc=${_srcloc:=${pb}/portstrees/${_portstree}/ports}
+	    else
+		_fqsrcloc=1
+	    fi
+	fi
+	;;
 
-    buildsrc)	if [ -z "${_build}" ] ; then
-		    echo "build has to be filled!" >&2
-		    return 1
-		fi
-		_jail=$(${pb}/scripts/tc getJailForBuild -b ${_build})
-		_destination=${pb}/${_build}/usr/src
-		if [ -z "${_source}" ] ; then
-		    _source=$(${pb}/scripts/tc getSrcMount -j ${_jail})
-		    if [ -z "${_source}" ] ; then
-			_source=${_source:=${pb}/jails/${_jail}/src}
-		    else
-			_fq_source=1
-		    fi
-		fi
-		;;
+    buildsrc)
+	if [ -z "${_build}" ]; then
+	    echo "requestMount: ${_type}: missing build"
+	    return 1
+	fi
+	_jail=$(${pb}/scripts/tc getJailForBuild -b ${_build})
+	_dstloc=${_dstloc:-${pb}/${_build}/usr/src}
 
-    buildports)	if [ -z "${_build}" ] ; then
-		    echo "build has to be filled!" >&2
-		    return 1
-		fi
-		_portstree=$(${pb}/scripts/tc getPortsTreeForBuild -b ${_build})
-		_destination=${pb}/${_build}/a/ports
-		if [ -z "${_source}" ] ; then
-		    _source=$(${pb}/scripts/tc getPortsMount -p ${_portstree})
-		    if [ -z "${_source}" ] ; then
-			_source=${_source:=${pb}/portstrees/${_portstree}/ports}
-		    else
-			_fq_source=1
-		    fi
-		fi
-		;;
+	if [ -z "${_srcloc}" ]; then
+	    _srcloc=$(${pb}/scripts/tc getSrcMount -j ${_jail})
+	    if [ -z "${_srcloc}" ]; then
+		_srcloc=${_srcloc:=${pb}/jails/${_jail}/src}
+	    else
+		_fqsrcloc=1
+	    fi
+	fi
+	;;
 
-    distcache)	_destination=${pb}/${_build}/distcache
-		_fq_source=1
-		;;
+    ccache)
+	if [ -z "${_build}" ]; then
+	    echo "requestMount: ${_type}: missing build"
+	    return 1
+	fi
+	_dstloc=${_dstloc:-${pb}/${_build}/ccache}
+	;;
 
-    ccache)	_destination=${pb}/${_build}/${_ccache_dir}
-		;;
+    distcache)
+	if [ -z "${_build}" ]; then
+	    echo "requestMount: ${_type}: missing build"
+	    return 1
+	fi
+	_dstloc=${_dstloc:-${pb}/${_build}/distcache}
+	_fqsrcloc=1
+	;;
 
-    *)		echo "unknown destination type!"
-		return 1
-		;;
+    jail)
+	if [ -z "${_jail}" ]; then
+	    echo "requestMount: ${_type}: missing jail"
+	    return 1
+	fi
+	_dstloc=${_dstloc:-${pb}/jails/${_jail}/src}
+	_srcloc=${_srcloc:-$(${pb}/scripts/tc getSrcMount -j ${_jail})}
+	_fqsrcloc=1
+	;;
+
+    portstree)
+	if [ -z "${_portstree}" ] ; then
+	    echo "requestMount: ${_type}: missing portstree"
+	    return 1
+	fi
+	_dstloc=${_dstloc:-${pb}/portstrees/${_portstree}/ports}
+	_srcloc=${_srcloc:-$(${pb}/scripts/tc getPortsMount -p ${_portstree})}
+	_fqsrcloc=1
+	;;
+
+    *)
+	echo "requestMount: ${_type}: unknown type"
+	return 1
+	;;
 
     esac
 
-    if [ -z "${_source}" ] ; then
-	[ ${_quiet} -ne 1 ] && echo "source has to be filled!" >&2
+    if [ -z "${_srcloc}" ]; then
+	# we assume that we're running strictly from a local filesystem
+	# and that no mounts are required
+	return 0
+    fi
+    if [ -z "${_dstloc}" ]; then
+	echo "requestMount: ${_type}: missing destination location"
 	return 1
     fi
-
-    if [ -z "${_destination}" ] ; then
-	echo "destination has to be filled!" >&2
-	return 1
-    fi
-
+    
     # is the filesystem already mounted?
-    filesystem=$(df ${_destination} | awk '{a=$1}  END {print a}')
-    mountpoint=$(df ${_destination} | awk '{a=$NF} END {print a}')
+    fsys=$(df ${_dstloc} 2>/dev/null | awk '{a=$1}  END {print a}')
+    mtpt=$(df ${_dstloc} 2>/dev/null | awk '{a=$NF} END {print a}')
 
-    if [ "${filesystem}" = "${_source}" -a \
-	 "${mountpoint}" = "${_destination}" ] ; then
+    if [ "${fsys}" = "${_srcloc}" -a "${mtpt}" = "${_dstloc}" ]; then
 	return 0
     fi
 
     # is _nullfs mount specified?
-    if [ ${_nullfs} -eq 1 -a ${_fq_source} -ne 1 ] ; then
+    if [ ${_nullfs} -eq 1 -a ${_fqsrcloc} -ne 1 ] ; then
 	_options="-t nullfs"
     else
 	# it probably has to be a nfs mount then
-	# lets check what kind of _source we have. If it is allready in
+	# lets check what kind of _srcloc we have. If it is allready in
 	# a nfs format, we don't need to adjust anything
-	case ${_source} in
+	case ${_srcloc} in
 
 	[a-zA-Z0-9\.-_]*:/*)
 		_options="-o nfsv3,intr"
 		;;
 
 	*)
-		if [ ${_fq_source} -eq 1 ] ; then
-		    # some _source's are full qualified sources, means
+		if [ ${_fqsrcloc} -eq 1 ] ; then
+		    # some _srcloc's are full qualified sources, means
 		    # don't try to detect sth. or fallback to localhost.
-		    # The user wants exactly what he specified as _source
+		    # The user wants exactly what he specified as _srcloc
 		    # don't modify anything. If it's not a nfs mount, it has
 		    # to be a nullfs mount.
 		    _options="-t nullfs"
@@ -275,25 +312,25 @@ requestMount () {
 		    _options="-o nfsv3,intr"
 
 		    # find out the filesystem the requested source is in
-		    filesystem=$(df ${_source} | awk '{a=$1}  END {print a}')
-		    mountpoint=$(df ${_source} | awk '{a=$NF} END {print a}')
+		    fsys=$(df ${_srcloc} | awk '{a=$1}  END {print a}')
+		    mtpt=$(df ${_srcloc} | awk '{a=$NF} END {print a}')
 		    # determine if the filesystem the requested source
 		    # is a nfs mount, or a local filesystem
 
-		    case ${filesystem} in
+		    case ${fsys} in
 
 		    [a-zA-Z0-9\.-_]*:/*)
 			# maybe our destination is a subdirectory of the
 			# mountpoint and not the mountpoint itself.
 			# if that is the case, add the subdir to the mountpoint
-			_source="${filesystem}/$(echo $_source | \
-					sed 's|'${mountpoint}'||')"
+			_srcloc="${fsys}/$(echo $_srcloc | \
+					sed 's|'${mtpt}'||')"
 			;;
 
 		    *)
 			# not a nfs mount, nullfs not specified, so
 			# mount it as nfs from localhost
-			_source="localhost:/${_source}"
+			_srcloc="localhost:/${_srcloc}"
 			;;
 
 		    esac
@@ -308,11 +345,11 @@ requestMount () {
     fi
 
     # Sanity check, and make sure the destination directory exists
-    if [ ! -d ${_destination} ]; then
-	mkdir -p ${_destination}
+    if [ ! -d ${_dstloc} ]; then
+	mkdir -p ${_dstloc}
     fi
 
-    mount ${_options} ${_source} ${_destination}
+    mount ${_options} ${_srcloc} ${_dstloc}
     return ${?}
 }
 
@@ -325,14 +362,19 @@ buildenvlist () {
 
     cat ${pb}/scripts/lib/tinderbox.env
 
-    if [ -n "${jail}" ]; then
-	cat ${pb}/jails/${jail}/jail.env 2>/dev/null
+    envdir=${pb}/scripts/etc/env
+
+    if [ -f ${envdir}/GLOBAL ]; then
+	cat ${envdir}/GLOBAL
     fi
-    if [ -n "${portstree}" ]; then
-	cat ${pb}/portstrees/${portstree}/portstree.env 2>/dev/null
+    if [ -n "${jail}" -a -f ${envdir}/jail.${jail} ]; then
+	cat ${envdir}/jail.${jail}
     fi
-    if [ -n "${build}" ]; then
-	cat ${pb}/builds/${build}/build.env 2>/dev/null
+    if [ -n "${portstree}" -a -f ${envdir}/portstree.${portstree} ]; then
+	cat ${envdir}/portstree.${portstree}
+    fi
+    if [ -n "${build}" -a -f ${envdir}/build.${build} ]; then
+	cat ${envdir}/build.${build}
     fi
 }
 
@@ -345,17 +387,23 @@ buildenv () {
     save_IFS=${IFS}
     IFS='
 '
+    # Allow SRCBASE to be overridden
+    eval "export SRCBASE=${SRCBASE:-`realpath ${pb}/jails/${jail}/src`}" \
+	>/dev/null 2>&1
 
-    for _tb_var in `buildenvlist "${jail} "${portstree}" "${build}"`
+    for _tb_var in $(buildenvlist "${jail}" "${portstree}" "${build}")
     do
-	var=$(echo ${_tb_var} | sed \
+	var=$(echo "${_tb_var}" | sed \
 		-e "s|^#${major_version}||; \
 		    s|##PB##|${pb}|g; \
 		    s|##BUILD##|${build}|g; \
 		    s|##JAIL##|${jail}|g; \
 		    s|##PORTSTREE##|${portstree}|g" \
-		-E -e 's|\^\^([^\^]+)\^\^|${\1}|g')
-	eval "export ${var}" >/dev/null 2>&1
+		-E -e 's|\^\^([^\^]+)\^\^|${\1}|g' -e 's|^#.*$||')
+
+	if [ -n "${var}" ]; then
+	    eval "export ${var}" >/dev/null 2>&1
+	fi
     done
 
     IFS=${save_IFS}
