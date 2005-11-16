@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.93 2005/11/16 01:07:14 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.94 2005/11/16 18:07:00 ade Exp $
 #
 
 my $pb;
@@ -177,14 +177,14 @@ my $ds = new TinderboxDS();
         "addPort" => {
                 help =>
                     "Add a port, and optionally, its dependencies, to the datastore",
-                usage  => "{-b <build name> | -a} -d <port directory> [-r]",
-                optstr => 'ab:d:r',
+                usage  => "{-b <build name> | -a} -d <port directory> [-R]",
+                optstr => 'ab:d:R',
         },
 	"addPortToOneBuild" => {
 		func   => \&addPortToOneBuild,
 		help   => "INTERNAL function only",
 		usage  => "",
-		optstr => 'b:d:r',
+		optstr => 'b:d:R',
 	},
         "addBuildPortsQueueEntry" => {
                 func  => \&addBuildPortsQueueEntry,
@@ -1248,7 +1248,9 @@ sub addPortToOneBuild {
 	my $build     = $ds->getBuildByName($opts->{'b'});
 	my $makecache = new MakeCache($ENV{'PORTSDIR'}, $ENV{'PKGSUFFIX'});
 
-	if ($opts->{'r'}) {
+	if ($opts->{'R'}) {
+		addPorts($opts->{'d'}, $build, $makecache, undef);
+	} else {
 		my @deps = ($opts->{'d'});
 		my %seen =();
 		while (my $port = shift @deps) {
@@ -1257,8 +1259,6 @@ sub addPortToOneBuild {
 				$seen{$port} = 1;
 			}
 		}
-	} else {
-		addPorts($opts->{'d'}, $build, $makecache, undef);
         }
 }
 

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.19 2005/11/16 01:07:14 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.20 2005/11/16 18:07:00 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -1352,7 +1352,7 @@ init () {
 addPortToBuild () {
     build=$1
     portDir=$2
-    recursive=$3
+    norecurse=$3
 
     jail=$(${pb}/scripts/tc getJailForBuild -b ${build})
     portsTree=$(${pb}/scripts/tc getPortsTreeForBuild -b ${build})
@@ -1369,7 +1369,7 @@ addPortToBuild () {
     buildenv ${jail} ${portsTree} ${build}
     buildenvNoHost
 
-    ${pb}/scripts/tc addPortToOneBuild -b ${build} -d ${portDir} ${recursive}
+    ${pb}/scripts/tc addPortToOneBuild -b ${build} -d ${portDir} ${norecurse}
 
     cleanupMounts -t jail -j ${jail}
     cleanupMounts -t portstree -p ${portsTree}
@@ -1380,17 +1380,17 @@ addPort () {
     build=""
     allBuilds=0
     portDir=""
-    recursive=""
+    norecurse=""
 
     # argument handling
-    while getopts ab:d:r arg >/dev/null 2>&1
+    while getopts ab:d:R arg >/dev/null 2>&1
     do
 	case "${arg}" in
 
 	a)	allBuilds=1;;
 	b)	build="${OPTARG}";;
 	d)	portDir="${OPTARG}";;
-	r)	recursive="-r";;
+	R)	norecurse="-R";;
 	?)	return 1;;
 
 	esac
@@ -1416,7 +1416,7 @@ addPort () {
 
 	for build in ${allBuilds}
 	do
-	    addPortToBuild ${build} ${portDir} ${recursive}
+	    addPortToBuild ${build} ${portDir} ${norecurse}
 	done
     else
 	if ! tcExists Builds ${build}; then
@@ -1424,7 +1424,7 @@ addPort () {
 	    return 1
 	fi
 
-	addPortToBuild ${build} ${portDir} ${recursive}
+	addPortToBuild ${build} ${portDir} ${norecurse}
     fi
 
     return 0

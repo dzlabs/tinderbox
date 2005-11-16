@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.49 2005/11/13 04:39:47 ade Exp $
+$MCom: portstools/tinderbox/README,v 1.50 2005/11/16 18:07:00 ade Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -178,14 +178,14 @@ To run a Tinderbox build, and track the progress in the database, you must
 first add the port you wish to build to the database using the
 ${pb}/scripts/tc application:
 
-# cd ${pb}/scripts && ./tc addPort -b {BUILD} -d {PORT DIRECTORY} -r
+# cd ${pb}/scripts && ./tc addPort -b {BUILD} -d {PORT DIRECTORY}
 
 Where {BUILD} is the name of the Build for which this port should be built,
 and {PORT DIRECTORY} is the directory within the PortsTree where this port
 can be found.  For example, to build the GNOME 2 Desktop port for the
 Build ``5.4-FreeBSD'':
 
-# cd ${pb}/scripts && ./tc addPort -b 5.4-FreeBSD -d x11/gnome2 -r
+# cd ${pb}/scripts && ./tc addPort -b 5.4-FreeBSD -d x11/gnome2
 
 Note: a port does not have to be added to the database for Tinderbox to
 build it.  If you just want to do a quick ad hoc port build, forgo the

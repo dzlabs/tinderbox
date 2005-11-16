@@ -29,7 +29,7 @@ main_loop () {
 	    tinderEcho "INFO: Going to build ${PORT} on ${BUILD}"
 	    ${pb}/scripts/tc updateBuildPortsQueueEntryStatus \
 			-i "${ID}" -s PROCESSING
-	    ${pb}/scripts/tc addPort -b "${BUILD}" -d "${PORT}" -r
+	    ${pb}/scripts/tc addPort -b "${BUILD}" -d "${PORT}"
 
 	    if ${pb}/scripts/tc tinderbuild -b "${BUILD}" ${TINDERBUILD_ARGS} \
 			 "${PORT}" >/dev/null ; then
