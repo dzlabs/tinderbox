@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.21 2005/11/18 17:57:26 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.22 2005/11/20 19:27:57 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -831,7 +831,7 @@ enterBuild () {
     if [ "${resp}" = "y" ]; then
 	rm -f ${pb}/$build}/usr/ports/${portDir}/.sleepme
 	if [ -f ${pb}/$build}/usr/ports/${portDir}/.sleepme ]; then
-	    echo "enterBuild: failed to remove ${pb}/$build}/usr/ports/${portDir}/.sleepme!"
+	    echo "enterBuild: failed to remove ${pb}/${build}/usr/ports/${portDir}/.sleepme!"
 	else
 	    echo "enterBuild: .sleepme removed."
 	fi
