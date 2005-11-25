@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.50 2005/11/16 18:07:00 ade Exp $
+$MCom: portstools/tinderbox/README,v 1.51 2005/11/25 02:37:43 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -292,7 +292,7 @@ touch a file called ``.sleepme'' in the port's directory.  The moment
 the ``.sleepme'' file is detected by the build system, the port build will
 suspend just before
 executing ``make build.''  You can access the Build with the command:
-        ./tc enterBuild -b ${BUILD} -d ${PORT_DIRECTORY}
+        ./tc enterBuild -b {BUILD} -d {PORT_DIRECTORY}
 When you have finished, remove the ``.sleepme'' file, and the port build
 will continue.
 
