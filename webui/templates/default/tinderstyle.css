@@ -1,4 +1,4 @@
-<!-- $MCom: portstools/tinderbox/webui/templates/default/tinderstyle.css,v 1.6 2005/10/22 00:41:00 oliver Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/tinderstyle.css,v 1.7 2005/11/26 05:00:50 ade Exp $ //-->
 
 body { background-color: white }
 table { border: 2px solid black; border-collapse: collapse }
@@ -11,6 +11,7 @@ th { font-size:10px; background-color: rgb(255,238,238) }
 td { font-size:12px; border: 1px solid gray; padding-left: 3px; padding-right: 3px }
 
 td.port_success { background-color: #E8FFE8 }
+td.port_dud { background-color: yellow; font-weight: bold; text-align: center }
 td.port_leftovers { background-color: #FFFFD8; color: red; font-weight: bold; text-align: center }
 td.port_broken { background-color: #FFFFD8; color: red; font-weight: bold; text-align: center }
 td.port_fail { background-color: red }
