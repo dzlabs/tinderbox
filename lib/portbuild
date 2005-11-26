@@ -1,4 +1,8 @@
 #!/bin/sh
+#
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.79 2005/11/26 03:10:00 ade Exp $
+
+. ${pb}/scripts/lib/tinderlib.sh
 
 usage () {
     echo "usage: $0 <build name> <jail name> <portstree name> [-noclean] [-plistcheck] [-nullfs] [-fetch-original] [-nolog] ED PD FD BD RD pkgname dirname"
@@ -23,28 +27,28 @@ cleanup()
 	fi
     fi
 
-    if [ $noclean = 0 ]; then
-	rm -rf ${chroot}/tmp/*
-	for dir in ${cleandirs}; do
-	    if ! rm -rf ${chroot}${dir} >/dev/null 2>&1; then
-		chflags -R noschg ${chroot}${dir}
-		rm -rf ${chroot}${dir} >/dev/null 2>&1
-	    fi
+    umount ${chroot}/compat/linux/proc >/dev/null
+    umount ${chroot}/proc >/dev/null
+
+    if [ $noclean -eq 0 ]; then
+	for dir in ${cleandirs}
+	do
+	    cleanDirs ${build} ${chroot}${dir}
 	done
+	rm -f ${chroot}/tmp/*
+
 	chroot ${chroot} /sbin/ldconfig -R
-	chroot ${chroot} /sbin/ldconfig -aout -R
-	rm -rf ${chroot}/var/db/pkg/*
+	if [ ${ARCH} = "i386" ]; then
+	    chroot ${chroot} /sbin/ldconfig -aout -R
+	fi
     fi
 
-    echo -n "$pkgname done at "
-    date
-
+    echo "$pkgname done at `date`"
     ${pb}/scripts/tc updateBuildCurrentPort -b ${build}
-
     exit $error
 }
 
-. ${pb}/scripts/lib/tinderlib.sh
+#---------------------------------------------------------------------------
 
 error=0
 init=0
@@ -72,7 +76,7 @@ shift 3
 # see arguments in a very specific way, and silently did weird and
 # wonderful things if they weren't
 doneargs=0
-while [ $# -gt 0 -a ${doneargs} = 0 ]; do
+while [ $# -gt 0 -a ${doneargs} -eq 0 ]; do
 
     case "x$1" in
 
@@ -91,7 +95,7 @@ while [ $# -gt 0 -a ${doneargs} = 0 ]; do
     x-nolog)		nolog=1
 			shift;;
 
-    x-*)		echo "ERROR: portbuild: unknown argument: $1"
+    x-*)		echo "portbuild: unknown argument: $1"
 			exit 1;;
 
     *)			doneargs=1;;
@@ -117,6 +121,18 @@ if [ -f ${pb}/builds/${build}/duds ]; then
         exit 1
     fi
 fi
+
+chroot=${pb}/${build}
+
+# mount linprocfs if required
+if [ "${ARCH}" = "i386" -o "${ARCH}" = "amd64" ]; then
+    mkdir -p ${chroot}/compat/linux/proc
+    mount_linprocfs linprocfs ${chroot}/compat/linux/proc
+fi
+
+# mount procfs
+mkdir -p ${chroot}/proc
+mount_procfs procfs ${chroot}/proc
 
 portdir=$(echo ${dirname} | sed -e 's|^/usr/ports/||')
 
@@ -164,16 +180,13 @@ echo "building $pkgname in $chroot"
 
 ${pb}/scripts/tc updateBuildCurrentPort -b ${build} -n ${pkgname}
 
-chroot=${pb}/${build}
 packages=${pb}/packages/${build}
 
 major_version=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
 
-trap  "cleanup ${chroot} ${noclean} ${error} \"${cleandirs}\" ${pkgname} ${build}" 1 2 3 9 10 11 15
-
 if [ -n "${DISTFILE_CACHE}" ]; then
     export DISTCACHE=/distcache
-    if [ ${fetchorig} = 0 ]; then
+    if [ ${fetchorig} -eq 0 ]; then
         _MASTER_SITE_OVERRIDE='file:///distcache/${DIST_SUBDIR}/'
         export MASTER_SITE_OVERRIDE="${_MASTER_SITE_OVERRIDE} ${MASTER_SITE_OVERRIDE}"
     fi
@@ -185,6 +198,8 @@ mkdir -p ${chroot}/tmp/depends ${chroot}/tmp/distfiles ${chroot}/tmp/packages
 echo "building ${pkgname} in directory ${chroot}" | \
     tee ${chroot}/tmp/${pkgname}.log
 
+trap  "cleanup ${chroot} ${noclean} ${error} \"${cleandirs}\" ${pkgname} ${build}" 1 2 3 9 10 11 15
+
 # Don't build in a world-writable directory because some ports hardcode
 # this path and try to load things from it at runtime, which is bad for
 # user security
@@ -194,15 +209,6 @@ mkdir -p ${chroot}/${WRKDIRPREFIX}
 if [ x"${CCACHE_ENABLED}" ]; then
     unset CCACHE_DISABLE
 fi
-
-for dir in ${cleandirs}; do
-    if ! rm -rf ${chroot}${dir} >/dev/null 2>&1; then
-	chflags -R noschg ${chroot}${dir}
-	rm -rf ${chroot}${dir} >/dev/null 2>&1
-    fi
-done
-
-rm -rf ${chroot}/var/db/pkg/*
 
 # reset mtrees for plist checking
 mtree -deU -f ${chroot}/etc/mtree/BSD.root.dist \
@@ -257,7 +263,7 @@ fi
 
 last_version=$(${pb}/scripts/tc getPortLastBuiltVersion -d ${portdir} -b ${build})
 
-if [ "${error}" = 0 ]; then
+if [ "${error}" = "0" ]; then
     ln -sf ${pkgname}.log2 ${chroot}/tmp/make.log
     # Cache the distfiles if requested.  We will wait a maximum of
     # ten minutes before giving up on the lock.
@@ -271,7 +277,7 @@ if [ "${error}" = 0 ]; then
 	lcounter=0
 	lcounter_max=200
 	while [ -f ${chroot}${DISTCACHE}/.lock -a ${lcounter} -lt ${lcounter_max} ]; do
-	    echo "INFO: Waiting for DISTCACHE lock..."
+	    echo "${build}: Waiting for DISTCACHE lock..."
 	    lcounter=$(expr ${lcounter} + 1)
 	    sleep 3
 	done
@@ -299,11 +305,11 @@ if [ "${error}" = 0 ]; then
 	cp ${chroot}/tmp/work.tbz ${pb}/wrkdirs/${build}/${pkgname}.tbz
     fi
 
-    if [ "${error}" = 0 ]; then
+    if [ "${error}" = "0" ]; then
         if [ ! -z "${last_version}" ]; then
 	    oldpkgs=$(find ${packages} -name "${last_version}${PKGSUFFIX}")
 	    for _pkg in ${oldpkgs}; do
-	        echo "INFO: Removing old package ${_pkg}."
+	        echo "${build}: Removing old package ${_pkg}."
 	        rm -f ${_pkg}
 	    done
         fi
@@ -326,7 +332,7 @@ if [ "${error}" = 0 ]; then
 	${pb}/scripts/tc updatePortLastFailReason -d ${portdir} -b ${build} -r "__nofail__"
     else
 	cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${build}/${pkgname}.log
-	if [ ${nolog} = 0 ]; then
+	if [ ${nolog} -eq 0 ]; then
 	    reason=$(${pb}/scripts/tc processLog -l ${pb}/errors/${build}/${pkgname}.log)
 	    ${pb}/scripts/tc updatePortLastFailReason -d ${portdir} -b ${build} -r ${reason}
 	fi
@@ -339,7 +345,7 @@ else
     cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${build}/${pkgname}.log
     cp ${chroot}/tmp/${pkgname}.log ${pb}/logs/${build}/${pkgname}.log
 
-    if [ ${nolog} = 0 ]; then
+    if [ ${nolog} -eq 0 ]; then
         reason=$(${pb}/scripts/tc processLog -l ${pb}/errors/${build}/${pkgname}.log)
         ${pb}/scripts/tc updatePortLastFailReason -d ${portdir} -b ${build} -r ${reason}
     fi

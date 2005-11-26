@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.22 2005/11/16 01:07:14 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.23 2005/11/26 03:10:00 ade Exp $
 #
 
 tinderEcho () {
@@ -38,6 +38,34 @@ tinderExit () {
     else
 	exit 255
     fi
+}
+
+cleanDirs () {
+    id=$1; shift; dirs="$*"
+
+    for dir in $*
+    do
+	echo "${id}: cleaning out ${dir}"
+	# perform the first remove
+	rm -rf ${dir} >/dev/null 2>&1
+
+	# this may not have succeeded if there are schg files around
+	if [ -d ${dir} ]; then
+	    chflags -R noschg ${dir} >/dev/null 2>&1
+	    rm -rf ${dir} >/dev/null 2>&1
+	    if [ $? != 0 ]; then
+		echo "*** FAILED (rm ${dir})"
+		exit 1 
+	    fi
+	fi
+
+	# now recreate the directory
+	mkdir -p ${dir} >/dev/null 2>&1
+	if [ $? != 0 ]; then
+	    echo "***FAILED (mkdir ${dir})"
+	    exit 1
+	fi
+    done
 }
 
 killMountProcesses () {

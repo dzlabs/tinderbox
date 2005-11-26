@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.94 2005/11/16 18:07:00 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.95 2005/11/26 03:10:00 ade Exp $
 #
 
 my $pb;
@@ -534,7 +534,7 @@ my $ds = new TinderboxDS();
         "tinderbuild" => {
                 help  => "Generate packages from an installed Build",
                 usage =>
-                    "-b <build name> [-init] [-cleanpackages] [-updateports] [-skipmake] [-noclean] [-noduds] [-plistcheck] [-nullfs] [-cleandistfiles] [-fetch-original] [portdir/portname [...]]",
+                    "-b <build name> [-init] [-cleanpackages] [-updateports] [-skipmake] [-noclean] [-noduds] [-plistcheck] [-nullfs] [-cleandistfiles] [-fetch-original] [-onceonly] [portdir/portname [...]]",
                 optstr => 'b:',
         },
 

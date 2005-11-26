@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.23 2005/11/25 02:41:16 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.24 2005/11/26 03:10:00 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -40,7 +40,7 @@ generateSupFile () {
     echo "*default release=cvs tag=$3"
     echo "*default delete use-rel-suffix"
 
-    if [ $5 = 1 ]; then
+    if [ $5 -eq 1 ]; then
 	echo "*default compress"
     fi
 
@@ -50,35 +50,6 @@ generateSupFile () {
 tcExists () {
     list=$(${pb}/scripts/tc list$1 2>/dev/null)
     echo ${list} | grep -qw $2
-}
-
-cleanDirs () {
-    name=$1; shift; dirs="$*"
-
-    echo -n "${name}: cleaning up any previous leftovers... "
-    for dir in $*
-    do
-	# perform the first remove
-	rm -rf ${dir} >/dev/null 2>&1
-
-	# this may not have succeeded if there are schg files around
-	if [ -d ${dir} ]; then
-	    chflags -R noschg ${dir} >/dev/null 2>&1
-	    rm -rf ${dir} >/dev/null 2>&1
-	    if [ $? != 0 ]; then
-		echo "FAILED (rm ${dir})"
-		exit 1
-	    fi
-	fi
-
-	# now recreate the directory
-	mkdir -p ${dir} >/dev/null 2>&1
-	if [ $? != 0 ]; then
-	    echo "FAILED (mkdir ${dir})"
- 	    exit 1
-	fi
-    done
-    echo "done."
 }
 
 updateTree () {
@@ -101,7 +72,7 @@ updateTree () {
     fi
 
     eval ${cmd} > ${dir}/update.log 2>&1
-    if [ $? != 0 ]; then
+    if [ $? -ne 0 ]; then
 	echo "updateTree: ${what} ${name}: update failed"
 	echo "    see ${dir}/update.log for more details"
 	cleanupMounts -t ${what} ${flag} ${name}
@@ -133,7 +104,7 @@ Setup () {
     tinderEcho "INFO: Checking prerequisites ..."
 
     missing=$(checkPreReqs ${MAN_PREREQS})
-    if [ $? != 0 ]; then
+    if [ $? -ne 0 ]; then
 	tinderEcho "ERROR: The following mandatory dependencies are missing.  These must be installed prior to running the Tinderbox setup script."
 	tinderEcho "ERROR:   ${missing}"
 	exit 1
@@ -141,7 +112,7 @@ Setup () {
 
     # Now, check the optional pre-reqs (for web usage).
     missing=$(checkPreReqs ${OPT_PREREQS})
-    if [ $? != 0 ]; then
+    if [ $? -ne 0 ]; then
 	tinderEcho "WARN: The following option dependencies are missing.  These are required to use the Tinderbox web front-ends."
 	tinderEcho "WARN:  ${missing}"
     fi
@@ -226,7 +197,7 @@ Upgrade () {
     db_driver=$(getDbDriver)
     dbinfo=$(getDbInfo ${db_driver})
 
-    if [ $? = 0 ]; then
+    if [ $? -eq 0 ]; then
 	db_admin_host=${dbinfo%:*}
 	db_name=${dbinfo##*:}
 	db_admin=${db_admin_host%:*}
@@ -253,7 +224,7 @@ Upgrade () {
 	shift
     done
 
-    if [ ${do_load} = 0 ]; then
+    if [ ${do_load} -eq 0 ]; then
 	tinderEcho "WARN: Database migration was not done.  If you proceed, you may encounter errors.  It is recommended you manually load any necessary schema updates, then re-run this script.  If you have already loaded the database schema, type 'y' or 'yes' to continue the migration."
 	echo ""
 
@@ -406,7 +377,7 @@ buildJail () {
     echo "${jailName}: making world"
     cd ${SRCBASE} && env DESTDIR=${J_TMPDIR} \
 	make world > ${jailBase}/world.log 2>&1
-    if [ $? != 0 ]; then
+    if [ $? -ne 0 ]; then
 	echo "ERROR: world failed - see ${jailBase}/world.log"
 	exit 1
     fi
@@ -415,7 +386,7 @@ buildJail () {
     echo "${jailName}: making distribution"
     cd ${SRCBASE}/etc && env DESTDIR=${J_TMPDIR} \
 	make distribution > ${jailBase}/distribution.log 2>&1
-    if [ $? != 0 ]; then
+    if [ $? -ne 0 ]; then
 	echo "ERROR: distribution failed - see ${jailBase}/distribution.log"
 	exit 1
     fi
@@ -447,7 +418,7 @@ buildJail () {
     TARBALL=${pb}/jails/${jailName}/${jailName}.tar
     tar -C ${J_TMPDIR} -cf ${TARBALL}.new . && \
 	mv -f ${TARBALL}.new ${TARBALL}
-    if [ $? != 0 ]; then
+    if [ $? -ne 0 ]; then
 	echo "ERROR: tarball creation failed."
         exit 1
     fi
@@ -549,7 +520,6 @@ createJail () {
 
     # clean out any previous directories
     basedir=${pb}/jails/${jailName}
-    cleanupMounts -t jail -j ${jailName}
     cleanDirs ${jailName} ${basedir}
 
     # set up the directory
@@ -583,17 +553,17 @@ createJail () {
 
     ${pb}/scripts/tc addJail -j ${jailName} \
 	-t ${tag} ${updateCmd} ${mountSrc} "${descr}"
-    if [ $? != 0 ]; then
+    if [ $? -ne 0 ]; then
 	echo "FAILED."
 	exit 1
     fi
     echo "done."
 
     # now initialize the jail (unless otherwise requested)
-    if [ ${init} = 1 ]; then
+    if [ ${init} -eq 1 ]; then
 	echo "${jailName}: initializing new jail..."
 	makeJail -j ${jailName}
-	if [ $? != 0 ]; then
+	if [ $? -ne 0 ]; then
 	    echo "FAILED."
 	    exit 1
 	fi
@@ -737,13 +707,13 @@ createPortsTree () {
 
     ${pb}/scripts/tc addPortsTree -p ${portsTreeName} \
 	-u ${updateCmd} ${mountSrc} ${cvswebUrl} "${descr}"
-    if [ $? != 0 ]; then
+    if [ $? -ne 0 ]; then
 	echo "FAILED."
 	exit 1
     fi
     echo "done."
 
-    if [ ${init} = 1 ]; then
+    if [ ${init} -eq 1 ]; then
 	updatePortsTree -p ${portsTreeName}
     fi
 
@@ -822,7 +792,7 @@ enterBuild () {
 
     echo "enterBuild: Continuing port build."
 
-    if [ ${autoSleep} = 1 ]; then
+    if [ ${autoSleep} -eq 1 ]; then
         resp="y"
     else
 	echo -n "Remove .sleepme too? [yN] "
@@ -871,8 +841,8 @@ makeBuild () {
     JAIL_TARBALL=${pb}/jails/${jailName}/${jailName}.tar
 
     if [ ! -f ${JAIL_TARBALL} ]; then
-	echo "ERROR: tarball for jail \"${jailName}\" doesn't exist."
-	echo "ERROR: run \"tc makeJail -j ${jailName}\" first."
+	echo "makeBuild: tarball for jail \"${jailName}\" doesn't exist."
+	echo "           run \"tc makeJail -j ${jailName}\" first."
 	exit 1
     fi
 
@@ -959,17 +929,17 @@ createBuild () {
 
     ${pb}/scripts/tc addBuild -b ${buildName} \
 	-j ${jailName} -p ${portsTreeName} "${descr}"
-    if [ $? != 0 ]; then
+    if [ $? -ne 0 ]; then
 	echo "FAILED."
 	exit 1
     fi
     echo "done."
 
-    if [ ${init} = 1 ]; then
+    if [ ${init} -eq 1 ]; then
 	echo -n "${buildName}: initializing..."
 	makeBuild -b ${buildName}
 
-	if [ $? != 0 ]; then
+	if [ $? -ne 0 ]; then
 	    echo "FAILED."
 	    exit 1
 	fi
@@ -990,7 +960,6 @@ tinderbuild_reset () {
     cleanupMounts -t ccache -b $1
     cleanupMounts -t distcache -b $1
     umount -f ${pb}/$1/dev >/dev/null 2>&1
-    umount -f ${pb}/$1/compat/linux/proc >/dev/null 2>&1
 }
 
 tinderbuild_cleanup () {
@@ -1006,7 +975,7 @@ tinderbuild_cleanup () {
 tinderbuild_setup () {
     # Make sure everything is dismounted, clean out the build tree
     # and recreate it from scratch
-    echo "INFO: Creating build directory for ${build}"
+    echo "tinderbuild: Creating build directory for ${build}"
     tinderbuild_reset ${build}
     makeBuild -b ${build}
 
@@ -1014,7 +983,7 @@ tinderbuild_setup () {
     # not need to be doing this every single time portbuild is called
 
     chroot=${pb}/${build}
-    echo "INFO: Finalizing chroot environment"
+    echo "tinderbuild: Finalizing chroot environment"
 
     # Mount ports/
     if ! requestMount -t buildports -b ${build} -r ${nullfs}; then
@@ -1037,7 +1006,7 @@ tinderbuild_setup () {
 	mkdir -p ${chroot}/libexec
 	mkdir -p ${chroot}/lib
 	if [ "${ARCH}" = "i386" -o "${ARCH}" = "amd64" ]; then
-	    cp -p /sbin/mount_linprocfs /sbin/mount /sbin/umount ${chroot}/sbin
+	    cp -p /sbin/mount /sbin/umount ${chroot}/sbin
 	    cp -p /lib/libufs.so.[0-9]* ${chroot}/lib
 	fi
 	cp -p /libexec/ld-elf.so.1 ${chroot}/libexec
@@ -1076,20 +1045,14 @@ tinderbuild_setup () {
     # Mount /dev, since we're going to be chrooting shortly
     mount -t devfs devfs ${chroot}/dev >/dev/null 2>&1
 
-    # Some linux-related ports need linprocfs
-    if [ ${ARCH} = "i386" -o ${ARCH} = "amd64" ]; then
-	mkdir -p ${chroot}/compat/linux/proc
-	mount_linprocfs linprocfs ${chroot}/compat/linux/proc
-    fi
-
     # Install a couple of tinderbox binaries
     if ! cp -p ${pb}/scripts/lib/buildscript ${chroot}; then
-	echo "ERROR: cant copy buildscript"
+	echo "tinderbuild: ${build}: cant copy buildscript"
 	tinderbuild_cleanup 1
     fi
 
     if ! cc -o ${chroot}/pnohang -static ${pb}/scripts/lib/pnohang.c; then
-	echo "ERROR: cant compile pnohang"
+	echo "tinderbuild: ${build}: cant compile pnohang"
 	tinderbuild_cleanup 1
     fi
 
@@ -1105,17 +1068,17 @@ tinderbuild_setup () {
 	    tinderbuild_cleanup 1
 	fi
 
-	if [ ${cleandistfiles} = 1 ]; then
-	    echo "INFO: Cleaning out distfile cache"
+	if [ ${cleandistfiles} -eq 1 ]; then
+	    echo "tinderbuild: ${build}: Cleaning out distfile cache"
 	    rm -rf ${chroot}/distcache/*
 	fi
     fi
 
     # Handle ccache
-    if [ ${CCACHE_ENABLED} = 1 ]; then
+    if [ ${CCACHE_ENABLED} -eq 1 ]; then
 
 	# per-build, or per-jail, ccache?
-	if [ ${CCACHE_JAIL} = 1 ]; then
+	if [ ${CCACHE_JAIL} -eq 1 ]; then
 	    ccacheDir=${pb}/${CCACHE_DIR}/${jail}
 	else
 	    ccacheDir=${pb}/${CCACHE_DIR}/${build}
@@ -1169,6 +1132,7 @@ tinderbuild () {
     cleanpackages=0
     init=0
     jobs=1
+    onceonly=0
     noduds=""
     nullfs=""
     pbargs=""
@@ -1182,7 +1146,7 @@ tinderbuild () {
 	x-b)
     	    shift
 	    if ! tcExists Builds $1; then
-		echo "ERROR: Build, \"$1\" is not a valid build."
+		echo "tinderbuild: Build, \"$1\" is not a valid build."
 		exit 1
 	    fi
 	    build=$1
@@ -1191,10 +1155,10 @@ tinderbuild () {
 	x-jobs)
 	    shift
 	    if ! expr -- "$1" : "^[[:digit:]]\{1,\}$" >/dev/null 2>&1 ; then
-		echo "ERROR: The argument to -jobs must be a number."
+		echo "tinderbuild: The argument to -jobs must be a number."
 		exit 1
 	    elif [ $1 -lt 1 ]; then
-		echo "ERROR: The argument to -jobs must be a number >= 1."
+		echo "tinderbuild: The argument to -jobs must be a number >= 1."
 		exit 1
 	    fi
 	    jobs=$1
@@ -1214,6 +1178,7 @@ tinderbuild () {
 	x-nolog)		pbargs="${pbargs} -nolog";;
 	x-nullfs)		pbargs="${pbargs} -nullfs"; nullfs="-n";;
 	x-plistcheck)		pbargs="${pbargs} -plistcheck";;
+	x-onceonly)		onceonly=1;;
 
 	-*)			return 1;;
 	*)			ports="${ports} $1";;
@@ -1230,12 +1195,17 @@ tinderbuild () {
     lock=${pb}/builds/${build}/lock
 
     if [ -e ${lock} ]; then
-	echo "ERROR: Lock file ${lock} exists; exiting."
+	echo "tinderbuild: Lock file ${lock} exists; exiting."
+	exit 1
+    fi
+
+    if ! mkdir -p ${pb}/builds/${build} ; then
+	echo "tinderbuild: couldn't create build directory; exiting."
 	exit 1
     fi
 
     if ! touch ${lock} ; then
-	echo "ERROR: Lock file ${lock} could not be created; exiting."
+	echo "tinderbuild: Lock file ${lock} could not be created; exiting."
 	exit 1
     fi
 
@@ -1269,7 +1239,7 @@ tinderbuild () {
     done
 
     # Clean out all old packages if requested
-    if [ ${cleanpackages} = 1 ]; then
+    if [ ${cleanpackages} -eq 1 ]; then
 	rm -rf ${PACKAGES}
 	rm -rf ${pb}/logs/${build}
 	rm -rf ${pb}/errors/${build}
@@ -1281,21 +1251,21 @@ tinderbuild () {
     mkdir -p ${pb}/errors/${build}
 
     # (Re)create jail if needed
-    if [ ${init} = 1 -o \( ! -d ${pb}/${build} -a \
+    if [ ${init} -eq 1 -o \( ! -d ${pb}/${build} -a \
 			   ! -f ${pb}/jails/${jail}/${jail}.tar \) ]; then
-	echo "INFO: Updating ${jail} jail for ${build}"
+	echo "tinderbuild: Updating ${jail} jail for ${build}"
 	${pb}/scripts/tc makeJail -j ${jail}
     fi
 
     # Update ports tree if required
-    if [ ${updateports} = 1 ]; then
-	echo "INFO: Updating ${portstree} portstree for ${build}"
+    if [ ${updateports} -eq 1 ]; then
+	echo "tinderbuild: Updating ${portstree} portstree for ${build}"
 	${pb}/scripts/tc updatePortsTree -p ${portstree}
     fi
 
     # Create makefile if required
-    if [ ${skipmake} = 0 ]; then
-	echo "INFO: creating makefile..."
+    if [ ${skipmake} -eq 0 ]; then
+	echo "tinderbuild: creating makefile..."
 
 	# Need to do this in a subshell so as to only hide the host
 	# environment during makefile creation
@@ -1308,8 +1278,8 @@ tinderbuild () {
 	    fi
 	    ${pb}/scripts/lib/makemake ${noduds} ${build} ${ports}
 	)
-	if [ $? != 0 ]; then
-	    echo "ERROR: failed to generate Makefile for ${build}"
+	if [ $? -ne 0 ]; then
+	    echo "tinderbuild: failed to generate Makefile for ${build}"
 	    cleanupMounts -t portstree -p ${portstree}
 	    tinderbuild_cleanup 1
 	else
@@ -1321,7 +1291,7 @@ tinderbuild () {
     osmajor=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
     case ${osmajor} in
     4|5|6|7)	tinderbuild_setup;;
-    *)		echo "ERROR: tinderbox: unhandled OS version: ${osmajor}"
+    *)		echo "tinderbuild: unhandled OS version: ${osmajor}"
 		tinderbuild_cleanup 1
 		;;
     esac
@@ -1329,7 +1299,9 @@ tinderbuild () {
     # Seatbelts off.  Away we go.
     ${pb}/scripts/tc updateBuildStatus -b ${build} -s PORTBUILD
     tinderbuild_phase 0 ${jobs}
-    tinderbuild_phase 1 ${jobs}
+    if [ ${onceonly} -ne 1 ]; then
+	tinderbuild_phase 1 ${jobs}
+    fi
     tinderbuild_cleanup 0
 }
 
@@ -1403,7 +1375,7 @@ addPort () {
 	return 1
     fi
 
-    if [ ${allBuilds} = 1 ]; then
+    if [ ${allBuilds} -eq 1 ]; then
 	if [ ! -z "${build}" ]; then
 	    echo "addPort: -a and -b are mutually exclusive"
 	    return 1
