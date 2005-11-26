@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.51 2005/11/25 02:37:43 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.52 2005/11/26 20:12:06 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -239,6 +239,7 @@ The tinderbuild function also accepts some additional command line arguments:
  -jobs <n>       : starts <n> number of parallel port builds (NOTE: the default
                    is 1, and for best results should not exceed the number
                    of physical CPUs in the Tinderbox host)
+ -onceonly       : only performs one build pass (i.e. tinderbuild Phase 1)
 
 Maintenance:
 ------------
