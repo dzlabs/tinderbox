@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.95 2005/11/26 03:10:00 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.96 2005/11/26 04:08:21 ade Exp $
 #
 
 my $pb;
@@ -353,7 +353,7 @@ my $ds = new TinderboxDS();
                 help =>
                     "Update the specified port's last build status for the specified build",
                 usage =>
-                    "-d <port directory> -b <build name> -s <UNKNOWN|SUCCESS|FAIL>",
+                    "-d <port directory> -b <build name> -s <UNKNOWN|SUCCESS|FAIL|DUD>",
                 optstr => 'd:b:s:',
         },
         "updatePortLastFailReason" => {

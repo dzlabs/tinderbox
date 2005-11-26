@@ -82,7 +82,7 @@ CREATE TABLE build_ports (
 	build_id INTEGER REFERENCES builds(build_id) ON UPDATE CASCADE ON DELETE RESTRICT,
 	port_id INTEGER REFERENCES ports(port_id) ON UPDATE CASCADE ON DELETE RESTRICT,
 	last_built TIMESTAMP,
-	last_status VARCHAR(16) CHECK (last_status IN ('UNKNOWN','SUCCESS','FAIL','BROKEN', 'LEFTOVERS')) DEFAULT 'UNKNOWN',
+	last_status VARCHAR(16) CHECK (last_status IN ('UNKNOWN','SUCCESS','FAIL','BROKEN', 'LEFTOVERS', 'DUD')) DEFAULT 'UNKNOWN',
 	last_fail_reason VARCHAR(20) NOT NULL DEFAULT '__nofail__' REFERENCES port_fail_reasons(port_fail_reason_tag) ON UPDATE CASCADE ON DELETE RESTRICT,
 	last_successful_built TIMESTAMP,
 	last_built_version VARCHAR(100)

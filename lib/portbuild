@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.79 2005/11/26 03:10:00 ade Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.80 2005/11/26 04:08:21 ade Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -115,14 +115,18 @@ dirname=$7
 echo ${pkgname}
 echo ${dirname}
 
+chroot=${pb}/${build}
+portdir=$(echo ${dirname} | sed -e 's|^/usr/ports/||')
+
 if [ -f ${pb}/builds/${build}/duds ]; then
     if grep -qxF ${pkgname} ${pb}/builds/${build}/duds; then
         echo "skipping ${pkgname} (found in duds)"
+	${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${build}
+	${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${build} -s DUD
+	${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
         exit 1
     fi
 fi
-
-chroot=${pb}/${build}
 
 # mount linprocfs if required
 if [ "${ARCH}" = "i386" -o "${ARCH}" = "amd64" ]; then
@@ -133,8 +137,6 @@ fi
 # mount procfs
 mkdir -p ${chroot}/proc
 mount_procfs procfs ${chroot}/proc
-
-portdir=$(echo ${dirname} | sed -e 's|^/usr/ports/||')
 
 # Want to use the /etc/make.conf in the chroot (Jail)
 unset __MAKE_CONF

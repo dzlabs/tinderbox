@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.7 2005/10/30 11:39:46 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.8 2005/11/26 04:08:21 ade Exp $
 #
 
 require_once 'module/module.php';
@@ -110,6 +110,12 @@ class modulePorts extends module {
 					$status_field_class  = 'port_fail';
 					$status_field_letter = '&nbsp;';
 					$port_link_logfile   = $errorloguri . '/' . $build_name . '/' . $port_logfilename;
+					$port_link_package   = '';
+					break;
+				case 'DUD':
+					$status_field_class  = 'port_dud';
+					$status_field_letter = 'D';
+					$port_link_logfile   = '';
 					$port_link_package   = '';
 					break;
 				default:
