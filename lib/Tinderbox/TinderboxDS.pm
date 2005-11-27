@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.67 2005/11/27 18:16:09 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.68 2005/11/27 22:46:04 marcus Exp $
 #
 
 package TinderboxDS;
@@ -943,7 +943,7 @@ sub updatePortLastStatus {
                 BROKEN    => 1,
                 LEFTOVERS => 1,
                 FAIL      => 1,
-		DUD	  => 1,
+                DUD       => 1,
         );
 
         if (!defined($status_hash{$status})) {
@@ -1477,8 +1477,8 @@ sub removePortFailReason {
 }
 
 sub findBuildsForJail {
-        my $self  = shift;
-        my $jail  = shift;
+        my $self   = shift;
+        my $jail   = shift;
         my @builds = ();
 
         my @results;
@@ -1495,9 +1495,9 @@ sub findBuildsForJail {
 }
 
 sub findBuildsForPortsTree {
-        my $self       = shift;
-        my $portstree  = shift;
-        my @portstrees = ();
+        my $self      = shift;
+        my $portstree = shift;
+        my @builds    = ();
 
         my @results;
         my $rc =
@@ -1508,9 +1508,9 @@ sub findBuildsForPortsTree {
                 return ();
         }
 
-        @portstrees = $self->_newFromArray("PortsTree", @results);
+        @builds = $self->_newFromArray("Build", @results);
 
-        return @portstrees;
+        return @builds;
 }
 
 sub findPortFailPatternsWithReason {
@@ -1757,10 +1757,10 @@ sub _doQuery {
 
         my $_sth;              # This is the real statement handler.
 
-	if (defined($ENV{'TINDERBOX_QUERY_DEBUG'})) {
-		printf STDERR "TINDERBOX_SQL:\n\tquery = %s\n\tvalues = %s\n",
-			$query, join(', ', @{$params});
-	}
+        if (defined($ENV{'TINDERBOX_QUERY_DEBUG'})) {
+                printf STDERR "TINDERBOX_SQL:\n\tquery = %s\n\tvalues = %s\n",
+                    $query, join(', ', @{$params});
+        }
 
         $_sth = $self->{'dbh'}->prepare($query);
 
