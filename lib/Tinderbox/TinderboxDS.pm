@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.66 2005/11/26 04:08:21 ade Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.67 2005/11/27 18:16:09 marcus Exp $
 #
 
 package TinderboxDS;
@@ -1479,7 +1479,7 @@ sub removePortFailReason {
 sub findBuildsForJail {
         my $self  = shift;
         my $jail  = shift;
-        my @jails = ();
+        my @builds = ();
 
         my @results;
         my $rc = $self->_doQueryHashRef("SELECT * FROM builds WHERE jail_id=?",
@@ -1489,9 +1489,9 @@ sub findBuildsForJail {
                 return ();
         }
 
-        @jails = $self->_newFromArray("Jail", @results);
+        @builds = $self->_newFromArray("Build", @results);
 
-        return @jails;
+        return @builds;
 }
 
 sub findBuildsForPortsTree {
