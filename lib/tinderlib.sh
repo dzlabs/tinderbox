@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.23 2005/11/26 03:10:00 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.24 2005/12/02 02:00:01 marcus Exp $
 #
 
 tinderEcho () {
@@ -563,14 +563,15 @@ checkPreReqs () {
 migDb () {
     do_load=$1
     db_driver=$2
-    db_host=$3
-    db_name=$4
+    db_admin=$3
+    db_host=$4
+    db_name=$5
     mig_file=${pb}/scripts/upgrade/mig_${db_driver}_tinderbox-${MIG_VERSION_FROM}_to_${MIG_VERSION_TO}.sql
 
     if [ -s "${mig_file}" ]; then
 	if [ ${do_load} = 1 ]; then
 	    tinderEcho "INFO: Migrating database schema from ${MIG_VERSION_FROM} to ${MIG_VERSION_TO} ..."
-	    if ! loadSchema "${mig_file}" ${db_driver} ${db_host} ${db_name} ; then
+	    if ! loadSchema "${mig_file}" ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
 	        tinderEcho "ERROR: Failed to load upgrade database schema."
 	        return 2
 	    fi

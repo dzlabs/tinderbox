@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup-pgsql.sh,v 1.9 2005/10/15 19:44:50 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup-pgsql.sh,v 1.10 2005/12/02 02:00:01 marcus Exp $
 #
 
 DB_MAN_PREREQS="databases/p5-DBD-Pg databases/postgresql*-client"
@@ -133,7 +133,7 @@ if [ ${do_db} = 1 ]; then
     echo ""
 
     tinderEcho "INFO: Loading Tinderbox schema into ${db_name} ..."
-    load_schema ${schema_file} pgsql ${db_user} ${db_host} ${db_name}
+    loadSchema ${schema_file} pgsql ${db_user} ${db_host} ${db_name}
 
     if [ $? != 0 ]; then
 	tinderExit "ERROR: Database schema load failed!  Consult the output above for more information." $?
