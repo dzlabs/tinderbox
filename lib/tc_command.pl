@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.97 2005/12/07 17:52:07 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.98 2005/12/07 19:18:05 ade Exp $
 #
 
 my $pb;
@@ -98,14 +98,6 @@ my $ds = new TinderboxDS();
                 usage =>
                     "[-o <jail object directory> | -O] [-h <host name> | -G] | -G -h <host name>",
                 optstr => 'o:Oh:G',
-        },
-        "configTinderd" => {
-                func => \&configTinderd,
-                help =>
-                    "Configure Tinderbox tinder daemon (tinderd) parameters",
-                usage =>
-                    "[-t <sleep time>] [-h <host name> | -G] | -G -h <host name>",
-                optstr => 't:h:G',
         },
         "listJails" => {
                 func  => \&listJails,
@@ -780,41 +772,6 @@ sub configDistfile {
         $ds->updateConfig("distfile", $host, @config)
             or cleanup($ds, 1,
                       "Failed to update distfile configuration: "
-                    . $ds->getError()
-                    . "\n");
-}
-
-sub configTinderd {
-        my @config = ();
-        my $sleeptime;
-        my $host;
-
-        $host = _configGetHost($opts->{'h'});
-
-        if (scalar(keys %{$opts}) == 0
-                || (scalar(keys %{$opts}) == 1 && ($opts->{'h'} ^ $opts->{'G'}))
-            )
-        {
-                configGet("tinderd", $host);
-                cleanup($ds, 0, undef);
-        }
-
-        if ($opts->{'G'} && $host) {
-                $ds->defaultConfig("tinderd", $host);
-                cleanup($ds, 0, undef);
-        }
-
-        $sleeptime = new TBConfig();
-        $sleeptime->setOptionName("sleeptime");
-
-        if ($opts->{'t'}) {
-                $sleeptime->setOptionValue($opts->{'t'});
-                push @config, $sleeptime;
-        }
-
-        $ds->updateConfig("tinderd", $host, @config)
-            or cleanup($ds, 1,
-                      "Failed to update tinderd configuration: "
                     . $ds->getError()
                     . "\n");
 }
