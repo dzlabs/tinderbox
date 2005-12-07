@@ -1,4 +1,4 @@
-<!-- $MCom: portstools/tinderbox/webui/templates/default/tinderstyle.css,v 1.7 2005/11/26 05:00:50 ade Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/tinderstyle.css,v 1.8 2005/12/07 17:52:08 ade Exp $ //-->
 
 body { background-color: white }
 table { border: 2px solid black; border-collapse: collapse }
@@ -21,14 +21,7 @@ td.build_portbuild { background-color: green }
 td.build_prepare { background-color: lightblue }
 td.build_default {  }
 
-td.queue_entry_enqueued { background-color: grey }
-td.queue_entry_processing { background-color: green }
-td.queue_entry_success { background-color: #E8FFE8 }
-td.queue_entry_fail { background-color: red }
-
 td.fail_reason_COMMON { background-color: red; color: white}
 a.fail_reason_COMMON { color: white }
 td.fail_reason_RARE { background-color: orange }
 td.fail_reason_TRANSIENT { background-color: yellow }
-
-

@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/user_admin.tpl,v 1.3 2005/07/21 11:28:29 oliver Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/user_admin.tpl,v 1.4 2005/12/07 17:52:08 ade Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -18,8 +18,6 @@
 
 <form method="post" action="index.php">
 <?=$user_properties?>
-<p><br /></p>
-<?=$user_permissions?>
 <p>
 <?if($add==true){?>
 <input type="hidden" name="action" value="add_user" />

@@ -104,22 +104,6 @@ CREATE TABLE config (
 	PRIMARY KEY (config_option_name, host_id)
 );
 
--- DROP TABLE build_ports_queue CASCADE;
-CREATE TABLE build_ports_queue (
-	build_ports_queue_id SERIAL PRIMARY KEY,
-	enqueue_date TIMESTAMP,
-	completion_date TIMESTAMP,
-	build_id INTEGER REFERENCES builds(build_id) ON UPDATE CASCADE,
-	user_id INTEGER REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
-	port_directory VARCHAR(255) NOT NULL,
-	priority INTEGER NOT NULL DEFAULT 10,
-	host_id INTEGER REFERENCES hosts(host_id) ON UPDATE CASCADE,
-	email_on_completion BOOLEAN NOT NULL,
-	status VARCHAR(16) CHECK (status IN ('ENQUEUED','PROCESSING','SUCCESS','FAIL')) DEFAULT 'ENQUEUED'
-);
-CREATE INDEX build_ports_queue_host_id_idx ON build_ports_queue(host_id);
-CREATE INDEX build_ports_queue_user_id_idx ON build_ports_queue(user_id);
-
 -- DROP TABLE port_fail_patterns CASCADE;
 CREATE TABLE port_fail_patterns (
 	port_fail_pattern_id INTEGER PRIMARY KEY,
