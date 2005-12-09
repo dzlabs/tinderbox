@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.80 2005/11/26 04:08:21 ade Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.81 2005/12/09 01:05:03 ade Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -35,7 +35,7 @@ cleanup()
 	do
 	    cleanDirs ${build} ${chroot}${dir}
 	done
-	rm -f ${chroot}/tmp/*
+	rm -rf ${chroot}/tmp/*
 
 	chroot ${chroot} /sbin/ldconfig -R
 	if [ ${ARCH} = "i386" ]; then
@@ -44,7 +44,7 @@ cleanup()
     fi
 
     echo "$pkgname done at `date`"
-    ${pb}/scripts/tc updateBuildCurrentPort -b ${build}
+    ${tc} updateBuildCurrentPort -b ${build}
     exit $error
 }
 
@@ -115,15 +115,18 @@ dirname=$7
 echo ${pkgname}
 echo ${dirname}
 
-chroot=${pb}/${build}
+tc=$(tinderLoc scripts tc)
+chroot=$(tinderLoc buildroot ${build})
+echo "chroot is: ${chroot}"
 portdir=$(echo ${dirname} | sed -e 's|^/usr/ports/||')
 
-if [ -f ${pb}/builds/${build}/duds ]; then
-    if grep -qxF ${pkgname} ${pb}/builds/${build}/duds; then
+dudsfile=$(tinderLoc builddata ${build})/duds
+if [ -f ${dudsfile} ]; then
+    if grep -qxF ${pkgname} ${dudsfile}; then
         echo "skipping ${pkgname} (found in duds)"
-	${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${build}
-	${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${build} -s DUD
-	${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
+	${tc} updatePortLastBuilt -d ${portdir} -b ${build}
+	${tc} updatePortLastStatus -d ${portdir} -b ${build} -s DUD
+	${tc} updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
         exit 1
     fi
 fi
@@ -180,10 +183,9 @@ fi
 
 echo "building $pkgname in $chroot"
 
-${pb}/scripts/tc updateBuildCurrentPort -b ${build} -n ${pkgname}
+${tc} updateBuildCurrentPort -b ${build} -n ${pkgname}
 
-packages=${pb}/packages/${build}
-
+packages=$(tinderLoc packages ${build})
 major_version=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
 
 if [ -n "${DISTFILE_CACHE}" ]; then
@@ -263,7 +265,9 @@ else
     error=255
 fi
 
-last_version=$(${pb}/scripts/tc getPortLastBuiltVersion -d ${portdir} -b ${build})
+last_version=$(${tc} getPortLastBuiltVersion -d ${portdir} -b ${build})
+logDir=$(tinderLoc buildlogs ${build})
+errorsDir=$(tinderLoc builderrors ${build})
 
 if [ "${error}" = "0" ]; then
     ln -sf ${pkgname}.log2 ${chroot}/tmp/make.log
@@ -297,14 +301,15 @@ if [ "${error}" = "0" ]; then
     cat ${chroot}/tmp/${pkgname}.log2 >> ${chroot}/tmp/${pkgname}.log
     rm ${chroot}/tmp/${pkgname}.log2
 
-    cp ${chroot}/tmp/${pkgname}.log ${pb}/logs/${build}/${pkgname}.log
+    cp ${chroot}/tmp/${pkgname}.log ${logsDir}/${pkgname}.log
     error=$(cat ${chroot}/tmp/status)
 
     rm -rf ${chroot}/${WRKDIRPREFIX}
 
     if [ -e ${chroot}/tmp/work.tbz ]; then
-	mkdir -p ${pb}/wrkdirs/${build}
-	cp ${chroot}/tmp/work.tbz ${pb}/wrkdirs/${build}/${pkgname}.tbz
+	workDir=$(tinderLOc buildworkdir ${build})
+	mkdir -p ${workDir}
+	cp ${chroot}/tmp/work.tbz ${workDir}/${pkgname}.tbz
     fi
 
     if [ "${error}" = "0" ]; then
@@ -319,42 +324,42 @@ if [ "${error}" = "0" ]; then
 		tar --unlink -C ${packages} -xvf -
 	[ -f ${packages}/All/${pkgname}${PKGSUFFIX} ] && \
 		touch ${packages}/All/${pkgname}${PKGSUFFIX}
-	rm -f ${pb}/errors/${build}/${pkgname}.log
-	if grep -q "${pkgname} is marked as broken: " ${pb}/logs/${build}/${pkgname}.log ; then
+	rm -f ${errorsDir}/${pkgname}.log
+	if grep -q "${pkgname} is marked as broken: " ${logsDir}/${pkgname}.log ; then
 	    status="BROKEN"
-	elif [ $(grep -A 1 '^=== Checking filesystem state' ${pb}/logs/${build}/${pkgname}.log | grep -c '^====') -eq 0 ] ; then
+	elif [ $(grep -A 1 '^=== Checking filesystem state' ${logsDir}/${pkgname}.log | grep -c '^====') -eq 0 ] ; then
 	    status="LEFTOVERS"
 	else
 	    status="SUCCESS"
 	fi
-	${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${build}
-	${pb}/scripts/tc updatePortLastSuccessfulBuilt -d ${portdir} -b ${build}
-	${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${build} -s ${status}
-	${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
-	${pb}/scripts/tc updatePortLastFailReason -d ${portdir} -b ${build} -r "__nofail__"
+	${tc} updatePortLastBuilt -d ${portdir} -b ${build}
+	${tc} updatePortLastSuccessfulBuilt -d ${portdir} -b ${build}
+	${tc} updatePortLastStatus -d ${portdir} -b ${build} -s ${status}
+	${tc} updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
+	${tc} updatePortLastFailReason -d ${portdir} -b ${build} -r "__nofail__"
     else
-	cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${build}/${pkgname}.log
+	cp ${chroot}/tmp/${pkgname}.log ${errorsDir}/${pkgname}.log
 	if [ ${nolog} -eq 0 ]; then
-	    reason=$(${pb}/scripts/tc processLog -l ${pb}/errors/${build}/${pkgname}.log)
-	    ${pb}/scripts/tc updatePortLastFailReason -d ${portdir} -b ${build} -r ${reason}
+	    reason=$(${tc} processLog -l ${errorsDir}/${pkgname}.log)
+	    ${tc} updatePortLastFailReason -d ${portdir} -b ${build} -r ${reason}
 	fi
-	${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${build}
-	${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${build} -s FAIL
-	${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
-        ${pb}/scripts/tc sendBuildErrorMail -d ${portdir} -b ${build}
+	${tc} updatePortLastBuilt -d ${portdir} -b ${build}
+	${tc} updatePortLastStatus -d ${portdir} -b ${build} -s FAIL
+	${tc} updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
+        ${tc} sendBuildErrorMail -d ${portdir} -b ${build}
     fi
 else
-    cp ${chroot}/tmp/${pkgname}.log ${pb}/errors/${build}/${pkgname}.log
-    cp ${chroot}/tmp/${pkgname}.log ${pb}/logs/${build}/${pkgname}.log
+    cp ${chroot}/tmp/${pkgname}.log ${errorsDir}/${pkgname}.log
+    cp ${chroot}/tmp/${pkgname}.log ${logsDir}/${pkgname}.log
 
     if [ ${nolog} -eq 0 ]; then
-        reason=$(${pb}/scripts/tc processLog -l ${pb}/errors/${build}/${pkgname}.log)
-        ${pb}/scripts/tc updatePortLastFailReason -d ${portdir} -b ${build} -r ${reason}
+        reason=$(${tc} processLog -l ${errorsDir}/${pkgname}.log)
+        ${tc} updatePortLastFailReason -d ${portdir} -b ${build} -r ${reason}
     fi
-    ${pb}/scripts/tc updatePortLastBuilt -d ${portdir} -b ${build}
-    ${pb}/scripts/tc updatePortLastStatus -d ${portdir} -b ${build} -s FAIL
-    ${pb}/scripts/tc updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
-    ${pb}/scripts/tc sendBuildErrorMail -d ${portdir} -b ${build}
+    ${tc} updatePortLastBuilt -d ${portdir} -b ${build}
+    ${tc} updatePortLastStatus -d ${portdir} -b ${build} -s FAIL
+    ${tc} updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
+    ${tc} sendBuildErrorMail -d ${portdir} -b ${build}
 fi
 
 cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${build}

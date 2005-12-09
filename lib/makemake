@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/makemake,v 1.41 2005/11/16 01:07:14 ade Exp $
+# $MCom: portstools/tinderbox/lib/makemake,v 1.42 2005/12/09 01:05:03 ade Exp $
 #
 
 my $pb;
@@ -204,7 +204,7 @@ while (scalar(@PORTS)) {
 # Symlink Makefile to the correct 'All' directory
 #---------------------------------------------------------------------------
 
-my $builddir = $pb . '/builds/' . $BUILD_NAME;
+my $builddir = tinderLoc($pb, 'builddata', $BUILD_NAME);
 
 cleanup($ds, 1, "Failed to open $builddir makefile for writing: $!\n")
     unless (open(MK, "> $builddir/Makefile"));
@@ -221,7 +221,8 @@ foreach my $key (keys %pkgdir) {
         printf MK "all: %s\n", $pname;
         printf MK "%s: %s\n",  $pkgdir{$key}, $pname;
         printf MK "%s: %s\n",  $pname, $pkgnames;
-        printf MK "\t@%s/scripts/lib/portbuild %s %s %s %s %s ", $pb,
+        printf MK "\t@%s %s %s %s %s %s ",
+	    tinderLoc($pb, 'scripts', 'lib/portbuild'),
             $BUILD_NAME, $JAIL_NAME, $PORTSTREE_NAME, $ENV{'PORTBUILD_ARGS'};
         printf MK "\"%s\" \"%s\" \"%s\" \"%s\" \"%s\" ", $edeplst, $pdeplst,
             $fdeplst, $bdeplst, $rdeplst;
@@ -240,7 +241,7 @@ if (!$noduds) {
         close(DUDS);
 }
 
-my $pkgdir = $pb . '/packages/' . $BUILD_NAME . '/All';
+my $pkgdir = tinderLoc($pb, 'packages', "$BUILD_NAME/All");
 mkpath $pkgdir;
 unlink "$pkgdir/Makefile";
 symlink "$builddir/Makefile", "$pkgdir/Makefile";

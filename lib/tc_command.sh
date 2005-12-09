@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.25 2005/12/04 05:51:14 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.26 2005/12/09 01:05:03 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -48,7 +48,7 @@ generateSupFile () {
 }
 
 tcExists () {
-    list=$(${pb}/scripts/tc list$1 2>/dev/null)
+    list=$($(tinderLoc scripts tc) list$1 2>/dev/null)
     echo ${list} | grep -qw $2
 }
 
@@ -90,7 +90,7 @@ Setup () {
     MAN_PREREQS="lang/perl5.8 net/p5-Net security/p5-Digest-MD5"
     OPT_PREREQS="lang/php[45] databases/pear-DB www/php[45]-session"
     PREF_FILES="tinderbox.ph"
-    README="${pb}/scripts/README"
+    README="$(tinderLoc scripts README)"
     TINDERBOX_URL="http://tinderbox.marcuscom.com/"
 
     clear
@@ -123,13 +123,14 @@ Setup () {
     # Now install the default preferences files.
     tinderEcho "INFO: Creating default configuration files ..."
     for f in ${PREF_FILES} ; do
-	if [ ! -f ${pb}/scripts/${f}.dist ]; then
-	    tinderExit "ERROR: Missing required distribution file ${pb}/scripts/${f}.dist.  Please download and extract Tinderbox again."
+	distfile=$(tinderLoc scripts ${f})
+	if [ ! -f "${distfile}.dist" ]; then
+	    tinderExit "ERROR: Missing required distribution file ${distfile}.dist.  Please download and extract Tinderbox again."
 	fi
-	if [ -f ${pb}/scripts/${f} ]; then
-	    cp -p ${pb}/scripts/${f} ${pb}/scripts/${f}.bak
+	if [ -f ${distfile} ]; then
+	    cp -p ${distfile} ${distfile}.bak
 	fi
-	cp -f ${pb}/scripts/${f}.dist ${pb}/scripts/${f}
+	cp -f ${distfile}.dist ${distfile}
     done
     tinderEcho "DONE."
     echo ""
@@ -138,20 +139,23 @@ Setup () {
     tinderEcho "INFO: Beginning database configuration."
 
     db_driver=$(getDbDriver)
-
-    if [ ! -f "${pb}/scripts/lib/setup-${db_driver}.sh" ]; then
+    db_setup=$(tinderLoc scripts lib/setup-${db_driver}.sh)
+    if [ ! -f "${db_setup}" ]; then
 	tinderEcho "ERROR: Failed to locate a setup script for the ${db_driver} database driver."
 	exit 1
     fi
 
-    . ${pb}/scripts/lib/setup-${db_driver}.sh
+    . ${db_setup}
 
     tinderEcho "INFO: Database configuration complete."
     echo ""
 
     # We're done now.  However, we don't want to be calling 'tc init'
     # here since the user may need to configure tinderbox.ph first
-    tinderExit "Congratulations!  The scripted portion of Tinderbox has completed successfully.  You should now verify the settings in ${pb}/scripts/tinderbox.ph are correct for your environment, then run '${pb}/scripts/tc init' to complete the setup.  Be sure to checkout ${TINDERBOX_URL} for further instructions." 0
+    tph=$(tinderLoc scripts tinderbox.ph)
+    tinit=$(tinderLoc scripts init)
+
+    tinderExit "Congratulations!  The scripted portion of Tinderbox has completed successfully.  You should now verify the settings in ${tph} are correct for your environment, then run \"${tinit}\" to complete the setup.  Be sure to checkout ${TINDERBOX_URL} for further instructions." 0
 }
 
 #---------------------------------------------------------------------------
@@ -182,8 +186,9 @@ Upgrade () {
     read -p "Hit <ENTER> to get started: " dummy
 
     # Check if the current Datasource Version is ascertainable
-    if ${pb}/scripts/tc dsversion >/dev/null 2>&1 ; then
-	DSVERSION=$(${pb}/scripts/tc dsversion)
+    tc=$(tinderLoc scripts tc)
+    if ${tc} dsversion >/dev/null 2>&1 ; then
+	DSVERSION=$(${tc} dsversion)
     else
 	tinderExit "ERROR: Database migration failed!  Consult the output above for more information." $?
     fi
@@ -271,15 +276,16 @@ updateJail () {
 	return 1
     fi
 
-    updateCmdName=$(${pb}/scripts/tc getUpdateCmd -j ${jailName})
-    jailDir=${pb}/jails/${jailName}
+    tc=$(tinderLoc scripts tc)
+    updateCmdName=$(${tc} getUpdateCmd -j ${jailName})
+    jailDir=$(tinderLoc jail ${jailName})
 
     case "${updateCmdName}" in
 
     CVSUP)	updateCmd="${cvsupProg} -g ${jailDir}/src-supfile";;
     NONE)	updateCmd="NONE";;
     "^/.*")	updateCmd="${updateCmdName} ${jailName}";;
-    *)		updateCmd="${pb}/scripts/${updateCmd} ${jailName}";;
+    *)		updateCmd="$(tinderLoc scripts ${updateCmd}) ${jailName}";;
 
     esac
 
@@ -320,22 +326,21 @@ buildJail () {
     fi
 
     # Hackery to set SRCBASE accordingly for all combinations
-    jailSrcMt=$(${pb}/scripts/tc getSrcMount -j ${jailName})
-    jailObj=$(${pb}/scripts/tc configGet | awk -F= '/^JAIL_OBJDIR/ {print $2}')
-    jailBase=${pb}/jails/${jailName}
+    tc=$(tinderLoc scripts tc)
+    jailSrcMt=$(${tc} getSrcMount -j ${jailName})
+    HOST_WORKDIR=$(${tc} configGet | awk -F= '/^HOST_WORKDIR/ {print $2}')
+    jailBase=$(tinderLoc jail ${jailName})
 
-    if [ -z "${jailObj}" ]; then
-	J_OBJDIR=${jailBase}/obj
-	J_SRCDIR=${jailBase}/src
-	J_TMPDIR=${jailBase}/tmp
+    J_OBJDIR=$(tinderLoc jailobj ${jailName})
+    J_SRCDIR=$(tinderLoc jailsrc ${jailName})
+    J_TMPDIR=$(tinderLoc jailtmp ${jailName})
+
+    if [ -z "${HOST_WORKDIR}" ]; then
 	if [ -n "${jailSrcMt}" ]; then
 	    reqmt="-r"
 	fi
     else
-	J_OBJDIR=${jailObj}/${jailName}/obj
-	J_TMPDIR=${jailObj}/${jailName}/tmp
 	if [ -n "${jailSrcMt}" ]; then
-	    J_SRCDIR=${jailObj}/${jailName}/src
 	    reqmt="-r -d ${J_SRCDIR}"
 	else
 	    J_SRCDIR=${jailBase}/src
@@ -355,7 +360,7 @@ buildJail () {
     buildenv ${jailName} "" ""
 
     # clean up after any previous build attempts
-    cleanDirs ${jailName} ${J_TMPDIR} ${J_OBJDIR}
+    cleanDirs ${jailName} ${J_OBJDIR} ${J_TMPDIR}
 
     # Set up environment
     # Certain locales cause build failures when trying to build older
@@ -376,18 +381,18 @@ buildJail () {
     # Make world
     echo "${jailName}: making world"
     cd ${SRCBASE} && env DESTDIR=${J_TMPDIR} \
-	make world > ${jailBase}/world.log 2>&1
+	make world > ${jailBase}/world.tmp 2>&1
     if [ $? -ne 0 ]; then
-	echo "ERROR: world failed - see ${jailBase}/world.log"
+	echo "ERROR: world failed - see ${jailBase}/world.tmp"
 	exit 1
     fi
 
     # Make a complete distribution
     echo "${jailName}: making distribution"
     cd ${SRCBASE}/etc && env DESTDIR=${J_TMPDIR} \
-	make distribution > ${jailBase}/distribution.log 2>&1
+	make distribution > ${jailBase}/distribution.tmp 2>&1
     if [ $? -ne 0 ]; then
-	echo "ERROR: distribution failed - see ${jailBase}/distribution.log"
+	echo "ERROR: distribution failed - see ${jailBase}/distribution.tmp"
 	exit 1
     fi
 
@@ -414,8 +419,9 @@ buildJail () {
 
     # Create the jail tarball
     echo "${jailName}: creating tarball"
-    mkdir -p ${pb}/jails/${jailName}
-    TARBALL=${pb}/jails/${jailName}/${jailName}.tar
+    jailDir=$(tinderLoc jail ${jailName})
+    mkdir -p ${jailDir}
+    TARBALL=$(tinderLoc jailtarball ${jailName})
     tar -C ${J_TMPDIR} -cf ${TARBALL}.new . && \
 	mv -f ${TARBALL}.new ${TARBALL}
     if [ $? -ne 0 ]; then
@@ -423,8 +429,15 @@ buildJail () {
         exit 1
     fi
 
+    # Move new logfiles into place
+    for logfile in world distribution
+    do
+	rm -f ${jailBase}/${logfile}.log
+	mv -f ${jailBase}/${logfile}.tmp ${jailBase}/${logfile}.log
+    done
+
     # Update the last-built time
-    ${pb}/scripts/tc updateJailLastBuilt -j ${jailName}
+    ${tc} updateJailLastBuilt -j ${jailName}
 
     # Finally, clean up
     cleanDirs ${jailName} ${J_TMPDIR} ${J_OBJDIR}
@@ -519,7 +532,7 @@ createJail () {
     fi
 
     # clean out any previous directories
-    basedir=${pb}/jails/${jailName}
+    basedir=$(tinderLoc jail ${jailName})
     cleanDirs ${jailName} ${basedir}
 
     # set up the directory
@@ -551,8 +564,8 @@ createJail () {
 	mountSrc="-m ${mountSrc}"
     fi
 
-    ${pb}/scripts/tc addJail -j ${jailName} \
-	-t ${tag} ${updateCmd} ${mountSrc} "${descr}"
+    tc=$(tinderLoc scripts tc)
+    ${tc} addJail -j ${jailName} -t ${tag} ${updateCmd} ${mountSrc} "${descr}"
     if [ $? -ne 0 ]; then
 	echo "FAILED."
 	exit 1
@@ -605,15 +618,16 @@ updatePortsTree () {
 	return 1
     fi
 
-    updateCmdName=$(${pb}/scripts/tc getUpdateCmd -p ${portsTreeName})
-    portsTreeDir=${pb}/portstrees/${portsTreeName}
+    tc=$(tinderLoc scripts tc)
+    updateCmdName=$(${tc} getUpdateCmd -p ${portsTreeName})
+    portsTreeDir=$(tinderLoc portstree ${portsTreeName})
 
     case "${updateCmdName}" in
 
     CVSUP)	updateCmd="${cvsupProg} -g ${portsTreeDir}/ports-supfile";;
     NONE)	updateCmd="NONE";;
     "^/.*")	updateCmd="${updateCmdName} ${portsTreeName}";;
-    *)		updateCmd="${pb}/scripts/${updateCmd} ${portsTreeName}";;
+    *)		updateCmd="$(tinderLoc scripts ${updateCmd}) ${portsTreeName}";;
 
     esac
 
@@ -667,7 +681,7 @@ createPortsTree () {
     fi
 
     # clean out any previous directories
-    basedir=${pb}/portstrees/${portsTreeName}
+    basedir=$(tinderLoc portstree ${portsTreeName})
     cleanupMounts -t portstree -p ${portsTreeName}
     cleanDirs ${portsTreeName} ${basedir}
 
@@ -705,8 +719,9 @@ createPortsTree () {
 	cvswebUrl="-w ${cvswebUrl}"
     fi
 
-    ${pb}/scripts/tc addPortsTree -p ${portsTreeName} \
-	-u ${updateCmd} ${mountSrc} ${cvswebUrl} "${descr}"
+    tc=$(tinderLoc scripts tc)
+    ${tc} addPortsTree -p ${portsTreeName} -u ${updateCmd} \
+	${mountSrc} ${cvswebUrl} "${descr}"
     if [ $? -ne 0 ]; then
 	echo "FAILED."
 	exit 1
@@ -757,39 +772,41 @@ enterBuild () {
 	return 1
     fi
 
-    if [ ! -f ${pb}/${build} ]; then
-	echo "enterBuild: Build directory (${pb}/${build}) does not exist"
+    buildRoot=$(tinderLoc buildroot ${build})
+    if [ ! -f ${buildRoot} ]; then
+	echo "enterBuild: Build directory (${buildRoot}) does not exist"
 	return 1
     fi
 
     sleepName=$(echo ${portDir} | sed -e 'y/\//_/')
+    portFullDir=${buildRoot}/usr/ports/${portDir}
 
-    if [ ! -d ${pb}/${build}/usr/ports/${portDir} ]; then
+    if [ ! -d ${portFullDir} ]; then
 	echo "enterBuild: Build environment does not exist yet, sleeping."
-	while [ ! -d ${pb}/${build}/usr/ports/${portDir} ]; do
+	while [ ! -d ${portFullDir} ]; do
 	    sleep 1
 	done
     fi
 
-    if [ ! -f ${pb}/${build}/usr/ports/${portDir}/.sleepme ]; then
+    if [ ! -f ${portFullDir}/.sleepme ]; then
 	echo "enterBuild: Build not marked for sleeping. Marking it."
-	touch ${pb}/${build}/usr/ports/${portDir}/.sleepme
-	if [ ! -f ${pb}/${build}/usr/ports/${portDir}/.sleepme ]; then
-	    echo "enterBuild: cannot touch ${pb}/${build}/usr/ports/${portDir}/.sleepme."
+	touch ${portFullDir}/.sleepme
+	if [ ! -f ${portFullDir}/.sleepme ]; then
+	    echo "enterBuild: cannot touch ${portFullDir}/.sleepme."
 	    return 1
 	fi
 	autoSleep=1
     fi
 
-    while [ ! -f ${pb}/${build}/tmp/.sleep_${sleepName} ]; do
+    while [ ! -f ${buildRoot}/tmp/.sleep_${sleepName} ]; do
 	echo "enterBuild: Build not yet sleeping, waiting 15 seconds."
 	sleep 15
     done
 
     echo 
-    cp ${pb}/scripts/lib/enterbuild ${pb}/${build}/root
-    chroot ${pb}/${build} /root/enterbuild ${portDir}
-    rm -f ${pb}/${build}/tmp/.sleep_${sleepName}
+    cp $(tinderLoc scripts lib/enterbuild) ${buildRoot}/root
+    chroot ${buildRoot} /root/enterbuild ${portDir}
+    rm -f ${buildRoot}/tmp/.sleep_${sleepName}
 
     echo "enterBuild: Continuing port build."
 
@@ -800,9 +817,9 @@ enterBuild () {
 	read resp
     fi
     if [ "${resp}" = "y" ]; then
-	rm -f ${pb}/${build}/usr/ports/${portDir}/.sleepme
-	if [ -f ${pb}/${build}/usr/ports/${portDir}/.sleepme ]; then
-	    echo "enterBuild: failed to remove ${pb}/${build}/usr/ports/${portDir}/.sleepme!"
+	rm -f ${portFullDir}/.sleepme
+	if [ -f ${portFullDir}/.sleepme ]; then
+	    echo "enterBuild: failed to remove ${portFullDir}/.sleepme!"
 	else
 	    echo "enterBuild: .sleepme removed."
 	fi
@@ -836,10 +853,11 @@ makeBuild () {
     fi
 
     # Find the jail associated with the build
-    jailName=$(${pb}/scripts/tc getJailForBuild -b ${buildName})
+    tc=$(tinderLoc scripts tc)
+    jailName=$(${tc} getJailForBuild -b ${buildName})
 
-    BUILD_DIR=${pb}/${buildName}
-    JAIL_TARBALL=${pb}/jails/${jailName}/${jailName}.tar
+    BUILD_DIR=$(tinderLoc buildroot ${buildName})
+    JAIL_TARBALL=$(tinderLoc jailtarball ${jailName})
 
     if [ ! -f ${JAIL_TARBALL} ]; then
 	echo "makeBuild: tarball for jail \"${jailName}\" doesn't exist."
@@ -850,8 +868,8 @@ makeBuild () {
     # Clean up any previous build tree
     cleanupMounts -t buildsrc -b ${buildName}
     cleanupMounts -t buildports -b ${buildName}
-    cleanupMounts -t ccache -b ${buildName}
-    cleanupMounts -t distcache -b ${buildName}
+    cleanupMounts -t buildccache -b ${buildName}
+    cleanupMounts -t builddistcache -b ${buildName}
     cleanDirs ${buildName} ${BUILD_DIR}
 
     # Extract the tarball
@@ -868,7 +886,6 @@ createBuild () {
     # set up defaults
     buildName=""
     descr=""
-    init=0
     jailName=""
     portsTreeName=""
 
@@ -879,7 +896,6 @@ createBuild () {
 
 	b)	buildName="${OPTARG}";;
 	d)	descr="${OPTARG}";;
-	i)	init=1;;
 	j)	jailName="${OPTARG}";;
 	p)	portsTreeName="${OPTARG}";;
 	?)	return 1;;
@@ -919,7 +935,12 @@ createBuild () {
     fi
 
     # clean out any previous directories
-    cleanDirs ${buildName} ${pb}/builds/${buildName} ${pb}/${buildName}
+    tc=$(tinderLoc scripts tc)
+    HOST_WORKDIR=$(${tc} configGet | awk -F= '/^HOST_WORKDIR/ {print $2}')
+    buildRoot=$(tinderLoc buildroot ${buildName})
+    buildData=$(tinderLoc builddata ${buildName})
+
+    cleanDirs ${buildName} ${buildRoot} ${buildData}
 
     # add build to datastore
     echo -n "${buildName}: adding Build to datastore... "
@@ -928,26 +949,13 @@ createBuild () {
 	descr="-d ${descr}"
     fi
 
-    ${pb}/scripts/tc addBuild -b ${buildName} \
-	-j ${jailName} -p ${portsTreeName} "${descr}"
+    ${tc} addBuild -b ${buildName} -j ${jailName} -p ${portsTreeName} "${descr}"
     if [ $? -ne 0 ]; then
 	echo "FAILED."
 	exit 1
     fi
+
     echo "done."
-
-    if [ ${init} -eq 1 ]; then
-	echo -n "${buildName}: initializing..."
-	makeBuild -b ${buildName}
-
-	if [ $? -ne 0 ]; then
-	    echo "FAILED."
-	    exit 1
-	fi
-	echo "done."
-    fi
-
-    # finished
     return 0
 }
 
@@ -958,15 +966,17 @@ createBuild () {
 tinderbuild_reset () {
     cleanupMounts -t buildsrc -b $1
     cleanupMounts -t buildports -b $1
-    cleanupMounts -t ccache -b $1
-    cleanupMounts -t distcache -b $1
-    umount -f ${pb}/$1/dev >/dev/null 2>&1
+    cleanupMounts -t buildccache -b $1
+    cleanupMounts -t builddistcache -b $1
+    umount -f $(tinderLoc buildroot $1)/dev >/dev/null 2>&1
 }
 
 tinderbuild_cleanup () {
     rm -f ${lock}
-    ${pb}/scripts/tc updateBuildStatus -b ${build} -s IDLE
-    ${pb}/scripts/tc sendBuildCompletionMail -b ${build}
+
+    tc=$(tinderLoc scripts tc)
+    ${tc} updateBuildStatus -b ${build} -s IDLE
+    ${tc} sendBuildCompletionMail -b ${build}
     tinderbuild_reset ${build}
     echo 
 
@@ -976,6 +986,10 @@ tinderbuild_cleanup () {
 tinderbuild_setup () {
     # Make sure everything is dismounted, clean out the build tree
     # and recreate it from scratch
+
+    tc=$(tinderLoc scripts tc)
+    HOST_WORKDIR=$(${tc} configGet | awk -F= '/^HOST_WORKDIR/ {print $2}')
+
     echo "tinderbuild: Creating build directory for ${build}"
     tinderbuild_reset ${build}
     makeBuild -b ${build}
@@ -983,7 +997,7 @@ tinderbuild_setup () {
     # set up the rest of the chrooted environment, we really do
     # not need to be doing this every single time portbuild is called
 
-    chroot=${pb}/${build}
+    buildRoot=$(tinderLoc buildroot ${build})
     echo "tinderbuild: Finalizing chroot environment"
 
     # Mount ports/
@@ -991,7 +1005,7 @@ tinderbuild_setup () {
 	echo "tinderbuild: cant mount ports source"
 	tinderbuild_cleanup 1
     fi
-    ln -sf ../a/ports ${pb}/${build}/usr/ports
+    ln -sf ../a/ports ${buildRoot}/usr/ports
 
     # Mount src/
     if ! requestMount -t buildsrc -b ${build} -r ${nullfs}; then
@@ -1004,14 +1018,14 @@ tinderbuild_setup () {
     case ${osmajor} in
 
     4)
-	mkdir -p ${chroot}/libexec
-	mkdir -p ${chroot}/lib
+	mkdir -p ${buildRoot}/libexec
+	mkdir -p ${buildRoot}/lib
 	if [ "${ARCH}" = "i386" -o "${ARCH}" = "amd64" ]; then
-	    cp -p /sbin/mount /sbin/umount ${chroot}/sbin
-	    cp -p /lib/libufs.so.[0-9]* ${chroot}/lib
+	    cp -p /sbin/mount /sbin/umount ${buildRoot}/sbin
+	    cp -p /lib/libufs.so.[0-9]* ${buildRoot}/lib
 	fi
-	cp -p /libexec/ld-elf.so.1 ${chroot}/libexec
-	cp -p /lib/libkvm.so.[0-9]* /lib/libm.so.[0-9]* ${chroot}/lib
+	cp -p /libexec/ld-elf.so.1 ${buildRoot}/libexec
+	cp -p /lib/libkvm.so.[0-9]* /lib/libm.so.[0-9]* ${buildRoot}/lib
 	if [ -f /lib/libc.so.6 ]; then
 	    libc_hackery="libc.so.6"
 	elif [ -f /lib/libc.so.5 ]; then
@@ -1034,44 +1048,47 @@ tinderbuild_setup () {
     esac
 
     if [ -n "${libc_hackery}" ]; then
-	chflags noschg ${chroot}/lib/${libc_hackery} >/dev/null 2>&1
-	cp -p /lib/${libc_hackery} ${chroot}/lib
+	chflags noschg ${buildRoot}/lib/${libc_hackery} >/dev/null 2>&1
+	cp -p /lib/${libc_hackery} ${buildRoot}/lib
     fi
 
     # For use by pnohang
     # XXX: though killall may not work since it's a dynamic executable
-    cp -p /rescue/ps ${chroot}/bin
-    cp -p /usr/bin/killall ${chroot}/bin
+    cp -p /rescue/ps ${buildRoot}/bin
+    cp -p /usr/bin/killall ${buildRoot}/bin
 
     # Mount /dev, since we're going to be chrooting shortly
-    mount -t devfs devfs ${chroot}/dev >/dev/null 2>&1
+    mount -t devfs devfs ${buildRoot}/dev >/dev/null 2>&1
 
     # Install a couple of tinderbox binaries
-    if ! cp -p ${pb}/scripts/lib/buildscript ${chroot}; then
+    if ! cp -p $(tinderLoc scripts lib/buildscript) ${buildRoot}; then
 	echo "tinderbuild: ${build}: cant copy buildscript"
 	tinderbuild_cleanup 1
     fi
 
-    if ! cc -o ${chroot}/pnohang -static ${pb}/scripts/lib/pnohang.c; then
+    if ! cc -o ${buildRoot}/pnohang -static \
+	$(tinderLoc scripts lib/pnohang.c); then
 	echo "tinderbuild: ${build}: cant compile pnohang"
 	tinderbuild_cleanup 1
     fi
 
     # Hack to fix some recent pkg_add problems in some releases
-    if [ -f ${pb}/jails/${jail}/pkg_install.tar ]; then
-	tar -C ${chroot} -xf ${pb}/jails/${jail}/pkg_install.tar
+    pitar=$(tinderLoc jail ${jail})/pkg_install.tar
+    if [ -f ${pitar} ]; then
+	tar -C ${buildRoot} -xf ${pitar}
     fi
 
     # Handle the distfile cache
     if [ -n "${DISTFILE_CACHE}" ]; then
-	if ! requestMount -t distcache -b ${build} -s ${DISTFILE_CACHE}; then
+	if ! requestMount -t builddistcache -b ${build} \
+		-s ${DISTFILE_CACHE}; then
 	    echo "tinderbuild: cant mount distfile cache"
 	    tinderbuild_cleanup 1
 	fi
 
 	if [ ${cleandistfiles} -eq 1 ]; then
 	    echo "tinderbuild: ${build}: Cleaning out distfile cache"
-	    rm -rf ${chroot}/distcache/*
+	    rm -rf $(tinderLoc builddistcache ${build})/*
 	fi
     fi
 
@@ -1080,23 +1097,25 @@ tinderbuild_setup () {
 
 	# per-build, or per-jail, ccache?
 	if [ ${CCACHE_JAIL} -eq 1 ]; then
-	    ccacheDir=${pb}/${CCACHE_DIR}/${jail}
+	    ccacheDir=$(tinderLoc ccache ${jail})
 	else
-	    ccacheDir=${pb}/${CCACHE_DIR}/${build}
+	    ccacheDir=$(tinderLoc ccache ${build})
 	fi
 
 	# create directories if need be
-	mkdir -p ${ccacheDir} ${pb}/${build}/ccache
+	mkdir -p ${ccacheDir} $(tinderLoc buildccache ${build})
 
-	if ! requestMount -t ccache -b ${build} -s ${ccacheDir} ${nullfs}; then
+	if ! requestMount -t buildccache -b ${build} \
+		-s ${ccacheDir} ${nullfs}; then
 	    echo "tinderbuild: cant mount ccache"
 	    tinderbuild_cleanup 1
 	fi
 
-	if [ -f ${pb}/jails/${jail}/ccache.tar ]; then
-	    tar -C ${chroot} -xf ${pb}/jails/${jail}/ccache.tar
+	cctar=$(tinderLoc jail ${jail})/ccache.tar
+	if [ -f ${cctar} ]; then
+	    tar -C ${buildRoot} -xf ${cctar}
 	    if [ -n "${CCACHE_MAX_SIZE}" ]; then
-		chroot ${chroot} /opt/ccache -M ${CCACHE_MAX_SIZE}
+		chroot ${buildRoot} /opt/ccache -M ${CCACHE_MAX_SIZE}
 	    fi
 	fi
     fi
@@ -1105,6 +1124,7 @@ tinderbuild_setup () {
 tinderbuild_phase () {
     num=$1
     jobs=$2
+    pkgDir=$3
 
     echo "================================================"
     echo "building packages (phase ${num})"
@@ -1113,16 +1133,16 @@ tinderbuild_phase () {
     echo "started at $(date)"
     start=$(date +%s)
 
-    cd ${PACKAGES}/All && make -k -j${jobs} all \
-	> ${pb}/builds/${build}/make.${num} 2>&1 </dev/null
+    cd ${pkgDir}/All && make PACKAGES=${pkgDir} -k -j${jobs} all \
+	> $(tinderLoc builddata ${build})/make.${num} 2>&1 </dev/null
 
     echo "ended at $(date)"
     end=$(date +%s)
 
     echo "phase ${num} took $(date -u -j -r $((${end} - ${start})) |
 		awk '{print $4}')"
-    echo $(echo $(ls -1 ${PACKAGES}/All | wc -l) - 1 | bc) "packages built"
-    echo $(echo $(du -sh ${PACKAGES} | awk '{print $1}')) " of packages"
+    echo $(echo $(ls -1 ${pkgDir}/All | wc -l) - 1 | bc) "packages built"
+    echo $(echo $(du -sh ${pkgDir} | awk '{print $1}')) " of packages"
 }
 
 tinderbuild () {
@@ -1193,14 +1213,15 @@ tinderbuild () {
 	return 1
     fi
 
-    lock=${pb}/builds/${build}/lock
+    buildData=$(tinderLoc builddata ${build})
+    lock=${buildData}/lock
 
     if [ -e ${lock} ]; then
 	echo "tinderbuild: Lock file ${lock} exists; exiting."
 	exit 1
     fi
 
-    if ! mkdir -p ${pb}/builds/${build} ; then
+    if ! mkdir -p ${buildData} ; then
 	echo "tinderbuild: couldn't create build directory; exiting."
 	exit 1
     fi
@@ -1211,7 +1232,8 @@ tinderbuild () {
     fi
 
     # Let the datastore known what we're doing.
-    ${pb}/scripts/tc updateBuildStatus -b ${build} -s PREPARE
+    tc=$(tinderLoc scripts tc)
+    ${tc} updateBuildStatus -b ${build} -s PREPARE
 
     trap "tinderbuild_cleanup 2" 1 2 3 9 10 11 15
 
@@ -1219,49 +1241,51 @@ tinderbuild () {
     ports=$(echo ${ports})
 
     # Setup the environment for this jail
-    jail=$(${pb}/scripts/tc getJailForBuild -b ${build})
-    portstree=$(${pb}/scripts/tc getPortsTreeForBuild -b ${build})
+    jail=$(${tc} getJailForBuild -b ${build})
+    portstree=$(${tc} getPortsTreeForBuild -b ${build})
 
     requestMount -t jail -j ${jail}
     buildenv ${jail} ${portstree} ${build}
     cleanupMounts -t jail -j ${jail}
 
     # Remove the make logs.
-    rm -f ${pb}/builds/${build}/make.*
+    rm -f ${buildData}/make.*
+
+    # Determine where we're going to write out packages
+    pkgDir=$(tinderLoc packages ${build})
 
     # Clean up packages if specific ports dirs were specified
     # on the command line
     for port in ${ports}; do
-	pkgname=$(${pb}/scripts/tc getPortLastBuiltVersion \
-			-b ${build} -d ${port})
+	pkgname=$(${tc} getPortLastBuiltVersion -b ${build} -d ${port})
 	if [ ! -z "${pkgname}" ]; then
-	    find -H ${PACKAGES} -name ${pkgname}${PKGSUFFIX} -delete
+	    find -H ${pkgDir} -name ${pkgname}${PKGSUFFIX} -delete
 	fi
     done
 
+    buildLogs=$(tinderLoc buildlogs ${build})
+    buildErrors=$(tinderLoc builderrors ${build})
+
     # Clean out all old packages if requested
     if [ ${cleanpackages} -eq 1 ]; then
-	rm -rf ${PACKAGES}
-	rm -rf ${pb}/logs/${build}
-	rm -rf ${pb}/errors/${build}
+	rm -rf ${pkgDir} ${buildLogs} ${buildErrors}
     fi
 
     # Make the package directories
-    mkdir -p ${PACKAGES}
-    mkdir -p ${pb}/logs/${build}
-    mkdir -p ${pb}/errors/${build}
+    mkdir -p ${pkgDir} ${buildLogs} ${buildErrors}
 
     # (Re)create jail if needed
-    if [ ${init} -eq 1 -o \( ! -d ${pb}/${build} -a \
-			   ! -f ${pb}/jails/${jail}/${jail}.tar \) ]; then
+    jailDir=$(tinderLoc jail ${jail})
+    if [ ${init} -eq 1 -o \( ! -d ${buildData} -a \
+			   ! -f $(tinderLoc jailtarball ${jailDir}) \) ]; then
 	echo "tinderbuild: Updating ${jail} jail for ${build}"
-	${pb}/scripts/tc makeJail -j ${jail}
+	${tc} makeJail -j ${jail}
     fi
 
     # Update ports tree if required
     if [ ${updateports} -eq 1 ]; then
 	echo "tinderbuild: Updating ${portstree} portstree for ${build}"
-	${pb}/scripts/tc updatePortsTree -p ${portstree}
+	${tc} updatePortsTree -p ${portstree}
     fi
 
     # Create makefile if required
@@ -1277,7 +1301,8 @@ tinderbuild () {
 		echo "tinderbuild: cant mount portstree: ${portstree}"
 		exit 1
 	    fi
-	    ${pb}/scripts/lib/makemake ${noduds} ${build} ${ports}
+	    env PORTSDIR=$(tinderLoc portstree ${portstree})/ports \
+		$(tinderLoc scripts lib/makemake) ${noduds} ${build} ${ports}
 	)
 	if [ $? -ne 0 ]; then
 	    echo "tinderbuild: failed to generate Makefile for ${build}"
@@ -1298,10 +1323,10 @@ tinderbuild () {
     esac
 
     # Seatbelts off.  Away we go.
-    ${pb}/scripts/tc updateBuildStatus -b ${build} -s PORTBUILD
-    tinderbuild_phase 0 ${jobs}
+    ${tc} updateBuildStatus -b ${build} -s PORTBUILD
+    tinderbuild_phase 0 ${jobs} ${pkgDir}
     if [ ${onceonly} -ne 1 ]; then
-	tinderbuild_phase 1 ${jobs}
+	tinderbuild_phase 1 ${jobs} ${pkgDir}
     fi
     tinderbuild_cleanup 0
 }
@@ -1328,8 +1353,9 @@ addPortToBuild () {
     portDir=$2
     norecurse=$3
 
-    jail=$(${pb}/scripts/tc getJailForBuild -b ${build})
-    portsTree=$(${pb}/scripts/tc getPortsTreeForBuild -b ${build})
+    tc=$(tinderLoc scripts tc)
+    jail=$(${tc} getJailForBuild -b ${build})
+    portsTree=$(${tc} getPortsTreeForBuild -b ${build})
 
     if ! requestMount -t jail -j ${jail} -r; then
 	echo "addPortToBuild: cant mount jail source"
@@ -1343,7 +1369,8 @@ addPortToBuild () {
     buildenv ${jail} ${portsTree} ${build}
     buildenvNoHost
 
-    ${pb}/scripts/tc addPortToOneBuild -b ${build} -d ${portDir} ${norecurse}
+    export PORTSDIR=$(tinderLoc portstree ${portsTree})/ports
+    ${tc} addPortToOneBuild -b ${build} -d ${portDir} ${norecurse}
 
     cleanupMounts -t jail -j ${jail}
     cleanupMounts -t portstree -p ${portsTree}
@@ -1382,7 +1409,8 @@ addPort () {
 	    return 1
 	fi
 
-	allBuilds=$(${pb}/scripts/tc listBuilds 2>/dev/null)
+	tc=$(tinderLoc scripts tc)
+	allBuilds=$(${tc} listBuilds 2>/dev/null)
 	if [ -z "${allBuilds}" ]; then
 	    echo "addPort: no builds are configured"
 	    return 1

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/setup-pgsql.sh,v 1.10 2005/12/02 02:00:01 marcus Exp $
+# $MCom: portstools/tinderbox/lib/setup-pgsql.sh,v 1.11 2005/12/09 01:05:03 ade Exp $
 #
 
 DB_MAN_PREREQS="databases/p5-DBD-Pg databases/postgresql*-client"
@@ -57,7 +57,7 @@ db_admin=""
 db_host=""
 db_user=""
 do_db=0
-schema_file=${pb}/scripts/tinderbox-pgsql.schema
+schema_file=$(tinderLoc scripts tinderbox-pgsql.schema)
 
 dbinfo=$(getDbInfo pgsql)
 if [ $? = 0 ]; then
@@ -142,7 +142,7 @@ if [ ${do_db} = 1 ]; then
     tinderEcho "DONE."
     echo ""
 
-    cat > ${pb}/scripts/ds.ph << EOT
+    cat > $(tinderLoc scripts ds.ph) << EOT
 \$DB_DRIVER       = 'Pg';
 \$DB_HOST         = '${db_host}';
 \$DB_NAME         = '${db_name}';

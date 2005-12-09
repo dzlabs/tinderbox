@@ -23,8 +23,58 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.24 2005/12/02 02:00:01 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.25 2005/12/09 01:05:03 ade Exp $
 #
+
+tinderLocJail () {
+    jail=$1
+    dir=$2
+
+    if [ -z "${HOST_WORKDIR}" ]; then
+	echo "$(tinderLoc jail ${jail})/${dir}"
+    else
+	echo "${HOST_WORKDIR}/jails/${jail}/${dir}"
+    fi
+}
+
+tinderLoc () {
+    type=$1
+    what=$2
+
+    case "${type}" in
+
+    "buildroot")	if [ -z "${HOST_WORKDIR}" ]; then
+			    echo "${pb}/${what}"
+			else
+			    echo "${HOST_WORKDIR}/builds/${what}"
+			fi
+			;;
+    "builddata")	echo "${pb}/builds/${what}";;
+    "buildports")	echo "$(tinderLoc buildroot ${what})/a/ports";;
+    "buildsrc")		echo "$(tinderLoc buildroot ${what})/usr/src";;
+    "buildccache")	echo "$(tinderLoc buildroot ${what})/ccache";;
+    "builddistcache")	echo "$(tinderLoc buildroot ${what})/distcache";;
+    "builderrors")	echo "${pb}/errors/${what}";;
+    "buildlogs")	echo "${pb}/logs/${what}";;
+    "buildworkdir")	echo "${pb}/wrkdirs/${what}";;
+    "ccache")		if [ -z "${HOST_WORKDIR}" ]; then
+			    echo "${pb}/${CCACHE_DIR}/${what}"
+			else
+			    echo "${HOST_WORKDIR}/${what}"
+			fi
+			;;
+    "jail")		echo "${pb}/jails/${what}";;
+    "jailobj")		echo "$(tinderLocJail ${what} obj)";;
+    "jailsrc")		echo "$(tinderLocJail ${what} src)";;
+    "jailtmp")		echo "$(tinderLocJail ${what} tmp)";;
+    "jailtarball")	echo "$(tinderLoc jail ${what})/${what}.tar";;
+    "packages")		echo "${pb}/packages/${what}";;
+    "portstree")	echo "${pb}/portstrees/${what}";;
+    "scripts")		echo "${pb}/scripts/${what}";;
+    *)			echo "/nonexistent/tinderbox/${type}/${what}";;
+
+    esac
+}	
 
 tinderEcho () {
     echo "$1" | /usr/bin/fmt 75 79
@@ -108,38 +158,16 @@ cleanupMounts () {
 	esac
     done
 
+    tc=$(tinderLoc scripts tc)
+
     case ${_type} in
 
-    buildports)
+    buildports|buildsrc|buildccache|builddistcache)
 	if [ -z "${_build}" ]; then
 	    echo "cleanupMounts: ${_type}: missing build"
 	    return 1
 	fi
-	_dstloc=${_dstloc:-${pb}/${_build}/a/ports}
-	;;
-
-    buildsrc)
-        if [ -z "${_build}" ]; then
-	    echo "cleanupMounts: ${_type}: missing build"
-	    return 1
-	fi
-	_dstloc=${_dstloc:-${pb}/${_build}/usr/src}
-	;;
-
-    ccache)
-	if [ -z "${_build}" ]; then
-	    echo "cleanupMounts: ${_type}: missing build"
-	    return 1
-	fi
-	_dstloc=${_dstloc:-${pb}/${_build}/ccache}
-	;;
-
-    distcache)
-	if [ -z "${_build}" ]; then
-	    echo "cleanupMounts: ${_type}: missing build"
-	    return 1
-	fi
-	_dstloc=${_dstloc:-${pb}/${_build}/distcache}
+	_dstloc=${_dstloc:-$(tinderLoc ${_type} ${_build})}
 	;;
 
     jail)
@@ -147,8 +175,8 @@ cleanupMounts () {
 	    echo "cleanupMounts: ${_type}: missing jail"
 	    return 
 	fi
-	_dstloc=${_dstloc:-${pb}/jails/${_jail}/src}
-	_srcloc=$(${pb}/scripts/tc getSrcMount -j ${_jail})
+	_dstloc=${_dstloc:-$(tinderLoc jail ${_jail})/src}
+	_srcloc=$(${tc} getSrcMount -j ${_jail})
 	;;
 
     portstree)
@@ -156,8 +184,8 @@ cleanupMounts () {
 	    echo "cleanupMounts: ${_type}: missing portstree"
 	    return 1
 	fi
-	_dstloc=${_dstloc:-${pb}/portstrees/${_portstree}/ports}
-	_srcloc=$(${pb}/scripts/tc getPortsMount -p ${_portstree})
+	_dstloc=${_dstloc:-$(tinderLoc portstree ${_portstree})/ports}
+	_srcloc=$(${tc} getPortsMount -p ${_portstree})
 	;;
 
     *)
@@ -215,6 +243,8 @@ requestMount () {
 	esac
     done
 
+    tc=$(tinderLoc scripts tc)
+
     case ${_type} in
 
     buildports)
@@ -222,13 +252,13 @@ requestMount () {
 	    echo "requestMount: ${_type}: missing build"
 	    return 1
 	fi
-	_portstree=$(${pb}/scripts/tc getPortsTreeForBuild -b ${_build})
-	_dstloc=${_dstloc:-${pb}/${_build}/a/ports}
+	_portstree=$(${tc} getPortsTreeForBuild -b ${_build})
+	_dstloc=${_dstloc:-$(tinderLoc buildports ${_build})}
 
 	if [ -z "${_srcloc}" ] ; then
-	    _srcloc=$(${pb}/scripts/tc getPortsMount -p ${_portstree})
+	    _srcloc=$(${tc} getPortsMount -p ${_portstree})
 	    if [ -z "${_srcloc}" ] ; then
-		_srcloc=${_srcloc:=${pb}/portstrees/${_portstree}/ports}
+		_srcloc=${_srcloc:=$(tinderLoc portstree ${_portstree})/ports}
 	    else
 		_fqsrcloc=1
 	    fi
@@ -240,13 +270,13 @@ requestMount () {
 	    echo "requestMount: ${_type}: missing build"
 	    return 1
 	fi
-	_jail=$(${pb}/scripts/tc getJailForBuild -b ${_build})
-	_dstloc=${_dstloc:-${pb}/${_build}/usr/src}
+	_jail=$(${tc} getJailForBuild -b ${_build})
+	_dstloc=${_dstloc:-$(tinderLoc buildsrc ${_build})}
 
 	if [ -z "${_srcloc}" ]; then
-	    _srcloc=$(${pb}/scripts/tc getSrcMount -j ${_jail})
+	    _srcloc=$(${tc} getSrcMount -j ${_jail})
 	    if [ -z "${_srcloc}" ]; then
-		_srcloc=${_srcloc:=${pb}/jails/${_jail}/src}
+		_srcloc=${_srcloc:=$(tinderLoc jail ${_jail})/src}
 	    else
 		_fqsrcloc=1
 	    fi
@@ -258,7 +288,7 @@ requestMount () {
 	    echo "requestMount: ${_type}: missing build"
 	    return 1
 	fi
-	_dstloc=${_dstloc:-${pb}/${_build}/ccache}
+	_dstloc=${_dstloc:-$(tinderLoc buildccache ${_build})}
 	;;
 
     distcache)
@@ -266,7 +296,7 @@ requestMount () {
 	    echo "requestMount: ${_type}: missing build"
 	    return 1
 	fi
-	_dstloc=${_dstloc:-${pb}/${_build}/distcache}
+	_dstloc=${_dstloc:-$(tinderLoc builddistcache ${_build})}
 	_fqsrcloc=1
 	;;
 
@@ -275,8 +305,8 @@ requestMount () {
 	    echo "requestMount: ${_type}: missing jail"
 	    return 1
 	fi
-	_dstloc=${_dstloc:-${pb}/jails/${_jail}/src}
-	_srcloc=${_srcloc:-$(${pb}/scripts/tc getSrcMount -j ${_jail})}
+	_dstloc=${_dstloc:-$(tinderLoc jail ${_jail})/src}
+	_srcloc=${_srcloc:-$(${tc} getSrcMount -j ${_jail})}
 	_fqsrcloc=1
 	;;
 
@@ -285,8 +315,8 @@ requestMount () {
 	    echo "requestMount: ${_type}: missing portstree"
 	    return 1
 	fi
-	_dstloc=${_dstloc:-${pb}/portstrees/${_portstree}/ports}
-	_srcloc=${_srcloc:-$(${pb}/scripts/tc getPortsMount -p ${_portstree})}
+	_dstloc=${_dstloc:-$(tinderLoc portstree ${_portstree})/ports}
+	_srcloc=${_srcloc:-$(${tc} getPortsMount -p ${_portstree})}
 	_fqsrcloc=1
 	;;
 
@@ -386,11 +416,11 @@ buildenvlist () {
     portstree=$2
     build=$3
 
-    ${pb}/scripts/tc configGet
+    $(tinderLoc scripts tc) configGet
 
-    cat ${pb}/scripts/lib/tinderbox.env
+    cat $(tinderLoc scripts lib/tinderbox.env)
 
-    envdir=${pb}/scripts/etc/env
+    envdir=$(tinderLoc scripts etc/env)
 
     if [ -f ${envdir}/GLOBAL ]; then
 	cat ${envdir}/GLOBAL
@@ -416,17 +446,13 @@ buildenv () {
     IFS='
 '
     # Allow SRCBASE to be overridden
-    eval "export SRCBASE=${SRCBASE:-`realpath ${pb}/jails/${jail}/src`}" \
+    eval "export SRCBASE=${SRCBASE:-`realpath $(tinderLoc jail ${jail})/src`}" \
 	>/dev/null 2>&1
 
     for _tb_var in $(buildenvlist "${jail}" "${portstree}" "${build}")
     do
 	var=$(echo "${_tb_var}" | sed \
-		-e "s|^#${major_version}||; \
-		    s|##PB##|${pb}|g; \
-		    s|##BUILD##|${build}|g; \
-		    s|##JAIL##|${jail}|g; \
-		    s|##PORTSTREE##|${portstree}|g" \
+		-e "s|^#${major_version}||" \
 		-E -e 's|\^\^([^\^]+)\^\^|${\1}|g' -e 's|^#.*$||')
 
 	if [ -n "${var}" ]; then
@@ -566,7 +592,7 @@ migDb () {
     db_admin=$3
     db_host=$4
     db_name=$5
-    mig_file=${pb}/scripts/upgrade/mig_${db_driver}_tinderbox-${MIG_VERSION_FROM}_to_${MIG_VERSION_TO}.sql
+    mig_file=$(tinderLoc scripts upgrade/mig_${db_driver}_tinderbox-${MIG_VERSION_FROM}_to_${MIG_VERSION_TO}.sql)
 
     if [ -s "${mig_file}" ]; then
 	if [ ${do_load} = 1 ]; then

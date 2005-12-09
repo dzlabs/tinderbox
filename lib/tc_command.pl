@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.98 2005/12/07 19:18:05 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.99 2005/12/09 01:05:03 ade Exp $
 #
 
 my $pb;
@@ -92,12 +92,12 @@ my $ds = new TinderboxDS();
                     "[-c <distfile cache mount src> | -C] [-h <host name> | -G] | -G -h <host name>",
                 optstr => 'c:Ch:G',
         },
-        "configJail" => {
-                func  => \&configJail,
-                help  => "Configure Tinderbox Jail parameters",
+        "configHost" => {
+                func  => \&configHost,
+                help  => "Configure Tinderbox Host parameters",
                 usage =>
-                    "[-o <jail object directory> | -O] [-h <host name> | -G] | -G -h <host name>",
-                optstr => 'o:Oh:G',
+                    "[-w <work directory> | -W] [-h <host name> | -G] | -G -h <host name>",
+                optstr => 'w:Wh:G',
         },
         "listJails" => {
                 func  => \&listJails,
@@ -459,7 +459,7 @@ my $ds = new TinderboxDS();
         "createBuild" => {
                 help  => "Create a new build",
                 usage =>
-                    "-b <buildname> -j <jailname> -p <portstreename> [-d <description>] [-i]",
+                    "-b <buildname> -j <jailname> -p <portstreename> [-d <description>]",
                 optstr => 'b:j:p:d:',
         },
 
@@ -776,13 +776,13 @@ sub configDistfile {
                     . "\n");
 }
 
-sub configJail {
+sub configHost {
         my @config = ();
-        my $objdir;
+        my $workdir;
         my $host;
 
-        if ($opts->{'o'} && $opts->{'O'}) {
-                usage("jail");
+        if ($opts->{'w'} && $opts->{'W'}) {
+                usage("host");
         }
 
         $host = _configGetHost($opts->{'h'});
@@ -791,29 +791,29 @@ sub configJail {
                 || (scalar(keys %{$opts}) == 1 && ($opts->{'h'} ^ $opts->{'G'}))
             )
         {
-                configGet("jail", $host);
+                configGet("host", $host);
                 cleanup($ds, 0, undef);
         }
 
         if ($opts->{'G'} && $host) {
-                $ds->defaultConfig("jail", $host);
+                $ds->defaultConfig("host", $host);
                 cleanup($ds, 0, undef);
         }
 
-        $objdir = new TBConfig();
-        $objdir->setOptionName("objdir");
+        $workdir = new TBConfig();
+        $workdir->setOptionName("workdir");
 
-        if ($opts->{'o'}) {
-                $objdir->setOptionValue($opts->{'o'});
-                push @config, $objdir;
+        if ($opts->{'w'}) {
+                $workdir->setOptionValue($opts->{'w'});
+                push @config, $workdir;
         }
 
-        if ($opts->{'O'}) {
-                $objdir->setOptionValue(undef);
-                push @config, $objdir;
+        if ($opts->{'W'}) {
+                $workdir->setOptionValue(undef);
+                push @config, $workdir;
         }
 
-        $ds->updateConfig("jail", $host, @config)
+        $ds->updateConfig("host", $host, @config)
             or cleanup($ds, 1,
                       "Failed to update jail configuration: "
                     . $ds->getError()
@@ -1488,11 +1488,12 @@ sub rmPort {
                 if (my $version = $ds->getPortLastBuiltVersion($port, $build)) {
                         my $jail   = $ds->getJailById($build->getJailId());
                         my $sufx   = $ds->getPackageSuffix($jail);
-                        my $pkgdir = join("/", $pb, 'jails', $build->getName());
-                        my $logpath =
-                            join("/", $pb, 'logs', $build->getName(), $version);
-                        my $errpath = join("/",
-                                $pb, 'errors', $build->getName(), $version);
+			my $buildName = $build->getName();
+                        my $pkgdir = tinderLoc($pb, 'packages', $buildName);
+                        my $logpath = tinderLoc($pb, 'buildlogs', $buildName
+						. "/$version");
+                        my $errpath = tinderLoc($pb, 'builderrors', $buildName
+						. "/$version");
                         if (-d $pkgdir) {
                                 print
                                     "Removing all packages matching ${version}${sufx} starting from $pkgdir.\n";
@@ -2537,7 +2538,7 @@ sub tbcleanup {
                 my $package_suffix = $ds->getPackageSuffix($jail);
 
                 # Delete unreferenced log files.
-                my $dir = join("/", $pb, 'logs', $build->getName());
+                my $dir = tinderLoc($pb, 'buildlogs', $build->getName());
                 opendir(DIR, $dir) || die "Failed to open $dir: $!\n";
 
                 while (my $file_name = readdir(DIR)) {
@@ -2559,9 +2560,9 @@ sub tbcleanup {
                 foreach my $port (@ports) {
                         if ($ds->getPortLastBuiltVersion($port, $build)) {
                                 my $path = join(
-                                        "/", $pb,
-                                        'packages',
-                                        $build->getName(),
+                                        "/",
+					tinderLoc($pb, 'packages',
+						  build->getName()),
                                         "All",
                                         $ds->getPortLastBuiltVersion($port,
                                                 $build)
