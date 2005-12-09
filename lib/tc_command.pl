@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.99 2005/12/09 01:05:03 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.100 2005/12/09 17:51:20 ade Exp $
 #
 
 my $pb;
@@ -283,45 +283,12 @@ my $ds = new TinderboxDS();
                 usage  => "-j <jail name> [-l <last built timestamp>]",
                 optstr => 'j:l:',
         },
-        "updatePortLastBuilt" => {
-                func => \&updatePortLastBuilt,
-                help =>
-                    "Update the specified port's last built time for the specified build",
-                usage =>
-                    "-d <port directory> -b <build name> [-l <last built timestamp>]",
-                optstr => 'd:b:l:',
-        },
-        "updatePortLastSuccessfulBuilt" => {
-                func => \&updatePortLastSuccessfulBuilt,
-                help =>
-                    "Update the specified port's last successful built time for the specified build",
-                usage =>
-                    "-d <port directory> -b <build name> [-l <last built timestamp>]",
-                optstr => 'd:b:l:',
-        },
-        "updatePortLastStatus" => {
-                func => \&updatePortLastStatus,
-                help =>
-                    "Update the specified port's last build status for the specified build",
-                usage =>
-                    "-d <port directory> -b <build name> -s <UNKNOWN|SUCCESS|FAIL|DUD>",
-                optstr => 'd:b:s:',
-        },
-        "updatePortLastFailReason" => {
-                func => \&updatePortLastFailReason,
-                help =>
-                    "Update the specified port's last build failure reason for the specified build",
-                usage  => "-d <port directory> -b <build name> -r <reason tag>",
-                optstr => 'd:b:r:',
-        },
-        "updatePortLastBuiltVersion" => {
-                func => \&updatePortLastBuiltVersion,
-                help =>
-                    "Update the specified port's last built version for the specified build",
-                usage =>
-                    "-d <port directory> -b <build name> -v <last built version>",
-                optstr => 'd:b:v:',
-        },
+	"updatePortStatus" => {
+		func   => \&updatePortStatus,
+		help   => "Update build information about a port",
+		usage  => "-d <portdir> -b <build> [-L] [-S] [-s <status>] [-r <reason>] [-v <version>]",
+		optstr => 'b:d:Lr:Ss:v:',
+	},
         "updateBuildStatus" => {
                 func   => \&updateBuildStatus,
                 help   => "Update the current status for the specific build",
@@ -1828,9 +1795,9 @@ sub updateJailLastBuilt {
                     . "\n");
 }
 
-sub updatePortLastBuilt {
+sub updatePortStatus {
         if (!$opts->{'d'} || !$opts->{'b'}) {
-                usage("updatePortLastBuilt");
+                usage("updatePortStatus");
         }
 
         my $port = $ds->getPortByDirectory($opts->{'d'});
@@ -1856,122 +1823,35 @@ sub updatePortLastBuilt {
                             . "\n");
         }
 
-        $ds->updatePortLastBuilt($port, $build, $opts->{'l'})
-            or cleanup($ds, 1,
-                      "Failed to update last built value in the datastore: "
-                    . $ds->getError()
-                    . "\n");
-}
+	if (defined($opts->{'L'})) {
+	        $ds->updatePortLastBuilt($port, $build, '') or
+		cleanup($ds, 1, "FAILED: last_built: " .
+			$ds->getError() . "\n");
+	}
 
-sub updatePortLastSuccessfulBuilt {
-        if (!$opts->{'d'} || !$opts->{'b'}) {
-                usage("updatePortLastSuccessfulBuilt");
-        }
+	if (defined($opts->{'S'})) {
+	        $ds->updatePortLastSuccessfulBuilt($port, $build, '') or
+		cleanup($ds, 1, "FAILED: last_successful_built: " .
+			$ds->getError() . "\n");
+	}
 
-        my $port = $ds->getPortByDirectory($opts->{'d'});
-        if (!defined($port)) {
-                cleanup($ds, 1,
-                              "Port, "
-                            . $opts->{'d'}
-                            . " is not in the datastore.\n");
-        }
+	if (defined($opts->{'s'})) {
+		$ds->updatePortLastStatus($port, $build, $opts->{'s'}) or
+		cleanup($ds, 1, "FAILED: last_status: " .
+			$ds->getError() . "\n");
+	}
 
-        if (!$ds->isValidBuild($opts->{'b'})) {
-                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
-        }
+	if (defined($opts->{'r'})) {
+		$ds->updatePortLastFailReason($port, $build, $opts->{'r'}) or
+		cleanup($ds, 1, "FAILED: last_fail_reason: " .
+			$ds->getError() . "\n");
+	}
 
-        my $build = $ds->getBuildByName($opts->{'b'});
-
-        if (!$ds->isPortForBuild($port, $build)) {
-                cleanup($ds, 1,
-                              "Port, "
-                            . $opts->{'d'}
-                            . " is not a valid port for build, "
-                            . $opts->{'b'}
-                            . "\n");
-        }
-
-        $ds->updatePortLastSuccessfulBuilt($port, $build, $opts->{'l'})
-            or cleanup(
-                $ds,
-                1,
-                "Failed to update last successful built value in the datastore: "
-                    . $ds->getError() . "\n"
-            );
-}
-
-sub updatePortLastStatus {
-        if (!$opts->{'d'} || !$opts->{'b'} || !$opts->{'s'}) {
-                usage("updatePortLastStatus");
-        }
-
-        my $port = $ds->getPortByDirectory($opts->{'d'});
-        if (!defined($port)) {
-                cleanup($ds, 1,
-                              "Port, "
-                            . $opts->{'d'}
-                            . " is not in the datastore.\n");
-        }
-
-        if (!$ds->isValidBuild($opts->{'b'})) {
-                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
-        }
-
-        my $build = $ds->getBuildByName($opts->{'b'});
-
-        if (!$ds->isPortForBuild($port, $build)) {
-                cleanup($ds, 1,
-                              "Port, "
-                            . $opts->{'d'}
-                            . " is not a valid port for build, "
-                            . $opts->{'b'}
-                            . "\n");
-        }
-
-        $ds->updatePortLastStatus($port, $build, $opts->{'s'})
-            or cleanup(
-                $ds,
-                1,
-                "Failed to update last status value in the datastore: "
-                    . $ds->getError() . "\n"
-            );
-}
-
-sub updatePortLastBuiltVersion {
-        if (!$opts->{'d'} || !$opts->{'b'} || !$opts->{'v'}) {
-                usage("updatePortLastBuiltVersion");
-        }
-
-        my $port = $ds->getPortByDirectory($opts->{'d'});
-        if (!defined($port)) {
-                cleanup($ds, 1,
-                              "Port, "
-                            . $opts->{'d'}
-                            . " is not in the datastore.\n");
-        }
-
-        if (!$ds->isValidBuild($opts->{'b'})) {
-                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
-        }
-
-        my $build = $ds->getBuildByName($opts->{'b'});
-
-        if (!$ds->isPortForBuild($port, $build)) {
-                cleanup($ds, 1,
-                              "Port, "
-                            . $opts->{'d'}
-                            . " is not a valid port for build, "
-                            . $opts->{'b'}
-                            . "\n");
-        }
-
-        $ds->updatePortLastBuiltVersion($port, $build, $opts->{'v'})
-            or cleanup(
-                $ds,
-                1,
-                "Failed to update last built version value in the datastore: "
-                    . $ds->getError() . "\n"
-            );
+	if (defined($opts->{'v'})) {
+	        $ds->updatePortLastBuiltVersion($port, $build, $opts->{'v'}) or
+		cleanup($ds, 1, "FAILED: last_built_version: " .
+			$ds->getError() . "\n");
+	}
 }
 
 sub updateBuildStatus {
@@ -2381,51 +2261,6 @@ sub processLog {
         } else {
                 print $reason . "\n";
         }
-}
-
-sub updatePortLastFailReason {
-        my $port;
-        my $build;
-
-        if (!$opts->{'d'} || !$opts->{'b'} || !$opts->{'r'}) {
-                usage("updatePortLastFailReason");
-        }
-
-        $port = $ds->getPortByDirectory($opts->{'d'});
-        if (!defined($port)) {
-                cleanup($ds, 1,
-                              "Port, "
-                            . $opts->{'d'}
-                            . " is not in the datastore.\n");
-        }
-
-        if (!$ds->isValidBuild($opts->{'b'})) {
-                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
-        }
-
-        $build = $ds->getBuildByName($opts->{'b'});
-
-        if (!$ds->isPortForBuild($port, $build)) {
-                cleanup($ds, 1,
-                              "Port, "
-                            . $opts->{'d'}
-                            . " is not a valid port for build, "
-                            . $opts->{'b'}
-                            . "\n");
-        }
-
-        if (!$ds->isValidPortFailReason($opts->{'r'})) {
-                cleanup($ds, 1,
-                        "Unknown failure reason, " . $opts->{'r'} . "\n");
-        }
-
-        $ds->updatePortLastFailReason($port, $build, $opts->{'r'})
-            or cleanup(
-                $ds,
-                1,
-                "Failed to update last failure reason value in the datastore: "
-                    . $ds->getError() . "\n"
-            );
 }
 
 sub _updateBuildUser {

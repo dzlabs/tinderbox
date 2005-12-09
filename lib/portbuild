@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.81 2005/12/09 01:05:03 ade Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.82 2005/12/09 17:51:20 ade Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -124,9 +124,8 @@ dudsfile=$(tinderLoc builddata ${build})/duds
 if [ -f ${dudsfile} ]; then
     if grep -qxF ${pkgname} ${dudsfile}; then
         echo "skipping ${pkgname} (found in duds)"
-	${tc} updatePortLastBuilt -d ${portdir} -b ${build}
-	${tc} updatePortLastStatus -d ${portdir} -b ${build} -s DUD
-	${tc} updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
+	${tc} updatePortStatus -d ${portdir} -b {$build} \
+		-L -s DUD -v ${pkgname}
         exit 1
     fi
 fi
@@ -332,33 +331,28 @@ if [ "${error}" = "0" ]; then
 	else
 	    status="SUCCESS"
 	fi
-	${tc} updatePortLastBuilt -d ${portdir} -b ${build}
-	${tc} updatePortLastSuccessfulBuilt -d ${portdir} -b ${build}
-	${tc} updatePortLastStatus -d ${portdir} -b ${build} -s ${status}
-	${tc} updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
-	${tc} updatePortLastFailReason -d ${portdir} -b ${build} -r "__nofail__"
+	${tc} updatePortStatus -d ${portdir} -b ${build} \
+		-L -S -s ${status} -v ${pkgname} -r "__nofail__"
     else
 	cp ${chroot}/tmp/${pkgname}.log ${errorsDir}/${pkgname}.log
+	reason=""
 	if [ ${nolog} -eq 0 ]; then
-	    reason=$(${tc} processLog -l ${errorsDir}/${pkgname}.log)
-	    ${tc} updatePortLastFailReason -d ${portdir} -b ${build} -r ${reason}
+	    reason="-r $(${tc} processLog -l ${errorsDir}/${pkgname}.log)"
 	fi
-	${tc} updatePortLastBuilt -d ${portdir} -b ${build}
-	${tc} updatePortLastStatus -d ${portdir} -b ${build} -s FAIL
-	${tc} updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
+	${tc} updatePortStatus -d ${portdir} -b ${build} \
+		-L -s ${status} -v ${pkgname} ${reason}
         ${tc} sendBuildErrorMail -d ${portdir} -b ${build}
     fi
 else
     cp ${chroot}/tmp/${pkgname}.log ${errorsDir}/${pkgname}.log
     cp ${chroot}/tmp/${pkgname}.log ${logsDir}/${pkgname}.log
 
+    reason=""
     if [ ${nolog} -eq 0 ]; then
-        reason=$(${tc} processLog -l ${errorsDir}/${pkgname}.log)
-        ${tc} updatePortLastFailReason -d ${portdir} -b ${build} -r ${reason}
+        reason="-r $(${tc} processLog -l ${errorsDir}/${pkgname}.log)"
     fi
-    ${tc} updatePortLastBuilt -d ${portdir} -b ${build}
-    ${tc} updatePortLastStatus -d ${portdir} -b ${build} -s FAIL
-    ${tc} updatePortLastBuiltVersion -d ${portdir} -b ${build} -v ${pkgname}
+    ${tc} updatePortStatus -d ${portdir} -b ${build} \
+		-L -s FAIL -v ${pkgname} ${reason}
     ${tc} sendBuildErrorMail -d ${portdir} -b ${build}
 fi
 
