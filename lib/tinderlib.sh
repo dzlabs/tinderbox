@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.25 2005/12/09 01:05:03 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.26 2005/12/09 17:50:15 ade Exp $
 #
 
 tinderLocJail () {
@@ -283,7 +283,7 @@ requestMount () {
 	fi
 	;;
 
-    ccache)
+    buildccache)
 	if [ -z "${_build}" ]; then
 	    echo "requestMount: ${_type}: missing build"
 	    return 1
@@ -291,7 +291,7 @@ requestMount () {
 	_dstloc=${_dstloc:-$(tinderLoc buildccache ${_build})}
 	;;
 
-    distcache)
+    builddistcache)
 	if [ -z "${_build}" ]; then
 	    echo "requestMount: ${_type}: missing build"
 	    return 1
