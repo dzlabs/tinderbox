@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.26 2005/12/09 01:05:03 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.27 2005/12/17 23:36:13 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -330,6 +330,13 @@ buildJail () {
     jailSrcMt=$(${tc} getSrcMount -j ${jailName})
     HOST_WORKDIR=$(${tc} configGet | awk -F= '/^HOST_WORKDIR/ {print $2}')
     jailBase=$(tinderLoc jail ${jailName})
+    if [ ! -d ${jailBase} ]; then
+	mkdir -p ${jailBase}
+	if [ $? -ne 0 ]; then
+	    echo "buildJail: cant create: ${jailBase}"
+	    return 0
+	fi
+    fi
 
     J_OBJDIR=$(tinderLoc jailobj ${jailName})
     J_SRCDIR=$(tinderLoc jailsrc ${jailName})
@@ -378,22 +385,40 @@ buildJail () {
     # We don't want the host environment getting in the way
     export __MAKE_CONF=/dev/null
 
+    # Get the architecture types for both the host and the jail
+    jailArch=$(${tc} getJailArch -j ${jailName})
+    myArch=$(uname -m)
+
     # Make world
     echo "${jailName}: making world"
-    cd ${SRCBASE} && env DESTDIR=${J_TMPDIR} \
+
+    # determine if we're cross-building world
+    crossEnv=""
+    if [ "${jailArch}" != "${myArch}" ]; then
+	crossEnv="TARGET_ARCH=${jailArch}"
+    fi
+    cd ${SRCBASE} && env DESTDIR=${J_TMPDIR} ${crossEnv} \
 	make world > ${jailBase}/world.tmp 2>&1
     if [ $? -ne 0 ]; then
 	echo "ERROR: world failed - see ${jailBase}/world.tmp"
-	exit 1
+	buildJailCleanup 1 ${jailName} ${J_SRCDIR}
     fi
 
     # Make a complete distribution
     echo "${jailName}: making distribution"
-    cd ${SRCBASE}/etc && env DESTDIR=${J_TMPDIR} \
+
+    # determine if we're cross-building world - unfortunately 5.x
+    # and below doesn't appear to have the "distribute" target in
+    # the top-level makefile, so we have to do a little bit of hackery
+    crossEnv=""
+    if [ "${jailArch}" != "${myArch}" ]; then
+	crossEnv="TARGET_ARCH=${jailArch} MACHINE_ARCH=${jailArch} MAKEOBJDIRPREFIX=${J_OBJDIR}/${jailArch} MACHINE=${jailArch}"
+    fi
+    cd ${SRCBASE}/etc && env DESTDIR=${J_TMPDIR} ${crossEnv} \
 	make distribution > ${jailBase}/distribution.tmp 2>&1
     if [ $? -ne 0 ]; then
 	echo "ERROR: distribution failed - see ${jailBase}/distribution.tmp"
-	exit 1
+	buildJailCleanup 1 ${jailName} ${J_SRCDIR}
     fi
 
     # Various hacks to keep the ports building environment happy
@@ -426,7 +451,7 @@ buildJail () {
 	mv -f ${TARBALL}.new ${TARBALL}
     if [ $? -ne 0 ]; then
 	echo "ERROR: tarball creation failed."
-        exit 1
+	buildJailCleanup 1 ${jailName} ${J_SRCDIR}
     fi
 
     # Move new logfiles into place
@@ -481,16 +506,18 @@ createJail () {
     cvsupCompress=0
     descr=""
     jailName=""
+    jailArch=$(uname -m)
     mountSrc=""
     tag=""
     updateCmd="CVSUP"
     init=1
 
     # argument handling
-    while getopts d:j:m:t:u:CH:I arg >/dev/null 2>&1
+    while getopts a:d:j:m:t:u:CH:I arg >/dev/null 2>&1
     do
 	case "${arg}" in
 
+	a)	jailArch="${OPTARG}";;
 	d)	descr="${OPTARG}";;
 	j)	jailName="${OPTARG}";;
 	m)	mountSrc="${OPTARG}";;
@@ -565,7 +592,8 @@ createJail () {
     fi
 
     tc=$(tinderLoc scripts tc)
-    ${tc} addJail -j ${jailName} -t ${tag} ${updateCmd} ${mountSrc} "${descr}"
+    ${tc} addJail -j ${jailName} -t ${tag} ${updateCmd} ${mountSrc} \
+		  -a ${jailArch} "${descr}"
     if [ $? -ne 0 ]; then
 	echo "FAILED."
 	exit 1

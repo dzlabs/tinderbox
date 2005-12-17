@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleConfig.php,v 1.1 2005/11/15 19:42:56 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleConfig.php,v 1.2 2005/12/17 23:36:14 ade Exp $
 #
 
 require_once 'module/module.php';
@@ -70,6 +70,7 @@ class moduleConfig extends module {
 		foreach( $jails as $jail ) {
 			$jail_id = $jail->getId();
 			$all_jails[$jail_id] = array( 'jail_name'        => $jail->getName(),
+                                                      'jail_arch'        => $jail->getArch(),
 			                              'jail_tag'         => $jail->getTag(),
 			                              'jail_last_built'  => $this->TinderboxDS->prettyDatetime($jail->getLastBuilt()),
 			                              'jail_update_cmd'  => $jail->getUpdateCmd(),

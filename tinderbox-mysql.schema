@@ -15,6 +15,7 @@ DROP TABLE IF EXISTS jails;
 CREATE TABLE jails (
 	jail_id SERIAL PRIMARY KEY,
 	jail_name VARCHAR(32) UNIQUE NOT NULL,
+	jail_arch VARCHAR(32),
 	jail_tag VARCHAR(32),
 	jail_last_built DATETIME,
 	jail_update_cmd VARCHAR(255) DEFAULT 'CVSUP',

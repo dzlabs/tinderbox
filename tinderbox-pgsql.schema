@@ -12,6 +12,7 @@ CREATE INDEX ports_port_maintainer_idx ON ports(port_maintainer);
 CREATE TABLE jails (
 	jail_id SERIAL PRIMARY KEY,
 	jail_name VARCHAR(32) UNIQUE NOT NULL,
+	jail_arch VARCHAR(32),
 	jail_tag VARCHAR(32),
 	jail_last_built TIMESTAMP,
 	jail_update_cmd VARCHAR(255) DEFAULT 'CVSUP',

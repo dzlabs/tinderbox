@@ -23,13 +23,14 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/Jail.pm,v 1.10 2005/10/10 23:30:14 ade Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/Jail.pm,v 1.11 2005/12/17 23:36:13 ade Exp $
 #
 
 package Jail;
 
 use strict;
 use TinderObject;
+use POSIX;
 use vars qw(@ISA);
 @ISA = qw(TinderObject);
 
@@ -40,6 +41,7 @@ sub new {
         my $object_hash = {
                 jail_id          => "",
                 jail_name        => "",
+		jail_arch	 => "",
                 jail_tag         => "",
                 jail_last_built  => "",
                 jail_update_cmd  => "",
@@ -66,6 +68,17 @@ sub getName {
         my $self = shift;
 
         return $self->{jail_name};
+}
+
+sub getArch {
+	my $self = shift;
+
+	my $arch = $self->{jail_arch};
+	if (!defined($arch) || $arch eq '') {
+		my @uname = POSIX::uname();
+		$arch = $uname[4];
+	}
+	return $arch;
 }
 
 sub getTag {
@@ -103,6 +116,13 @@ sub setName {
         my $name = shift;
 
         $self->{jail_name} = $name;
+}
+
+sub setArch {
+	my $self = shift;
+	my $name = shift;
+
+	$self->{jail_arch} = $name;
 }
 
 sub setTag {

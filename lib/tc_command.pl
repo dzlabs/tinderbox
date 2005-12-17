@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.100 2005/12/09 17:51:20 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.101 2005/12/17 23:36:13 ade Exp $
 #
 
 my $pb;
@@ -144,8 +144,8 @@ my $ds = new TinderboxDS();
                 func  => \&addJail,
                 help  => "Add a jail to the datastore",
                 usage =>
-                    "-j <jail name> -t <jail tag> [-d <jail description>] [-m <src mount source>] [-u <updatecommand>|CVSUP|NONE>]",
-                optstr => 'm:j:t:u:d:',
+                    "-j <jail name> -t <jail tag> [-d <jail description>] [-m <src mount source>] [-u <updatecommand>|CVSUP|NONE>] [-a <arch>]",
+                optstr => 'm:j:t:u:d:a:',
         },
         "addPortsTree" => {
                 func  => \&addPortsTree,
@@ -198,6 +198,12 @@ my $ds = new TinderboxDS();
                 usage  => "-j <jail name>",
                 optstr => 'j:',
         },
+	"getJailArch" => {
+		func   => \&getJailArch,
+		help   => "Get the architecture for a give jail",
+		usage  => "-j <jail name>",
+		optstr => 'j:',
+	},
         "getUpdateCmd" => {
                 func   => \&getUpdateCmd,
                 help   => "Get the update command for the given object",
@@ -412,8 +418,8 @@ my $ds = new TinderboxDS();
         "createJail" => {
                 help  => "Create a new jail",
                 usage =>
-                    "-j <jailname> [-t <tag>] [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE> [-I]",
-                optstr => 'j:t:d:CH:m:u:I',
+                    "-j <jailname> [-t <tag>] [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE> [-I] [-a <arch>]",
+                optstr => 'j:t:d:CH:m:u:Ia:',
         },
 
         "createPortsTree" => {
@@ -1045,6 +1051,7 @@ sub addJail {
         }
 
         my $name = $opts->{'j'};
+	my $arch = $opts->{'a'};
         my $tag  = $opts->{'t'};
 
         if ($ds->isValidJail($name)) {
@@ -1066,6 +1073,7 @@ sub addJail {
         my $jail = new Jail();
 
         $jail->setName($name);
+	$jail->setArch($arch);
         $jail->setTag($tag);
         $jail->setUpdateCmd($update_cmd);
         $jail->setDescription($opts->{'d'}) if ($opts->{'d'});
@@ -1276,6 +1284,20 @@ sub getTagForJail {
         my $jail = $ds->getJailByName($opts->{'j'});
 
         print $jail->getTag() . "\n";
+}
+
+sub getJailArch {
+	if (!$opts->{'j'}) {
+		usage("getJailArch");
+	}
+
+	if (!$ds->isValidJail($opts->{'j'})) {
+		cleanup($ds, 1, "Unknown jail, " . $opts->{'j'} . "\n");
+	}
+
+	my $jail = $ds->getJailByName($opts->{'j'});
+
+	print $jail->getArch() . "\n";
 }
 
 sub getUpdateCmd {

@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/config.tpl,v 1.2 2005/11/15 19:45:33 oliver Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/config.tpl,v 1.3 2005/12/17 23:36:14 ade Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -63,6 +63,7 @@
 	<table>
 		<tr>
 			<th>Name</th>
+			<th>Architecture</th>
 			<th>Description</th>
 			<th>Last Built</th>
 			<th>Tag</th>
@@ -73,6 +74,7 @@
 		<?foreach($jail_data as $row) {?>
 			<tr>
 				<td><?=$row['jail_name']?></td>
+				<td><?=$row['jail_arch']?></td>
 				<td><?=$row['jail_description']?></td>
 				<td><?=$row['jail_last_built']?></td>
 				<td><?=$row['jail_tag']?></td>
@@ -112,7 +114,7 @@
 
 	</table>
 <?}else{?>
-	<p>There are no jails configured.</p>
+	<p>There are no ports trees configured.</p>
 <?}?>
 
 <h2>further configurations:</h2>
