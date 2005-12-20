@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.27 2005/12/17 23:36:13 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.28 2005/12/20 20:36:58 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -801,7 +801,7 @@ enterBuild () {
     fi
 
     buildRoot=$(tinderLoc buildroot ${build})
-    if [ ! -f ${buildRoot} ]; then
+    if [ ! -d ${buildRoot} ]; then
 	echo "enterBuild: Build directory (${buildRoot}) does not exist"
 	return 1
     fi
