@@ -3,6 +3,24 @@
 # usage: $0 DIRNAME PHASE ED PD FD BD RD [PLISTCHECK]
 #   PHASE is 1 (checksum) or 2 (package)
 
+mountprocfs() {
+    arch=$1
+
+    if [ ${arch} = "i386" -o ${arch} = "amd64" ]; then
+	# JDK ports need linprocfs :(
+	mkdir -p /compat/linux/proc
+	mount_linprocfs linprocfs /compat/linux/proc
+    fi
+}
+
+umountprocfs() {
+    arch=$1
+
+    if [ ${arch} = "i386" -o ${arch} = "amd64" ]; then
+	umount -f /compat/linux/proc 2> /dev/null > /dev/null
+    fi
+}
+
 cleanup() {
   status=$1
 
@@ -28,6 +46,8 @@ add_pkg() {
   cd /tmp/depends
   export PKG_PATH=/tmp/depends
   if [ ! -z "${pkgs}" ]; then
+    arch=$(uname -m)
+    umountprocfs ${arch}
     echo "adding dependencies"
     for i in $pkgs; do
       echo "pkg_add $i"
@@ -43,6 +63,7 @@ add_pkg() {
         fi
       fi
     done
+    mountprocfs ${arch}
   fi
 }
 
