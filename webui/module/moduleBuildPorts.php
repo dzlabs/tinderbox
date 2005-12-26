@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.9 2005/11/08 23:46:54 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.10 2005/12/26 22:45:56 marcus Exp $
 #
 
 require_once 'module/module.php';
@@ -63,10 +63,10 @@ class moduleBuildPorts extends module {
 		$this->template_assign( 'build_name',             $build_name );
 		$this->template_assign( 'jail_name',              $jail->getName() );
 		$this->template_assign( 'jail_tag',               $jail->getTag() );
-		$this->template_assign( 'jail_lastbuilt',         $this->TinderboxDS->prettyDatetime( $jail->getLastBuilt() ) );
+		$this->template_assign( 'jail_lastbuilt',         prettyDatetime( $jail->getLastBuilt() ) );
 		$this->template_assign( 'ports_tree_description', $ports_tree->getDescription() );
-		$this->template_assign( 'ports_tree_lastbuilt',   $this->TinderboxDS->prettyDatetime( $ports_tree->getLastBuilt() ) );
-		$this->template_assign( 'local_time',             $this->TinderboxDS->prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
+		$this->template_assign( 'ports_tree_lastbuilt',   prettyDatetime( $ports_tree->getLastBuilt() ) );
+		$this->template_assign( 'local_time',             prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
 
 		return $this->template_parse( 'list_buildports.tpl' );
 	}
@@ -98,7 +98,7 @@ class moduleBuildPorts extends module {
 		$this->template_assign( 'port_fail_reasons',      $port_fail_reasons );
 		$this->template_assign( 'build_name', $build_name );
 		$this->template_assign( 'maintainer', $maintainer );
-		$this->template_assign( 'local_time', $this->TinderboxDS->prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
+		$this->template_assign( 'local_time', prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
 
 		return $this->template_parse( 'failed_buildports.tpl' );
 	}
@@ -132,7 +132,7 @@ class moduleBuildPorts extends module {
 		$this->template_assign( 'port_fail_reasons',      $port_fail_reasons );
 		$this->template_assign( 'current_builds',         $current_builds );
 		$this->template_assign( 'build_name',             $build_name );
-		$this->template_assign( 'local_time',             $this->TinderboxDS->prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
+		$this->template_assign( 'local_time',             prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
 
 		return $this->template_parse( 'latest_buildports.tpl' );
 	}

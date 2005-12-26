@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleConfig.php,v 1.2 2005/12/17 23:36:14 ade Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleConfig.php,v 1.3 2005/12/26 22:45:56 marcus Exp $
 #
 
 require_once 'module/module.php';
@@ -72,7 +72,7 @@ class moduleConfig extends module {
 			$all_jails[$jail_id] = array( 'jail_name'        => $jail->getName(),
                                                       'jail_arch'        => $jail->getArch(),
 			                              'jail_tag'         => $jail->getTag(),
-			                              'jail_last_built'  => $this->TinderboxDS->prettyDatetime($jail->getLastBuilt()),
+			                              'jail_last_built'  => prettyDatetime($jail->getLastBuilt()),
 			                              'jail_update_cmd'  => $jail->getUpdateCmd(),
 			                              'jail_description' => $jail->getDescription(),
 			                              'jail_src_mount'   => $jail->getSrcMount() );
@@ -81,7 +81,7 @@ class moduleConfig extends module {
 		foreach( $ports_trees as $ports_tree ) {
 			$ports_tree_id = $ports_tree->getId();
 			$all_ports_trees[$ports_tree_id] = array( 'ports_tree_name'        => $ports_tree->getName(),
-			                   	        	  'ports_tree_last_built'  => $this->TinderboxDS->prettyDatetime( $ports_tree->getLastBuilt() ),
+			                   	        	  'ports_tree_last_built'  => prettyDatetime( $ports_tree->getLastBuilt() ),
 			                   	        	  'ports_tree_update_cmd'  => $ports_tree->getUpdateCmd(),
 			                   	        	  'ports_tree_description' => $ports_tree->getDescription(),
 		                           	        	  'ports_tree_cvsweb_url'  => $ports_tree->getCVSwebURL(),

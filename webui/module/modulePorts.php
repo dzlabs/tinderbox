@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.8 2005/11/26 04:08:21 ade Exp $
+# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.9 2005/12/26 22:45:56 marcus Exp $
 #
 
 require_once 'module/module.php';
@@ -60,7 +60,7 @@ class modulePorts extends module {
 		$this->template_assign( 'port_maintainer',   $ports[0]->getMaintainer() );
 		$this->template_assign( 'port_name',         $ports[0]->getName() );
 		$this->template_assign( 'ports_trees_links', $ports_trees_links );
-		$this->template_assign( 'local_time',        $this->TinderboxDS->prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
+		$this->template_assign( 'local_time',        prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
 
 		return $this->template_parse( 'describe_port.tpl' );
 	}
@@ -128,11 +128,11 @@ class modulePorts extends module {
 
 			$data[] = array(	'build_name'                 => $build_name,
 						'port_directory'             => $port->getDirectory(),
-						'port_maintainer'            => $this->TinderboxDS->prettyEmail( $port->getMaintainer() ).' ',
+						'port_maintainer'            => prettyEmail( $port->getMaintainer() ).' ',
 						'port_id'                    => $port_id,
 						'port_last_built_version'    => $port_last_built_version,
-						'port_last_built'            => $this->TinderboxDS->prettyDatetime( $port->getLastBuilt() ),
-						'port_last_successful_built' => $this->TinderboxDS->prettyDatetime( $port->getLastSuccessfulBuilt() ),
+						'port_last_built'            => prettyDatetime( $port->getLastBuilt() ),
+						'port_last_successful_built' => prettyDatetime( $port->getLastSuccessfulBuilt() ),
 						'port_last_fail_reason'      => htmlentities($port->getLastFailReason()),
 						'port_link_logfile'          => $port_link_logfile,
 						'port_link_package'          => $port_link_package,
