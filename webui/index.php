@@ -24,18 +24,10 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.12 2005/12/07 17:52:07 ade Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.13 2005/12/26 22:53:32 marcus Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
-
-function get_var( $var ) {
-	if( isset( $_POST[$var] ) ) {
-		return $_POST[$var];
-	} elseif( isset( $_GET[$var] ) ) {
-		return $_GET[$var];
-	}
-}
 
 require_once 'module/moduleBuilds.php';
 require_once 'module/moduleBuildPorts.php';
@@ -65,52 +57,52 @@ if( isset($_POST['do_login']) ) {
 
 $display_login = $moduleUsers->display_login();
 
-$action = get_var( 'action' );
+$action = $_REQUEST['action'];
 
 switch( $action ) {
-	case 'describe_port':		$port_id    = get_var( 'id' );
+	case 'describe_port':		$port_id    = $_REQUEST['id'];
 					$display    = $modulePorts->display_describe_port( $port_id );
 					break;
-	case 'failed_buildports':	$build      = get_var( 'build' );
-					$maintainer = get_var( 'maintainer' );
+	case 'failed_buildports':	$build      = $_REQUEST['build'];
+					$maintainer = $_REQUEST['maintainer'];
 					$display    = $moduleBuildPorts->display_failed_buildports( $build, $maintainer );
 					break;
-	case 'latest_buildports':	$build      = get_var( 'build' );
+	case 'latest_buildports':	$build      = $_REQUEST['build'];
 					$display    = $moduleBuildPorts->display_latest_buildports( $build );
 					break;
-	case 'list_buildports':		$build      = get_var( 'build' );
+	case 'list_buildports':		$build      = $_REQUEST['build'];
 					$display    = $moduleBuildPorts->display_list_buildports( $build );
 					break;
 	case 'display_add_user':	$display    = $moduleUsers->display_add_user( '', '', '', '', array() );
 					break;
-	case 'add_user':		$user_name  = get_var( 'user_name' );
-					$user_email = get_var( 'user_email' );
-					$user_pwd   = get_var( 'user_password' );
-					$wwwenabled = get_var( 'www_enabled' );
-					$perm_obj   = get_var( 'permission_object' );
+	case 'add_user':		$user_name  = $_REQUEST['user_name'];
+					$user_email = $_REQUEST['user_email'];
+					$user_pwd   = $_REQUEST['user_password'];
+					$wwwenabled = $_REQUEST['www_enabled'];
+					$perm_obj   = $_REQUEST['permission_object'];
 					$display    = $moduleUsers->action_user( 'add', '', $user_name, $user_email, $user_pwd, $wwwenabled, $perm_obj );
 					switch( $display ) {
 						case '1':	unset( $display ); header( 'Location: index.php' ); break;
 						case '0':	$display = $moduleUsers->display_add_user( $user_name, $user_email, $user_pwd, $wwwenabled, $perm_obj ); break;
 					}
 					break;
-	case 'display_modify_user':	$user_id  = get_var( 'modify_user_id' );
+	case 'display_modify_user':	$user_id  = $_REQUEST['modify_user_id'];
 					$display    = $moduleUsers->display_modify_user( 1, $user_id, '', '', '', '', array() );
 					break;
-	case 'modify_user':		$actionuser = get_var( 'action_user' );
-					$user_id    = get_var( 'user_id' );
-					$user_name  = get_var( 'user_name' );
-					$user_email = get_var( 'user_email' );
-					$user_pwd   = get_var( 'user_password' );
-					$wwwenabled = get_var( 'www_enabled' );
-					$perm_obj   = get_var( 'permission_object' );
+	case 'modify_user':		$actionuser = $_REQUEST['action_user'];
+					$user_id    = $_REQUEST['user_id'];
+					$user_name  = $_REQUEST['user_name'];
+					$user_email = $_REQUEST['user_email'];
+					$user_pwd   = $_REQUEST['user_password'];
+					$wwwenabled = $_REQUEST['www_enabled'];
+					$perm_obj   = $_REQUEST['permission_object'];
 					$display    = $moduleUsers->action_user( $actionuser, $user_id, $user_name, $user_email, $user_pwd, $wwwenabled, $perm_obj );
 					switch( $display ) {
 						case '1':	unset( $display ); header( 'Location: index.php' ); break;
 						case '0':	$display = $moduleUsers->display_modify_user( 0, $user_id, $user_name, $user_email, $user_pwd, $www_enabled, $perm_obj ); break;
 					}
 					break;
-	case 'display_failure_reasons':	$failure_reason_tag  = get_var( 'failure_reason_tag' );
+	case 'display_failure_reasons':	$failure_reason_tag  = $_REQUEST['failure_reason_tag'];
 					$display    = $modulePortFailureReasons->display_failure_reasons( $failure_reason_tag );
 					break;
 	case 'config':			$display    = $moduleConfig->display_config();
