@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.13 2005/12/26 22:45:56 marcus Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.14 2005/12/26 22:46:55 marcus Exp $
 #
 
 require_once 'module/module.php';
@@ -53,7 +53,7 @@ class moduleUsers extends module {
 				$this->template_assign( 'all_users', $this->get_all_users() );
 			} else {
 				$this->template_assign( 'is_www_admin', false );
-			}			
+			}
 		} else {
 			$this->template_assign( 'user_name', '' );
 		}
