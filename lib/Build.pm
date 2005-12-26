@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Build.pm,v 1.10 2005/10/10 23:30:14 ade Exp $
+# $MCom: portstools/tinderbox/lib/Build.pm,v 1.11 2005/12/26 23:59:28 marcus Exp $
 #
 
 package Build;
@@ -51,6 +51,7 @@ sub new {
                 build_status       => "",
                 build_description  => "",
                 build_current_port => "",
+                build_last_updated => "",
         };
 
         my @args = ();
@@ -102,6 +103,12 @@ sub getCurrentPort {
         my $self = shift;
 
         return $self->{build_current_port};
+}
+
+sub getLastUpdated {
+        my $self = shift;
+
+        return $self->{build_last_updated};
 }
 
 sub setName {

@@ -39,7 +39,8 @@ CREATE TABLE builds (
 	ports_tree_id INTEGER REFERENCES ports_trees(ports_tree_id) ON UPDATE CASCADE ON DELETE RESTRICT,
 	build_description TEXT,
 	build_status VARCHAR(16) CHECK (build_status IN ('IDLE','PREPARE','PORTBUILD')) DEFAULT 'IDLE',
-	build_current_port VARCHAR(255)
+	build_current_port VARCHAR(255),
+	build_last_updated TIMESTAMP
 );
 
 -- DROP TABLE users CASCADE;

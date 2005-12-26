@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/Build.php,v 1.3 2005/10/10 23:30:16 ade Exp $
+# $MCom: portstools/tinderbox/webui/core/Build.php,v 1.4 2005/12/26 23:59:28 marcus Exp $
 #
 
     require_once 'TinderObject.php';
@@ -39,7 +39,8 @@
 		'ports_tree_id' => '',
 		'build_description' => '',
 		'build_status' => '',
-		'build_current_port' => ''
+		'build_current_port' => '',
+		'build_last_updated' => ''
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
@@ -71,6 +72,10 @@
 
 	function getBuildCurrentPort() {
 	    return $this->build_current_port;
+	}
+
+	function getBuildLastUpdated() {
+	    return $this->build_last_updated;
 	}
 
 	function setName($name) {

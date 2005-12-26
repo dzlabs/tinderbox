@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.11 2005/12/26 23:38:32 marcus Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.12 2005/12/26 23:59:29 marcus Exp $
 #
 
 require_once 'module/module.php';
@@ -167,6 +167,7 @@ class moduleBuildPorts extends module {
 					$data[$i]['port_current_version'] = preparing_next_build;
 
 				$data[$i]['build_name'] = $build->getName();
+				$data[$i]['build_last_updated'] = $build->getBuildLastUpdated();
 				$i++;
 	                }
 			$this->template_assign( 'data', $data );
