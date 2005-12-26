@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/functions.php,v 1.1 2005/12/26 22:41:41 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/functions.php,v 1.2 2005/12/26 23:38:32 marcus Exp $
 #
 
 function prettyEmail($input) {
@@ -50,6 +50,15 @@ function prettyDatetime($input) {
 
 function cryptPassword($password) {
 	return md5($password);
+}
+
+function build_query_string($url, $qs, $key, $value) {
+	$qs[$key] = $value;
+	$tmp = array();
+	foreach ($qs as $k => $v) {
+		array_push($tmp, $k . '=' . $v);
+	}
+	return $url . '?' . implode('&amp;', $tmp);
 }
 
 ?>
