@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuilds.php,v 1.5 2005/11/08 23:07:22 marcus Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuilds.php,v 1.6 2005/12/26 22:33:53 marcus Exp $
 #
 
 require_once 'module/module.php';
@@ -62,12 +62,24 @@ class moduleBuilds extends module {
 
 		$i = 0;
 		foreach( $builds as $build ) {
-			$stats       = $this->TinderboxDS->getBuildStats( $build->getId() );
 			$status      = $build->getBuildStatus();
 			$description = $build->getDescription();
 			$name        = $build->getName();
 
-			$failures    = $stats['fails']?$stats['fails']:0;
+			$stats       = $this->TinderboxDS->getBuildStatsWithStatus( $build->getId() );
+
+			$results = array(
+				"UNKNOWN"    => 0,
+				"FAIL"       => 0,
+				"LEFTOVERS"  => 0,
+				"SUCCESS"    => 0,
+			);
+			foreach ($stats as $stat) {
+				$results[$stat['last_status']] = $stat['c'];
+			}
+			foreach ($results as $k => $v) {
+				if ($v == 0) $results[$k] = "-";
+			}
 
 			switch( $status ) {
 				case 'PORTBUILD':
@@ -88,8 +100,8 @@ class moduleBuilds extends module {
 				$data[$i]['packagedir'] = $pkguri.'/'.$name.'/';
 			} else {
 				$data[$i]['packagedir'] = false;
-			}			
-			$data[$i]['failures'] = $failures;
+			}
+			$data[$i]['results'] = $results;
 			$i++;
 		}
 

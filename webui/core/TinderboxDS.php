@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.27 2005/12/07 17:52:07 ade Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.28 2005/12/26 22:33:53 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -349,6 +349,13 @@
 
             return $ports;
         }
+
+	function getBuildStatsWithStatus($build_id) {
+	    $query = 'SELECT last_status,COUNT(*) AS c FROM build_ports WHERE build_id = ? GROUP BY last_status';
+	    $rc = $this->_doQueryHashRef($query, $results, $build_id);
+	    if (!$rc) return null;
+	    return $results;
+	}
 
 
         function getBuildStats($build_id) {

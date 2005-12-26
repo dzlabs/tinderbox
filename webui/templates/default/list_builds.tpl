@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_builds.tpl,v 1.2 2005/07/10 07:39:18 oliver Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_builds.tpl,v 1.3 2005/12/26 22:33:53 marcus Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -13,7 +13,11 @@
 			<th style="width: 20px">&nbsp;</th>
 			<th>Build Name</th>
 			<th>Build Description</th>
-			<th>Failures</th>
+			<th>
+				<span title="unknown / fail / leftovers">
+				U / F / L
+				</span>
+			</th>
 			<th>Build Packages</th>
 		</tr>
 
@@ -22,7 +26,15 @@
 				<td class="<?=$row['status_field_class']?>">&nbsp;</td>
 				<td><a href="index.php?action=list_buildports&amp;build=<?=$row['name']?>"><?=$row['name']?></a></td>
 				<td><?=$row['description']?></td>
-				<td align="center"><?=$row['failures']?></td>
+				<td align="center">
+					<span title="unknown / fail / leftovers">
+					<?=$row['results']['UNKNOWN']?>
+					/
+					<?=$row['results']['FAIL']?>
+					/
+					<?=$row['results']['LEFTOVERS']?>
+					</span>
+				</td>
 				<?if($row['packagedir']){?>
 					<td><a href="<?=$row['packagedir']?>">Package Directory</a></td>
 				<?}else{?>
