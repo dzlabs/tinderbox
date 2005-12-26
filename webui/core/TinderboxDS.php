@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.28 2005/12/26 22:33:53 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.29 2005/12/26 22:41:41 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -683,10 +683,6 @@
             $this->error = null;
         }
 
-        function cryptPassword($password) {
-            return md5($password);
-        }
-
         function getPackageSuffix($jail_id) {
             if (empty($jail_id)) return "";
             /* Use caching to avoid a lot of SQL queries */
@@ -704,29 +700,5 @@
 
             }
         }
-
-        /* formatting functions */
-
-         function prettyDatetime($input) {
-            if (ereg("[0-9]{14}", $input)) {
-                /* timestamp */
-                return substr($input,0,4)."-".substr($input,4,2)."-".substr($input,6,2)." ".substr($input,8,2).":".substr($input,10,2).":".substr($input,12,2);
-            } elseif (ereg("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}", $input)) {
-                /* datetime */
-                if ($input == "0000-00-00 00:00:00" ||
-		    $input == "0000-00-00 00:00:00.000000") {
-                    return "";
-                } else {
-                    return substr($input,0,19);
-                }
-            } else {
-                return $input;
-            }
-        }
-
-        function prettyEmail($input) {
-            return eregi_replace("@FreeBSD.org", "", $input);
-        }
-
    }
 ?>

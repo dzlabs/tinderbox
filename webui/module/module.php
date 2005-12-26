@@ -24,9 +24,10 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/module.php,v 1.3 2005/07/10 17:06:25 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/module.php,v 1.4 2005/12/26 22:41:41 marcus Exp $
 #
 
+require_once 'core/functions.php';
 require_once 'core/TinderboxDS.php';
 
 class module {
