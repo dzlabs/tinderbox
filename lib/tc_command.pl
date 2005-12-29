@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.101 2005/12/17 23:36:13 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.102 2005/12/29 05:56:27 marcus Exp $
 #
 
 my $pb;
@@ -865,7 +865,7 @@ ID           Reason                 Expression
 .
                                 format PATTERN =
 @<<<<<<<<<<  @<<<<<<<<<<<<<<<<<<<   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-$id          $reason                $expr
+$id,         $reason,               $expr
 ~                                   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                                     $expr
 ~                                   ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -938,7 +938,7 @@ Tag                    Type           Description
 .
                                 format REASON =
 @<<<<<<<<<<<<<<<<<<<   @<<<<<<<<<     ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-$tag                   $type          $descr
+$tag,                  $type,         $descr
 ~                                     ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                                       $descr
 ~                                     ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
