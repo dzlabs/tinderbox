@@ -1,4 +1,4 @@
-<!-- $MCom: portstools/tinderbox/webui/templates/default/current_buildports.tpl,v 1.2 2005/12/26 23:59:29 marcus Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/current_buildports.tpl,v 1.3 2005/12/31 00:48:49 marcus Exp $ //-->
 <?if(!$no_list){?>
 	<?if($build_name){?>
 		<h1>Current Builds in <?=$build_name?></h1>
@@ -19,4 +19,7 @@
 			</tr>
 		<?}?>
 	</table>
+	<script language="JavaScript">
+		setTimeout("reloadpage()", 15000)
+	</script>
 <?}?>
