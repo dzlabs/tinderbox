@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.102 2005/12/29 05:56:27 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.103 2006/01/04 09:36:34 ade Exp $
 #
 
 my $pb;
@@ -1462,7 +1462,6 @@ sub rmPort {
                         print "Really remove port " . $opts->{'d'} . "? ";
                 }
                 my $response = <STDIN>;
-                print "\n";
                 cleanup($ds, 0, undef) unless ($response =~ /^y/i);
         }
 
