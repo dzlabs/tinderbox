@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.83 2005/12/11 18:38:34 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.84 2006/01/21 19:46:24 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -225,7 +225,6 @@ mtree -deU -f ${chroot}/etc/mtree/BSD.local.dist \
 
 case "${X_WINDOW_SYSTEM}" in
 "xfree86-3")	_X_MTREE="BSD.x11.dist";;
-"xorg")		_X_MTREE="BSD.x11-xorg.dist";;
 *)		_X_MTREE="BSD.x11-4.dist";;
 esac
 mtree -deU -f ${chroot}/etc/${_X_MTREE} \
