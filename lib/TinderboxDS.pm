@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.71 2005/12/29 05:51:02 marcus Exp $
+# $MCom: portstools/tinderbox/lib/TinderboxDS.pm,v 1.72 2006/01/23 18:42:06 marcus Exp $
 #
 
 package TinderboxDS;
@@ -1048,7 +1048,7 @@ sub setWwwAdmin {
         if (!$rc) {
                 $rc = $self->_doQuery(
                         'INSERT INTO user_permissions (user_id,host_id,user_permission_object_type,user_permission_object_id,user_permission) VALUES (?, ? , ?, ?, ?)',
-                        [$user->getId(), '0', 'users', $user->getId(), 1]
+                        [$user->getId(), '-1', 'users', $user->getId(), 1]
                 );
         } else {
                 $rc = $self->_doQuery(
