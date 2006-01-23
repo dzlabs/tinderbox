@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.84 2006/01/21 19:46:24 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.85 2006/01/23 21:51:13 ade Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -264,7 +264,7 @@ else
 fi
 
 last_version=$(${tc} getPortLastBuiltVersion -d ${portdir} -b ${build})
-logDir=$(tinderLoc buildlogs ${build})
+logsDir=$(tinderLoc buildlogs ${build})
 errorsDir=$(tinderLoc builderrors ${build})
 
 if [ "${error}" = "0" ]; then
@@ -305,7 +305,7 @@ if [ "${error}" = "0" ]; then
     rm -rf ${chroot}/${WRKDIRPREFIX}
 
     if [ -e ${chroot}/tmp/work.tbz ]; then
-	workDir=$(tinderLOc buildworkdir ${build})
+	workDir=$(tinderLoc buildworkdir ${build})
 	mkdir -p ${workDir}
 	cp ${chroot}/tmp/work.tbz ${workDir}/${pkgname}.tbz
     fi
@@ -339,8 +339,8 @@ if [ "${error}" = "0" ]; then
 	    reason="-r $(${tc} processLog -l ${errorsDir}/${pkgname}.log)"
 	fi
 	${tc} updatePortStatus -d ${portdir} -b ${build} \
-		-L -s ${status} -v ${pkgname} ${reason}
-        ${tc} sendBuildErrorMail -d ${portdir} -b ${build}
+		-L -s FAIL -v ${pkgname} ${reason}
+        ${tc} sendBuildErrorMail -d ${portdir} -b ${build} -p ${pkgname}
     fi
 else
     cp ${chroot}/tmp/${pkgname}.log ${errorsDir}/${pkgname}.log
@@ -352,7 +352,7 @@ else
     fi
     ${tc} updatePortStatus -d ${portdir} -b ${build} \
 		-L -s FAIL -v ${pkgname} ${reason}
-    ${tc} sendBuildErrorMail -d ${portdir} -b ${build}
+    ${tc} sendBuildErrorMail -d ${portdir} -b ${build} -p ${pkgname}
 fi
 
 cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${build}

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.103 2006/01/04 09:36:34 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.104 2006/01/23 21:51:13 ade Exp $
 #
 
 my $pb;
@@ -52,7 +52,7 @@ use vars qw(
     $SUBJECT
     $SENDER
     $SMTP_HOST
-    $LOG_URI
+    $ERRORS_URI
     $SHOWBUILD_URI
     $SHOWPORT_URI
 );
@@ -374,7 +374,7 @@ my $ds = new TinderboxDS();
                 help =>
                     "Send email to the build interest list when a port fails to build",
                 usage =>
-                    "-b <build name> -d <port directory> [-p <package name>]",
+                    "-b <build name> -d <port directory> -p <package name>",
                 optstr => 'b:d:p:',
         },
         "listUsers" => {
@@ -1969,12 +1969,13 @@ sub updateBuildCurrentPort {
 }
 
 sub sendBuildErrorMail {
-        if (!$opts->{'b'} || !$opts->{'d'}) {
+        if (!$opts->{'b'} || !$opts->{'d'} || !$opts->{'p'}) {
                 usage("sendBuildErrorMail");
         }
 
         my $buildname = $opts->{'b'};
         my $portdir   = $opts->{'d'};
+	my $pkgname   = $opts->{'p'};
 
         if (!$ds->isValidBuild($buildname)) {
                 cleanup($ds, 1, "Unknown build, $buildname\n");
@@ -1983,18 +1984,13 @@ sub sendBuildErrorMail {
         my $build = $ds->getBuildByName($buildname);
         my $port  = $ds->getPortByDirectory($portdir);
 
-        my $version = $opts->{'p'};
-        if (!$version) {
-                $version = $ds->getPortLastBuiltVersion($port, $build);
-        }
-
         my $subject = $SUBJECT . " Port $portdir failed for build $buildname";
         my $now     = scalar localtime;
         my $data    = <<EOD;
 Port $portdir failed for build $buildname on $now.  The error log can be
 found at:
 
-${TINDERBOX_HOST}${LOG_URI}/$buildname/${version}.log
+${TINDERBOX_HOST}${ERRORS_URI}/$buildname/${pkgname}.log
 
 EOD
         if (defined($port)) {

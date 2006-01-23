@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.26 2005/12/09 17:50:15 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.27 2006/01/23 21:51:13 ade Exp $
 #
 
 tinderLocJail () {
@@ -60,7 +60,7 @@ tinderLoc () {
     "ccache")		if [ -z "${HOST_WORKDIR}" ]; then
 			    echo "${pb}/${CCACHE_DIR}/${what}"
 			else
-			    echo "${HOST_WORKDIR}/${what}"
+			    echo "${HOST_WORKDIR}/ccache/${what}"
 			fi
 			;;
     "jail")		echo "${pb}/jails/${what}";;
