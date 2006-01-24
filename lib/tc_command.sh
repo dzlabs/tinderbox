@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.29 2005/12/27 00:08:50 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.30 2006/01/24 00:40:07 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -294,6 +294,7 @@ updateJail () {
 }
 
 buildJailCleanup () {
+    trap "" 1 2 3 9 10 11 15
     echo "Cleaning up after Jail creation.  Please be patient."
     cd ${pb}
     cleanupMounts -t jail -j $2 -d $3
@@ -1001,6 +1002,7 @@ tinderbuild_reset () {
 }
 
 tinderbuild_cleanup () {
+    trap "" 1 2 3 9 10 11 15
     echo "tinderbuild: Cleaning up after tinderbuild.  Please be patient."
     rm -f ${lock}
 
