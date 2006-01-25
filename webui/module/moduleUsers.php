@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.14 2005/12/26 22:46:55 marcus Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.15 2006/01/25 17:48:43 marcus Exp $
 #
 
 require_once 'module/module.php';
@@ -342,7 +342,7 @@ class moduleUsers extends module {
 	}
 
 	function checkWwwAdmin() {
-		return $this->get_permission( '0', 'users', $this->get_id(), 'IS_WWW_ADMIN' );
+		return $this->get_permission( '-1', 'users', $this->get_id(), 'IS_WWW_ADMIN' );
 	}
 }
 ?>
