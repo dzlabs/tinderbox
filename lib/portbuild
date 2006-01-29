@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.87 2006/01/29 23:48:32 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.88 2006/01/29 23:55:57 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -325,7 +325,7 @@ if [ "${error}" = "0" ]; then
 	rm -f ${errorsDir}/${pkgname}.log
 	if grep -q "${pkgname} is marked as broken: " ${logsDir}/${pkgname}.log ; then
 	    status="BROKEN"
-	elif [ $(grep -A 2 '^=== Checking filesystem state' ${logsDir}/${pkgname}.log | grep -c '^====') -eq 0 ] ; then
+	elif [ $(grep -A 2 '^=== Checking filesystem state$' ${logsDir}/${pkgname}.log | grep -c '^====') -eq 0 ] ; then
 	    status="LEFTOVERS"
 	else
 	    status="SUCCESS"
