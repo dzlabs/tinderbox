@@ -24,11 +24,11 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.30 2006/01/24 00:40:07 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.31 2006/01/29 18:02:31 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
-export cvsupProg="/usr/local/bin/cvsup"
+export defaultCvsupProg="/usr/local/bin/cvsup"
 
 #---------------------------------------------------------------------------
 # Generic routines
@@ -505,6 +505,7 @@ makeJail () {
 createJail () {
     # set up defaults
     cvsupHost=${defaultCvsupHost}
+    cvsupProg=${defaultCvsupProg}
     cvsupCompress=0
     descr=""
     jailName=""
@@ -515,7 +516,7 @@ createJail () {
     init=1
 
     # argument handling
-    while getopts a:d:j:m:t:u:CH:I arg >/dev/null 2>&1
+    while getopts a:d:j:m:t:u:CH:IP: arg >/dev/null 2>&1
     do
 	case "${arg}" in
 
@@ -528,6 +529,7 @@ createJail () {
 	C)	cvsupCompress=1;;
 	H)	cvsupHost="${OPTARG}";;
 	I)	init=0;;
+	P)	cvsupProg="${OPTARG}";;
 	?)	return 1;;
 
 	esac
@@ -668,6 +670,7 @@ updatePortsTree () {
 createPortsTree () {
     # set up defaults
     cvsupHost=${defaultCvsupHost}
+    cvsupProg=${defaultCvsupProg}
     cvsupCompress=0
     cvswebUrl=""
     descr=""
@@ -677,7 +680,7 @@ createPortsTree () {
     updateCmd="CVSUP"
 
     # argument handling
-    while getopts d:m:p:u:w:CH:I arg >/dev/null 2>&1
+    while getopts d:m:p:u:w:CH:IP: arg >/dev/null 2>&1
     do
 	case "${arg}" in
 
@@ -689,6 +692,7 @@ createPortsTree () {
 	C)	cvsupCompress=1;;
 	H)	cvsupHost="${OPTARG}";;
 	I)	init=0;;
+	P)	cvsupProg="${OPTARG}";;
 	?)	return 1;;
 
 	esac
