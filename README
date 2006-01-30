@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.54 2006/01/29 18:02:31 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.55 2006/01/30 00:23:48 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -156,7 +156,7 @@ cvsup2.freebsd.org, enable cvsup compression, and use csup instead of cvsup
 for all Jail updates, use the following command:
 
 # cd ${pb}/scripts && ./tc createJail -j 5-STABLE -d "FreeBSD 5-STABLE" \
-	-t RELENG_5 -u CVSUP -C -H cvsup2.freebsd.org -P /usr/lcoal/bin/csup
+	-t RELENG_5 -u CVSUP -C -H cvsup2.freebsd.org -P /usr/local/bin/csup
 
 Upgrading:
 ----------
