@@ -293,14 +293,17 @@ EOF
   if [ -s /tmp/list4 ]; then
     echo "list of extra files and directories in / (not present before this port was installed but present after it was deinstalled)"
     cat /tmp/list4
+    touch /tmp/leftovers
   fi
   if [ -s /tmp/list5 ]; then
     echo "list of files present before this port was installed but missing after it was deinstalled)"
     cat /tmp/list5
+    touch /tmp/leftovers
   fi
   if [ -s /tmp/list6 ]; then
     echo "list of filesystem changes from before and after port installation and deinstallation"
     cat /tmp/list6
+    touch /tmp/leftovers
     if [ -n "${PLISTCHECK}" ]; then
       echo "1" > /tmp/status
     fi
@@ -341,14 +344,17 @@ EOF
       if [ -s /tmp/list4 ]; then
 	  echo "list of extra files and directories in / (not present on clean system but present after everything was deinstalled)"
 	  cat /tmp/list4
+	  touch /tmp/leftovers
       fi
       if [ -s /tmp/list5 ]; then
 	  echo "list of files present on clean system but missing after everything was deinstalled)"
 	  cat /tmp/list5
+	  touch /tmp/leftovers
       fi
       if [ -s /tmp/list6 ]; then
 	  echo "list of filesystem changes from before and after all port installation/deinstallation"
 	  cat /tmp/list6
+	  touch /tmp/leftovers
       fi
   fi
 
