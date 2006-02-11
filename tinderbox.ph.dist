@@ -6,8 +6,7 @@ $SENDER		 = 'tinderbox@example.com';
 $SMTP_HOST	 = 'mail.example.com';
 
 # These should probably be left alone
-$ERRORS_URI	 = $TINDERBOX_URI . '/errors';
-$LOG_URI	 = $TINDERBOX_URI . '/logs';
+$LOGS_URI	 = $TINDERBOX_URI . '/logs';
 $SHOWBUILD_URI	 = $TINDERBOX_URI . '/index.php?action=list_buildports&build=';
 $SHOWPORT_URI	 = $TINDERBOX_URI . '/index.php?action=describe_port&id=';
 

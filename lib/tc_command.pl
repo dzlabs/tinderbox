@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.104 2006/01/23 21:51:13 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.105 2006/02/11 23:05:34 ade Exp $
 #
 
 my $pb;
@@ -52,7 +52,7 @@ use vars qw(
     $SUBJECT
     $SENDER
     $SMTP_HOST
-    $ERRORS_URI
+    $LOGS_URI
     $SHOWBUILD_URI
     $SHOWPORT_URI
 );
@@ -374,8 +374,8 @@ my $ds = new TinderboxDS();
                 help =>
                     "Send email to the build interest list when a port fails to build",
                 usage =>
-                    "-b <build name> -d <port directory> -p <package name>",
-                optstr => 'b:d:p:',
+                    "-b <build name> -d <port directory> -p <package name> [-l]",
+                optstr => 'b:d:lp:',
         },
         "listUsers" => {
                 func  => \&listUsers,
@@ -1984,13 +1984,15 @@ sub sendBuildErrorMail {
         my $build = $ds->getBuildByName($buildname);
         my $port  = $ds->getPortByDirectory($portdir);
 
-        my $subject = $SUBJECT . " Port $portdir failed for build $buildname";
+	my $subject = $SUBJECT . ' ' .
+		      (defined($opts->{'l'}) ? 'leftovers' : 'failed') .
+		      " $portdir $buildname";
         my $now     = scalar localtime;
         my $data    = <<EOD;
 Port $portdir failed for build $buildname on $now.  The error log can be
 found at:
 
-${TINDERBOX_HOST}${ERRORS_URI}/$buildname/${pkgname}.log
+${TINDERBOX_HOST}${LOGS_URI}/$buildname/${pkgname}.log
 
 EOD
         if (defined($port)) {
