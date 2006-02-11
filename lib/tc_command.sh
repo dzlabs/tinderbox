@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.31 2006/01/29 18:02:31 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.32 2006/02/11 22:56:41 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -400,7 +400,8 @@ buildJail () {
 	crossEnv="TARGET_ARCH=${jailArch}"
     fi
     cd ${SRCBASE} && env DESTDIR=${J_TMPDIR} ${crossEnv} \
-	make world > ${jailBase}/world.tmp 2>&1
+	make -DNO_RESCUE -DNO_MAN -DNO_PROFILE -DNO_INFO \
+	     world > ${jailBase}/world.tmp 2>&1
     if [ $? -ne 0 ]; then
 	echo "ERROR: world failed - see ${jailBase}/world.tmp"
 	buildJailCleanup 1 ${jailName} ${J_SRCDIR}
@@ -424,10 +425,8 @@ buildJail () {
     fi
 
     # Various hacks to keep the ports building environment happy
-    ln -sf dev/null ${J_TMPDIR}/kernel		# XXX: still needed?
     ln -sf aj ${J_TMPDIR}/etc/malloc.conf
     touch -f ${J_TMPDIR}/etc/fstab
-    touch -f ${J_TMPDIR}/etc/wall_cmos_clock
 
     MTREE_DIR=${SRCBASE}/etc/mtree
     mtree -deU -f ${MTREE_DIR}/BSD.root.dist \
@@ -1190,6 +1189,7 @@ tinderbuild () {
     init=0
     jobs=1
     onceonly=0
+    onlymake=0
     noduds=""
     nullfs=""
     pbargs=""
@@ -1225,6 +1225,7 @@ tinderbuild () {
 	x-cleanpackages)	cleanpackages=1;;
 	x-init)			init=1;;
 	x-skipmake)		skipmake=1;;
+	x-onlymake)		onlymake=1;;
 	x-updateports)		updateports=1;;
 
 	# various arguments passed through to makemake and portbuild
@@ -1347,6 +1348,11 @@ tinderbuild () {
 	else
 	    cleanupMounts -t portstree -p ${portstree}
 	fi
+    fi
+
+    if [ ${onlymake} -eq 1 ]; then
+	echo "onlymake specified: not running tinderbuild"
+	tinderbuild_cleanup 0
     fi
 
     # Set up the chrooted environment
