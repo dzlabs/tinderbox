@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.32 2006/02/11 22:56:41 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.33 2006/02/11 23:54:02 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -400,8 +400,7 @@ buildJail () {
 	crossEnv="TARGET_ARCH=${jailArch}"
     fi
     cd ${SRCBASE} && env DESTDIR=${J_TMPDIR} ${crossEnv} \
-	make -DNO_RESCUE -DNO_MAN -DNO_PROFILE -DNO_INFO \
-	     world > ${jailBase}/world.tmp 2>&1
+	make world > ${jailBase}/world.tmp 2>&1
     if [ $? -ne 0 ]; then
 	echo "ERROR: world failed - see ${jailBase}/world.tmp"
 	buildJailCleanup 1 ${jailName} ${J_SRCDIR}
