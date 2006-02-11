@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.27 2006/01/23 21:51:13 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.28 2006/02/11 22:54:09 ade Exp $
 #
 
 tinderLocJail () {
@@ -355,7 +355,7 @@ requestMount () {
 	case ${_srcloc} in
 
 	[a-zA-Z0-9\.-_]*:/*)
-		_options="-o nfsv3,intr"
+		_options="-o nfsv3,intr,tcp"
 		;;
 
 	*)
@@ -367,7 +367,7 @@ requestMount () {
 		    # to be a nullfs mount.
 		    _options="-t nullfs"
 		else
-		    _options="-o nfsv3,intr"
+		    _options="-o nfsv3,intr,tcp"
 
 		    # find out the filesystem the requested source is in
 		    fsys=$(df ${_srcloc} | awk '{a=$1}  END {print a}')
