@@ -28,10 +28,10 @@ foreach my $line (@rawpats) {
         my $pattern = {};
         chomp $line;
 
-        $line =~ s/^([^,]+),\s*//;
+        $line =~ s/^[^\(]+\(([^,]+),\s*//;
         $name = $1;
 
-        $line =~ s/,\s*([^,]+)$//;
+        $line =~ s/,\s*([^,\)]+)\).*$//;
         $parent = $1;
 
         $pattern->{'body'} = $line;
