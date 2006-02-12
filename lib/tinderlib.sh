@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.28 2006/02/11 22:54:09 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.29 2006/02/12 09:20:46 ade Exp $
 #
 
 tinderLocJail () {
@@ -464,6 +464,7 @@ buildenv () {
 }
 
 buildenvNoHost () {
+    eval "export __MAKE_CONF=/dev/null" >/dev/null 2>&1
     eval "export LOCALBASE=/nonexistentlocal" >/dev/null 2>&1
     eval "export X11BASE=/nonexistentx" >/dev/null 2>&1
     eval "export PKG_DBDIR=/nonexistentdb" >/dev/null 2>&1
