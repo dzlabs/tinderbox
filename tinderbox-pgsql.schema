@@ -361,6 +361,4 @@ INSERT INTO port_fail_patterns VALUES (13400, '/usr/bin/ld: cannot find -lXThrSt
 INSERT INTO port_fail_patterns VALUES (13500, '<varargs.h> is obsolete with this version of GCC', 'varargs', 0);
 INSERT INTO port_fail_patterns VALUES (13600, 'Cannot stat: ', 'configure_error', 0);
 INSERT INTO port_fail_patterns VALUES (13700, 'cd: can.t cd to', 'NFS', 0);
-INSERT INTO port_fail_patterns VALUES (13800, '.*', '???', 0);
-INSERT INTO port_fail_patterns VALUES (13900, , 0);
 INSERT INTO port_fail_patterns VALUES (2147483647, '.*', '???', 0);
