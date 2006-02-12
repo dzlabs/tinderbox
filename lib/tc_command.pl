@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.105 2006/02/11 23:05:34 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.106 2006/02/12 00:40:55 ade Exp $
 #
 
 my $pb;
@@ -48,7 +48,6 @@ use Getopt::Std;
 use vars qw(
     %COMMANDS
     $TINDERBOX_HOST
-    $TINDERBOX_URI
     $SUBJECT
     $SENDER
     $SMTP_HOST
