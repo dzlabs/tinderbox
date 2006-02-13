@@ -76,23 +76,39 @@ del_pkg() {
   cd /tmp/depends
   export PKG_PATH=/tmp/depends
   if [ ! -z "${pkgs}" ]; then
-    unset delpkg
-    for i in $pkgs; do
-      base=$(basename $i .tgz)
-      base=$(basename $base .tbz)
-      if ! pkg_info -q -e $base; then
-        echo "skipping $base, already deleted"
+    recursion=1
+    dellist=""
+    while [ $recursion -eq 1 ]; do
+      unset delpkg nextpkg
+      recursion=0
+      for i in $pkgs; do
+        base=$(basename $i .tgz)
+        base=$(basename $base .tbz)
+        if [ -s /var/db/pkg/${base}/+REQUIRED_BY ]; then
+          recursion=1
+          nextpkg="${base} ${nextpkg}"
+        else
+          delpkg="${base} ${delpkg}"
+        fi
+      done
+      pkgs="${nextpkg}"
+      if [ "$dellist" = "$delpkg" ]; then
+        echo "deleted list =\""$dellist"\", packages to delete ="\"$delpkg\"
+        echo "The following packages were left behind (perhaps your dependency list is incomplete):"
+        ls /var/db/pkg
+        echo "error in pkg_delete, exiting"
+        cleanup 0
       else
-	delpkg="${base} ${delpkg}"
+        for j in ${delpkg}; do
+          echo "Deleting ${j}"
+          if ! (pkg_delete $j); then
+            echo "--> error in pkg_delete, exiting"
+            cleanup 0
+          fi
+        done
+        dellist=$delpkg
       fi
-    done
-    echo "Deleting $delpkg"
-    if ! (echo ${delpkg} | xargs pkg_delete -rf); then
-      echo "error in pkg_delete, exiting"
-      echo "1" > /tmp/status
-      exit 1
-    fi
-  fi
+  done
 }
 
 dir=$1
@@ -135,6 +151,8 @@ if [ $phase = 1 ]; then
     cleanup 1
   fi
 
+  del_pkg $FD
+
 else
 
   # Files we do not care about changing between pre-build and post-cleanup
@@ -147,8 +165,9 @@ else
 ./work/*
 ./compat/linux/proc
 ./usr/share/man/cat*/*
+./usr/local/etc/apache/httpd.conf
+./usr/local/etc/apache2/httpd.conf
 EOF
-
   # Record a "pristine" mtree.
   mtree -X /tmp/mtree.preexclude -xcn -k uid,gid,mode -p / > /tmp/mtree.pristine
 
@@ -157,6 +176,11 @@ EOF
 
   echo "================================================================"
   echo "====================<phase 2: make extract>===================="
+
+  # XXX The 'make fetch' stage is rerun by 'make extract' since there's
+  # no cookie for it (and nowhere to put a cookie during 'make fetch'
+  # anyway, since ${WRKDIR} isn't created yet)
+
   add_pkg ${ED}
   cd $dir
   /pnohang $TIMEOUT /tmp/make.log2 ${pkgname} make extract || cleanup 2
@@ -333,10 +357,10 @@ EOF
       grep -vE ' (extra|missing)$' /tmp/list3 > /tmp/list6
       if [ -n "${PLISTCHECK}" ]; then
 	  if grep -vqE "(usr/X11R6|usr/local)/etc/" /tmp/list4; then
-	      echo "1" > /tmp/status
+	      #echo "1" > /tmp/status
 	  fi
 	  if [ -s /tmp/list5 ]; then
-	      echo "1" > /tmp/status
+	      #echo "1" > /tmp/status
 	  fi
       fi
       echo "================================================================"
