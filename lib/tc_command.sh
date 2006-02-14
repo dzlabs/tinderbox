@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.33 2006/02/11 23:54:02 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.34 2006/02/14 03:02:44 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -1389,6 +1389,14 @@ init () {
 # add port to builds
 #---------------------------------------------------------------------------
 
+addPortToBuild_cleanup () {
+    jail=$1
+    portsTree=$2
+
+    cleanupMounts -t jail -j ${jail}
+    cleanupMounts -t portstree -p ${portsTree}
+}
+
 addPortToBuild () {
     build=$1
     portDir=$2
@@ -1407,14 +1415,15 @@ addPortToBuild () {
 	exit 1
     fi
 
+    trap "addPortToBuild_cleanup ${jail} ${portsTree}" 1 2 3 9 10 11 15
+
     buildenv ${jail} ${portsTree} ${build}
     buildenvNoHost
 
     export PORTSDIR=$(tinderLoc portstree ${portsTree})/ports
     ${tc} addPortToOneBuild -b ${build} -d ${portDir} ${norecurse}
 
-    cleanupMounts -t jail -j ${jail}
-    cleanupMounts -t portstree -p ${portsTree}
+    addPortToBuild_cleanup ${jail} ${portsTree}
 }
 
 addPort () {

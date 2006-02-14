@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.29 2006/02/12 09:20:46 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.30 2006/02/14 03:02:44 ade Exp $
 #
 
 tinderLocJail () {
@@ -399,7 +399,7 @@ requestMount () {
     fi
 
     if [ ${_readonly} -eq 1 ] ; then
-	options="${_options} -r"
+	_options="${_options} -o ro"
     fi
 
     # Sanity check, and make sure the destination directory exists
