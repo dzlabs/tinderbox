@@ -108,7 +108,8 @@ del_pkg() {
         done
         dellist=$delpkg
       fi
-  done
+    done
+  fi
 }
 
 dir=$1
