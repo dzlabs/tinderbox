@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.30 2006/02/14 03:02:44 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.31 2006/02/14 03:03:57 ade Exp $
 #
 
 tinderLocJail () {
