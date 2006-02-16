@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.35 2006/02/14 04:57:33 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.36 2006/02/16 08:13:10 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -714,7 +714,6 @@ createPortsTree () {
 
     # clean out any previous directories
     basedir=$(tinderLoc portstree ${portsTreeName})
-    cleanupMounts -t portstree -p ${portsTreeName}
     cleanDirs ${portsTreeName} ${basedir}
 
     # set up the directory
@@ -1128,7 +1127,8 @@ tinderbuild_setup () {
     fi
 
     # Handle ccache
-    if [ ${CCACHE_ENABLED} -eq 1 ]; then
+    cctar=$(tinderLoc jail ${jail})/ccache.tar
+    if [ ${CCACHE_ENABLED} -eq 1 -a -f ${cctar} ]; then
 
 	# per-build, or per-jail, ccache?
 	if [ ${CCACHE_JAIL} -eq 1 ]; then
@@ -1146,12 +1146,9 @@ tinderbuild_setup () {
 	    tinderbuild_cleanup 1
 	fi
 
-	cctar=$(tinderLoc jail ${jail})/ccache.tar
-	if [ -f ${cctar} ]; then
-	    tar -C ${buildRoot} -xf ${cctar}
-	    if [ -n "${CCACHE_MAX_SIZE}" ]; then
-		chroot ${buildRoot} /opt/ccache -M ${CCACHE_MAX_SIZE}
-	    fi
+	tar -C ${buildRoot} -xf ${cctar}
+	if [ -n "${CCACHE_MAX_SIZE}" ]; then
+	    chroot ${buildRoot} /opt/ccache -M ${CCACHE_MAX_SIZE}
 	fi
     fi
 }
