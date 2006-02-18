@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.107 2006/02/18 19:57:20 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.108 2006/02/18 20:30:36 marcus Exp $
 #
 
 my $pb;
@@ -516,7 +516,6 @@ if (!scalar(@ARGV)) {
         usage();
 }
 
-my $ds      = new Tinderbox::TinderboxDS();
 my $opts    = {};
 my $command = $ARGV[0];
 shift;
