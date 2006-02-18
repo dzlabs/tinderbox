@@ -23,15 +23,15 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/PortFailPattern.pm,v 1.1 2005/10/19 03:29:17 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/PortFailPattern.pm,v 1.2 2006/02/18 19:57:21 marcus Exp $
 #
 
-package PortFailPattern;
+package Tinderbox::PortFailPattern;
 
 use strict;
-use TinderObject;
+use Tinderbox::TinderObject;
 use vars qw(@ISA);
-@ISA = qw(TinderObject);
+@ISA = qw(Tinderbox::TinderObject);
 
 sub new {
         my $that        = shift;

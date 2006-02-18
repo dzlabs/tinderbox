@@ -23,15 +23,15 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/Config.pm,v 1.4 2005/10/10 23:30:14 ade Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/Config.pm,v 1.5 2006/02/18 19:57:21 marcus Exp $
 #
 
-package TBConfig;
+package Tinderbox::Config;
 
 use strict;
-use TinderObject;
+use Tinderbox::TinderObject;
 use vars qw(@ISA);
-@ISA = qw(TinderObject);
+@ISA = qw(Tinderbox::TinderObject);
 
 sub new {
         my $that        = shift;

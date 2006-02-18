@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.106 2006/02/12 00:40:55 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.107 2006/02/18 19:57:20 marcus Exp $
 #
 
 my $pb;
@@ -42,8 +42,8 @@ BEGIN {
 
 use strict;
 
-use TinderboxDS;
-use MakeCache;
+use Tinderbox::TinderboxDS;
+use Tinderbox::MakeCache;
 use Getopt::Std;
 use vars qw(
     %COMMANDS
@@ -59,7 +59,7 @@ use vars qw(
 require "tinderbox.ph";
 require "tinderlib.pl";
 
-my $ds = new TinderboxDS();
+my $ds = new Tinderbox::TinderboxDS();
 
 %COMMANDS = (
         "init" => {
@@ -159,12 +159,12 @@ my $ds = new TinderboxDS();
                 usage  => "{-b <build name> | -a} -d <port directory> [-R]",
                 optstr => 'ab:d:R',
         },
-	"addPortToOneBuild" => {
-		func   => \&addPortToOneBuild,
-		help   => "INTERNAL function only",
-		usage  => "",
-		optstr => 'b:d:R',
-	},
+        "addPortToOneBuild" => {
+                func   => \&addPortToOneBuild,
+                help   => "INTERNAL function only",
+                usage  => "",
+                optstr => 'b:d:R',
+        },
         "addPortFailPattern" => {
                 func  => \&addPortFailPattern,
                 help  => "Add a port failure pattern to the datastore",
@@ -197,12 +197,12 @@ my $ds = new TinderboxDS();
                 usage  => "-j <jail name>",
                 optstr => 'j:',
         },
-	"getJailArch" => {
-		func   => \&getJailArch,
-		help   => "Get the architecture for a give jail",
-		usage  => "-j <jail name>",
-		optstr => 'j:',
-	},
+        "getJailArch" => {
+                func   => \&getJailArch,
+                help   => "Get the architecture for a give jail",
+                usage  => "-j <jail name>",
+                optstr => 'j:',
+        },
         "getUpdateCmd" => {
                 func   => \&getUpdateCmd,
                 help   => "Get the update command for the given object",
@@ -288,12 +288,13 @@ my $ds = new TinderboxDS();
                 usage  => "-j <jail name> [-l <last built timestamp>]",
                 optstr => 'j:l:',
         },
-	"updatePortStatus" => {
-		func   => \&updatePortStatus,
-		help   => "Update build information about a port",
-		usage  => "-d <portdir> -b <build> [-L] [-S] [-s <status>] [-r <reason>] [-v <version>]",
-		optstr => 'b:d:Lr:Ss:v:',
-	},
+        "updatePortStatus" => {
+                func  => \&updatePortStatus,
+                help  => "Update build information about a port",
+                usage =>
+                    "-d <portdir> -b <build> [-L] [-S] [-s <status>] [-r <reason>] [-v <version>]",
+                optstr => 'b:d:Lr:Ss:v:',
+        },
         "updateBuildStatus" => {
                 func   => \&updateBuildStatus,
                 help   => "Update the current status for the specific build",
@@ -515,7 +516,7 @@ if (!scalar(@ARGV)) {
         usage();
 }
 
-my $ds      = new TinderboxDS();
+my $ds      = new Tinderbox::TinderboxDS();
 my $opts    = {};
 my $command = $ARGV[0];
 shift;
@@ -640,17 +641,17 @@ sub configCcache {
                 cleanup($ds, 0, undef);
         }
 
-        $enabled = new TBConfig();
+        $enabled = new Tinderbox::Config();
         $enabled->setOptionName("enabled");
 
-        $logfile = new TBConfig();
+        $logfile = new Tinderbox::Config();
         $logfile->setOptionName("logfile");
 
-        $jail = new TBConfig();
+        $jail = new Tinderbox::Config();
         $jail->setOptionName("jail");
 
         if ($opts->{'e'}) {
-                my $nolink = new TBConfig();
+                my $nolink = new Tinderbox::Config();
                 $enabled->setOptionValue("1");
                 $nolink->setOptionName("nolink");
                 $nolink->setOptionValue("1");
@@ -664,14 +665,14 @@ sub configCcache {
         }
 
         if ($opts->{'c'}) {
-                my $cdir = new TBConfig();
+                my $cdir = new Tinderbox::Config();
                 $cdir->setOptionName("dir");
                 $cdir->setOptionValue($opts->{'c'});
                 push @config, $cdir;
         }
 
         if ($opts->{'s'}) {
-                my $size = new TBConfig();
+                my $size = new Tinderbox::Config();
                 $size->setOptionName("max_size");
                 $size->setOptionValue($opts->{'s'});
                 push @config, $size;
@@ -728,7 +729,7 @@ sub configDistfile {
                 cleanup($ds, 0, undef);
         }
 
-        $cache = new TBConfig();
+        $cache = new Tinderbox::Config();
         $cache->setOptionName("cache");
 
         if ($opts->{'c'}) {
@@ -772,7 +773,7 @@ sub configHost {
                 cleanup($ds, 0, undef);
         }
 
-        $workdir = new TBConfig();
+        $workdir = new Tinderbox::Config();
         $workdir->setOptionName("workdir");
 
         if ($opts->{'w'}) {
@@ -988,7 +989,7 @@ sub addHost {
                 );
         }
 
-        my $host = new Host();
+        my $host = new Tinderbox::Host();
         $host->setName($hostname);
 
         my $rc = $ds->addHost($host);
@@ -1028,7 +1029,7 @@ sub addBuild {
         my $jCls = $ds->getJailByName($jail);
         my $pCls = $ds->getPortsTreeByName($portstree);
 
-        my $build = new Build();
+        my $build = new Tinderbox::Build();
         $build->setName($name);
         $build->setJailId($jCls->getId());
         $build->setPortsTreeId($pCls->getId());
@@ -1050,7 +1051,7 @@ sub addJail {
         }
 
         my $name = $opts->{'j'};
-	my $arch = $opts->{'a'};
+        my $arch = $opts->{'a'};
         my $tag  = $opts->{'t'};
 
         if ($ds->isValidJail($name)) {
@@ -1069,10 +1070,10 @@ sub addJail {
                 $update_cmd = $opts->{'u'};
         }
 
-        my $jail = new Jail();
+        my $jail = new Tinderbox::Jail();
 
         $jail->setName($name);
-	$jail->setArch($arch);
+        $jail->setArch($arch);
         $jail->setTag($tag);
         $jail->setUpdateCmd($update_cmd);
         $jail->setDescription($opts->{'d'}) if ($opts->{'d'});
@@ -1106,7 +1107,7 @@ sub addPortsTree {
                 $update_cmd = $opts->{'u'};
         }
 
-        my $portstree = new PortsTree();
+        my $portstree = new Tinderbox::PortsTree();
 
         $portstree->setName($name);
         $portstree->setUpdateCmd($update_cmd);
@@ -1128,20 +1129,21 @@ sub addPortsTree {
 # Internal function: do NOT call directly, but only from addPort
 # This code assumes its mount points and environment have been set up
 sub addPortToOneBuild {
-	my $build     = $ds->getBuildByName($opts->{'b'});
-	my $makecache = new MakeCache($ENV{'PORTSDIR'}, $ENV{'PKGSUFFIX'});
+        my $build     = $ds->getBuildByName($opts->{'b'});
+        my $makecache =
+            new Tinderbox::MakeCache($ENV{'PORTSDIR'}, $ENV{'PKGSUFFIX'});
 
-	if ($opts->{'R'}) {
-		addPorts($opts->{'d'}, $build, $makecache, undef);
-	} else {
-		my @deps = ($opts->{'d'});
-		my %seen =();
-		while (my $port = shift @deps) {
-			if (!$seen{$port}) {
-				addPorts($port, $build, $makecache, \@deps);
-				$seen{$port} = 1;
-			}
-		}
+        if ($opts->{'R'}) {
+                addPorts($opts->{'d'}, $build, $makecache, undef);
+        } else {
+                my @deps = ($opts->{'d'});
+                my %seen = ();
+                while (my $port = shift @deps) {
+                        if (!$seen{$port}) {
+                                addPorts($port, $build, $makecache, \@deps);
+                                $seen{$port} = 1;
+                        }
+                }
         }
 }
 
@@ -1187,7 +1189,7 @@ sub addPortFailPattern {
                         "Bad regular expression, '" . $opts->{'e'} . "': $@\n");
         }
 
-        $pattern = new PortFailPattern();
+        $pattern = new Tinderbox::PortFailPattern();
         $pattern->setId($opts->{'i'});
         $pattern->setReason($opts->{'r'});
         $pattern->setParent($parent);
@@ -1224,7 +1226,7 @@ sub addPortFailReason {
                             . " in the datastore.\n");
         }
 
-        $reason = new PortFailReason();
+        $reason = new Tinderbox::PortFailReason();
         $reason->setTag($opts->{'t'});
         $reason->setDescr($descr);
         $reason->setType($type);
@@ -1286,41 +1288,41 @@ sub getTagForJail {
 }
 
 sub getJailArch {
-	if (!$opts->{'j'}) {
-		usage("getJailArch");
-	}
+        if (!$opts->{'j'}) {
+                usage("getJailArch");
+        }
 
-	if (!$ds->isValidJail($opts->{'j'})) {
-		cleanup($ds, 1, "Unknown jail, " . $opts->{'j'} . "\n");
-	}
+        if (!$ds->isValidJail($opts->{'j'})) {
+                cleanup($ds, 1, "Unknown jail, " . $opts->{'j'} . "\n");
+        }
 
-	my $jail = $ds->getJailByName($opts->{'j'});
+        my $jail = $ds->getJailByName($opts->{'j'});
 
-	print $jail->getArch() . "\n";
+        print $jail->getArch() . "\n";
 }
 
 sub getUpdateCmd {
-	if ($opts->{'j'}) {
-		my $jailName = $opts->{'j'};
+        if ($opts->{'j'}) {
+                my $jailName = $opts->{'j'};
 
-		cleanup($ds, 1, "Unknown jail, $jailName\n")
-			if (!$ds->isValidJail($jailName));
+                cleanup($ds, 1, "Unknown jail, $jailName\n")
+                    if (!$ds->isValidJail($jailName));
 
-		my $jail = $ds->getJailByName($jailName);
-		print $jail->getUpdateCmd() . "\n";
+                my $jail = $ds->getJailByName($jailName);
+                print $jail->getUpdateCmd() . "\n";
 
-	} elsif ($opts->{'p'}) {
-		my $portsTreeName = $opts->{'p'};
+        } elsif ($opts->{'p'}) {
+                my $portsTreeName = $opts->{'p'};
 
-		cleanup($ds, 1, "Unknown portstree, $portsTreeName\n")
-			if (!$ds->isValidPortsTree($portsTreeName));
+                cleanup($ds, 1, "Unknown portstree, $portsTreeName\n")
+                    if (!$ds->isValidPortsTree($portsTreeName));
 
-		my $portsTree = $ds->getPortsTreeByName($portsTreeName);
-		print $portsTree->getUpdateCmd() . "\n";
+                my $portsTree = $ds->getPortsTreeByName($portsTreeName);
+                print $portsTree->getUpdateCmd() . "\n";
 
-	} else {
-		usage("getUpdateCmd");
-	}
+        } else {
+                usage("getUpdateCmd");
+        }
 }
 
 sub getSrcMount {
@@ -1473,14 +1475,16 @@ sub rmPort {
         }
         foreach my $build (@builds) {
                 if (my $version = $ds->getPortLastBuiltVersion($port, $build)) {
-                        my $jail   = $ds->getJailById($build->getJailId());
-                        my $sufx   = $ds->getPackageSuffix($jail);
-			my $buildName = $build->getName();
-                        my $pkgdir = tinderLoc($pb, 'packages', $buildName);
-                        my $logpath = tinderLoc($pb, 'buildlogs', $buildName
-						. "/$version");
-                        my $errpath = tinderLoc($pb, 'builderrors', $buildName
-						. "/$version");
+                        my $jail      = $ds->getJailById($build->getJailId());
+                        my $sufx      = $ds->getPackageSuffix($jail);
+                        my $buildName = $build->getName();
+                        my $pkgdir    = tinderLoc($pb, 'packages', $buildName);
+                        my $logpath   =
+                            tinderLoc($pb, 'buildlogs',
+                                $buildName . "/$version");
+                        my $errpath =
+                            tinderLoc($pb, 'builderrors',
+                                $buildName . "/$version");
                         if (-d $pkgdir) {
                                 print
                                     "Removing all packages matching ${version}${sufx} starting from $pkgdir.\n";
@@ -1843,35 +1847,42 @@ sub updatePortStatus {
                             . "\n");
         }
 
-	if (defined($opts->{'L'})) {
-	        $ds->updatePortLastBuilt($port, $build, '') or
-		cleanup($ds, 1, "FAILED: last_built: " .
-			$ds->getError() . "\n");
-	}
+        if (defined($opts->{'L'})) {
+                $ds->updatePortLastBuilt($port, $build, '')
+                    or cleanup($ds, 1,
+                        "FAILED: last_built: " . $ds->getError() . "\n");
+        }
 
-	if (defined($opts->{'S'})) {
-	        $ds->updatePortLastSuccessfulBuilt($port, $build, '') or
-		cleanup($ds, 1, "FAILED: last_successful_built: " .
-			$ds->getError() . "\n");
-	}
+        if (defined($opts->{'S'})) {
+                $ds->updatePortLastSuccessfulBuilt($port, $build, '')
+                    or cleanup(
+                        $ds,
+                        1,
+                        "FAILED: last_successful_built: "
+                            . $ds->getError() . "\n"
+                    );
+        }
 
-	if (defined($opts->{'s'})) {
-		$ds->updatePortLastStatus($port, $build, $opts->{'s'}) or
-		cleanup($ds, 1, "FAILED: last_status: " .
-			$ds->getError() . "\n");
-	}
+        if (defined($opts->{'s'})) {
+                $ds->updatePortLastStatus($port, $build, $opts->{'s'})
+                    or cleanup($ds, 1,
+                        "FAILED: last_status: " . $ds->getError() . "\n");
+        }
 
-	if (defined($opts->{'r'})) {
-		$ds->updatePortLastFailReason($port, $build, $opts->{'r'}) or
-		cleanup($ds, 1, "FAILED: last_fail_reason: " .
-			$ds->getError() . "\n");
-	}
+        if (defined($opts->{'r'})) {
+                $ds->updatePortLastFailReason($port, $build, $opts->{'r'})
+                    or cleanup($ds, 1,
+                        "FAILED: last_fail_reason: " . $ds->getError() . "\n");
+        }
 
-	if (defined($opts->{'v'})) {
-	        $ds->updatePortLastBuiltVersion($port, $build, $opts->{'v'}) or
-		cleanup($ds, 1, "FAILED: last_built_version: " .
-			$ds->getError() . "\n");
-	}
+        if (defined($opts->{'v'})) {
+                $ds->updatePortLastBuiltVersion($port, $build, $opts->{'v'})
+                    or cleanup(
+                        $ds,
+                        1,
+                        "FAILED: last_built_version: " . $ds->getError() . "\n"
+                    );
+        }
 }
 
 sub updateBuildStatus {
@@ -1974,7 +1985,7 @@ sub sendBuildErrorMail {
 
         my $buildname = $opts->{'b'};
         my $portdir   = $opts->{'d'};
-	my $pkgname   = $opts->{'p'};
+        my $pkgname   = $opts->{'p'};
 
         if (!$ds->isValidBuild($buildname)) {
                 cleanup($ds, 1, "Unknown build, $buildname\n");
@@ -1983,11 +1994,12 @@ sub sendBuildErrorMail {
         my $build = $ds->getBuildByName($buildname);
         my $port  = $ds->getPortByDirectory($portdir);
 
-	my $subject = $SUBJECT . ' ' .
-		      (defined($opts->{'l'}) ? 'leftovers' : 'failed') .
-		      " $portdir $buildname";
-        my $now     = scalar localtime;
-        my $data    = <<EOD;
+        my $subject =
+              $SUBJECT . ' '
+            . (defined($opts->{'l'}) ? 'leftovers' : 'failed')
+            . " $portdir $buildname";
+        my $now  = scalar localtime;
+        my $data = <<EOD;
 Port $portdir failed for build $buildname on $now.  The error log can be
 found at:
 
@@ -2077,7 +2089,7 @@ sub addUser {
                 usage("addUser");
         }
 
-        my $user = new User();
+        my $user = new Tinderbox::User();
 
         $user->setName($opts->{'u'});
         $user->setEmail($opts->{'e'})    if ($opts->{'e'});
@@ -2348,7 +2360,7 @@ sub addPorts {
                 }
         }
 
-        my $pCls = new Port();
+        my $pCls = new Tinderbox::Port();
         $pCls->setDirectory($port);
         $pCls->setName($cache->Name($port));
         $pCls->setMaintainer($cache->Maintainer($port));
@@ -2414,8 +2426,10 @@ sub tbcleanup {
                         if ($ds->getPortLastBuiltVersion($port, $build)) {
                                 my $path = join(
                                         "/",
-					tinderLoc($pb, 'packages',
-						  build->getName()),
+                                        tinderLoc(
+                                                $pb, 'packages',
+                                                build->getName()
+                                        ),
                                         "All",
                                         $ds->getPortLastBuiltVersion($port,
                                                 $build)

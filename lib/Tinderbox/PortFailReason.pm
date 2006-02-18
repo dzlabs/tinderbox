@@ -23,15 +23,15 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/PortFailReason.pm,v 1.1 2005/10/19 03:29:17 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/PortFailReason.pm,v 1.2 2006/02/18 19:57:21 marcus Exp $
 #
 
-package PortFailReason;
+package Tinderbox::PortFailReason;
 
 use strict;
-use TinderObject;
+use Tinderbox::TinderObject;
 use vars qw(@ISA %TYPE_HASH);
-@ISA = qw(TinderObject);
+@ISA = qw(Tinderbox::TinderObject);
 
 %TYPE_HASH = (
         COMMON    => 0,

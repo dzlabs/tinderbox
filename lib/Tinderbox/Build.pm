@@ -23,15 +23,15 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/Build.pm,v 1.11 2005/12/26 23:59:28 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/Build.pm,v 1.12 2006/02/18 19:57:21 marcus Exp $
 #
 
-package Build;
+package Tinderbox::Build;
 
 use strict;
-use TinderObject;
+use Tinderbox::TinderObject;
 use vars qw(@ISA %STATUS_HASH);
-@ISA = qw(TinderObject);
+@ISA = qw(Tinderbox::TinderObject);
 
 %STATUS_HASH = (
         IDLE      => 0,

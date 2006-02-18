@@ -1,16 +1,16 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.38 2005/12/31 01:32:34 adamw Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.39 2006/02/18 19:57:20 marcus Exp $
 
 VERSION=	3.0.0
 
 DATA=		README ds.ph.dist tc tinderbox.ph.dist tinderd \
 		tinderbox-mysql.schema tinderbox-pgsql.schema
-LIBDATA=	Build.pm Host.pm Jail.pm MakeCache.pm \
-		Port.pm PortsTree.pm TBConfig.pm TinderObject.pm \
-		TinderboxDS.pm User.pm \
-		buildscript enterbuild makemake pnohang.c portbuild \
+LIBDATA=	buildscript enterbuild makemake pnohang.c portbuild \
 		setup-mysql.sh setup-pgsql.sh \
 		tc_commands.pl tc_commands.sh tinderlib.pl tinderlib.sh \
 		tinderbox.env
+PERLMODDATA=	Build.pm Config.pm Host.pm Jail.pm MakeCache.pm Port.pm \
+		PortFailPattern.pm PortFailReason.pm PortsTree.pm \
+		TinderObject.pm TinderboxDS.pm User.pm
 ETCRCDATA=
 MIGDATA=
 MAN1DATA=	tc-configCcache.1 tc-configDistfile.1 tc-configGet.1 \
@@ -54,6 +54,10 @@ release:
 	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/lib
 .for lf in ${LIBDATA}
 	cp ${.CURDIR}/lib/${lf} ${.CURDIR}/tinderbox-${VERSION}/lib
+.endfor
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/lib/Tinderbox
+.for pmf in ${PERLMODDATA}
+	cp ${.CURDIR}/lib/Tinderbox/${pmf} ${.CURDIR}/tinderbox-${VERSION}/lib/Tinderbox
 .endfor
 	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/upgrade
 .for erf in ${ETCRCDATA}

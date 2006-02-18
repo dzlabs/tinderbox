@@ -23,16 +23,16 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/Jail.pm,v 1.11 2005/12/17 23:36:13 ade Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/Jail.pm,v 1.12 2006/02/18 19:57:21 marcus Exp $
 #
 
-package Jail;
+package Tinderbox::Jail;
 
 use strict;
-use TinderObject;
+use Tinderbox::TinderObject;
 use POSIX;
 use vars qw(@ISA);
-@ISA = qw(TinderObject);
+@ISA = qw(Tinderbox::TinderObject);
 
 use constant JAIL_ID_FIELD => 'jail_id';
 

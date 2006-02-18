@@ -23,10 +23,10 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderObject.pm,v 1.14 2006/01/31 20:31:05 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderObject.pm,v 1.15 2006/02/18 19:57:21 marcus Exp $
 #
 
-package TinderObject;
+package Tinderbox::TinderObject;
 
 use strict;
 use vars qw(@ISA);

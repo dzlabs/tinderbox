@@ -22,10 +22,10 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/MakeCache.pm,v 1.6 2005/09/26 23:39:42 ade Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/MakeCache.pm,v 1.7 2006/02/18 19:57:21 marcus Exp $
 #
 
-package MakeCache;
+package Tinderbox::MakeCache;
 
 use strict;
 

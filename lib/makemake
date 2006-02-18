@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/makemake,v 1.43 2006/02/11 23:00:21 ade Exp $
+# $MCom: portstools/tinderbox/lib/makemake,v 1.44 2006/02/18 19:57:20 marcus Exp $
 #
 
 my $pb;
@@ -41,8 +41,8 @@ BEGIN {
 }
 
 use strict;
-use TinderboxDS;
-use MakeCache;
+use Tinderbox::TinderboxDS;
+use Tinderbox::MakeCache;
 use Getopt::Std;
 use File::Path;
 use vars qw(
@@ -59,7 +59,7 @@ require "tinderbox.ph";    # Setup the tinderbox config.
 require "tinderlib.pl";
 
 # Get a database handle for obtaining the ports.
-my $ds          = new TinderboxDS();
+my $ds          = new Tinderbox::TinderboxDS();
 my @build_names = $ds->getAllBuilds();
 
 if (!@build_names && defined($ds->getError())) {
@@ -118,7 +118,7 @@ if (!scalar(@ARGV)) {
                         # Simply create a sparse port with just a directory.
                         # If the port doesn't exist in the datastore, that's
                         # okay.
-                        $port = new Port();
+                        $port = new Tinderbox::Port();
                         $port->setDirectory($arg);
                         push @PORTS, $port;
                 } else {
@@ -138,7 +138,7 @@ my (
 );
 
 $portbase  = $ENV{'PORTSDIR'};
-$makecache = new MakeCache($portbase, $ENV{'PKGSUFFIX'});
+$makecache = new Tinderbox::MakeCache($portbase, $ENV{'PKGSUFFIX'});
 
 while (scalar(@PORTS)) {
         my $port    = shift @PORTS;
@@ -292,7 +292,7 @@ sub findRunDepends {
                         push @{$dest->{$portdir}}, $rundep;
                 }
                 push @{$dest->{$portdir}}, $rdep;
-                my $p = new Port();
+                my $p = new Tinderbox::Port();
                 $p->setDirectory($rdep);
                 push @{$ports}, $p;
         }

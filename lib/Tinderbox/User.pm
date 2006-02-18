@@ -23,15 +23,15 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/User.pm,v 1.8 2005/10/10 23:30:15 ade Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/User.pm,v 1.9 2006/02/18 19:57:21 marcus Exp $
 #
 
-package User;
+package Tinderbox::User;
 
 use strict;
-use TinderObject;
+use Tinderbox::TinderObject;
 use vars qw(@ISA);
-@ISA = qw(TinderObject);
+@ISA = qw(Tinderbox::TinderObject);
 
 use constant USER_ID_FIELD => 'user_id';
 
