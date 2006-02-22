@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.91 2006/02/16 08:10:41 ade Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.92 2006/02/22 09:16:01 ade Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -212,9 +212,14 @@ major_version=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
 if [ -n "${DISTFILE_CACHE}" ]; then
     export DISTCACHE=/distcache
     if [ ${fetchorig} -eq 0 ]; then
-        _MASTER_SITE_OVERRIDE='file:///distcache/${DIST_SUBDIR}/'
-        export MASTER_SITE_OVERRIDE="${_MASTER_SITE_OVERRIDE} ${MASTER_SITE_OVERRIDE}"
+        _MSO='file:///distcache/${DIST_SUBDIR}/'
+        export MASTER_SITE_OVERRIDE="${_MSO} ${MASTER_SITE_OVERRIDE}"
     fi
+fi
+
+if [ -n "${DISTFILE_URI}" ]; then
+    _MSO=$(printf '%s/${DIST_SUBDIR}/' ${DISTFILE_URI})
+    export MASTER_SITE_OVERRIDE="${_MSO} ${MASTER_SITE_OVERRIDE}"
 fi
 
 rm -rf ${chroot}/tmp/*
@@ -249,15 +254,24 @@ fi
 
 set x $ED $FD $PD $BD $RD
 shift 1
+
+cd ${chroot}/tmp/depends
 while [ $# -gt 0 ]; do
-    if [ -f ${packages}/All/$1 ]; then
-	if [ ! -f ${chroot}/tmp/depends/$1 ]; then
-	    echo "copying package $1 for ${pkgname}"
-	    cp -p ${packages}/All/$1 ${chroot}/tmp/depends
-	fi
-    else
+
+    if [ ! -f $1 -a -n "${PACKAGE_URI}" ]; then
+	echo "fetching package $1 for ${pkgname}"
+	fetch ${PACKAGE_URI}/${build}/All/$1
+    fi
+
+    if [ ! -f $1 -a -f ${packages}/All/$1 ]; then
+	echo "copying package $1 for ${pkgname}"
+	cp -p ${packages}/All/$1 .
+    fi
+
+    if [ ! -f $1 ]; then
 	echo "skipping package $1 for ${pkgname} since it is missing"
     fi
+
     shift
 done
 

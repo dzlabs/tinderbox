@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.108 2006/02/18 20:30:36 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.109 2006/02/22 09:16:01 ade Exp $
 #
 
 my $pb;
@@ -88,9 +88,16 @@ my $ds = new Tinderbox::TinderboxDS();
                 func  => \&configDistfile,
                 help  => "Configure Tinderbox distfile parameters",
                 usage =>
-                    "[-c <distfile cache mount src> | -C] [-h <host name> | -G] | -G -h <host name>",
-                optstr => 'c:Ch:G',
+                    "[-c <distfile cache mount src> | -C] [-u <distfile uri> | -U] [-h <host name> | -G] | -G -h <host name>",
+                optstr => 'c:Cu:Uh:G',
         },
+	"configPackage" => {
+		func  => \&configPackage,
+		help  => "Configure Tinderbox package parameters",
+		usage =>
+		    "[-u <uri> | -U] [-h <host name> | -G] -G -h <host name>",
+		optstr => 'u:Uh:G',
+	},
         "configHost" => {
                 func  => \&configHost,
                 help  => "Configure Tinderbox Host parameters",
@@ -566,6 +573,26 @@ sub _configGetHost {
         return $host;
 }
 
+sub _configHandle {
+	my $item = shift;
+	my $host = _configGetHost($opts->{'h'});
+
+        if (scalar(keys %{$opts}) == 0
+                || (scalar(keys %{$opts}) == 1 && ($opts->{'h'} ^ $opts->{'G'}))
+            )
+        {
+                configGet($item, $host);
+                cleanup($ds, 0, undef);
+        }
+
+        if ($opts->{'G'} && $host) {
+                $ds->defaultConfig($item, $host);
+                cleanup($ds, 0, undef);
+        }
+
+	return $host;
+}
+
 sub configGet {
         my $configlet = undef;
         my $host      = undef;
@@ -625,20 +652,7 @@ sub configCcache {
                 usage("configCcache");
         }
 
-        $host = _configGetHost($opts->{'h'});
-
-        if (scalar(keys %{$opts}) == 0
-                || (scalar(keys %{$opts}) == 1 && ($opts->{'h'} ^ $opts->{'G'}))
-            )
-        {
-                configGet("ccache", $host);
-                cleanup($ds, 0, undef);
-        }
-
-        if ($opts->{'G'} && $host) {
-                $ds->defaultConfig("ccache", $host);
-                cleanup($ds, 0, undef);
-        }
+        $host = _configHandle("ccache");
 
         $enabled = new Tinderbox::Config();
         $enabled->setOptionName("enabled");
@@ -707,43 +721,76 @@ sub configCcache {
 sub configDistfile {
         my @config = ();
         my $cache;
+	my $uri;
         my $host;
 
         if ($opts->{'c'} && $opts->{'C'}) {
                 usage("configDistfile");
         }
+	if ($opts->{'u'} && $opts->{'U'}) {
+		usage("configDistFile");
+	}
 
-        $host = _configGetHost($opts->{'h'});
-
-        if (scalar(keys %{$opts}) == 0
-                || (scalar(keys %{$opts}) == 1 && ($opts->{'h'} ^ $opts->{'G'}))
-            )
-        {
-                configGet("distfile", $host);
-                cleanup($ds, 0, undef);
-        }
-
-        if ($opts->{'G'} && $host) {
-                $ds->defaultConfig("distfile", $host);
-                cleanup($ds, 0, undef);
-        }
+        $host = _configHandle("distfile");
 
         $cache = new Tinderbox::Config();
         $cache->setOptionName("cache");
+
+	$uri = new Tinderbox::Config();
+	$uri->setOptionName("uri");
 
         if ($opts->{'c'}) {
                 $cache->setOptionValue($opts->{'c'});
                 push @config, $cache;
         }
-
         if ($opts->{'C'}) {
                 $cache->setOptionValue(undef);
                 push @config, $cache;
         }
 
+	if ($opts->{'u'}) {
+		$uri->setOptionValue($opts->{'u'});
+		push @config, $uri;
+	}
+	if ($opts->{'U'}) {
+		$uri->setOptionValue(undef);
+		push @config, $uri;
+	}
+
         $ds->updateConfig("distfile", $host, @config)
             or cleanup($ds, 1,
                       "Failed to update distfile configuration: "
+                    . $ds->getError()
+                    . "\n");
+}
+
+sub configPackage {
+        my @config = ();
+        my $pkg;
+        my $host;
+
+        if ($opts->{'c'} && $opts->{'C'}) {
+                usage("configPackage");
+        }
+
+        $host = _configHandle("package");
+
+        $pkg = new Tinderbox::Config();
+        $pkg->setOptionName("uri");
+
+        if ($opts->{'u'}) {
+                $pkg->setOptionValue($opts->{'u'});
+                push @config, $pkg;
+        }
+
+        if ($opts->{'U'}) {
+                $pkg->setOptionValue(undef);
+                push @config, $pkg;
+        }
+
+        $ds->updateConfig("package", $host, @config)
+            or cleanup($ds, 1,
+                      "Failed to update package configuration: "
                     . $ds->getError()
                     . "\n");
 }
@@ -757,20 +804,7 @@ sub configHost {
                 usage("host");
         }
 
-        $host = _configGetHost($opts->{'h'});
-
-        if (scalar(keys %{$opts}) == 0
-                || (scalar(keys %{$opts}) == 1 && ($opts->{'h'} ^ $opts->{'G'}))
-            )
-        {
-                configGet("host", $host);
-                cleanup($ds, 0, undef);
-        }
-
-        if ($opts->{'G'} && $host) {
-                $ds->defaultConfig("host", $host);
-                cleanup($ds, 0, undef);
-        }
+        $host = _configHandle("host");
 
         $workdir = new Tinderbox::Config();
         $workdir->setOptionName("workdir");
