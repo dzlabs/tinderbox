@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.16 2006/02/27 09:31:26 oliver Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.17 2006/02/27 09:57:18 oliver Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -83,11 +83,10 @@ switch( $action ) {
 					$user_email = $_REQUEST['user_email'];
 					$user_pwd   = $_REQUEST['user_password'];
 					$wwwenabled = $_REQUEST['www_enabled'];
-					$perm_obj   = $_REQUEST['permission_object'];
-					$display    = $moduleUsers->action_user( 'add', '', $user_name, $user_email, $user_pwd, $wwwenabled, $perm_obj );
+					$display    = $moduleUsers->action_user( 'add', '', $user_name, $user_email, $user_pwd, $wwwenabled );
 					switch( $display ) {
 						case '1':	unset( $display ); header( 'Location: index.php' ); break;
-						case '0':	$display = $moduleUsers->display_add_user( $user_name, $user_email, $user_pwd, $wwwenabled, $perm_obj ); break;
+						case '0':	$display = $moduleUsers->display_add_user( $user_name, $user_email, $user_pwd, $wwwenabled ); break;
 					}
 					break;
 	case 'display_modify_user':	$user_id  = $_REQUEST['modify_user_id'];
@@ -99,11 +98,10 @@ switch( $action ) {
 					$user_email = $_REQUEST['user_email'];
 					$user_pwd   = $_REQUEST['user_password'];
 					$wwwenabled = $_REQUEST['www_enabled'];
-					$perm_obj   = $_REQUEST['permission_object'];
-					$display    = $moduleUsers->action_user( $actionuser, $user_id, $user_name, $user_email, $user_pwd, $wwwenabled, $perm_obj );
+					$display    = $moduleUsers->action_user( $actionuser, $user_id, $user_name, $user_email, $user_pwd, $wwwenabled );
 					switch( $display ) {
 						case '1':	unset( $display ); header( 'Location: index.php' ); break;
-						case '0':	$display = $moduleUsers->display_modify_user( 0, $user_id, $user_name, $user_email, $user_pwd, $www_enabled, $perm_obj ); break;
+						case '0':	$display = $moduleUsers->display_modify_user( 0, $user_id, $user_name, $user_email, $user_pwd, $www_enabled ); break;
 					}
 					break;
 	case 'display_failure_reasons':	$failure_reason_tag  = $_REQUEST['failure_reason_tag'];
