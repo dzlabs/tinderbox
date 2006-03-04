@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.109 2006/02/22 09:16:01 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.110 2006/03/04 17:38:53 oliver Exp $
 #
 
 my $pb;
@@ -2461,7 +2461,7 @@ sub tbcleanup {
                                         "/",
                                         tinderLoc(
                                                 $pb, 'packages',
-                                                build->getName()
+                                                $build->getName()
                                         ),
                                         "All",
                                         $ds->getPortLastBuiltVersion($port,
