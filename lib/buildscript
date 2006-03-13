@@ -204,16 +204,18 @@ else
 
   # Files we do not care about changing between pre-build and post-cleanup
   cat > /tmp/mtree.buildexclude <<EOF
-./var/log/*
+./root/*
+./var/*
 ./tmp/*
+./etc/make.conf.bak
+./etc/make.conf
 ./work/*
 ./compat/linux/proc
-./root/*
-./var/mail/*
-./var/tmp/*
 ./usr/share/man/cat*/*
-./usr/local/etc/apache/httpd.conf
-./usr/local/etc/apache2/httpd.conf
+./usr/local/etc/apache
+./usr/local/etc/apache2
+./usr/local/news
+./usr/local/share/xml
 EOF
   # Record a "pristine" mtree.
   mtree -X /tmp/mtree.buildexclude -xcn -k uid,gid,mode -p / > /tmp/mtree.prebuild
@@ -266,13 +268,18 @@ EOF
   add_pkg ${RD}
 
   cat > /tmp/mtree.exclude <<EOF
-./root/*
-./var/*
+./var/log/*
 ./tmp/*
-./etc/make.conf.bak
-./etc/make.conf
 ./work/*
 ./compat/linux/proc
+./root/*
+./var/mail/*
+./var/tmp/*
+./usr/share/man/cat*/*
+./usr/local/etc/apache
+./usr/local/etc/apache2
+./usr/local/news
+./usr/local/share/xml
 EOF
   mtree -X /tmp/mtree.exclude -xcn -k uid,gid,mode -p / > /tmp/mtree
 
