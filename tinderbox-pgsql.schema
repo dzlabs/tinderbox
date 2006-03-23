@@ -259,8 +259,8 @@ INSERT INTO port_fail_patterns VALUES (3200, 'values.h: No such file or director
 INSERT INTO port_fail_patterns VALUES (3300, '.*\\.h: No such file', '__parent__', 0);
 INSERT INTO port_fail_patterns VALUES (3400, '(X11/.*|Xosdefs)\\.h: No such file', '__parent__', 3300);
 INSERT INTO port_fail_patterns VALUES (3500, 'XFree86-.*\\.tgz', 'missing_header', 3400);
-INSERT INTO port_fail_patterns VALUES (3600, '.*', 'USE_XLIB', 3300);
-INSERT INTO port_fail_patterns VALUES (3700, '.*', 'missing_header', 3400);
+INSERT INTO port_fail_patterns VALUES (3600, '.*', 'USE_XLIB', 3400);
+INSERT INTO port_fail_patterns VALUES (3700, '.*', 'missing_header', 3300);
 INSERT INTO port_fail_patterns VALUES (3800, 'pnohang: killing make checksum', 'fetch_timeout', 0);
 INSERT INTO port_fail_patterns VALUES (3900, 'USER   PID  PPID  PGID JOBC STAT  TT       TIME COMMAND', 'runaway_process', 0);
 INSERT INTO port_fail_patterns VALUES (4000, 'pnohang: killing make package', 'runaway_process', 0);
