@@ -56,7 +56,7 @@ CREATE TABLE users (
 );
 
 DROP TABLE IF EXISTS user_permissions;
-CREATE TABLE IF NOT EXISTS user_permissions (
+CREATE TABLE user_permissions (
 	user_id INTEGER REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
 	host_id INTEGER REFERENCES hosts(host_id) ON UPDATE CASCADE ON DELETE RESTRICT,
 	user_permission_object_type ENUM('builds','users') NOT NULL,
