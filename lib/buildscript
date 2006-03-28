@@ -148,8 +148,8 @@ if [ $phase = 1 ]; then
 ./work/*
 ./compat/linux/proc
 ./usr/share/man/cat*/*
-./usr/local/etc/apache/httpd.conf
-./usr/local/etc/apache2/httpd.conf
+./usr/local/etc/apache
+./usr/local/etc/apache2
 ./usr/local/news
 ./usr/local/share/xml
 ./usr/X11R6/etc/gconf
@@ -207,13 +207,13 @@ else
 
   # Files we do not care about changing between pre-build and post-cleanup
   cat > /tmp/mtree.buildexclude <<EOF
-./root/*
-./var/*
+./var/log/*
 ./tmp/*
-./etc/make.conf.bak
-./etc/make.conf
 ./work/*
 ./compat/linux/proc
+./root/*
+./var/mail/*
+./var/tmp/*
 ./usr/share/man/cat*/*
 ./usr/local/etc/apache
 ./usr/local/etc/apache2
@@ -272,19 +272,13 @@ EOF
   add_pkg ${RD}
 
   cat > /tmp/mtree.exclude <<EOF
-./var/log/*
+./root/*
+./var/*
 ./tmp/*
+./etc/make.conf.bak
+./etc/make.conf
 ./work/*
 ./compat/linux/proc
-./root/*
-./var/mail/*
-./var/tmp/*
-./usr/share/man/cat*/*
-./usr/local/etc/apache
-./usr/local/etc/apache2
-./usr/local/news
-./usr/local/share/xml
-./usr/X11R6/etc/gconf
 EOF
   mtree -X /tmp/mtree.exclude -xcn -k uid,gid,mode -p / > /tmp/mtree
 
