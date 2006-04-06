@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.55 2006/01/30 00:23:48 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.56 2006/04/06 04:59:15 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -149,14 +149,13 @@ nfs_reserved_port_only="YES"
 
 
 NOTE: The create script uses cvsup12 as their default cvsup mirror.
-If you would like to use another server, enable cvsup compression, or
-use an alternate cvsup program use the -H, -C, and -P command
-line arguments to the create script respectively. For example, to use
-cvsup2.freebsd.org, enable cvsup compression, and use csup instead of cvsup
+If you would like to use another server or enable cvsup compression
+use the -H and -C line arguments to the create script respectively.
+For example, to use cvsup2.freebsd.org and enable cvsup compression
 for all Jail updates, use the following command:
 
 # cd ${pb}/scripts && ./tc createJail -j 5-STABLE -d "FreeBSD 5-STABLE" \
-	-t RELENG_5 -u CVSUP -C -H cvsup2.freebsd.org -P /usr/local/bin/csup
+	-t RELENG_5 -u CVSUP -C -H cvsup2.freebsd.org
 
 Upgrading:
 ----------

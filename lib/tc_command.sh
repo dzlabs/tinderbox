@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.36 2006/02/16 08:13:10 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.37 2006/04/06 04:59:15 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -514,7 +514,7 @@ createJail () {
     init=1
 
     # argument handling
-    while getopts a:d:j:m:t:u:CH:IP: arg >/dev/null 2>&1
+    while getopts a:d:j:m:t:u:CH:I arg >/dev/null 2>&1
     do
 	case "${arg}" in
 
@@ -527,7 +527,6 @@ createJail () {
 	C)	cvsupCompress=1;;
 	H)	cvsupHost="${OPTARG}";;
 	I)	init=0;;
-	P)	cvsupProg="${OPTARG}";;
 	?)	return 1;;
 
 	esac
@@ -678,7 +677,7 @@ createPortsTree () {
     updateCmd="CVSUP"
 
     # argument handling
-    while getopts d:m:p:u:w:CH:IP: arg >/dev/null 2>&1
+    while getopts d:m:p:u:w:CH:I arg >/dev/null 2>&1
     do
 	case "${arg}" in
 
@@ -690,7 +689,6 @@ createPortsTree () {
 	C)	cvsupCompress=1;;
 	H)	cvsupHost="${OPTARG}";;
 	I)	init=0;;
-	P)	cvsupProg="${OPTARG}";;
 	?)	return 1;;
 
 	esac
