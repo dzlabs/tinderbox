@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.92 2006/02/22 09:16:01 ade Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.93 2006/04/24 00:37:55 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -17,15 +17,6 @@ cleanup()
     cleandirs=$4
     pkgname=$5
     build=$6
-
-    if [ -n "${DISTFILE_CACHE}" ]; then
-	if [ -f ${chroot}${DISTCACHE}/.lock ]; then
-	    lpid=$(echo ${chroot}${DISTCACHE}/.lock)
-	    if [ ${lpid} = $$ ]; then
-		rm -f ${chroot}${DISTCACHE}/.lock
-	    fi
-	fi
-    fi
 
     umount ${chroot}/compat/linux/proc >/dev/null
     umount ${chroot}/proc >/dev/null
@@ -291,24 +282,8 @@ if [ "${error}" = "0" ]; then
     # Cache the distfiles if requested.  We will wait a maximum of
     # ten minutes before giving up on the lock.
     if [ -n "${DISTFILE_CACHE}" ]; then
-        if [ -f ${chroot}${DISTCACHE}/.lock ]; then
-	    lpid=$(echo ${chroot}${DISTCACHE}/.lock)
-	    if [ ${lpid} = $$ ]; then
-	        rm -f ${chroot}${DISTCACHE}/.lock
-	    fi
-	fi
-	lcounter=0
-	lcounter_max=200
-	while [ -f ${chroot}${DISTCACHE}/.lock -a ${lcounter} -lt ${lcounter_max} ]; do
-	    echo "${build}: Waiting for DISTCACHE lock..."
-	    lcounter=$(expr ${lcounter} + 1)
-	    sleep 3
-	done
-	if [ ${lcounter} -lt ${lcounter_max} ]; then
-	    echo $$ > ${chroot}${DISTCACHE}/.lock
-	    tar -C ${chroot}/${DISTDIR} -cf - . | \
-	        tar --unlink -C ${chroot}${DISTCACHE} -xvf -
-	    rm -f ${chroot}${DISTCACHE}/.lock
+	lockf -t 600 ${chroot}${DISTCACHE}/.lock tar -C ${chroot}/${DISTDIR} \
+	    -cf - . | tar --unlink -C ${chroot}${DISTCACHE} -xvf -
 	fi
     fi
 
