@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.93 2006/04/24 00:37:55 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.94 2006/04/25 20:07:42 oliver Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -284,7 +284,6 @@ if [ "${error}" = "0" ]; then
     if [ -n "${DISTFILE_CACHE}" ]; then
 	lockf -t 600 ${chroot}${DISTCACHE}/.lock tar -C ${chroot}/${DISTDIR} \
 	    -cf - . | tar --unlink -C ${chroot}${DISTCACHE} -xvf -
-	fi
     fi
 
     chroot ${chroot} /usr/bin/nice -n $nice /buildscript ${dirname} 2  "$ED" "$PD" "$FD" "$BD" "$RD" "${plistcheck}" > ${chroot}/tmp/${pkgname}.log2 2>&1
