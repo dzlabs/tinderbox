@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.110 2006/03/04 17:38:53 oliver Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.111 2006/04/28 09:33:43 oliver Exp $
 #
 
 my $pb;
@@ -2456,8 +2456,9 @@ sub tbcleanup {
                 # Delete database records for nonexistent packages.
                 my @ports = $ds->getPortsForBuild($build);
                 foreach my $port (@ports) {
+                        my $path = "/nonexistent";
                         if ($ds->getPortLastBuiltVersion($port, $build)) {
-                                my $path = join(
+                                $path = join(
                                         "/",
                                         tinderLoc(
                                                 $pb, 'packages',
@@ -2468,15 +2469,14 @@ sub tbcleanup {
                                                 $build)
                                             . $package_suffix
                                 );
-                                if (!-e $path) {
-                                        print
-                                            "Removing database entry for nonexistent package "
-                                            . $build->getName() . "/"
-                                            . $ds->getPortLastBuiltVersion(
-                                                $port, $build)
-                                            . "\n";
-                                        $ds->removePortForBuild($port, $build);
-                                }
+                        }
+                        if (!-e $path) {
+                                print
+                                    "Removing database entry for nonexistent port "
+                                    . $build->getName() . "/"
+                                    . $port->getName()
+                                    . "\n";
+                                $ds->removePortForBuild($port, $build);
                         }
                 }
         }
