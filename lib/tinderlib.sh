@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.31 2006/02/14 03:03:57 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.32 2006/04/29 09:13:16 oliver Exp $
 #
 
 tinderLocJail () {
@@ -141,7 +141,6 @@ cleanupMounts () {
     _portstree=""
     _type=""
     _dstloc=""
-    _srcloc=""
 
     # argument processing
     while getopts b:d:j:p:t: arg
@@ -176,7 +175,6 @@ cleanupMounts () {
 	    return 
 	fi
 	_dstloc=${_dstloc:-$(tinderLoc jail ${_jail})/src}
-	_srcloc=$(${tc} getSrcMount -j ${_jail})
 	;;
 
     portstree)
@@ -185,7 +183,6 @@ cleanupMounts () {
 	    return 1
 	fi
 	_dstloc=${_dstloc:-$(tinderLoc portstree ${_portstree})/ports}
-	_srcloc=$(${tc} getPortsMount -p ${_portstree})
 	;;
 
     *)
@@ -197,9 +194,6 @@ cleanupMounts () {
 
     if [ -n "${_dstloc}" ]; then
 	mtpt=$(df | awk '$NF == mtpt { print $NF }' mtpt=${_dstloc})
-    fi
-    if [ -z "${mtpt}" -a -n "${_srcloc}" ]; then
-	mtpt=$(df | awk '$1 == mtpt { print $NF }' mtpt=${_srcloc})
     fi
 
     if [ -n "${mtpt}" ]; then
