@@ -181,6 +181,7 @@ else
   echo "================================================================"
   echo "====================<phase 2: make extract>===================="
 
+  add_pkg ${FD}
   add_pkg ${ED}
   cd $dir
   /pnohang $TIMEOUT /tmp/make.log2 ${pkgname} make extract || cleanup 2
