@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/MakeCache.pm,v 1.8 2006/04/26 17:58:58 oliver Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/MakeCache.pm,v 1.9 2006/05/05 05:57:03 oliver Exp $
 #
 
 package Tinderbox::MakeCache;
@@ -98,7 +98,9 @@ sub _getList {
                         $ddir = $d;
                 }
                 $ddir =~ s|^$self->{BASEDIR}/||;
-                push @deps, $ddir;
+                if ( $ddir ) {
+                        push @deps, $ddir;
+                }
         }
         return @deps;
 }
