@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/MakeCache.pm,v 1.9 2006/05/05 05:57:03 oliver Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/MakeCache.pm,v 1.10 2006/06/27 18:13:16 marcus Exp $
 #
 
 package Tinderbox::MakeCache;
@@ -38,7 +38,7 @@ our @makeTargets = (
         'LIB_DEPENDS',     'RUN_DEPENDS',
         'DEPENDS',         'MAINTAINER',
         'COMMENT',         'PORTNAME',
-	'DISTFILES',
+        'DISTFILES',
 );
 
 # Create a new cache object
@@ -98,7 +98,7 @@ sub _getList {
                         $ddir = $d;
                 }
                 $ddir =~ s|^$self->{BASEDIR}/||;
-                if ( $ddir ) {
+                if ($ddir) {
                         push @deps, $ddir;
                 }
         }
@@ -195,6 +195,42 @@ sub IgnoreList {
         return $n eq 0 ? "" : $self->PkgName($port);
 }
 
+sub FetchDependsList {
+        my $self = shift;
+        my $port = shift;
+
+        my @deps;
+        push(@deps, $self->FetchDepends($port));
+        push(@deps, $self->Depends($port));
+
+        my %uniq;
+        return grep { !$uniq{$_}++ } @deps;
+}
+
+sub ExtractDependsList {
+        my $self = shift;
+        my $port = shift;
+
+        my @deps;
+        push(@deps, $self->ExtractDepends($port));
+        push(@deps, $self->Depends($port));
+
+        my %uniq;
+        return grep { !$uniq{$_}++ } @deps;
+}
+
+sub PatchDependsList {
+        my $self = shift;
+        my $port = shift;
+
+        my @deps;
+        push(@deps, $self->PatchDepends($port));
+        push(@deps, $self->Depends($port));
+
+        my %uniq;
+        return grep { !$uniq{$_}++ } @deps;
+}
+
 # A close approximation to the 'build-depends-list' target
 sub BuildDependsList {
         my $self = shift;
@@ -227,16 +263,16 @@ sub RunDependsList {
 }
 
 sub DistFiles {
-	my $self = shift;
-	my $port = shift;
-	my $distlist = $self->_getVariable($port, 'DISTFILES');
+        my $self     = shift;
+        my $port     = shift;
+        my $distlist = $self->_getVariable($port, 'DISTFILES');
 
-	my @distfiles;
-	foreach my $distfile (split(/ /, $distlist)) {
-		next unless $distfile;
-		$distfile =~ s/:.*$//;
-		push(@distfiles, $distfile);
-	}
+        my @distfiles;
+        foreach my $distfile (split(/ /, $distlist)) {
+                next unless $distfile;
+                $distfile =~ s/:.*$//;
+                push(@distfiles, $distfile);
+        }
 
-	return join(',', @distfiles);
+        return join(',', @distfiles);
 }

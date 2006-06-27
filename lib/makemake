@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/makemake,v 1.44 2006/02/18 19:57:20 marcus Exp $
+# $MCom: portstools/tinderbox/lib/makemake,v 1.45 2006/06/27 18:13:16 marcus Exp $
 #
 
 my $pb;
@@ -175,9 +175,9 @@ while (scalar(@PORTS)) {
         $pkgbdeps{$portdir} = [];
         $pkgrdeps{$portdir} = [];
         $pkgdir{$portdir}   = $pkgname;
-        push @edeps, $makecache->ExtractDepends($portdir);
-        push @pdeps, $makecache->PatchDepends($portdir);
-        push @fdeps, $makecache->FetchDepends($portdir);
+        push @edeps, $makecache->ExtractDependsList($portdir);
+        push @pdeps, $makecache->PatchDependsList($portdir);
+        push @fdeps, $makecache->FetchDependsList($portdir);
         push @bdeps, $makecache->BuildDependsList($portdir);
         push @rdeps, $makecache->RunDependsList($portdir);
 
@@ -222,8 +222,8 @@ foreach my $key (keys %pkgdir) {
         printf MK "%s: %s\n",  $pkgdir{$key}, $pname;
         printf MK "%s: %s\n",  $pname, $pkgnames;
         printf MK "\t@%s %s %s %s %s %s ",
-	    tinderLoc($pb, 'scripts', 'lib/portbuild'),
-            $BUILD_NAME, $JAIL_NAME, $PORTSTREE_NAME, $ENV{'PORTBUILD_ARGS'};
+            tinderLoc($pb, 'scripts', 'lib/portbuild'), $BUILD_NAME, $JAIL_NAME,
+            $PORTSTREE_NAME, $ENV{'PORTBUILD_ARGS'};
         printf MK "\"%s\" \"%s\" \"%s\" \"%s\" \"%s\" ", $edeplst, $pdeplst,
             $fdeplst, $bdeplst, $rdeplst;
         printf MK "%s /usr/ports/%s\n", $pname, $key;
