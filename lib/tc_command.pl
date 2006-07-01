@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.111 2006/04/28 09:33:43 oliver Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.112 2006/07/01 17:46:43 marcus Exp $
 #
 
 my $pb;
@@ -91,13 +91,13 @@ my $ds = new Tinderbox::TinderboxDS();
                     "[-c <distfile cache mount src> | -C] [-u <distfile uri> | -U] [-h <host name> | -G] | -G -h <host name>",
                 optstr => 'c:Cu:Uh:G',
         },
-	"configPackage" => {
-		func  => \&configPackage,
-		help  => "Configure Tinderbox package parameters",
-		usage =>
-		    "[-u <uri> | -U] [-h <host name> | -G] -G -h <host name>",
-		optstr => 'u:Uh:G',
-	},
+        "configPackage" => {
+                func  => \&configPackage,
+                help  => "Configure Tinderbox package parameters",
+                usage =>
+                    "[-u <uri> | -U] [-h <host name> | -G] -G -h <host name>",
+                optstr => 'u:Uh:G',
+        },
         "configHost" => {
                 func  => \&configHost,
                 help  => "Configure Tinderbox Host parameters",
@@ -574,8 +574,8 @@ sub _configGetHost {
 }
 
 sub _configHandle {
-	my $item = shift;
-	my $host = _configGetHost($opts->{'h'});
+        my $item = shift;
+        my $host = _configGetHost($opts->{'h'});
 
         if (scalar(keys %{$opts}) == 0
                 || (scalar(keys %{$opts}) == 1 && ($opts->{'h'} ^ $opts->{'G'}))
@@ -590,7 +590,7 @@ sub _configHandle {
                 cleanup($ds, 0, undef);
         }
 
-	return $host;
+        return $host;
 }
 
 sub configGet {
@@ -721,23 +721,23 @@ sub configCcache {
 sub configDistfile {
         my @config = ();
         my $cache;
-	my $uri;
+        my $uri;
         my $host;
 
         if ($opts->{'c'} && $opts->{'C'}) {
                 usage("configDistfile");
         }
-	if ($opts->{'u'} && $opts->{'U'}) {
-		usage("configDistFile");
-	}
+        if ($opts->{'u'} && $opts->{'U'}) {
+                usage("configDistFile");
+        }
 
         $host = _configHandle("distfile");
 
         $cache = new Tinderbox::Config();
         $cache->setOptionName("cache");
 
-	$uri = new Tinderbox::Config();
-	$uri->setOptionName("uri");
+        $uri = new Tinderbox::Config();
+        $uri->setOptionName("uri");
 
         if ($opts->{'c'}) {
                 $cache->setOptionValue($opts->{'c'});
@@ -748,14 +748,14 @@ sub configDistfile {
                 push @config, $cache;
         }
 
-	if ($opts->{'u'}) {
-		$uri->setOptionValue($opts->{'u'});
-		push @config, $uri;
-	}
-	if ($opts->{'U'}) {
-		$uri->setOptionValue(undef);
-		push @config, $uri;
-	}
+        if ($opts->{'u'}) {
+                $uri->setOptionValue($opts->{'u'});
+                push @config, $uri;
+        }
+        if ($opts->{'U'}) {
+                $uri->setOptionValue(undef);
+                push @config, $uri;
+        }
 
         $ds->updateConfig("distfile", $host, @config)
             or cleanup($ds, 1,
@@ -2393,7 +2393,13 @@ sub addPorts {
                 }
         }
 
-        my $pCls = new Tinderbox::Port();
+        my $pCls    = $ds->getPortByDirectory($port);
+        my $newPort = 0;
+        if (!defined($pCls)) {
+                $pCls    = new Tinderbox::Port();
+                $newPort = 1;
+        }
+
         $pCls->setDirectory($port);
         $pCls->setName($cache->Name($port));
         $pCls->setMaintainer($cache->Maintainer($port));
@@ -2401,7 +2407,7 @@ sub addPorts {
 
         # Only add the port if it isn't already in the datastore.
         my $rc;
-        if (!$ds->isPortInDS($pCls)) {
+        if ($newPort) {
                 $rc = $ds->addPort(\$pCls);
                 if (!$rc) {
                         warn "WARN: Failed to add port "
@@ -2474,8 +2480,7 @@ sub tbcleanup {
                                 print
                                     "Removing database entry for nonexistent port "
                                     . $build->getName() . "/"
-                                    . $port->getName()
-                                    . "\n";
+                                    . $port->getName() . "\n";
                                 $ds->removePortForBuild($port, $build);
                         }
                 }
