@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.57 2006/07/01 19:35:02 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.58 2006/07/01 19:35:46 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -375,7 +375,7 @@ Then, in the root of each build directory, there will be a ccache.log that
 will let you know if the cache is working.
 
 Customizing the Environment:
--------------------------
+----------------------------
 
 It is possible to export environment variables on a per-Jail, per-PortsTree,
 and/or per-Build basis.  This is done by creating a file named jail.env,
