@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.112 2006/07/01 17:46:43 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.113 2006/07/01 18:33:57 marcus Exp $
 #
 
 my $pb;
@@ -2435,29 +2435,36 @@ sub addPorts {
 
 sub tbcleanup {
         my @builds = $ds->getAllBuilds();
+        my @ports  = $ds->getAllPorts();
+
+        foreach my $port (@ports) {
+                my @portstrees = $ds->getAllPortsTrees();
+                my $pathFound  = 0;
+
+                foreach my $portstree (@portstrees) {
+                        my $path =
+                            tinderLoc($pb, 'portstrees', $portstree->getName());
+                        $path = join("/",
+                                $path, "ports", $port->getDirectory(),
+                                "Makefile");
+
+                        if (-e $path) {
+                                $pathFound = 1;
+                                last;
+                        }
+                }
+
+                if (!$pathFound) {
+                        print "Removing database entry for nonexistent port "
+                            . $port->getDirectory() . "\n";
+                        $ds->removePort($port);
+                }
+        }
 
         foreach my $build (@builds) {
                 print $build->getName() . "\n";
                 my $jail           = $ds->getJailById($build->getJailId());
                 my $package_suffix = $ds->getPackageSuffix($jail);
-
-                # Delete unreferenced log files.
-                my $dir = tinderLoc($pb, 'buildlogs', $build->getName());
-                opendir(DIR, $dir) || die "Failed to open $dir: $!\n";
-
-                while (my $file_name = readdir(DIR)) {
-                        if ($file_name =~ /\.log$/) {
-                                my $result =
-                                    $ds->isLogCurrent($build, $file_name);
-                                if (!$result) {
-                                        print
-                                            "Deleting stale log $dir/$file_name\n";
-                                        unlink "$dir/$file_name";
-                                }
-                        }
-                }
-
-                closedir(DIR);
 
                 # Delete database records for nonexistent packages.
                 my @ports = $ds->getPortsForBuild($build);
@@ -2483,6 +2490,40 @@ sub tbcleanup {
                                     . $port->getName() . "\n";
                                 $ds->removePortForBuild($port, $build);
                         }
+
+                        my $portstree =
+                            $ds->getPortsTreeById($build->getPortsTreeId());
+                        my $path =
+                            tinderLoc($pb, 'portstrees', $portstree->getName());
+                        $path = join("/",
+                                $path, "ports", $port->getDirectory(),
+                                "Makefile");
+
+                        if (!-e $path) {
+                                print
+                                    "Removing database entry for nonexistent port "
+                                    . $build->getName() . "/"
+                                    . $port->getName() . "\n";
+                                $ds->removePortForBuild($port, $build);
+                        }
                 }
+
+                # Delete unreferenced log files.
+                my $dir = tinderLoc($pb, 'buildlogs', $build->getName());
+                opendir(DIR, $dir) || die "Failed to open $dir: $!\n";
+
+                while (my $file_name = readdir(DIR)) {
+                        if ($file_name =~ /\.log$/) {
+                                my $result =
+                                    $ds->isLogCurrent($build, $file_name);
+                                if (!$result) {
+                                        print
+                                            "Deleting stale log $dir/$file_name\n";
+                                        unlink "$dir/$file_name";
+                                }
+                        }
+                }
+
+                closedir(DIR);
         }
 }
