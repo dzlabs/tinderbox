@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.56 2006/04/06 04:59:15 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.57 2006/07/01 19:35:02 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -373,6 +373,29 @@ switch to the command.
 
 Then, in the root of each build directory, there will be a ccache.log that
 will let you know if the cache is working.
+
+Customizing the Environment:
+-------------------------
+
+It is possible to export environment variables on a per-Jail, per-PortsTree,
+and/or per-Build basis.  This is done by creating a file named jail.env,
+portstree.env, or build.env respectively, and placing it in the root of
+the Jail (${pb}/jails/{JAIL}), PortsTree (${pb}/portstrees/{PORTSTREE}),
+or Build (${pb}/builds/{BUILD}) in question.
+
+For example, if you want a particular Build (e.g. "5.X-Perl56") to use Perl
+5.6.2 instead of Perl 5.8.x, create a file named build.env in
+${pb}/builds/5.X-Perl56 that contains the following:
+
+export PERL_VER=5.6.2
+export PERL_VERSION=5.6.2
+
+Likewise, if you want to enable debugging for a particular PortsTree
+(e.g. "FreeBSD-debug"), create the following portstree.env in
+${pb}/portstrees/FreeBSD-debug:
+
+export CFLAGS="-O -g -pipe"
+export STRIP=
 
 Creating Hosts:
 ---------------
