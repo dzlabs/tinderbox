@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.18 2005/12/09 01:05:03 ade Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.19 2006/07/01 18:21:23 marcus Exp $
 #
 
 use strict;
@@ -82,17 +82,18 @@ sub getHostname {
 }
 
 sub tinderLoc {
-	my $pb   = shift;
-	my $type = shift;
-	my $what = shift;
+        my $pb   = shift;
+        my $type = shift;
+        my $what = shift;
 
-	return "$pb/builds/$what"	if ($type eq 'builddata');
-	return "$pb/errors/$what"	if ($type eq 'builderrors');
-	return "$pb/logs/$what"		if ($type eq 'buildlogs');
-	return "$pb/packages/$what"	if ($type eq 'packages');
-	return "$pb/scripts/$what"	if ($type eq 'scripts');
+        return "$pb/builds/$what"     if ($type eq 'builddata');
+        return "$pb/errors/$what"     if ($type eq 'builderrors');
+        return "$pb/logs/$what"       if ($type eq 'buildlogs');
+        return "$pb/packages/$what"   if ($type eq 'packages');
+        return "$pb/scripts/$what"    if ($type eq 'scripts');
+        return "$pb/portstrees/$what" if ($type eq 'portstrees');
 
-	return "/nonexistent/tinderbox/$type/$what";
+        return "/nonexistent/tinderbox/$type/$what";
 }
 
 1;
