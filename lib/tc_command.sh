@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.37 2006/04/06 04:59:15 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.38 2006/07/10 18:43:03 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -1476,4 +1476,102 @@ addPort () {
     fi
 
     return 0
+}
+
+#---------------------------------------------------------------------------
+# cleanup a Tinderbox
+#---------------------------------------------------------------------------
+
+tbcleanup_cleanup () {
+    portstrees=$*
+
+    for portstree in ${portstrees} ; do
+        cleanupMounts -t portstree -p ${portstree}
+    done
+}
+
+tbcleanup () {
+    tc=$(tinderLoc scripts tc)
+    builds=$(${tc} listBuilds 2>/dev/null)
+    ports=$(${tc} listPorts 2>/dev/null)
+
+    portstrees=$(${tc} listPortsTrees 2>/dev/null)
+    trap "tbcleanup_cleanup ${portstrees}" 1 2 3 9 10 11 15
+    for portstree in ${portstrees} ; do
+        if ! requestMount -t portstree -p ${portstree} -r; then
+            echo "tbcleanup: cannot mount portstree source"
+            exit 1
+        fi
+    done
+    for port in ${ports} ; do
+	pathFound=0
+        for portstree in ${portstrees} ; do
+	    path=$(tinderLoc portstree ${portstree})
+	    path="${path}/ports/${port}/Makefile"
+	    if [ -e ${path} ]; then
+		pathFound=1
+		break
+	    fi
+	done
+
+	if [ ${pathFound} = 0 ]; then
+	    echo "Removing database entry for nonexistent port ${port}"
+	    ${tc} rmPort -d ${port} -f -c
+	fi
+    done
+
+    tbcleanup_cleanup ${portstrees}
+
+    for build in ${builds} ; do
+	jail=$(${tc} getJailForBuild -b ${build} 2>/dev/null)
+	package_suffix=$(${tc} getPackageSuffix -j ${jail} 2>/dev/null)
+
+	echo ${build}
+
+        # Delete database records for nonexistent packages.
+	ports=$(${tc} getPortsForBuild -b ${build} 2>/dev/null)
+        portstree=$(${tc} getPortsTreeForBuild -b ${build} 2>/dev/null)
+
+        if ! requestMount -t portstree -p ${portstree} -r; then
+            echo "tbcleanup: cannot mount portstree source"
+            exit 1
+        fi
+        trap "tbcleanup_cleanup ${portstree}" 1 2 3 9 10 11 15
+
+	for port in ${ports} ; do
+	    path="/nonexistent"
+	    if ${tc} getPortLastBuiltVersion -d ${port} -b ${build} >/dev/null 2>&1 ; then
+		pkg_path=$(tinderLoc packages ${build})
+		lbv=$(${tc} getPortLastBuiltVersion -d ${port} -b ${build} 2>/dev/null)
+		path="${pkg_path}/All/${lbv}${package_suffix}"
+	    fi
+	    if [ ! -e ${path} ]; then
+		echo "Removing database entry for nonexistent port ${port}/${build}"
+		${tc} rmPort -d ${port} -b ${build} -f -c
+	    fi
+
+	    path=$(tinderLoc portstree ${portstree})
+	    path="${path}/ports/${port}/Makefile"
+
+	    if [ ! -e ${path} ]; then
+		echo "Removing database entry for nonexistent port ${build}/${port}"
+		${tc} rmPort -d ${port} -b ${build} -f -c
+	    fi
+	done
+
+        tbcleanup_cleanup ${portstree}
+
+	# Delete unreferenced log files.
+	dir=$(tinderLoc buildlogs ${build})
+
+	for file_name in $(/bin/ls -1 ${dir}) ; do
+	    if expr ${file_name} : '\.log$' ; then
+		result=$(${tc} isLogCurrent -b ${build} -l ${file_name} 2>/dev/null)
+		if [ ${result} != 1 ]; then
+		    echo "Deleting stale log ${dir}/${file_name}"
+		    /bin/rm -f "${dir}/${file_name}"
+		fi
+	    fi
+	done
+    done
 }

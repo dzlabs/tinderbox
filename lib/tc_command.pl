@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.113 2006/07/01 18:33:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.114 2006/07/10 18:43:03 marcus Exp $
 #
 
 my $pb;
@@ -115,6 +115,11 @@ my $ds = new Tinderbox::TinderboxDS();
                 help  => "List all builds in the datastore",
                 usage => "",
         },
+        "listPorts" => {
+                func  => \&listPorts,
+                help  => "List all ports in the datastore",
+                usage => "",
+        },
         "listPortsTrees" => {
                 func  => \&listPortsTrees,
                 help  => "List all portstrees in the datastore",
@@ -198,6 +203,12 @@ my $ds = new Tinderbox::TinderboxDS();
                 usage => "-b <build name>",
                 optstr => 'b:',
         },
+        "getPortsForBuild" => {
+                func   => \&getPortsForBuild,
+                help   => "Get all the ports associated with a given build",
+                usage  => "-b <build name>",
+                optstr => 'b:',
+        },
         "getTagForJail" => {
                 func   => \&getTagForJail,
                 help   => "Get the tag for a given jail",
@@ -227,6 +238,12 @@ my $ds = new Tinderbox::TinderboxDS();
                 help   => "Get the ports mount source for the given portstree",
                 usage  => "-p <portstree name>",
                 optstr => 'p:',
+        },
+        "getPackageSuffix" => {
+                func   => \&getPackageSuffix,
+                help   => "Get the package suffix for a given jail",
+                usage  => "-j <jail name>",
+                optstr => 'j:',
         },
         "setSrcMount" => {
                 func   => \&setSrcMount,
@@ -401,11 +418,11 @@ my $ds = new Tinderbox::TinderboxDS();
                 usage  => "-l <logfile> [-v]",
                 optstr => 'vl:',
         },
-        "tbcleanup" => {
-                func => \&tbcleanup,
-                help =>
-                    "Cleanup old build logs, and prune old database entries for which no package exists",
-                usage => "",
+        "isLogCurrent" => {
+                func   => \&isLogCurrent,
+                help   => "Determine if a logfile is still relevant",
+                usage  => "-b <build name> -l <logfile>",
+                optstr => 'b:l:',
         },
 
         # The following commands are actually handled by shell code, but we put
@@ -851,6 +868,20 @@ sub listBuilds {
         } else {
                 cleanup($ds, 1,
                         "There are no builds configured in the datastore.\n");
+        }
+}
+
+sub listPorts {
+        my @ports = $ds->getAllPorts();
+
+        if (@ports) {
+                map { print $_->getDirectory() . "\n" } @ports;
+        } elsif (defined($ds->getError())) {
+                cleanup($ds, 1,
+                        "Failed to list ports: " . $ds->getError() . "\n");
+        } else {
+                cleanup($ds, 1,
+                        "There are no ports configured in the datastore.\n");
         }
 }
 
@@ -1306,6 +1337,23 @@ sub getPortsTreeForBuild {
         print $portstree->getName() . "\n";
 }
 
+sub getPortsForBuild {
+        if (!$opts->{'b'}) {
+                usage("getPortsForBuild");
+        }
+
+        if (!$ds->isValidBuild($opts->{'b'})) {
+                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
+        }
+
+        my $build = $ds->getBuildByName($opts->{'b'});
+        my @ports = $ds->getPortsForBuild($build);
+
+        if (@ports) {
+                map { print $_->getDirectory() . "\n" } @ports;
+        }
+}
+
 sub getTagForJail {
         if (!$opts->{'j'}) {
                 usage("getTagForJail");
@@ -1444,6 +1492,21 @@ sub setPortsMount {
                             . $ds->getError()
                             . "\n");
         }
+}
+
+sub getPackageSuffix {
+        if (!$opts->{'j'}) {
+                usage("getPackageSuffix");
+        }
+
+        if (!$ds->isValidJail($opts->{'j'})) {
+                cleanup($ds, 1, "Unknown jail, " . $opts->{'j'} . "\n");
+        }
+
+        my $jail = $ds->getJailByName($opts->{'j'});
+        my $sufx = $ds->getPackageSuffix($jail);
+
+        print $sufx . "\n";
 }
 
 sub rmHost {
@@ -2433,97 +2496,17 @@ sub addPorts {
         }
 }
 
-sub tbcleanup {
-        my @builds = $ds->getAllBuilds();
-        my @ports  = $ds->getAllPorts();
-
-        foreach my $port (@ports) {
-                my @portstrees = $ds->getAllPortsTrees();
-                my $pathFound  = 0;
-
-                foreach my $portstree (@portstrees) {
-                        my $path =
-                            tinderLoc($pb, 'portstrees', $portstree->getName());
-                        $path = join("/",
-                                $path, "ports", $port->getDirectory(),
-                                "Makefile");
-
-                        if (-e $path) {
-                                $pathFound = 1;
-                                last;
-                        }
-                }
-
-                if (!$pathFound) {
-                        print "Removing database entry for nonexistent port "
-                            . $port->getDirectory() . "\n";
-                        $ds->removePort($port);
-                }
+sub isLogCurrent {
+        if (!$opts->{'b'} || !$opts->{'l'}) {
+                usage("isLogCurrent");
         }
 
-        foreach my $build (@builds) {
-                print $build->getName() . "\n";
-                my $jail           = $ds->getJailById($build->getJailId());
-                my $package_suffix = $ds->getPackageSuffix($jail);
-
-                # Delete database records for nonexistent packages.
-                my @ports = $ds->getPortsForBuild($build);
-                foreach my $port (@ports) {
-                        my $path = "/nonexistent";
-                        if ($ds->getPortLastBuiltVersion($port, $build)) {
-                                $path = join(
-                                        "/",
-                                        tinderLoc(
-                                                $pb, 'packages',
-                                                $build->getName()
-                                        ),
-                                        "All",
-                                        $ds->getPortLastBuiltVersion($port,
-                                                $build)
-                                            . $package_suffix
-                                );
-                        }
-                        if (!-e $path) {
-                                print
-                                    "Removing database entry for nonexistent port "
-                                    . $build->getName() . "/"
-                                    . $port->getName() . "\n";
-                                $ds->removePortForBuild($port, $build);
-                        }
-
-                        my $portstree =
-                            $ds->getPortsTreeById($build->getPortsTreeId());
-                        my $path =
-                            tinderLoc($pb, 'portstrees', $portstree->getName());
-                        $path = join("/",
-                                $path, "ports", $port->getDirectory(),
-                                "Makefile");
-
-                        if (!-e $path) {
-                                print
-                                    "Removing database entry for nonexistent port "
-                                    . $build->getName() . "/"
-                                    . $port->getName() . "\n";
-                                $ds->removePortForBuild($port, $build);
-                        }
-                }
-
-                # Delete unreferenced log files.
-                my $dir = tinderLoc($pb, 'buildlogs', $build->getName());
-                opendir(DIR, $dir) || die "Failed to open $dir: $!\n";
-
-                while (my $file_name = readdir(DIR)) {
-                        if ($file_name =~ /\.log$/) {
-                                my $result =
-                                    $ds->isLogCurrent($build, $file_name);
-                                if (!$result) {
-                                        print
-                                            "Deleting stale log $dir/$file_name\n";
-                                        unlink "$dir/$file_name";
-                                }
-                        }
-                }
-
-                closedir(DIR);
+        if (!$ds->isValidBuild($opts->{'b'})) {
+                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
         }
+
+        my $build  = $ds->getBuildByName($opts->{'b'});
+        my $result = $ds->isLogCurrent($build, $opts->{'l'});
+
+        print $result . "\n";
 }
