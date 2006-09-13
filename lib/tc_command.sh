@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.40 2006/07/11 04:48:52 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.41 2006/09/13 20:53:59 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -49,7 +49,13 @@ generateSupFile () {
 
 tcExists () {
     list=$($(tinderLoc scripts tc) list$1 2>/dev/null)
-    echo ${list} | grep -qw $2
+    for obj in ${list}; do
+	if [ x"${obj}" = x"$2" ]; then
+	    return 0
+	fi
+    done
+
+    return 1
 }
 
 updateTree () {
