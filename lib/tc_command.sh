@@ -24,11 +24,15 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.42 2006/09/18 19:45:17 oliver Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.43 2006/10/24 06:10:57 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
-export defaultCvsupProg="/usr/local/bin/cvsup"
+if [ -x "/usr/bin/csup" ]; then
+    export defaultCvsupProg="/usr/bin/csup"
+else
+    export defaultCvsupProg="/usr/local/bin/cvsup"
+fi
 
 #---------------------------------------------------------------------------
 # Generic routines
@@ -288,7 +292,7 @@ updateJail () {
 
     case "${updateCmdName}" in
 
-    CVSUP)	updateCmd="${cvsupProg} -g ${jailDir}/src-supfile";;
+    CVSUP)	updateCmd="${defaultCvsupProg} -g ${jailDir}/src-supfile";;
     NONE)	updateCmd="NONE";;
     "^/.*")	updateCmd="${updateCmdName} ${jailName}";;
     *)		updateCmd="$(tinderLoc scripts ${updateCmd}) ${jailName}";;
@@ -659,7 +663,7 @@ updatePortsTree () {
 
     case "${updateCmdName}" in
 
-    CVSUP)	updateCmd="${cvsupProg} -g ${portsTreeDir}/ports-supfile";;
+    CVSUP)	updateCmd="${defaultCvsupProg} -g ${portsTreeDir}/ports-supfile";;
     NONE)	updateCmd="NONE";;
     "^/.*")	updateCmd="${updateCmdName} ${portsTreeName}";;
     *)		updateCmd="$(tinderLoc scripts ${updateCmd}) ${portsTreeName}";;
