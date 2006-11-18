@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.95 2006/09/14 05:51:42 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.96 2006/11/18 01:37:41 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -39,6 +39,22 @@ cleanup()
     exit $error
 }
 
+clean_env()
+{
+    SAFE_VARS="PATH EDITOR BLOCKSIZE PAGER ENV"
+    old_IFS=${IFS}
+    IFS='
+'
+
+    for i in $(env); do
+	var=${i%%=*}
+	if ! echo ${SAFE_VARS} | grep -qw ${var}; then
+	    unset ${var}
+	fi
+    done
+    IFS=${old_IFS}
+}
+
 #---------------------------------------------------------------------------
 
 error=0
@@ -49,6 +65,9 @@ fetchorig=0
 nolog=0
 plistcheck=""
 nice=0
+
+# Clear out the environment.
+clean_env
 
 # check parameter count
 if [ $# -lt 10 ]; then
