@@ -311,7 +311,7 @@ INSERT INTO port_fail_patterns VALUES (7800, 'autoconf(.*): No such file or dire
 INSERT INTO port_fail_patterns VALUES (7900, 'autoheader: not found', 'autoheader', 0);
 INSERT INTO port_fail_patterns VALUES (8000, 'automake(.*): not found', 'automake', 0);
 INSERT INTO port_fail_patterns VALUES (8100, '/usr/local/www/cgi-bin does not exist', 'cgi-bin', 0);
-INSERT INTO port_fail_patterns VALUES (8200, 'Shared object \"libc.so.6\" not found, required by', 'compat6x', 0);
+INSERT INTO port_fail_patterns VALUES (8200, 'Shared object \\"libc.so.6\\" not found, required by', 'compat6x', 0);
 INSERT INTO port_fail_patterns VALUES (8300, 'Cannot open /dev/tty for read', 'DISPLAY', 0);
 INSERT INTO port_fail_patterns VALUES (8400, 'RuntimeError: cannot open display', 'DISPLAY', 0);
 INSERT INTO port_fail_patterns VALUES (8500, 'You must run this program under the X-Window System', 'DISPLAY', 0);
