@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.44 2006/11/18 22:59:32 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.45 2006/11/18 23:09:55 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -1352,7 +1352,7 @@ tinderbuild () {
 	# environment during makefile creation
 	(
 	    export PORTBUILD_ARGS="$(echo ${pbargs})"
-	    buildenvNoHost
+	    buildenvNoHost ${build}
 	    if ! requestMount -t portstree -p ${portstree}; then
 		echo "tinderbuild: cant mount portstree: ${portstree}"
 		exit 1
@@ -1438,7 +1438,7 @@ addPortToBuild () {
     trap "addPortToBuild_cleanup ${jail} ${portsTree}" 1 2 3 9 10 11 15
 
     buildenv ${jail} ${portsTree} ${build}
-    buildenvNoHost
+    buildenvNoHost ${build}
 
     export PORTSDIR=$(tinderLoc portstree ${portsTree})/ports
     ${tc} addPortToOneBuild -b ${build} -d ${portDir} ${norecurse}
