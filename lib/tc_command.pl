@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.114 2006/07/10 18:43:03 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.115 2006/11/18 22:59:32 marcus Exp $
 #
 
 my $pb;
@@ -78,29 +78,36 @@ my $ds = new Tinderbox::TinderboxDS();
                 optstr => 'h:G',
         },
         "configCcache" => {
-                func  => \&configCcache,
-                help  => "Configure Tinderbox ccache parameters",
+                func => \&configCcache,
+                help => "Configure Tinderbox ccache parameters",
                 usage =>
                     "[-d | -e] [-c <cache mount src>] [-s <max cache size>] [-j | -J] [-l <debug logfile> | -L] [-h <host name> | -G] | -G -h <host name>",
                 optstr => 'dec:s:l:LjJh:G',
         },
         "configDistfile" => {
-                func  => \&configDistfile,
-                help  => "Configure Tinderbox distfile parameters",
+                func => \&configDistfile,
+                help => "Configure Tinderbox distfile parameters",
                 usage =>
                     "[-c <distfile cache mount src> | -C] [-u <distfile uri> | -U] [-h <host name> | -G] | -G -h <host name>",
                 optstr => 'c:Cu:Uh:G',
         },
+        "configOptions" => {
+                func => \&configOptions,
+                help => "Configure Tinderbox port OPTIONS parameters",
+                usage =>
+                    "[-d | -e] [-o <options mount src>] [-h <host name> | -G] | -G -h <host name>",
+                optstr => 'deo:h:G',
+        },
         "configPackage" => {
-                func  => \&configPackage,
-                help  => "Configure Tinderbox package parameters",
+                func => \&configPackage,
+                help => "Configure Tinderbox package parameters",
                 usage =>
                     "[-u <uri> | -U] [-h <host name> | -G] -G -h <host name>",
                 optstr => 'u:Uh:G',
         },
         "configHost" => {
-                func  => \&configHost,
-                help  => "Configure Tinderbox Host parameters",
+                func => \&configHost,
+                help => "Configure Tinderbox Host parameters",
                 usage =>
                     "[-w <work directory> | -W] [-h <host name> | -G] | -G -h <host name>",
                 optstr => 'w:Wh:G',
@@ -145,22 +152,22 @@ my $ds = new Tinderbox::TinderboxDS();
                 optstr => 'h:',
         },
         "addBuild" => {
-                func  => \&addBuild,
-                help  => "Add a build to the datastore",
+                func => \&addBuild,
+                help => "Add a build to the datastore",
                 usage =>
                     "-b <build name> -j <jail name> -p <portstree name> [-d <build description>]",
                 optstr => 'b:j:p:d:',
         },
         "addJail" => {
-                func  => \&addJail,
-                help  => "Add a jail to the datastore",
+                func => \&addJail,
+                help => "Add a jail to the datastore",
                 usage =>
                     "-j <jail name> -t <jail tag> [-d <jail description>] [-m <src mount source>] [-u <updatecommand>|CVSUP|NONE>] [-a <arch>]",
                 optstr => 'm:j:t:u:d:a:',
         },
         "addPortsTree" => {
-                func  => \&addPortsTree,
-                help  => "Add a portstree to the datastore",
+                func => \&addPortsTree,
+                help => "Add a portstree to the datastore",
                 usage =>
                     "-p <portstree name> [-d <portstree description>] [-m <ports mount source>] [-u <updatecommand>|CVSUP|NONE>] [-w <CVSweb URL>]",
                 optstr => 'm:p:u:d:w:',
@@ -178,15 +185,15 @@ my $ds = new Tinderbox::TinderboxDS();
                 optstr => 'b:d:R',
         },
         "addPortFailPattern" => {
-                func  => \&addPortFailPattern,
-                help  => "Add a port failure pattern to the datastore",
+                func => \&addPortFailPattern,
+                help => "Add a port failure pattern to the datastore",
                 usage =>
                     "-i <ID> -r <reason tag> -e <expression> [-p <parent ID>]",
                 optstr => 'i:r:e:p:',
         },
         "addPortFailReason" => {
-                func  => \&addPortFailReason,
-                help  => "Add a port failure reason to the datastore",
+                func => \&addPortFailReason,
+                help => "Add a port failure reason to the datastore",
                 usage =>
                     "-t <tag> [-d <description>] [-y COMMON|RARE|TRANSIENT]",
                 optstr => 't:d:y:',
@@ -313,8 +320,8 @@ my $ds = new Tinderbox::TinderboxDS();
                 optstr => 'j:l:',
         },
         "updatePortStatus" => {
-                func  => \&updatePortStatus,
-                help  => "Update build information about a port",
+                func => \&updatePortStatus,
+                help => "Update build information about a port",
                 usage =>
                     "-d <portdir> -b <build> [-L] [-S] [-s <status>] [-r <reason>] [-v <version>]",
                 optstr => 'b:d:Lr:Ss:v:',
@@ -354,15 +361,15 @@ my $ds = new Tinderbox::TinderboxDS();
                 ,
         },
         "addUser" => {
-                func  => \&addUser,
-                help  => "Add a user to the datastore",
+                func => \&addUser,
+                help => "Add a user to the datastore",
                 usage =>
                     "-u <username> [-e <emailaddress>] [-p <password>] [-w]",
                 optstr => 'u:e:p:w',
         },
         "updateUser" => {
-                func  => \&updateUser,
-                help  => "Update user preferences",
+                func => \&updateUser,
+                help => "Update user preferences",
                 usage =>
                     "-u <username> [-e <emailaddress>] [-p <password>] [-w]",
                 optstr => 'u:e:p:w',
@@ -440,21 +447,21 @@ my $ds = new Tinderbox::TinderboxDS();
         },
 
         "createJail" => {
-                help  => "Create a new jail",
+                help => "Create a new jail",
                 usage =>
                     "-j <jailname> [-t <tag>] [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE> [-I] [-a <arch>]",
                 optstr => 'j:t:d:CH:m:u:Ia:',
         },
 
         "createPortsTree" => {
-                help  => "Create a new portstree",
+                help => "Create a new portstree",
                 usage =>
                     "-p <portstreename> [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE> [-w <cvsweburl>] [-I]",
                 optstr => 'p:d:CH:m:u:w:',
         },
 
         "createBuild" => {
-                help  => "Create a new build",
+                help => "Create a new build",
                 usage =>
                     "-b <buildname> -j <jailname> -p <portstreename> [-d <description>]",
                 optstr => 'b:j:p:d:',
@@ -473,7 +480,7 @@ my $ds = new Tinderbox::TinderboxDS();
         },
 
         "tinderbuild" => {
-                help  => "Generate packages from an installed Build",
+                help => "Generate packages from an installed Build",
                 usage =>
                     "-b <build name> [-init] [-cleanpackages] [-updateports] [-skipmake] [-noclean] [-noduds] [-plistcheck] [-nullfs] [-cleandistfiles] [-fetch-original] [-onceonly] [portdir/portname [...]]",
                 optstr => 'b:',
@@ -777,6 +784,43 @@ sub configDistfile {
         $ds->updateConfig("distfile", $host, @config)
             or cleanup($ds, 1,
                       "Failed to update distfile configuration: "
+                    . $ds->getError()
+                    . "\n");
+}
+
+sub configOptions {
+        my @config = ();
+        my $host;
+
+        if ($opts->{'d'} && $opts->{'e'}) {
+                usage("configOptions");
+        }
+
+        $host = _configHandle("options");
+
+        $enabled = new Tinderbox::Config();
+        $enabled->setOptionName("enabled");
+
+        if ($opts->{'e'}) {
+                $enabled->setOptionValue("1");
+                push @config, $enabled;
+        }
+
+        if ($opts->{'d'}) {
+                $enabled->setOptionValue("0");
+                push @config, $enabled;
+        }
+
+        if ($opts->{'o'}) {
+                my $odir = new Tinderbox::Config();
+                $odir->setOptionName("dir");
+                $odir->setOptionValue($opts->{'o'});
+                push @config, $odir;
+        }
+
+        $ds->updateConfig("options", $host, @config)
+            or cleanup($ds, 1,
+                      "Failed to update options configuration: "
                     . $ds->getError()
                     . "\n");
 }
@@ -1193,7 +1237,7 @@ sub addPortsTree {
 # Internal function: do NOT call directly, but only from addPort
 # This code assumes its mount points and environment have been set up
 sub addPortToOneBuild {
-        my $build     = $ds->getBuildByName($opts->{'b'});
+        my $build = $ds->getBuildByName($opts->{'b'});
         my $makecache =
             new Tinderbox::MakeCache($ENV{'PORTSDIR'}, $ENV{'PKGSUFFIX'});
 
@@ -1575,7 +1619,7 @@ sub rmPort {
                         my $sufx      = $ds->getPackageSuffix($jail);
                         my $buildName = $build->getName();
                         my $pkgdir    = tinderLoc($pb, 'packages', $buildName);
-                        my $logpath   =
+                        my $logpath =
                             tinderLoc($pb, 'buildlogs',
                                 $buildName . "/$version");
                         my $errpath =
@@ -2505,7 +2549,7 @@ sub isLogCurrent {
                 cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
         }
 
-        my $build  = $ds->getBuildByName($opts->{'b'});
+        my $build = $ds->getBuildByName($opts->{'b'});
         my $result = $ds->isLogCurrent($build, $opts->{'l'});
 
         print $result . "\n";

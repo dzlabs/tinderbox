@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.43 2006/10/24 06:10:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.44 2006/11/18 22:59:32 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -909,6 +909,7 @@ makeBuild () {
     cleanupMounts -t buildports -b ${buildName}
     cleanupMounts -t buildccache -b ${buildName}
     cleanupMounts -t builddistcache -b ${buildName}
+    cleanupMounts -t buildoptios -b ${buildName}
     cleanDirs ${buildName} ${BUILD_DIR}
 
     # Extract the tarball
@@ -1007,6 +1008,7 @@ tinderbuild_reset () {
     cleanupMounts -t buildports -b $1
     cleanupMounts -t buildccache -b $1
     cleanupMounts -t builddistcache -b $1
+    cleanupMounts -t buildoptions -b $1
     umount -f $(tinderLoc buildroot $1)/dev >/dev/null 2>&1
 }
 
@@ -1157,6 +1159,18 @@ tinderbuild_setup () {
 	tar -C ${buildRoot} -xf ${cctar}
 	if [ -n "${CCACHE_MAX_SIZE}" ]; then
 	    chroot ${buildRoot} /opt/ccache -M ${CCACHE_MAX_SIZE}
+	fi
+    fi
+
+    if [ ${OPTIONS_ENABLED} -eq 1 ]; then
+	optionsDir=$(tinderLoc options ${build})
+
+	mkdir -p ${optionsDir} $(tinderLoc buildoptions ${build})
+
+	if ! requestMount -t buildoptions -b ${build} \
+	    	-s ${optionsDir} ${nullfs}; then
+	    echo "tinderbuild: cant mount options"
+	    tinderbuild_cleanup 1
 	fi
     fi
 }

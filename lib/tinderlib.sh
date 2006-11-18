@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.32 2006/04/29 09:13:16 oliver Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.33 2006/11/18 22:59:32 marcus Exp $
 #
 
 tinderLocJail () {
@@ -53,6 +53,7 @@ tinderLoc () {
     "buildports")	echo "$(tinderLoc buildroot ${what})/a/ports";;
     "buildsrc")		echo "$(tinderLoc buildroot ${what})/usr/src";;
     "buildccache")	echo "$(tinderLoc buildroot ${what})/ccache";;
+    "buildoptions")	echo "$(tinderLoc buildroot ${what})/var/db/ports";;
     "builddistcache")	echo "$(tinderLoc buildroot ${what})/distcache";;
     "builderrors")	echo "${pb}/errors/${what}";;
     "buildlogs")	echo "${pb}/logs/${what}";;
@@ -61,6 +62,12 @@ tinderLoc () {
 			    echo "${pb}/${CCACHE_DIR}/${what}"
 			else
 			    echo "${HOST_WORKDIR}/ccache/${what}"
+			fi
+			;;
+    "options")		if [ -z "${HOST_WORKDIR}" ]; then
+    			    echo "${pb}/${OPTIONS_DIR}/${what}"
+			else
+			    echo "${HOST_WORKDIR}/options/${what}"
 			fi
 			;;
     "jail")		echo "${pb}/jails/${what}";;
@@ -161,7 +168,7 @@ cleanupMounts () {
 
     case ${_type} in
 
-    buildports|buildsrc|buildccache|builddistcache)
+    buildports|buildsrc|buildccache|builddistcache|buildoptions)
 	if [ -z "${_build}" ]; then
 	    echo "cleanupMounts: ${_type}: missing build"
 	    return 1
@@ -292,6 +299,14 @@ requestMount () {
 	fi
 	_dstloc=${_dstloc:-$(tinderLoc builddistcache ${_build})}
 	_fqsrcloc=1
+	;;
+
+    buildoptions)
+    	if [ -z "${_build}" ]; then
+	    echo "requestMount: ${_type}: missing build"
+	    return 1
+	fi
+	_dstLoc=${_dstloc:-$(tinderLoc buildoptions ${_build})}
 	;;
 
     jail)
@@ -462,7 +477,9 @@ buildenvNoHost () {
     eval "export LOCALBASE=/nonexistentlocal" >/dev/null 2>&1
     eval "export X11BASE=/nonexistentx" >/dev/null 2>&1
     eval "export PKG_DBDIR=/nonexistentdb" >/dev/null 2>&1
-    eval "export PORT_DBDIR=/nonexistentportdb" >/dev/null 2>&1
+    if [ x"${OPTIONS_ENABLED}" -ne x"1" ]; then
+        eval "export PORT_DBDIR=/nonexistentportdb" >/dev/null 2>&1
+    fi
     eval "export LINUXBASE=/nonexistentlinux" >/dev/null 2>&1
     eval "unset DISPLAY" >/dev/null 2>&1
 }
