@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.97 2006/11/18 01:43:12 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.98 2006/11/18 07:33:31 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -208,6 +208,9 @@ ulimit -f 1228800
 ulimit -t 3600
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/X11R6/bin
+
+# Set HOME to be /root to avoid errant leftover files
+export HOME=/root
 
 if [ x"${CCACHE_ENABLED}" = x"1" ]; then
     # XXX We need to do this since certain ports (e.g. cdrtools) don't
