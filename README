@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.59 2006/09/18 19:45:16 oliver Exp $
+$MCom: portstools/tinderbox/README,v 1.60 2006/11/19 06:23:16 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -395,6 +395,40 @@ ${pb}/portstrees/FreeBSD-debug:
 
 export CFLAGS="-O -g -pipe"
 export STRIP=
+
+Configuring port OPTIONS:
+-------------------------
+
+It is possible to manipulate port OPTIONS on a per-Build basis.  To do
+this, create a directory under which all build OPTIONS subdirectories
+will go (e.g. ${pb}/options).  For each Build that you wish to use to
+use OPTIONS, create a subdirectory named for that build (e.g.
+6-STABLE-FreeBSD).  This directory should look like /var/db/ports in
+that it contains subdirectories for each OPTIONS-supporting port.
+
+For example, if you wanted to build net/wireshark with RTP support for
+the Build 6-STABLE-FreeBSD, you would have the following directory
+structure:
+
+${pb}/options/6-STABLE-FreeBSD/wireshark/options
+
+The contents of the wireshark/options file would be:
+
+_OPTIONS_READ=wireshark-0.99.4
+WITH_RTP=true
+WITH_SNMP=true
+WITH_ADNS=true
+WITH_PCRE=true
+
+Once this structure is setup, then enable OPTIONS support in Tinderbox,
+and specify the path to the OPTIONS directory structure:
+
+    ./tc configOptions -e
+    ./tc configOptions -o /options
+
+The configOptions command takes the standard host arguments as well as -e
+(enable OPTIONS support), -d (disable OPTIONS support), and -o
+(set an OPTIONS source directory tree).
 
 Creating Hosts:
 ---------------
