@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.115 2006/11/18 22:59:32 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.116 2006/11/19 21:24:30 marcus Exp $
 #
 
 my $pb;
@@ -790,6 +790,7 @@ sub configDistfile {
 
 sub configOptions {
         my @config = ();
+	my $enabled;
         my $host;
 
         if ($opts->{'d'} && $opts->{'e'}) {
