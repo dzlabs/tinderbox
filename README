@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.60 2006/11/19 06:23:16 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.61 2006/11/23 18:38:41 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -53,8 +53,9 @@ you should substitute for whatever root directory you're using.
    If your Tinderbox host does not have administrative access to the database
    server, you must perform the next few steps by hand.  Else, skip to step 7.
 
-4. Edit ${pb}/scripts/ds.ph for your setup (if you are using the standard web
-   front-end, also edit www/inc_ds.php).
+4. Edit ${pb}/scripts/ds.ph.dist for your setup (if you are using the web
+   front-end, also edit webui/inc_ds.php.dist).  Once these files have been
+   edited, they must be copied to ds.ph and inc_ds.php respectively.
 
 5. Create the database and database user on the host that you defined within
    ds.ph.  Note: the database can live on the same server as Tinderbox.  Just
@@ -88,7 +89,10 @@ psql -U {$DB_USER} -W -h {$DB_HOST} -d {$DB_NAME} < tinderbox-pgsql.schema
    will be included, and instructions will be available at
    http://tinderbox.marcuscom.com.
 
-7. Edit ${pb}/scripts/tinderbox.ph for your environment.
+7. Edit ${pb}/scripts/tinderbox.ph.dist for your environment (if you are
+   using the web front-end, also edit webui/inc_tinderbox.php.dist).
+   Once these files have been edited they must be copied to tinderbox.ph
+   and inc_tinderbox.php respectively.
 
 8. Initialize the Tinderbox:
 
