@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.39 2006/02/18 19:57:20 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.40 2006/11/23 18:34:33 marcus Exp $
 
 VERSION=	3.0.0
 
@@ -15,7 +15,7 @@ ETCRCDATA=
 MIGDATA=
 MAN1DATA=	tc-configCcache.1 tc-configDistfile.1 tc-configGet.1 \
 		tc-configJail.1 tc-configTinderd.1 tc-init.1
-WEBUIDATA=	inc_ds.php inc_tinderbox.php index.php
+WEBUIDATA=	inc_ds.php.dist inc_tinderbox.php.dist index.php
 WEBUICDATA=	Build.php Host.php Jail.php Port.php \
 		PortsTree.php TinderObject.php TinderboxDS.php User.php \
 		functions.php
