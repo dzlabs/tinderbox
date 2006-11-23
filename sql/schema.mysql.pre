@@ -238,7 +238,7 @@ INSERT INTO port_fail_patterns VALUES (500, '/usr/local/bin/(perl|perl5.6.1):.*(
 INSERT INTO port_fail_patterns VALUES (600, 'perl(.*): Perl is not installed, try .pkg_add -r perl.', 'perl', 0);
 INSERT INTO port_fail_patterns VALUES (700, 'cannot find -lc_r', 'threads', 0);
 INSERT INTO port_fail_patterns VALUES (800, 'checking for.*lc_r\\.\\.\\. no', 'threads', 0);
-INSERT INTO port_fail_patterns VALUES (900, '(No checksum recorded for|(Maybe|Either) .* is out of date', 'distinfo_update', 0);
+INSERT INTO port_fail_patterns VALUES (900, '(No checksum recorded for|(Maybe|Either) .* is out of date, or)', 'distinfo_update', 0);
 INSERT INTO port_fail_patterns VALUES (1000, 'checking whether apxs works.*apxs: not found', 'apxs', 0);
 INSERT INTO port_fail_patterns VALUES (1100, 'Configuration .* not supported', 'arch', 0);
 INSERT INTO port_fail_patterns VALUES (1200, '(configure: error:|Script.*configure.*failed unexpectedly|script.*failed: here are the contents of)', '__parent__', 0);
