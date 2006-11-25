@@ -122,6 +122,9 @@ BD=$6
 RD=$7
 PLISTCHECK=$8
 
+L=$(echo ${LOCALBASE} | sed 's,^/,,')
+X=$(echo ${X11BASE} | sed 's,^/,,')
+
 if [ $phase = 1 ]; then
 
   cd $dir || exit 1
@@ -148,12 +151,12 @@ if [ $phase = 1 ]; then
 ./work/*
 ./compat/linux/proc
 ./usr/share/man/cat*/*
-./usr/local/etc/apache
-./usr/local/etc/apache2
-./usr/local/news
-./usr/local/share/xml
-./usr/X11R6/etc/gconf
-./usr/local/etc/gconf
+./${L}/etc/apache
+./${L}/etc/apache2
+./${L}/news
+./${L}/share/xml
+./${X}/etc/gconf
+./${L}/etc/gconf
 EOF
   # Record a "pristine" mtree.
   mtree -X /tmp/mtree.preexclude -xcn -k uid,gid,mode -p / > /tmp/mtree.pristine
@@ -214,12 +217,12 @@ else
 ./var/mail/*
 ./var/tmp/*
 ./usr/share/man/cat*/*
-./usr/local/etc/apache
-./usr/local/etc/apache2
-./usr/local/news
-./usr/local/share/xml
-./usr/X11R6/etc/gconf
-./usr/local/etc/gconf
+./${L}/etc/apache
+./${L}/etc/apache2
+./${L}/news
+./${L}/share/xml
+./${X}/etc/gconf
+./${L}/etc/gconf
 EOF
   # Record a "pristine" mtree.
   mtree -X /tmp/mtree.buildexclude -xcn -k uid,gid,mode -p / > /tmp/mtree.prebuild
@@ -256,7 +259,7 @@ EOF
   /pnohang $TIMEOUT /tmp/make.log5 ${pkgname} make -k regression-test
   cat /tmp/make.log5
 
-  mtree -X /tmp/mtree.buildexclude -x -f /tmp/mtree.prebuild -p / | egrep -v "^(usr/local/var|usr/X11R6/lib/X11/xserver/SecurityPolicy|usr/local/share/nls/POSIX|usr/local/share/nls/en_US.US-ASCII|etc/services|compat |usr/X11R6 |etc/manpath.config|etc/.*.bak|usr/local/info/dir|usr/X11R6/lib/X11/fonts/.*/fonts\.|usr/(X11R6|local)/man/..( |/man. )|usr/X11R6/lib/X11/fonts/TrueType|usr/X11R6/etc/gconf/gconf.xml.defaults/%gconf-tree.*.xml|usr/local/etc/gconf/gconf.xml.defaults/%gconf-tree.*.xml )" > /tmp/list.preinstall
+  mtree -X /tmp/mtree.buildexclude -x -f /tmp/mtree.prebuild -p / | egrep -v "^(${L}/var|${X}/lib/X11/xserver/SecurityPolicy|${L}/share/nls/POSIX|${L}/share/nls/en_US.US-ASCII|etc/services|compat |${X} |etc/manpath.config|etc/.*.bak|${L}/info/dir|${X}/lib/X11/fonts/.*/fonts\.|${L}/man/..( |/man. )|${X}/man/..( |/man. )|${X}/lib/X11/fonts/TrueType|${X}/etc/gconf/gconf.xml.defaults/%gconf-tree.*.xml|${L}/etc/gconf/gconf.xml.defaults/%gconf-tree.*.xml )" > /tmp/list.preinstall
 
   if [ -s /tmp/list.preinstall ]; then
       echo "================================================================"
@@ -304,7 +307,7 @@ EOF
   del_pkg ${pkgname}
 
 
-  mtree -X /tmp/mtree.exclude -x -f /tmp/mtree -p / | egrep -v "^(usr/local/var|usr/X11R6/lib/X11/xserver/SecurityPolicy|usr/local/share/nls/POSIX|usr/local/share/nls/en_US.US-ASCII|etc/services|compat |usr/X11R6 |etc/manpath.config|etc/.*.bak|usr/local/info/dir|usr/X11R6/lib/X11/fonts/.*/fonts\.|usr/(X11R6|local)/man/..( |/man. )|usr/X11R6/lib/X11/fonts/TrueType|usr/X11R6/etc/gconf/gconf.xml.defaults/%gconf-tree.*.xml|usr/local/etc/gconf/gconf.xml.defaults/%gconf-tree.*.xml )" > /tmp/list3
+  mtree -X /tmp/mtree.exclude -x -f /tmp/mtree -p / | egrep -v "^(${L}/var|${X}/lib/X11/xserver/SecurityPolicy|${L}/share/nls/POSIX|${L}/share/nls/en_US.US-ASCII|etc/services|compat |${X} |etc/manpath.config|etc/.*.bak|${L}/info/dir|${X}/lib/X11/fonts/.*/fonts\.|${L}/man/..( |/man. )|${X}/man/..( |/man. )|${X}/lib/X11/fonts/TrueType|${X}/etc/gconf/gconf.xml.defaults/%gconf-tree.*.xml|${L}/etc/gconf/gconf.xml.defaults/%gconf-tree.*.xml )" > /tmp/list3
 
   dirty=0
   if [ -s /tmp/list3 ]; then
@@ -313,7 +316,7 @@ EOF
     grep ' missing$' /tmp/list3 > /tmp/list5
     grep -vE ' (extra|missing)$' /tmp/list3 > /tmp/list6
     if [ -n "${PLISTCHECK}" ]; then
-      if grep -vqE "(usr/X11R6|usr/local)/etc/" /tmp/list4; then
+      if grep -vqE "(${X}|${L})/etc/" /tmp/list4; then
         echo "1" > /tmp/status
         dirty=1
       fi
@@ -361,7 +364,7 @@ EOF
   fi
 
   # Compare the state of the filesystem now to clean system (should again be clean)
-  mtree -X /tmp/mtree.preexclude -x -f /tmp/mtree.pristine -p / | egrep -v "^(usr/local/var|usr/X11R6/lib/X11/xserver/SecurityPolicy|usr/local/share/nls/POSIX|usr/local/share/nls/en_US.US-ASCII|etc/services|compat |usr/X11R6 |etc/manpath.config|etc/.*.bak|usr/local/info/dir|usr/X11R6/lib/X11/fonts/.*/fonts\.|usr/(X11R6|local)/man/..( |/man. )|usr/X11R6/lib/X11/fonts/TrueType|usr/X11R6/etc/gconf/gconf.xml.defaults/%gconf-tree.*.xml|usr/local/etc/gconf/gconf.xml.defaults/%gconf-tree.*.xml )" > /tmp/list3
+  mtree -X /tmp/mtree.preexclude -x -f /tmp/mtree.pristine -p / | egrep -v "^(${L}/var|${X}/lib/X11/xserver/SecurityPolicy|${L}/share/nls/POSIX|${L}/share/nls/en_US.US-ASCII|etc/services|compat |${X} |etc/manpath.config|etc/.*.bak|${L}/info/dir|${X}/lib/X11/fonts/.*/fonts\.|${L}/man/..( |/man. )|${X}/man/..( |/man. )|${X}/lib/X11/fonts/TrueType|${X}/etc/gconf/gconf.xml.defaults/%gconf-tree.*.xml|${L}/etc/gconf/gconf.xml.defaults/%gconf-tree.*.xml )" > /tmp/list3
   echo
   echo "=== Checking filesystem state after all packages deleted"
 
@@ -371,7 +374,7 @@ EOF
       grep ' missing$' /tmp/list3 > /tmp/list5
       grep -vE ' (extra|missing)$' /tmp/list3 > /tmp/list6
       if [ -n "${PLISTCHECK}" ]; then
-	  if grep -vqE "(usr/X11R6|usr/local)/etc/" /tmp/list4; then
+	  if grep -vqE "(${X}|${L})/etc/" /tmp/list4; then
 	      #echo "1" > /tmp/status
 	  fi
 	  if [ -s /tmp/list5 ]; then

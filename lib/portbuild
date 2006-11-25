@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.99 2006/11/18 23:09:55 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.100 2006/11/25 00:43:19 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -144,7 +144,7 @@ if [ -f ${dudsfile} ]; then
 fi
 
 # directories to clean
-cleandirs="/usr/local /usr/X11R6 /compat /var/db/pkg"
+cleandirs="${LOCALBASE} ${X11BASE} /compat /var/db/pkg"
 
 for dir in ${cleandirs}; do
     cleanDirs ${build} ${chroot}${dir}
@@ -159,14 +159,14 @@ mtree -deU -f ${chroot}/etc/mtree/BSD.var.dist \
 mtree -deU -f ${chroot}/etc/mtree/BSD.usr.dist \
       -p ${chroot}/usr >/dev/null 2>&1
 mtree -deU -f ${chroot}/etc/mtree/BSD.local.dist \
-      -p ${chroot}/usr/local >/dev/null 2>&1
+      -p ${chroot}${LOCALBASE} >/dev/null 2>&1
 
 case "${X_WINDOW_SYSTEM}" in
 "xfree86-3")	_X_MTREE="BSD.x11.dist";;
 *)		_X_MTREE="BSD.x11-4.dist";;
 esac
 mtree -deU -f ${chroot}/etc/mtree/${_X_MTREE} \
-      -p ${chroot}/usr/X11R6 >/dev/null 2>&1
+      -p ${chroot}${X11BASE} >/dev/null 2>&1
 
 # mount linprocfs if required
 if [ "${ARCH}" = "i386" -o "${ARCH}" = "amd64" ]; then
@@ -207,7 +207,7 @@ export TIMEOUT=7200
 ulimit -f 1228800
 ulimit -t 3600
 
-export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/X11R6/bin
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:${LOCALBASE}/sbin:${LOCALBASE}/bin:${X11BASE}/bin
 
 # Set HOME to be /root to avoid errant leftover files
 export HOME=/root
