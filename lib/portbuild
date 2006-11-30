@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.104 2006/11/30 08:39:26 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.105 2006/11/30 13:06:49 oliver Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -22,19 +22,15 @@ cleanup()
     umount ${chroot}/proc >/dev/null
 
     if [ $noclean -eq 0 ]; then
-	if [ $error -eq 0 ]; then
-	    for dir in ${cleandirs}
-	    do
-	        cleanDirs ${build} ${chroot}${dir}
-	    done
-	    rm -rf ${chroot}/tmp/*
+	for dir in ${cleandirs}
+	do
+	    cleanDirs ${build} ${chroot}${dir}
+	done
+	rm -rf ${chroot}/tmp/*
 
-	    chroot ${chroot} /sbin/ldconfig -R
-	    if [ ${ARCH} = "i386" ]; then
-	        chroot ${chroot} /sbin/ldconfig -aout -R
-	    fi
-	else
-	    ${pb}/scripts/tc makeBuild -b ${build}
+	chroot ${chroot} /sbin/ldconfig -R
+	if [ ${ARCH} = "i386" ]; then
+	    chroot ${chroot} /sbin/ldconfig -aout -R
 	fi
     fi
 
@@ -363,3 +359,4 @@ else
 fi
 
 cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${build}
+exit ${error}

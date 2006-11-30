@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.47 2006/11/30 08:39:26 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.48 2006/11/30 13:06:49 oliver Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -905,11 +905,7 @@ makeBuild () {
     fi
 
     # Clean up any previous build tree
-    cleanupMounts -t buildsrc -b ${buildName}
-    cleanupMounts -t buildports -b ${buildName}
-    cleanupMounts -t buildccache -b ${buildName}
-    cleanupMounts -t builddistcache -b ${buildName}
-    cleanupMounts -t buildoptions -b ${buildName}
+    tinderbuild_reset ${buildName}
     cleanDirs ${buildName} ${BUILD_DIR}
 
     # Extract the tarball
@@ -1035,7 +1031,6 @@ tinderbuild_setup () {
     HOST_WORKDIR=$(${tc} configGet | awk -F= '/^HOST_WORKDIR/ {print $2}')
 
     echo "tinderbuild: Creating build directory for ${build}"
-    tinderbuild_reset ${build}
     makeBuild -b ${build}
 
     # set up the rest of the chrooted environment, we really do
@@ -1387,7 +1382,11 @@ tinderbuild () {
     # Seatbelts off.  Away we go.
     ${tc} updateBuildStatus -b ${build} -s PORTBUILD
     tinderbuild_phase 0 ${jobs} ${pkgDir}
+    error=$?
     if [ ${onceonly} -ne 1 ]; then
+	if [ ${error} -ne 0 ] ; then
+	    tinderbuild_setup
+	fi
 	tinderbuild_phase 1 ${jobs} ${pkgDir}
     fi
     tinderbuild_cleanup 0
