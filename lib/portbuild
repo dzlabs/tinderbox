@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.102 2006/11/30 07:07:30 oliver Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.103 2006/11/30 07:20:34 oliver Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -45,7 +45,7 @@ cleanup()
 
 clean_env()
 {
-    SAFE_VARS="PATH EDITOR BLOCKSIZE PAGER ENV"
+    SAFE_VARS="PATH EDITOR BLOCKSIZE PAGER ENV pb"
     old_IFS=${IFS}
     IFS='
 '
