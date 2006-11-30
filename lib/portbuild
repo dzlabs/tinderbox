@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/sh -x
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.100 2006/11/25 00:43:19 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.101 2006/11/30 07:05:45 oliver Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -35,6 +35,7 @@ cleanup()
 	    fi
 	else
 	    ${pb}/scripts/tc makeBuild -b ${build}
+	fi
     fi
 
     echo "$pkgname done at `date`"
