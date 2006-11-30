@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.46 2006/11/30 06:54:40 oliver Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.47 2006/11/30 08:39:26 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -1301,6 +1301,7 @@ tinderbuild () {
     portstree=$(${tc} getPortsTreeForBuild -b ${build})
 
     requestMount -t jail -j ${jail}
+    cleanenv
     buildenv ${jail} ${portstree} ${build}
     cleanupMounts -t jail -j ${jail}
 

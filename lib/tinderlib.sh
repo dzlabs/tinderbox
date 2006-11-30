@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.35 2006/11/30 06:09:18 oliver Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.36 2006/11/30 08:39:26 marcus Exp $
 #
 
 tinderLocJail () {
@@ -443,6 +443,21 @@ buildenvlist () {
     if [ -n "${build}" -a -f ${envdir}/build.${build} ]; then
 	cat ${envdir}/build.${build}
     fi
+}
+
+cleanenv() {
+    SAFE_VARS="PATH EDITOR BLOCKSIZE PAGER ENV pb"
+    old_IFS=${IFS}
+    IFS='
+'
+
+    for i in $(env); do
+	var=${i%%=*}
+	if ! echo ${SAFE_VARS} | grep -qw ${var}; then
+	    unset ${var}
+	fi
+    done
+    IFS=${old_IFS}
 }
 
 buildenv () {
