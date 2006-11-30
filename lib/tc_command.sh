@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.45 2006/11/18 23:09:55 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.46 2006/11/30 06:54:40 oliver Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -909,7 +909,7 @@ makeBuild () {
     cleanupMounts -t buildports -b ${buildName}
     cleanupMounts -t buildccache -b ${buildName}
     cleanupMounts -t builddistcache -b ${buildName}
-    cleanupMounts -t buildoptios -b ${buildName}
+    cleanupMounts -t buildoptions -b ${buildName}
     cleanDirs ${buildName} ${BUILD_DIR}
 
     # Extract the tarball
