@@ -1,6 +1,6 @@
-#!/bin/sh -x
+#!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.101 2006/11/30 07:05:45 oliver Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.102 2006/11/30 07:07:30 oliver Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
