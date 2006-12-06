@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.105 2006/11/30 13:06:49 oliver Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.106 2006/12/06 22:48:38 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -149,12 +149,12 @@ mtree -deU -f ${chroot}/etc/mtree/${_X_MTREE} \
 # mount linprocfs if required
 if [ "${ARCH}" = "i386" -o "${ARCH}" = "amd64" ]; then
     mkdir -p ${chroot}/compat/linux/proc
-    mount_linprocfs linprocfs ${chroot}/compat/linux/proc
+    mount -t linprocfs linprocfs ${chroot}/compat/linux/proc
 fi
 
 # mount procfs
 mkdir -p ${chroot}/proc
-mount_procfs procfs ${chroot}/proc
+mount -t procfs procfs ${chroot}/proc
 
 # Want to use the /etc/make.conf in the chroot (Jail)
 unset __MAKE_CONF
