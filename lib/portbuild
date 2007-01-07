@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.106 2006/12/06 22:48:38 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.107 2007/01/07 15:38:53 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -136,6 +136,8 @@ mtree -deU -f ${chroot}/etc/mtree/BSD.var.dist \
       -p ${chroot}/var >/dev/null 2>&1
 mtree -deU -f ${chroot}/etc/mtree/BSD.usr.dist \
       -p ${chroot}/usr >/dev/null 2>&1
+
+mkdir -p ${chroot}${LOCALBASE}
 mtree -deU -f ${chroot}/etc/mtree/BSD.local.dist \
       -p ${chroot}${LOCALBASE} >/dev/null 2>&1
 
@@ -143,6 +145,7 @@ case "${X_WINDOW_SYSTEM}" in
 "xfree86-3")	_X_MTREE="BSD.x11.dist";;
 *)		_X_MTREE="BSD.x11-4.dist";;
 esac
+mkdir -p ${chroot}${X11BASE}
 mtree -deU -f ${chroot}/etc/mtree/${_X_MTREE} \
       -p ${chroot}${X11BASE} >/dev/null 2>&1
 
