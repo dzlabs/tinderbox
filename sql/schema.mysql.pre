@@ -340,3 +340,5 @@ INSERT INTO port_fail_patterns VALUES (10500, '/usr/bin/ld: cannot find -l', 'li
 INSERT INTO port_fail_patterns VALUES (10600, 'cd: can.t cd to', 'NFS', 0);
 INSERT INTO port_fail_patterns VALUES (10700, 'pkg_create: make_dist: tar command failed with code', 'PLIST', 0);
 INSERT INTO port_fail_patterns VALUES (2147483647, '.*', '???', 0);
+
+SET FOREIGN_KEY_CHECKS=1;
