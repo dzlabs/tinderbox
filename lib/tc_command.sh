@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.48 2006/11/30 13:06:49 oliver Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.49 2007/02/10 20:11:10 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -434,7 +434,6 @@ buildJail () {
     fi
 
     # Various hacks to keep the ports building environment happy
-    ln -sf aj ${J_TMPDIR}/etc/malloc.conf
     touch -f ${J_TMPDIR}/etc/fstab
 
     MTREE_DIR=${SRCBASE}/etc/mtree
