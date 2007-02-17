@@ -238,7 +238,7 @@ INSERT INTO port_fail_patterns VALUES (600, 'configure: error: [Pp]erl (5.* requ
 INSERT INTO port_fail_patterns VALUES (700, '.*', 'configure_error', 400);
 INSERT INTO port_fail_patterns VALUES (800, 'Couldn.t fetch it - please try', 'fetch', 0);
 INSERT INTO port_fail_patterns VALUES (900, 'Error: shared library ".*" does not exist', 'LIB_DEPENDS', 0);
-INSERT INTO port_fail_patterns VALUES (1000, '\\.(c|cc|ccx|cpp|h|y)[1-9:]+ .+\\.h: No such file', '__parent__', 0);
+INSERT INTO port_fail_patterns VALUES (1000, '\\.(c|cc|cxx|cpp|h|y)[1-9:]+ .+\\.h: No such file', '__parent__', 0);
 INSERT INTO port_fail_patterns VALUES (1100, '(X11/.*|Xosdefs)\\.h: No such file', '__parent__', 1000);
 INSERT INTO port_fail_patterns VALUES (1200, 'XFree86-.*\\.tgz', 'missing_header', 1100);
 INSERT INTO port_fail_patterns VALUES (1300, '.*', 'USE_XLIB', 1100);
@@ -304,7 +304,7 @@ INSERT INTO port_fail_patterns VALUES (7200, 'libtool: link: cannot find the lib
 INSERT INTO port_fail_patterns VALUES (7300, 'relocation against dynamic symbol', 'linker_error', 0);
 INSERT INTO port_fail_patterns VALUES (7400, 'Shared object.*not found, required by', 'linker_error', 0);
 INSERT INTO port_fail_patterns VALUES (7500, 'Could not create Makefile', 'makefile', 0);
-INSERT INTO port_fail_patterns VALUES (7600, 'make.*(cannot open [Mm]akefile|don.t know how to make|fatal errors encountered|No rule to make target|built-in)', 'makefile', 0);
+INSERT INTO port_fail_patterns VALUES (7600, 'make.*(cannot open [Mm]akefile|don.t know how to make|fatal errors encountered|No rule to make target|built-in)(?!\\s*regression-test.continuing)', 'makefile', 0);
 INSERT INTO port_fail_patterns VALUES (7700, '/usr/.*/man/.*: No such file or directory', 'manpage', 0);
 INSERT INTO port_fail_patterns VALUES (7800, 'out of .* hunks .*--saving rejects to', 'patch', 0);
 INSERT INTO port_fail_patterns VALUES (7900, '/usr/local/bin/(perl|perl5.6.1):.*(not found|No such file or directory)', 'perl', 0);
