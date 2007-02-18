@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.107 2007/01/07 15:38:53 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.108 2007/02/18 16:48:33 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -181,12 +181,12 @@ unset LC_MESSAGES
 unset LC_NUMERIC
 unset LANG
 
-# wait 1 hour before killing build with no output
+# wait 2 hours before killing build with no output
 export TIMEOUT=7200
 
-# to prevent runaway processes -- 600 meg file size limit, one hour CPU limit
-ulimit -f 1228800
-ulimit -t 3600
+# to prevent runaway processes -- 400 meg file size limit, two hour CPU limit
+ulimit -f 819200
+ulimit -t 7200
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:${LOCALBASE}/sbin:${LOCALBASE}/bin:${X11BASE}/bin
 
