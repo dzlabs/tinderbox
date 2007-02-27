@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.108 2007/02/18 16:48:33 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.109 2007/02/27 04:48:34 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -138,16 +138,27 @@ mtree -deU -f ${chroot}/etc/mtree/BSD.usr.dist \
       -p ${chroot}/usr >/dev/null 2>&1
 
 mkdir -p ${chroot}${LOCALBASE}
-mtree -deU -f ${chroot}/etc/mtree/BSD.local.dist \
-      -p ${chroot}${LOCALBASE} >/dev/null 2>&1
+if [ -f ${chroot}/a/ports/Templates/BSD.local.dist ]; then
+    mtree -deU -f ${chroot}/a/ports/Templates/BSD.local.dist -p ${chroot}${LOCALBASE} \
+    	>/dev/null 2>&1
+else
+    mtree -deU -f ${chroot}/etc/mtree/BSD.local.dist -p ${chroot}${LOCALBASE} \
+    	>/dev/null 2>&1
+fi
 
-case "${X_WINDOW_SYSTEM}" in
-"xfree86-3")	_X_MTREE="BSD.x11.dist";;
-*)		_X_MTREE="BSD.x11-4.dist";;
-esac
-mkdir -p ${chroot}${X11BASE}
-mtree -deU -f ${chroot}/etc/mtree/${_X_MTREE} \
-      -p ${chroot}${X11BASE} >/dev/null 2>&1
+if [ -f ${chroot}/a/ports/Templates/BSD.local.dist ]; then
+    mkdir -p ${chroot}${X11BASE}
+    mtree -deU -f ${chroot}/a/ports/Templates/BSD.local.dist -p ${chroot}${X11BASE} \
+    	>/dev/null 2>&1
+else
+    case "${X_WINDOW_SYSTEM}" in
+    "xfree86-3")	_X_MTREE="BSD.x11.dist";;
+    *)			_X_MTREE="BSD.x11-4.dist";;
+    esac
+    mkdir -p ${chroot}${X11BASE}
+    mtree -deU -f ${chroot}/etc/mtree/${_X_MTREE} \
+          -p ${chroot}${X11BASE} >/dev/null 2>&1
+fi
 
 # mount linprocfs if required
 if [ "${ARCH}" = "i386" -o "${ARCH}" = "amd64" ]; then
