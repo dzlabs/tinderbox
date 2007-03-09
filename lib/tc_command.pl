@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.116 2006/11/19 21:24:30 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.117 2007/03/09 19:11:43 marcus Exp $
 #
 
 my $pb;
@@ -2161,7 +2161,7 @@ EOD
 Please do not reply to this email.
 EOD
 
-        my @users = $ds->getBuildCompletionUsers($build);
+        my @users = $ds->getBuildErrorUsers($build);
 
         if (scalar(@users)) {
 
