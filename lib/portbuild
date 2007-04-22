@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.109 2007/02/27 04:48:34 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.110 2007/04/22 15:48:00 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -115,7 +115,7 @@ dudsfile=$(tinderLoc builddata ${build})/duds
 if [ -f ${dudsfile} ]; then
     if grep -qxF ${pkgname} ${dudsfile}; then
         echo "skipping ${pkgname} (found in duds)"
-	${tc} updatePortStatus -d ${portdir} -b {$build} \
+	${tc} updatePortStatus -d ${portdir} -b ${build} \
 		-L -s DUD -v ${pkgname}
         exit 1
     fi
