@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.49 2007/02/10 20:11:10 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.50 2007/05/19 15:57:09 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -1064,7 +1064,9 @@ tinderbuild_setup () {
 	fi
 	cp -p /libexec/ld-elf.so.1 ${buildRoot}/libexec
 	cp -p /lib/libkvm.so.[0-9]* /lib/libm.so.[0-9]* ${buildRoot}/lib
-	if [ -f /lib/libc.so.6 ]; then
+	if [ -f /lib/libc.so.7 ]; then
+	    libc_hackery="libc.so.7"
+	elif [ -f /lib/libc.so.6 ]; then
 	    libc_hackery="libc.so.6"
 	elif [ -f /lib/libc.so.5 ]; then
 	    libc_hackery="libc.so.5"
@@ -1072,7 +1074,9 @@ tinderbuild_setup () {
 	;;
 
     5)
-	if [ -f /lib/libc.so.6 ]; then
+    	if [ -f /lib/libc.so.7 ]; then
+	    libc_hackery="libc.so.7"
+	elif [ -f /lib/libc.so.6 ]; then
 	    libc_hackery="libc.so.6"
 	fi
 	;;
@@ -1080,6 +1084,12 @@ tinderbuild_setup () {
     6|7)
 	if [ -f /lib/libc.so.5 ]; then
 	    libc_hackery="libc.so.5"
+	fi
+	if [ ${osmajor} = 6 -a -f /lib/libc.so.7 ]; then
+	    if [ -f ${buildRoot}/lib/libc.so.7 ]; then
+		chflags noschg ${buildRoot}/lib/libc.so.7 >/dev/null 2>&1
+	    fi
+	    cp -p /lib/libc.so.7 ${buildRoot}/lib
 	fi
 	;;
 
