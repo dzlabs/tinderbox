@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/describe_port.tpl,v 1.4 2006/05/01 02:34:57 marcus Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/describe_port.tpl,v 1.5 2007/06/09 22:09:12 marcus Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -35,6 +35,7 @@
 			<th>&nbsp;</th>
 			<th>Last Build Attempt</th>
 			<th>Last Successful Build</th>
+			<th>Duration</th>
 		</tr>
 		<?foreach($data as $row) {?>
 			<tr>
@@ -51,6 +52,7 @@
 				</td>
 				<td><?=$row['port_last_built']?></td>
 				<td><?=$row['port_last_successful_built']?></td>
+				<td><?=time_elapsed($row['port_last_run_duration'])?></td>
 			</tr>
 		<?}?>
 	</table>

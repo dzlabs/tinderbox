@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/functions.php,v 1.4 2006/03/14 01:00:15 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/functions.php,v 1.5 2007/06/09 22:09:12 marcus Exp $
 #
 
 function prettyEmail($input) {
@@ -64,8 +64,17 @@ function build_query_string($url, $qs, $key, $value) {
 function time_difference_from_now($then) {
 	$then = strtotime(prettyDatetime($then));
 	$diff = time() - $then;
-	return sprintf("%02d:%02d:%02d",
-	    floor($diff/3600), floor(($diff%3600)/60), floor($diff%60));
+	return time_elapsed($diff);
+}
+
+function time_elapsed($c) {
+	if ($c===0 || $c < 0 || $c=="")
+		return "-";
+	if ($c>=3600)
+		return sprintf("%0d:%02d:%02d",
+			floor($c/3600),floor(($c%3600)/60),floor($c%60));
+	return sprintf("%02d:%02d",
+		floor(($c%3600)/60),floor($c%60));
 }
 
 ?>

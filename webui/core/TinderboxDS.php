@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.31 2005/12/29 05:59:51 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.32 2007/06/09 22:09:12 marcus Exp $
 #
 
     require_once 'DB.php';
@@ -108,6 +108,8 @@
                              bp.last_built,
                              bp.last_status,
                              bp.last_successful_built,
+			     bp.last_failed_dependency,
+			     bp.last_run_duration,
                              bp.last_built_version,
                         CASE bp.last_fail_reason
                            WHEN '__nofail__' THEN ''
@@ -264,6 +266,8 @@
                              bp.last_status,
                              bp.last_successful_built,
                              bp.last_built_version,
+			     bp.last_failed_dependency,
+			     bp.last_run_duration,
                         CASE bp.last_fail_reason
                            WHEN '__nofail__' THEN ''
                            ELSE bp.last_fail_reason
@@ -293,6 +297,8 @@
                              bp.last_status,
                              bp.last_successful_built,
                              bp.last_built_version,
+			     bp.last_failed_dependency,
+			     bp.last_run_duration,
                         CASE bp.last_fail_reason
                            WHEN '__nofail__' THEN ''
                            ELSE bp.last_fail_reason
@@ -319,6 +325,33 @@
             return $ports;
         }
 
+	function getBuildPorts($port_id,$build_id) {
+		$query = "SELECT p.*,
+			         bp.last_built,
+				 bp.last_status,
+				 bp.last_successful_built,
+				 bp.last_failed_dependency,
+				 bp.last_run_duration,
+			 CASE bp.last_fail_reason
+			    WHEN '__nofail__' THEN ''
+			    ELSE bp.last_fail_reason
+			 END
+			  AS last_fail_reason
+			 FROM ports p,
+			      build_ports bp
+			 WHERE p.port_id = bp.port_id
+			 AND bp.build_id=?
+			 AND bp.port_id=?";
+
+		$rc = $this->_doQueryHashRef($query, $results, array($build_id, $port_id));
+		if (!$rc) return null;
+
+		$ports = $this->_newFromArray("Port", $results);
+
+		return $ports[0];
+	}
+
+
         function getPortsByStatus($build_id,$maintainer,$status) {
             $query = "SELECT p.*,
                              bp.build_id,
@@ -326,6 +359,8 @@
                              bp.last_status,
                              bp.last_successful_built,
                              bp.last_built_version,
+			     bp.last_failed_dependency,
+			     bp.last_run_duration,
                         CASE bp.last_fail_reason
                            WHEN '__nofail__' THEN ''
                            ELSE bp.last_fail_reason
@@ -378,6 +413,25 @@
 
             return $results[0];
         }
+
+	function getPortByDirectory($dir) {
+	    $results = $this->getPorts(array( 'port_directory' => $dir ));
+
+	    if (is_null($results)) {
+                return null;
+	    }
+
+	    return $results[0];
+	}
+
+	function getCurrentPortForBuild($build_id) {
+	    $query = 'SELECT port_id AS id FROM build_ports WHERE build_id = ? AND currently_building = \'1\'';
+	    $rc = $this->_doQueryHashRef($query, $results, array($build_id));
+	    if (!$rc) return null;
+	    $port = $this->getPortById($results[0]['id']);
+
+	    return $port;
+	}
 
         function getObjects($type, $params = array()) {
             global $objectMap;
