@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.110 2007/04/22 15:48:00 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.111 2007/06/09 21:36:16 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -37,6 +37,27 @@ cleanup()
     echo "$pkgname done at `date`"
     ${tc} updateBuildCurrentPort -b ${build}
     exit $error
+}
+
+mark_failed() {
+    tc=$1
+    branch=$2
+    pkgname=$3
+    portdir=$4
+
+    mf="${pb}/builds/${branch}/Makefile"
+    if [ ! -f "${mf}" ]; then
+	return
+    fi
+
+    dependents=$(grep ${pkgname} ${mf} | grep '^[[:space:]]\{1,\}@' | awk '{print $NF}' | sed -e 's|^/usr/ports/||' | grep -v ${portdir})
+    if [ $? -ne 0 ]; then
+	return
+    fi
+
+    for dep in ${dependents}; do
+	${tc} updatePortStatus -d ${dep} -b ${branch} -L -s DEPEND -p ${portdir}
+    done
 }
 
 #---------------------------------------------------------------------------
@@ -111,12 +132,22 @@ chroot=$(tinderLoc buildroot ${build})
 echo "chroot is: ${chroot}"
 portdir=$(echo ${dirname} | sed -e 's|^/usr/ports/||')
 
+execute_hook "prePortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} PORTDIR=${portdir} PB=${pb}"
+if [ $? -ne 0 ]; then
+    echo "portbuild: Terminating build for ${pkgname} since prePortBuild hook failed"
+    ${tc} updatePortStatus -d ${portdir} -b ${build} -L -s FAIL -v ${pkgname} -r "hook"
+    mark_failed ${tc} ${build} ${pkgname} ${portdir}
+    exit 1
+fi
+
 dudsfile=$(tinderLoc builddata ${build})/duds
 if [ -f ${dudsfile} ]; then
     if grep -qxF ${pkgname} ${dudsfile}; then
         echo "skipping ${pkgname} (found in duds)"
 	${tc} updatePortStatus -d ${portdir} -b ${build} \
 		-L -s DUD -v ${pkgname}
+	mark_failed ${tc} ${build} ${pkgname} ${portdir}
+	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=DUD PORTDIR=${portdir} PB=${pb}"
         exit 1
     fi
 fi
@@ -146,19 +177,14 @@ else
     	>/dev/null 2>&1
 fi
 
-if [ -f ${chroot}/a/ports/Templates/BSD.local.dist ]; then
-    mkdir -p ${chroot}${X11BASE}
-    mtree -deU -f ${chroot}/a/ports/Templates/BSD.local.dist -p ${chroot}${X11BASE} \
-    	>/dev/null 2>&1
-else
-    case "${X_WINDOW_SYSTEM}" in
-    "xfree86-3")	_X_MTREE="BSD.x11.dist";;
-    *)			_X_MTREE="BSD.x11-4.dist";;
-    esac
-    mkdir -p ${chroot}${X11BASE}
-    mtree -deU -f ${chroot}/etc/mtree/${_X_MTREE} \
-          -p ${chroot}${X11BASE} >/dev/null 2>&1
-fi
+mkdir -p ${chroot}${X11BASE}
+case "${X_WINDOW_SYSTEM}" in
+  "xfree86-3")	_X_MTREE="BSD.x11.dist";;
+  *)		_X_MTREE="BSD.x11-4.dist";;
+esac
+mkdir -p ${chroot}${X11BASE}
+mtree -deU -f ${chroot}/etc/mtree/${_X_MTREE} -p ${chroot}${X11BASE} \
+      >/dev/null 2>&1
 
 # mount linprocfs if required
 if [ "${ARCH}" = "i386" -o "${ARCH}" = "amd64" ]; then
@@ -216,6 +242,7 @@ fi
 
 echo "building $pkgname in $chroot"
 
+${tc} updateBuildStatus -b ${build} -s PORTBUILD
 ${tc} updateBuildCurrentPort -b ${build} -n ${pkgname}
 
 packages=$(tinderLoc packages ${build})
@@ -346,6 +373,7 @@ if [ "${error}" = "0" ]; then
 	fi
 	${tc} updatePortStatus -d ${portdir} -b ${build} \
 		-L -S -s ${status} -v ${pkgname} -r "__nofail__"
+	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=${status} PORTDIR=${portdir} PB=${pb}"
 	if [ ${status} = "LEFTOVERS" ]; then
 	    ${tc} sendBuildErrorMail -d ${portdir} -b ${build} -p ${pkgname} -l
 	fi
@@ -357,7 +385,9 @@ if [ "${error}" = "0" ]; then
 	fi
 	${tc} updatePortStatus -d ${portdir} -b ${build} \
 		-L -s FAIL -v ${pkgname} ${reason}
+	mark_failed ${tc} ${build} ${pkgname} ${portdir}
         ${tc} sendBuildErrorMail -d ${portdir} -b ${build} -p ${pkgname}
+	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=FAIL PORTDIR=${portdir} PB=${pb}"
     fi
 else
     cp ${chroot}/tmp/${pkgname}.log ${logsDir}/${pkgname}.log
@@ -369,7 +399,9 @@ else
     fi
     ${tc} updatePortStatus -d ${portdir} -b ${build} \
 		-L -s FAIL -v ${pkgname} ${reason}
+    mark_failed ${tc} ${build} ${pkgname} ${portdir}
     ${tc} sendBuildErrorMail -d ${portdir} -b ${build} -p ${pkgname}
+    execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=FAIL PORTDIR=${portdir} PB=${pb}"
 fi
 
 cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${build}

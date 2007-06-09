@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.36 2006/11/30 08:39:26 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.37 2007/06/09 21:36:16 marcus Exp $
 #
 
 tinderLocJail () {
@@ -445,7 +445,7 @@ buildenvlist () {
     fi
 }
 
-cleanenv() {
+cleanenv () {
     SAFE_VARS="PATH EDITOR BLOCKSIZE PAGER ENV pb"
     old_IFS=${IFS}
     IFS='
@@ -458,6 +458,8 @@ cleanenv() {
 	fi
     done
     IFS=${old_IFS}
+
+    export USER="root"
 }
 
 buildenv () {
@@ -643,4 +645,32 @@ migDb () {
     fi
 
     return 0
+}
+
+execute_hook () {
+    name=$1
+    env=$2
+
+    tc=$(tinderLoc scripts tc)
+    hook_cmd=$(${tc} getHookCmd -h ${name})
+    if [ -z "${hook_cmd}" ]; then
+	return 0
+    fi
+
+    echo "execute_hook: Running ${hook_cmd} for ${name} with environment \"${env}\" from ${pb}/scripts."
+
+    (
+      cleanenv
+      cd ${pb}/scripts
+      env ${env} $(realpath ${hook_cmd})
+      exit $?
+    )
+
+    rc=$?
+
+    if [ ${rc} -ne 0 ]; then
+	echo "execute_hook: Failed to run ${hook_cmd}, exited with ${rc}."
+    fi
+
+    return ${rc}
 }

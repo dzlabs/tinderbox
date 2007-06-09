@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.50 2007/05/19 15:57:09 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.51 2007/06/09 21:36:16 marcus Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -299,7 +299,14 @@ updateJail () {
 
     esac
 
+    execute_hook "preJailUpdate" "JAIL=${jailName} UPDATE_CMD=${updateCmd} PB=${pb}"
+    if [ $? -ne 0 ]; then
+	echo "updateJail: Terminating Jail update since hook preJailUpdate failed."
+	return 1
+    fi
     updateTree jail ${jailName} -j ${jailDir} ${updateCmd}
+    rc=$?
+    execute_hook "postJailUpdate" "JAIL=${jailName} RC=${rc} UPDATE_CMD=${updateCmd} PB=${pb}"
     return 0
 }
 
@@ -401,6 +408,12 @@ buildJail () {
     jailArch=$(${tc} getJailArch -j ${jailName})
     myArch=$(uname -m)
 
+    execute_hook "preJailBuild" "JAIL=${jailName} DESTDIR=${J_TMPDIR} JAIL_ARCH=${jailArch} MY_ARCH=${myArch} JAIL_OBJDIR=${JAIL_OBJDIR} SRCBASE=${SRCBASE} PB=${pb}"
+    if [ $? -ne 0 ]; then
+	echo "buildJail: Terminating Jail build since hook preJailBuild failed."
+	return 1
+    fi
+
     # Make world
     echo "${jailName}: making world"
 
@@ -411,7 +424,9 @@ buildJail () {
     fi
     cd ${SRCBASE} && env DESTDIR=${J_TMPDIR} ${crossEnv} \
 	make world > ${jailBase}/world.tmp 2>&1
-    if [ $? -ne 0 ]; then
+    rc=$?
+    execute_hook "postJailBuild" "JAIL=${jailName} DESTDIR=${J_TMPDIR} JAIL_ARCH=${jailArch} MY_ARCH=${myArch} JAIL_OBJDIR=${JAIL_OBJDIR} SRCBASE=${SRCBASE} PB=${pb} RC=${rc}"
+    if [ ${rc} -ne 0 ]; then
 	echo "ERROR: world failed - see ${jailBase}/world.tmp"
 	buildJailCleanup 1 ${jailName} ${J_SRCDIR}
     fi
@@ -669,7 +684,14 @@ updatePortsTree () {
 
     esac
 
+    execute_hook "prePortsTreeUpdate" "PORTSTREE=${portsTreeName} UPDATE_CMD=${updateCmd} PB=${pb}"
+    if [ $? -ne 0 ];then
+	echo "${portsTreeName}: terminating ports tree update since hook prePortsTreeUpdate failed."
+	return 1
+    fi
     updateTree portstree ${portsTreeName} -p ${portsTreeDir} ${updateCmd}
+    rc=$?
+    execute_hook "postPortsTreeUpdate" "PORTSTREE=${portsTreeName} UPDATE_CMD=${updateCmd} PB=${pb} RC=${rc}"
     return 0
 }
 
@@ -903,6 +925,12 @@ makeBuild () {
 	exit 1
     fi
 
+    execute_hook "preBuildExtract" "BUILD=${buildName} DESTDIR=${BUILD_DIR} JAIL=${jailName} PB=${pb}"
+    if [ $? -ne 0 ]; then
+	echo "makeBuild: Terminating Build extraction since hook preBuildExtract failed."
+	exit 1
+    fi
+
     # Clean up any previous build tree
     tinderbuild_reset ${buildName}
     cleanDirs ${buildName} ${BUILD_DIR}
@@ -910,6 +938,8 @@ makeBuild () {
     # Extract the tarball
     echo "makeBuild: extracting jail tarball"
     tar -C ${BUILD_DIR} -xpf ${JAIL_TARBALL}
+
+    execute_hook "postBuildExtract" "BUILD=${buildName} DESTDIR=${BUILD_DIR} JAIL=${jailName} PB=${pb} RC=0"
 
     # Finalize environment
     cp -f /etc/resolv.conf ${BUILD_DIR}/etc
@@ -1430,6 +1460,7 @@ addPortToBuild () {
     build=$1
     portDir=$2
     norecurse=$3
+    options=$4
 
     tc=$(tinderLoc scripts tc)
     jail=$(${tc} getJailForBuild -b ${build})
@@ -1446,11 +1477,29 @@ addPortToBuild () {
 
     trap "addPortToBuild_cleanup ${jail} ${portsTree}" 1 2 3 9 10 11 15
 
+    # Save TERM since we need that for OPTIONS
+    save_TERM=${TERM}
+
     buildenv ${jail} ${portsTree} ${build}
     buildenvNoHost ${build}
 
     export PORTSDIR=$(tinderLoc portstree ${portsTree})/ports
     ${tc} addPortToOneBuild -b ${build} -d ${portDir} ${norecurse}
+    if [ ${options} -eq 1 -a ${OPTIONS_ENABLED} -eq 1 ]; then
+	pdir="${PORTSDIR}/${portDir}"
+	if [ -d ${pdir} ]; then
+	    export TERM=${save_TERM}
+	    read -p "Generating options for ${build}; hit Enter to continue..." key
+	    echo ""
+	    if [ -z "${norecurse}" ]; then
+		( cd ${pdir} && make rmconfig-recursive
+		  && make config-recursive )
+	    else
+		( cd ${pdir} && make rmconfig
+		  && make config )
+	    fi
+	fi
+    fi
 
     addPortToBuild_cleanup ${jail} ${portsTree}
 }
@@ -1461,6 +1510,7 @@ addPort () {
     allBuilds=0
     portDir=""
     norecurse=""
+    options=0
 
     # argument handling
     while getopts ab:d:R arg >/dev/null 2>&1
@@ -1470,6 +1520,7 @@ addPort () {
 	a)	allBuilds=1;;
 	b)	build="${OPTARG}";;
 	d)	portDir="${OPTARG}";;
+	o)      options=1;;
 	R)	norecurse="-R";;
 	?)	return 1;;
 
@@ -1497,7 +1548,7 @@ addPort () {
 
 	for build in ${allBuilds}
 	do
-	    addPortToBuild ${build} ${portDir} ${norecurse}
+	    addPortToBuild ${build} ${portDir} ${norecurse} ${options}
 	done
     else
 	if ! tcExists Builds ${build}; then
@@ -1505,7 +1556,7 @@ addPort () {
 	    return 1
 	fi
 
-	addPortToBuild ${build} ${portDir} ${norecurse}
+	addPortToBuild ${build} ${portDir} ${norecurse} ${options}
     fi
 
     return 0

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #-
-# Copyright (c) 2004-2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2004-2007 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.117 2007/03/09 19:11:43 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.118 2007/06/09 21:36:16 marcus Exp $
 #
 
 my $pb;
@@ -172,12 +172,6 @@ my $ds = new Tinderbox::TinderboxDS();
                     "-p <portstree name> [-d <portstree description>] [-m <ports mount source>] [-u <updatecommand>|CVSUP|NONE>] [-w <CVSweb URL>]",
                 optstr => 'm:p:u:d:w:',
         },
-        "addPort" => {
-                help =>
-                    "Add a port, and optionally, its dependencies, to the datastore",
-                usage  => "{-b <build name> | -a} -d <port directory> [-R]",
-                optstr => 'ab:d:R',
-        },
         "addPortToOneBuild" => {
                 func   => \&addPortToOneBuild,
                 help   => "INTERNAL function only",
@@ -197,6 +191,19 @@ my $ds = new Tinderbox::TinderboxDS();
                 usage =>
                     "-t <tag> [-d <description>] [-y COMMON|RARE|TRANSIENT]",
                 optstr => 't:d:y:',
+        },
+        "listHooks" => {
+                func => \&listHooks,
+                help =>
+                    "List all hooks, their commands, and their descriptions",
+                usage  => "[-h <hook name>]",
+                optstr => 'h:',
+        },
+        "getHookCmd" => {
+                func   => \&getHookCmd,
+                help   => "Get the command for a given hook",
+                usage  => "-h <hook name>",
+                optstr => 'h:',
         },
         "getJailForBuild" => {
                 func   => \&getJailForBuild,
@@ -307,12 +314,6 @@ my $ds = new Tinderbox::TinderboxDS();
                 usage  => "-t <tag> [-f]",
                 optstr => 't:f',
         },
-        "updatePortsTree" => {
-                help =>
-                    "Run the configured update command on the specified portstree",
-                usage  => "-p <portstree name> [-l <last built timestamp>]",
-                optstr => 'p:l:',
-        },
         "updateJailLastBuilt" => {
                 func   => \&updateJailLastBuilt,
                 help   => "Update the specified jail's last built time",
@@ -323,8 +324,8 @@ my $ds = new Tinderbox::TinderboxDS();
                 func => \&updatePortStatus,
                 help => "Update build information about a port",
                 usage =>
-                    "-d <portdir> -b <build> [-L] [-S] [-s <status>] [-r <reason>] [-v <version>]",
-                optstr => 'b:d:Lr:Ss:v:',
+                    "-d <portdir> -b <build> [-L] [-S] [-s <status>] [-r <reason>] [-v <version>] [-p <dependency port directory>]",
+                optstr => 'b:d:Lr:Ss:v:p:',
         },
         "updateBuildStatus" => {
                 func   => \&updateBuildStatus,
@@ -343,8 +344,15 @@ my $ds = new Tinderbox::TinderboxDS();
                 func => \&updateBuildCurrentPort,
                 help =>
                     "Update the port currently being built for the specify build",
-                usage  => "-b <build name> [-n <package name>]",
-                optstr => 'b:n:',
+                usage =>
+                    "-b <build name> [-d <port directory>] [-n <package name>]",
+                optstr => 'b:d:n:',
+        },
+        "updateHookCmd" => {
+                func   => \&updateHookCmd,
+                help   => "Update the command for the given hook",
+                usage  => "-h <hook name> [-c <hook command>]",
+                optstr => 'h:c:',
         },
         "sendBuildCompletionMail" => {
                 func => \&sendBuildCompletionMail,
@@ -790,7 +798,7 @@ sub configDistfile {
 
 sub configOptions {
         my @config = ();
-	my $enabled;
+        my $enabled;
         my $host;
 
         if ($opts->{'d'} && $opts->{'e'}) {
@@ -1082,6 +1090,63 @@ $tag,                  $type,         $descr
                                 "There are no port failure reasons configured in the datastore.\n"
                         );
                 }
+        }
+}
+
+sub listHooks {
+        if ($opts->{'h'}) {
+                my $hook = $ds->getHookByName($opts->{'h'});
+
+                if (!defined($hook)) {
+                        cleanup($ds, 1,
+                                      "Failed to find hook with name "
+                                    . $opts->{'h'}
+                                    . " in the datastore.\n");
+                }
+
+                print "Name       : " . $hook->getName() . "\n";
+                print "Command    : " . $hook->getCmd() . "\n";
+                print "Description:\n";
+                print $hook->getDescription() . "\n";
+        } else {
+                my @hooks = $ds->getAllHooks();
+
+                if (@hooks) {
+                        foreach my $hook (@hooks) {
+                                print
+                                    "--------------------------------------------------------------------------------\n";
+                                print "Name       : " . $hook->getName() . "\n";
+                                print "Command    : " . $hook->getCmd() . "\n";
+                                print "Description:\n";
+                                print $hook->getDescription() . "\n\n";
+
+                        }
+                } elsif (defined($ds->getError())) {
+                        cleanup($ds, 1,
+                                      "Failed to list hooks: "
+                                    . $ds->getError()
+                                    . "\n");
+                } else {
+                        cleanup($ds, 1,
+                                "There are no hooks configured in the datastore.\n"
+                        );
+                }
+        }
+}
+
+sub getHookCmd {
+        if (!$opts->{'h'}) {
+                usage("getHookCmd");
+        }
+
+        if (!$ds->isValidHook($opts->{'h'})) {
+                cleanup($ds, 1, "Unknown hook, " . $opts->{'h'} . "\n");
+        }
+
+        my $hook = $ds->getHookByName($opts->{'h'});
+        my $cmd  = $hook->getCmd();
+        if ($cmd ne "") {
+                print $cmd . "\n";
         }
 }
 
@@ -1620,11 +1685,9 @@ sub rmPort {
                         my $sufx      = $ds->getPackageSuffix($jail);
                         my $buildName = $build->getName();
                         my $pkgdir    = tinderLoc($pb, 'packages', $buildName);
-                        my $logpath =
-                            tinderLoc($pb, 'buildlogs',
+                        my $logpath   = tinderLoc($pb, 'buildlogs',
                                 $buildName . "/$version");
-                        my $errpath =
-                            tinderLoc($pb, 'builderrors',
+                        my $errpath = tinderLoc($pb, 'builderrors',
                                 $buildName . "/$version");
                         if (-d $pkgdir) {
                                 print
@@ -2024,6 +2087,12 @@ sub updatePortStatus {
                         "FAILED: last_built_version: " . $ds->getError() . "\n"
                     );
         }
+
+        if (defined($opts->{'p'})) {
+                $ds->updatePortLastFailedDep($port, $build, $opts->{'p'})
+                    or cleanup($ds, 1,
+                        "FAILED: last_failed_dep: " . $ds->getError() . "\n");
+        }
 }
 
 sub updateBuildStatus {
@@ -2110,11 +2179,36 @@ sub updateBuildCurrentPort {
         }
 
         my $build = $ds->getBuildByName($opts->{'b'});
+        my $port  = undef;
+        if ($opts->{'d'}) {
+                $port = $ds->getPortByDirectory($opts->{'d'});
+        }
 
-        $ds->updateBuildCurrentPort($build, $opts->{'n'})
-            or cleanup($ds, 1,
-                      "Failed to get last update build current port for build "
+        $ds->updateBuildCurrentPort($build, $port, $opts->{'n'})
+            or cleanup(
+                $ds,
+                1,
+                "Failed to get last update build current port for build "
                     . $opts->{'b'} . ": "
+                    . $ds->getError() . "\n"
+            );
+}
+
+sub updateHookCmd {
+        if (!$opts->{'h'}) {
+                usage("updateHookCmd");
+        }
+
+        if (!$ds->isValidHook($opts->{'h'})) {
+                cleanup($ds, 1, "Unknown hook, " . $opts->{'h'} . "\n");
+        }
+
+        my $hook = $ds->getHookByName($opts->{'h'});
+
+        $ds->updateHookCmd($hook, $opts->{'c'})
+            or cleanup($ds, 1,
+                      "Failed to update command for hook "
+                    . $opts->{'h'} . ": "
                     . $ds->getError()
                     . "\n");
 }
@@ -2161,7 +2255,7 @@ EOD
 Please do not reply to this email.
 EOD
 
-        my @users = $ds->getBuildErrorUsers($build);
+        my @users = $ds->getBuildCompletionUsers($build);
 
         if (scalar(@users)) {
 

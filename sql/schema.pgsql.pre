@@ -84,10 +84,13 @@ CREATE TABLE build_ports (
 	build_id INTEGER REFERENCES builds(build_id) ON UPDATE CASCADE ON DELETE RESTRICT,
 	port_id INTEGER REFERENCES ports(port_id) ON UPDATE CASCADE ON DELETE RESTRICT,
 	last_built TIMESTAMP,
-	last_status VARCHAR(16) CHECK (last_status IN ('UNKNOWN','SUCCESS','FAIL','BROKEN', 'LEFTOVERS', 'DUD')) DEFAULT 'UNKNOWN',
+	last_status VARCHAR(16) CHECK (last_status IN ('UNKNOWN','SUCCESS','FAIL','BROKEN', 'LEFTOVERS', 'DUD', 'DEPEND')) DEFAULT 'UNKNOWN',
 	last_fail_reason VARCHAR(20) NOT NULL DEFAULT '__nofail__' REFERENCES port_fail_reasons(port_fail_reason_tag) ON UPDATE CASCADE ON DELETE RESTRICT,
 	last_successful_built TIMESTAMP,
-	last_built_version VARCHAR(100)
+	last_built_version VARCHAR(100),
+	last_failed_dependency VARCHAR(255),
+	last_run_duration INTEGER,
+	currently_building INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX build_ports_build_id_idx ON build_ports(build_id);
 
@@ -115,6 +118,13 @@ CREATE TABLE port_fail_patterns (
 );
 CREATE INDEX port_fail_pattern_parent_idx ON port_fail_patterns(port_fail_pattern_parent);
 
+-- DROP TABLE hooks CASCADE;
+CREATE TABLE hooks (
+	hook_name VARCHAR(32) NOT NULL PRIMARY KEY,
+	hook_cmd VARCHAR(255),
+	hook_description TEXT
+);
+
 INSERT INTO hosts VALUES (-1, '__ALL__');
 
 
@@ -135,6 +145,22 @@ INSERT INTO config VALUES ('DISTFILE_CACHE', '', -1);
 INSERT INTO config VALUES ('OPTIONS_ENABLED', '0', -1);
 INSERT INTO config VALUES ('OPTIONS_DIR', '', -1);
 INSERT INTO config VALUES ('HOST_WORKDIR', '', -1);
+
+/*
+ Hooks.  These are commands to run when certain conditions are met within
+ Tinderbox.  Changes to the hooks list require a micro version bump to
+ __DSVERSION__.
+*/
+INSERT INTO hooks VALUES ('prePortsTreeUpdate', NULL, 'Hook to run prior to updating a PortsTree.\nIf this hook returns a non-zero value, the PortsTree will not be updated.\nThe following environment will be passed to the hook command:\n\tPORTSTREE : PortsTree name\n\tUPDATE_CMD : Update command\n\tPB : Tinderbox root');
+INSERT INTO hooks VALUES ('postPortsTreeUpdate', NULL, 'Hook to run after a PortsTree has been updated.\nThe following environment will be passed to the hook command:\n\tPORTSTREE : PortsTree name\n\tUPDATE_CMD : Update command\n\tPB : Tinderbox root\n\tRC : Result code of the update command');
+INSERT INTO hooks VALUES ('preBuildExtract', NULL, 'Hook to run prior to extracting a Build.\nIf this hook returns a non-zero value, the Build will not be extracted.\nThe following environment will be passed to the hook command:\n\tBUILD : Build name\n\tDESTDIR : Extract destination\n\tJAIL : Jail for this Build\n\tPB : Tinderbox root');
+INSERT INTO hooks VALUES ('postBuildExtract', NULL, 'Hook to run after a Build has been extracted.\nThe following environment will be passed to the hook command:\n\tBUILD : Build name\n\tDESTDIR : Extract destination\n\tJAIL : Jail for this Build\n\tPB : Tinderbox root\n\tRC : Result code of the extraction');
+INSERT INTO hooks VALUES ('preJailUpdate', NULL, 'Hook to run prior to updating a Jail.\nIf this hook returns a non-zero value, the Jail will not be updated.\nThe following environment will be passed to the hook command:\n\tJAIL : Jail name\n\tUPDATE_CMD : Update command\n\tPB : Tinderbox root');
+INSERT INTO hooks VALUES ('postJailUpdate', NULL, 'Hook to run after a Jail has been updated.\nThe following environment will be passed to the hook command:\n\tJAIL : Jail name\n\tUPDATE_CMD : Update command\n\tPB : Tinderbox root\n\tRC : Result code of the update command');
+INSERT INTO hooks VALUES ('preJailBuild', NULL, 'Hook to run before building a Jail.\nIf this hook returns a non-zero value, the Jail will not be built.\nThe following environment will be passed to the hook command:\n\tJAIL : Jail name\n\tJAIL_OBJDIR : Object directory for Jail\n\tSRCBASE : Source code location for Jail\n\tPB : Tinderbox root');
+INSERT INTO hooks VALUES ('postJailBuild', NULL, 'Hook to run after building a Jail.\nThe following environment will be passed to the hook command:\n\tJAIL : Jail name\n\tJAIL_OBJDIR : Object directory for Jail\n\tSRCBASE : Source code location for Jail\n\tPB : Tinderbox root\n\tRC : Result code of the build');
+INSERT INTO hooks VALUES ('prePortBuild', NULL, 'Hook to run before building a port.\nIf this command returns a non-zero value, the port will not be built.\nThe following environment will be passed to the hook command:\n\tPACKAGE_NAME : Package name of the port\n\tBUILD : Build name for this port\n\tJAIL : Jail name for this Build\n\tPORTSTREE : PortsTree name for this Build\n\tCHROOT : Location of the Build root\n\tPORTDIR : Directory origin of this port\n\tPB : Tinderbox root');
+INSERT INTO hooks VALUES ('postPortBuild', NULL, 'Hook to run after building a port.\nThe following environment will be passed to the hook command:\n\tPACKAGE_NAME : Package name of the port\n\tBUILD : Build name for this port\n\tJAIL : Jail name for this Build\n\tPORTSTREE : PortsTree name for this Build\n\tCHROOT : Location of the Build root\n\tPORTDIR : Directory origin of this port\n\tPB : Tinderbox root\n\tSTATUS : Status of the port build');
 
 
 /*
@@ -217,6 +243,7 @@ INSERT INTO port_fail_reasons VALUES ('PLIST', 'There is a missing item in the P
 INSERT INTO port_fail_reasons VALUES ('compat6x', 'This port relies on libraries from FreeBSD 6.X, and the compat6x package is not installed.  A dependency to misc/compat6x must be added.', 'RARE');
 INSERT INTO port_fail_reasons VALUES ('gcc4_error', 'Your code does not run with the latest gcc version (pending import to -CURRENT). See http://wiki.freebsd.org/gcc4 for further information.', 'COMMON');
 INSERT INTO port_fail_reasons VALUES ('sysvipc', 'Your port is interacting badly with the System V InterProcess Communication code.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('hook', 'A pre-condition hook failed to execute successfully', 'RARE');
 INSERT INTO port_fail_reasons VALUES ('???', 'The automated script cannot even guess what is wrong with your port. Either the script is really stupid (more likely), or your port has ventured into unknown lands (congratulations!).', 'COMMON');
 
 
