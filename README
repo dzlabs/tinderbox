@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.61 2006/11/23 18:38:41 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.62 2007/06/10 04:02:58 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -434,10 +434,31 @@ The configOptions command takes the standard host arguments as well as -e
 (enable OPTIONS support), -d (disable OPTIONS support), and -o
 (set an OPTIONS source directory tree).
 
+If you would like to interactively choose OPTIONS for your ports, specify
+the -o option to ``./tc addPort''.  This will perform a ``make config''
+on all ports, displaying the ncurses OPTIONS dialog.  All OPTIONS setting
+will be automatically saved to the correct location.
+
 Creating Hosts:
 ---------------
 
 XXX: stuff needs to go in here.
+
+Using Hooks:
+------------
+
+A hook is a "callout" which gives Tinderbox the ability to run
+custom code at pre-determined times.  For example, you can establish a
+Hook to run just before a Port is built, after a Build is extracted,
+before a PortsTree is updated, etc.  Pre-condition hooks can even cause
+an operation to terminate if so desired.  To see a list of all available
+Hooks, run ``./tc listHooks''.  To add a new command for an existing Hook,
+use the command ``./tc updateHookCmd -h <hook> -c <command>''.  If you wish
+to disable a Hook, run ``./tc updateHookCmd -h <hook> -c'' (note: do not
+specify an command after the -c option).
+
+There is no way to add new Hooks dynamically.  However, if you have an idea
+for a new Hook, please contact tinderbox-list@marcuscom.com.
 
 Creating Users:
 ---------------
