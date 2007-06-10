@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.17 2006/02/27 09:57:18 oliver Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.18 2007/06/10 03:54:08 marcus Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -121,4 +121,5 @@ if( isset( $with_timer ) && $with_timer == 1 ) {
         $timer = ( $endtimer[1]-$starttimer[1] )+( $endtimer[0]-$starttimer[0] );
         printf( '<p style="color:#FF0000;font-size:10px;">elapsed: %03.6f seconds, %s', $timer, ' </p>' );
 }
+echo '<p style="font-size:10px;"><b>Note:</b> The Tinderbox web interface requires cookies to be enable.</p>';
 ?>
