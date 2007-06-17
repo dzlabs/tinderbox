@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.119 2007/06/17 00:05:46 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.120 2007/06/17 19:35:53 ade Exp $
 #
 
 my $pb;
@@ -2663,8 +2663,6 @@ EOD
                         cleanup($ds, 1, "Failed to send email.");
                 }
         }
-
-        $rc = $ds->moveBuildPortsQueueFromUserToUser($old_id, $user->getId());
 }
 
 sub addUser {
@@ -2771,6 +2769,8 @@ sub setWwwAdmin {
                 cleanup($ds, 1,
                         "Failed to set www admin: " . $ds->getError() . "\n");
         }
+
+	$rc = $ds->moveBuildPortsQueueFromUserToUser($old_id, $user->getId());
 }
 
 sub addBuildUser {
