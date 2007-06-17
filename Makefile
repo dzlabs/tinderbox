@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.41 2007/06/17 00:05:46 ade Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.42 2007/06/17 00:12:06 marcus Exp $
 
 VERSION=	3.0.0
 
@@ -8,7 +8,7 @@ LIBDATA=	buildscript enterbuild makemake pnohang.c portbuild \
 		setup-mysql.sh setup-pgsql.sh \
 		tc_commands.pl tc_commands.sh tinderlib.pl tinderlib.sh \
 		tinderbox.env
-PERLMODDATA=	Build.pm BuildPortsQueue.pm Config.pm Host.pm Jail.pm \
+PERLMODDATA=	Build.pm BuildPortsQueue.pm Config.pm Hook.pm Host.pm Jail.pm \
 		MakeCache.pm Port.pm PortFailPattern.pm PortFailReason.pm \
 		PortsTree.pm TinderObject.pm TinderboxDS.pm User.pm
 ETCRCDATA=	tinderd.sh
