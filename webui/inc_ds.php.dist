@@ -1,9 +1,9 @@
 <?php
 
-$DB_HOST = 'foo.lovett.com';
 $DB_DRIVER = 'mysql';
+$DB_HOST = 'mysql.example.com';
 $DB_NAME = 'tinderbox';
-$DB_USER = 'tinderbox';
-$DB_PASS = 't1nd3rb0x';
+$DB_USER = 'tinder';
+$DB_PASS = '';
 
 ?>
