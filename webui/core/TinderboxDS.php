@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.33 2007/06/17 00:05:47 ade Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.34 2007/06/17 21:45:08 ade Exp $
 #
 
     require_once 'DB.php';
@@ -367,34 +367,6 @@
             }
 
             return true;
-        }
-
-        function getPortsForBuild($build) {
-            $query = "SELECT p.*,
-                             bp.last_built,
-                             bp.last_status,
-                             bp.last_successful_built,
-                             bp.last_built_version,
-                        CASE bp.last_fail_reason
-                           WHEN '__nofail__' THEN ''
-                           ELSE bp.last_fail_reason
-                        END
-		          AS last_fail_reason
-                        FROM ports p,
-                             build_ports bp
-                       WHERE p.port_id = bp.port_id
-                         AND bp.build_id=?
-                    ORDER BY p.port_directory";
-
-            $rc = $this->_doQueryHashRef($query, $results, $build->getId());
-
-            if (!$rc) {
-                return null;
-            }
-
-            $ports = $this->_newFromArray("Port", $results);
-
-            return $ports;
         }
 
         function getBuildPortsQueueEntryById($id) {
