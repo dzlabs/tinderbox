@@ -23,10 +23,10 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/BuildPortsQueue.pm,v 1.9 2007/06/17 00:05:46 ade Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/BuildPortsQueue.pm,v 1.10 2007/06/17 19:35:15 ade Exp $
 #
 
-package Tinderbox:BuildPortsQueue;
+package Tinderbox::BuildPortsQueue;
 
 use strict;
 use Tinderbox::TinderObject;
