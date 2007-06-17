@@ -24,11 +24,12 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.32 2007/06/09 22:09:12 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.33 2007/06/17 00:05:47 ade Exp $
 #
 
     require_once 'DB.php';
     require_once 'Build.php';
+    require_once 'BuildPortsQueue.php';
     require_once 'Config.php';
     require_once 'Host.php';
     require_once 'Jail.php';
@@ -41,6 +42,7 @@
 
     $objectMap = array(
         "Build" => "builds",
+	"BuildPortsQueue" => "build_ports_queue",
         "Config" => "config",
         "Host"  => "hosts",
         "Jail"  => "jails",
@@ -150,6 +152,9 @@
 
         function deleteUser($user) {
             if( !$user->getId() || $this->deleteUserPermissions($user,'') ) {
+		if ($user->getId()) {
+			$this->deleteBuildPortsQueueByUserId($user);
+		}
                 $query = "DELETE FROM users
                                 WHERE user_name=?";
 
@@ -198,6 +203,12 @@
                 SELECT
                 CASE user_permission
                    WHEN 1 THEN 'IS_WWW_ADMIN'
+		   WHEN 2 THEN 'PERM_ADD_QUEUE'
+		   WHEN 3 THEN 'PERM_MODIFY_OWN_QUEUE'
+		   WHEN 4 THEN 'PERM_DELETE_OWN_QUEUE'
+		   WHEN 5 THEN 'PERM_PRIO_LOWER_5'
+		   WHEN 6 THEN 'PERM_MODIFY_OTHER_QUEUE'
+		   WHEN 7 THEN 'PERM_DELETE_OTHER_QUEUE'
                    ELSE 'PERM_UNKNOWN'
                 END
                    AS user_permission
@@ -238,6 +249,12 @@
 
             switch( $permission ) {
 //              case 'IS_WWW_ADMIN':             $permission = 1; break;   /* only configureable via shell */
+		case 'PERM_ADD_QUEUE':		 $permission = 2; break; 
+		case 'PERM_MODIFY_OWN_QUEUE':	 $permission = 3; break;
+		case 'PERM_DELETE_OWN_QUEUE':	 $permission = 4; break;
+		case 'PERM_PRIO_LOWER_5':	 $permission = 5; break;
+		case 'PERM_MODIFY_OTHER_QUEUE':	 $permission = 6; break;
+		case 'PERM_DELETE_OTHER_QUEUE':	 $permission = 7; break;
                 default:                         return false;
             }
 
@@ -254,6 +271,140 @@
             }
 
             return true;
+        }
+
+        function getBuildPortsQueueEntries($host_id,$build_id) {
+            $query = "SELECT build_ports_queue.*, builds.build_name AS build_name, users.user_name AS user_name, hosts.host_name AS host_name
+                        FROM build_ports_queue, builds, users, hosts
+                       WHERE build_ports_queue.host_id=?
+                         AND build_ports_queue.build_id=?
+                         AND builds.build_id = build_ports_queue.build_id
+                         AND users.user_id = build_ports_queue.user_id
+                         AND hosts.host_id = build_ports_queue.host_id
+                    ORDER BY priority ASC, build_ports_queue_id ASC";
+            $rc = $this->_doQueryHashRef($query, $results, array($host_id,$build_id));
+
+            if (!$rc) {
+                return null;
+            }
+
+            $build_ports_queue_entries = $this->_newFromArray("BuildPortsQueue", $results);
+
+            return $build_ports_queue_entries;
+        }
+
+        function deleteBuildPortsQueueEntry($entry_id) {
+            $query = "DELETE FROM build_ports_queue
+                            WHERE build_ports_queue_id=?";
+
+            $rc = $this->_doQuery($query, $entry_id, $res);
+
+            if (!$rc) {
+                return false;
+            }
+
+            return true;
+        }
+
+        function deleteBuildPortsQueueByUserId($user) {
+            $query = "DELETE FROM build_ports_queue
+                            WHERE user_id=?";
+
+            $rc = $this->_doQuery($query, $user->getId(), $res);
+
+            if (!$rc) {
+                return false;
+            }
+
+            return true;
+        }
+
+        function createBuildPortsQueueEntry($host_id,$build_id,$priority,$port_directory,$user_id,$email_on_completion) {
+            switch( $email_on_completion ) {
+                case '1':    $email_on_completion = 1; break;
+                default:     $email_on_completion = 0; break;
+            }
+
+            $entries[] = array('host_id'        => $host_id,
+                               'build_id'       => $build_id,
+                               'priority'       => $priority,
+                               'port_directory' => $port_directory,
+                               'user_id'        => $user_id,
+                               'enqueue_date'   => date("Y-m-d H:i:s", time()),
+                               'email_on_completion' => $email_on_completion,
+                               'status'         => 'ENQUEUED');
+
+            $results = $this->_newFromArray("BuildPortsQueue",$entries);
+
+            return $results[0];
+        }
+
+        function updateBuildPortsQueueEntry($entry) {
+
+            $query = "UPDATE build_ports_queue
+                         SET host_id=?, build_id=?, priority=?, email_on_completion=?, status=?
+                       WHERE build_ports_queue_id=?";
+
+            $rc = $this->_doQuery($query, array($entry->getHostId(),$entry->getBuildId(),$entry->getPriority(),$entry->getEmailOnCompletion(),$entry->getStatus(),$entry->getId()), $res);
+
+            if (!$rc) {
+                return false;
+            }
+
+            return true;
+        }
+
+        function addBuildPortsQueueEntry($entry) {
+            $query = "INSERT INTO build_ports_queue
+                         (host_id,enqueue_date,build_id,priority,port_directory,user_id,email_on_completion,status)
+                      VALUES
+                         (?,?,?,?,?,?,?,?)";
+
+            $rc = $this->_doQuery($query, array($entry->getHostId(),$entry->getEnqueueDate(),$entry->getBuildId(),$entry->getPriority(),$entry->getPortDirectory(),$entry->getUserId(),$entry->getEmailOnCompletion(),$entry->getStatus()), $res);
+
+            if (!$rc) {
+                return false;
+            }
+
+            return true;
+        }
+
+        function getPortsForBuild($build) {
+            $query = "SELECT p.*,
+                             bp.last_built,
+                             bp.last_status,
+                             bp.last_successful_built,
+                             bp.last_built_version,
+                        CASE bp.last_fail_reason
+                           WHEN '__nofail__' THEN ''
+                           ELSE bp.last_fail_reason
+                        END
+		          AS last_fail_reason
+                        FROM ports p,
+                             build_ports bp
+                       WHERE p.port_id = bp.port_id
+                         AND bp.build_id=?
+                    ORDER BY p.port_directory";
+
+            $rc = $this->_doQueryHashRef($query, $results, $build->getId());
+
+            if (!$rc) {
+                return null;
+            }
+
+            $ports = $this->_newFromArray("Port", $results);
+
+            return $ports;
+        }
+
+        function getBuildPortsQueueEntryById($id) {
+            $results = $this->getBuildPortsQueue(array( 'build_ports_queue_id' => $id ));
+
+            if (is_null($results)) {
+                 return null;
+            }
+
+            return $results[0];
         }
 
         function getPortsForBuild($build, $sortby = 'port_directory') {
@@ -569,6 +720,10 @@
         function getConfig($params = array()) {
             return $this->getObjects("Config", $params);
         }
+
+	function getBuildPortsQueue($params = array()) {
+	    return $this->getObjects("BuildPortsQueue", $params);
+	}
 
         function getBuilds($params = array()) {
             return $this->getObjects("Build", $params);

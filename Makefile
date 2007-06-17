@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.40 2006/11/23 18:34:33 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.41 2007/06/17 00:05:46 ade Exp $
 
 VERSION=	3.0.0
 
@@ -8,25 +8,25 @@ LIBDATA=	buildscript enterbuild makemake pnohang.c portbuild \
 		setup-mysql.sh setup-pgsql.sh \
 		tc_commands.pl tc_commands.sh tinderlib.pl tinderlib.sh \
 		tinderbox.env
-PERLMODDATA=	Build.pm Config.pm Host.pm Jail.pm MakeCache.pm Port.pm \
-		PortFailPattern.pm PortFailReason.pm PortsTree.pm \
-		TinderObject.pm TinderboxDS.pm User.pm
-ETCRCDATA=
+PERLMODDATA=	Build.pm BuildPortsQueue.pm Config.pm Host.pm Jail.pm \
+		MakeCache.pm Port.pm PortFailPattern.pm PortFailReason.pm \
+		PortsTree.pm TinderObject.pm TinderboxDS.pm User.pm
+ETCRCDATA=	tinderd.sh
 MIGDATA=
 MAN1DATA=	tc-configCcache.1 tc-configDistfile.1 tc-configGet.1 \
 		tc-configJail.1 tc-configTinderd.1 tc-init.1
 WEBUIDATA=	inc_ds.php.dist inc_tinderbox.php.dist index.php
-WEBUICDATA=	Build.php Host.php Jail.php Port.php \
+WEBUICDATA=	Build.php BuildPortsQueue.php Host.php Jail.php Port.php \
 		PortsTree.php TinderObject.php TinderboxDS.php User.php \
 		functions.php
 WEBUIMDATA=	module.php moduleBuildPorts.php moduleBuilds.php \
 		moduleHosts.php modulePorts.php moduleSession.php \
-		moduleUsers.php
+		moduleTinderd.php moduleUsers.php
 WEBUITDATA=	current_buildports.tpl describe_port.tpl display_login.tpl \
-		failed_buildports.tpl latest_buildports.tpl list_buildports.tpl \
-		list_builds.tpl messages.inc \
-		please_login.tpl tinderstyle.css user_admin.tpl \
-		user_properties.tpl
+		failed_buildports.tpl latest_buildports.tpl \
+		list_buildports.tpl list_builds.tpl list_tinderd_queue.tpl \
+		messages.inc please_login.tpl tinderstyle.css user_admin.tpl \
+		user_permissions.tpl user_properties.tpl
 
 release:
 	-rm -rf ${.CURDIR}/tinderbox-${VERSION} \

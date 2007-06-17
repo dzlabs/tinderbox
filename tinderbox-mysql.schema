@@ -112,6 +112,22 @@ CREATE TABLE config (
 	PRIMARY KEY (config_option_name, host_id)
 );
 
+DROP TABLE IF EXISTS build_ports_queue;
+CREATE TABLE build_ports_queue (
+	build_ports_queue_id SERIAL PRIMARY KEY,
+	enqueue_date DATETIME,
+	completion_date DATETIME,
+	build_id INTEGER REFERENCES builds(build_id) ON UPDATE CASCADE,
+	user_id INTEGER REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	port_directory VARCHAR(255) NOT NULL,
+	priority INTEGER NOT NULL DEFAULT 10,
+	host_id INTEGER REFERENCES hosts(host_id) ON UPDATE CASCADE,
+	email_on_completion BOOLEAN NOT NULL,
+	status ENUM('ENQUEUED','PROCESSING','SUCCESS','FAIL') NOT NULL DEFAULT 'ENQUEUED'
+);
+CREATE INDEX build_ports_queue_host_id_idx ON build_ports_queue(host_id);
+CREATE INDEX build_ports_queue_user_id_idx ON build_ports_queue(user_id);
+
 DROP TABLE IF EXISTS port_fail_patterns;
 CREATE TABLE port_fail_patterns (
 	port_fail_pattern_id INTEGER PRIMARY KEY,
@@ -148,6 +164,7 @@ INSERT INTO config VALUES ('DISTFILE_CACHE', '', -1);
 INSERT INTO config VALUES ('OPTIONS_ENABLED', '0', -1);
 INSERT INTO config VALUES ('OPTIONS_DIR', '', -1);
 INSERT INTO config VALUES ('HOST_WORKDIR', '', -1);
+INSERT INTO config VALUES ('TINDERD_SLEEPTIME', '120', -1);
 
 /*
  Hooks.  These are commands to run when certain conditions are met within

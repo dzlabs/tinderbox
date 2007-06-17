@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.62 2007/06/10 04:02:58 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.63 2007/06/17 00:05:46 ade Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -492,6 +492,38 @@ users easily by using the "Add User" or "Modify User" links.
 Automating/Queuing Port Builds:
 -------------------------------
 
-Please note that the previous incantation of 'tinderd' has been removed
-from the HEAD branch, pending major reworking of the system to use
-a brand new distributed-aware core.
+If you want to use tinderbox to test many different ports one after the other
+you probably want ``tinderd''. tinderd runs as a daemon and looks to see if
+something was added to the ``ports to build queue''. You can add different
+ports for different builds for different hosts with different priorities.
+tinderd will automatically pick up the port with the highest priority for its
+host and starts building it. That repeats until the queue is empty. After
+the queue empties tinderd will sleep for a configurable amount of time
+(default: 120 seconds) thereafter it starts searching for new queue entries
+again.  If you need tinderd to check the queue before the sleep timer has
+expired, send the tinderd process a SIGHUP:
+
+# kill -HUP {PID of tinderd}
+
+Where {PID of tinderd} is the process ID of the tinderd script as seen in
+the output of ps(1).
+
+To set it up you must first add a Tinderbox host to the database:
+
+# cd ${pb}/scripts && ./tc addHost
+
+Right after that you can start tinderd (it will stay in foreground by default).
+If you want to run tinderd automatically when the system boots, copy the
+include ${pb}/etc/rc.d/tinderd.sh script to /usr/local/etc/rc.d.  Be sure
+to check out the various rc.conf variables documented in this script before
+using it.
+
+Now use:
+
+# cd ${pb}/scripts && ./tc addBuildPortsQueueEntry -b {BUILD} \
+	-d {PORT DIRECTORY}
+
+To add a port to the queue. tinderd will automatically pick it up, run a
+tinderbuild on it, and will delete the entry after tinderbuild completed.
+(Where {BUILD} is a Build name, and {PORT DIRECTORY} is a directory under
+{BUILDS}'s PortsTree (e.g. x11/gnome2).)

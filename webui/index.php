@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.18 2007/06/10 03:54:08 marcus Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.19 2007/06/17 00:05:47 ade Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -35,6 +35,7 @@ require_once 'module/moduleConfig.php';
 require_once 'module/modulePorts.php';
 require_once 'module/modulePortFailureReasons.php';
 require_once 'module/moduleSession.php';
+require_once 'module/moduleTinderd.php';
 require_once 'module/moduleUsers.php';
 
 require_once $templatesdir.'/messages.inc';
@@ -45,6 +46,7 @@ $moduleConfig			= new moduleConfig();
 $modulePorts			= new modulePorts();
 $modulePortFailureReasons	= new modulePortFailureReasons();
 $moduleSession			= new moduleSession();
+$moduleTinderd			= new moduleTinderd();
 $moduleUsers			= new moduleUsers();
 
 $moduleSession->start();
@@ -76,6 +78,32 @@ switch( $action ) {
 						$sort = $_REQUEST['sort'];
 					}
 					$display    = $moduleBuildPorts->display_list_buildports( $build, $sort );
+					break;
+	case 'list_tinderd_queue':	$host_id    = get_var( 'filter_host_id' );
+					$build_id   = get_var( 'filter_build_id' );
+					$display    = $moduleTinderd->list_tinderd_queue( $host_id, $build_id );
+					break;
+	case 'change_tinderd_queue':	$ctinderdq  = get_var( 'change_tinderd_queue' );
+					$entry_id   = get_var( 'entry_id' );
+					$host_id    = get_var( 'host_id' );
+					$build_id   = get_var( 'build_id' );
+					$priority   = get_var( 'priority' );
+					$emailoc    = get_var( 'email_on_completion' );
+					$moduleTinderd->change_tinderd_queue( $ctinderdq, $entry_id, $host_id, $build_id, $priority, $emailoc );
+					$host_id    = get_var( 'filter_host_id' );
+					$build_id   = get_var( 'filter_build_id' );
+					$display    = $moduleTinderd->list_tinderd_queue( $host_id, $build_id );
+					break;
+	case 'add_tinderd_queue':	$atinderdq  = get_var( 'add_tinderd_queue' );
+					$host_id    = get_var( 'new_host_id' );
+					$build_id   = get_var( 'new_build_id' );
+					$priority   = get_var( 'new_priority' );
+					$directory  = get_var( 'new_port_directory' );
+					$emailoc    = get_var( 'new_email_on_completion' );
+					$moduleTinderd->add_tinderd_queue( $atinderdq, $host_id, $build_id, $priority, $directory, $emailoc );
+					$host_id    = get_var( 'filter_host_id' );
+					$build_id   = get_var( 'filter_build_id' );
+					$display    = $moduleTinderd->list_tinderd_queue( $host_id, $build_id );
 					break;
 	case 'display_add_user':	$display    = $moduleUsers->display_add_user( '', '', '', '', array() );
 					break;

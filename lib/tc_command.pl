@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.118 2007/06/09 21:36:16 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.119 2007/06/17 00:05:46 ade Exp $
 #
 
 my $pb;
@@ -112,6 +112,14 @@ my $ds = new Tinderbox::TinderboxDS();
                     "[-w <work directory> | -W] [-h <host name> | -G] | -G -h <host name>",
                 optstr => 'w:Wh:G',
         },
+        "configTinderd" => {
+                func => \&configTinderd,
+                help =>
+                    "Configure Tinderbox tinder daemon (tinderd) parameters",
+                usage =>
+                    "[-t <sleep time>] [-h <host name> | -G] | -G -h <host name>",
+                optstr => 't:h:G',
+        },
         "listJails" => {
                 func  => \&listJails,
                 help  => "List all jails in the datastore",
@@ -132,6 +140,12 @@ my $ds = new Tinderbox::TinderboxDS();
                 help  => "List all portstrees in the datastore",
                 usage => "",
         },
+        "listBuildPortsQueue" => {
+                func   => \&listBuildPortsQueue,
+                help   => "Lists the Ports to Build Queue",
+                usage  => "[-h <host>] [-r] [-s <status>]",
+                optstr => 'h:s:r',
+        },
         "listPortFailPatterns" => {
                 func => \&listPortFailPatterns,
                 help =>
@@ -144,6 +158,12 @@ my $ds = new Tinderbox::TinderboxDS();
                 help  => "List all port failure reasons and their descriptions",
                 usage => "[-t <tag>]",
                 optstr => 't:',
+        },
+        "reorgBuildPortsQueue" => {
+                func   => \&reorgBuildPortsQueue,
+                help   => "Reorganizes the Ports to Build Queue",
+                usage  => "[-h <host>]",
+                optstr => 'h:',
         },
         "addHost" => {
                 func   => \&addHost,
@@ -177,6 +197,13 @@ my $ds = new Tinderbox::TinderboxDS();
                 help   => "INTERNAL function only",
                 usage  => "",
                 optstr => 'b:d:R',
+        },
+        "addBuildPortsQueueEntry" => {
+                func  => \&addBuildPortsQueueEntry,
+                help  => "Adds a Port to the Ports to Build Queue",
+                usage =>
+                    "-b <build name> -d <port directory> [-h <hostname>] [-p <priority>]",
+                optstr => 'b:d:h:p:',
         },
         "addPortFailPattern" => {
                 func => \&addPortFailPattern,
@@ -277,6 +304,20 @@ my $ds = new Tinderbox::TinderboxDS();
                 usage  => "[-h <hostname>]",
                 optstr => 'h:',
         },
+        "rmBuildPortsQueue" => {
+                func => \&rmBuildPortsQueue,
+                help =>
+                    "Removes all Ports from the Ports to Build Queue for one host",
+                usage  => "[-h <hostname>]",
+                optstr => 'h:',
+        },
+        "rmBuildPortsQueueEntry" => {
+                func  => \&rmBuildPortsQueueEntry,
+                help  => "Removes a Port from the Ports to Build Queue",
+                usage =>
+                    "-i <Build_Ports_Queue_Id> | -b <build name> -d <port directory> [-h <hostname>]",
+                optstr => 'i:b:d:h:',
+        },
         "rmPort" => {
                 func => \&rmPort,
                 help =>
@@ -314,6 +355,13 @@ my $ds = new Tinderbox::TinderboxDS();
                 usage  => "-t <tag> [-f]",
                 optstr => 't:f',
         },
+        "updateBuildPortsQueueEntryCompletionDate" => {
+                func => \&updateBuildPortsQueueEntryCompletionDate,
+                help =>
+                    "Update the specified Build Ports Queue Entry completion time",
+                usage  => "-i <id> [-l <completion timestamp>]",
+                optstr => 'i:l:',
+        },
         "updateJailLastBuilt" => {
                 func   => \&updateJailLastBuilt,
                 help   => "Update the specified jail's last built time",
@@ -332,6 +380,13 @@ my $ds = new Tinderbox::TinderboxDS();
                 help   => "Update the current status for the specific build",
                 usage  => "-b <build name> -s <IDLE|PORTBUILD>",
                 optstr => 'b:s:',
+        },
+        "updateBuildPortsQueueEntryStatus" => {
+                func => \&updateBuildPortsQueueEntryStatus,
+                help =>
+                    "Update the current status for the specific queue entry",
+                usage  => "-i id -s <ENQUEUED|PROCESSING|SUCCESS|FAIL>",
+                optstr => 'i:s:',
         },
         "getPortLastBuiltVersion" => {
                 func => \&getPortLastBuiltVersion,
@@ -792,6 +847,41 @@ sub configDistfile {
         $ds->updateConfig("distfile", $host, @config)
             or cleanup($ds, 1,
                       "Failed to update distfile configuration: "
+                    . $ds->getError()
+                    . "\n");
+}
+
+sub configTinderd {
+        my @config = ();
+        my $sleeptime;
+        my $host;
+
+        $host = _configGetHost($opts->{'h'});
+
+        if (scalar(keys %{$opts}) == 0
+                || (scalar(keys %{$opts}) == 1 && ($opts->{'h'} ^ $opts->{'G'}))
+            )
+        {
+                configGet("tinderd", $host);
+                cleanup($ds, 0, undef);
+        }
+
+        if ($opts->{'G'} && $host) {
+                $ds->defaultConfig("tinderd", $host);
+                cleanup($ds, 0, undef);
+        }
+
+        $sleeptime = new TBConfig();
+        $sleeptime->setOptionName("sleeptime");
+
+        if ($opts->{'t'}) {
+                $sleeptime->setOptionValue($opts->{'t'});
+                push @config, $sleeptime;
+        }
+
+        $ds->updateConfig("tinderd", $host, @config)
+            or cleanup($ds, 1,
+                      "Failed to update tinderd configuration: "
                     . $ds->getError()
                     . "\n");
 }
@@ -1321,6 +1411,42 @@ sub addPortToOneBuild {
         }
 }
 
+sub addBuildPortsQueueEntry {
+        my $admin;
+        my $user_id;
+
+        if (!$opts->{'b'} || !$opts->{'d'}) {
+                usage("addBuildPortsQueueEntry");
+        }
+
+        my $priority = $opts->{'p'} ? $opts->{'p'} : 10;
+
+        my $hostname = getHostname();
+        if ($opts->{'h'}) {
+                $hostname = $opts->{'h'};
+        }
+
+        if (!$ds->isValidHost($hostname)) {
+                cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
+        }
+
+        if (!$ds->isValidBuild($opts->{'b'})) {
+                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
+        }
+
+        my $build = $ds->getBuildByName($opts->{'b'});
+        my $host  = $ds->getHostByName($hostname);
+
+        if ($admin = $ds->getWwwAdmin()) {
+                $user_id = $admin->getId();
+        } else {
+                $user_id = 0;
+        }
+
+        $ds->addBuildPortsQueueEntry($build, $opts->{'d'}, $host, $priority,
+                $user_id);
+}
+
 sub addPortFailPattern {
         my $parent;
         my $pattern;
@@ -1414,6 +1540,73 @@ sub addPortFailReason {
                             . " to the datastore: "
                             . $ds->getError()
                             . ".\n");
+        }
+}
+
+sub listBuildPortsQueue {
+        my $raw;
+        my $status   = $opts->{'s'};
+        my $hostname = getHostname();
+
+        if ($opts->{'h'}) {
+                $hostname = $opts->{'h'}
+        }
+
+        if ($opts->{'r'}) {
+                $raw = 1
+        }
+
+        if (!$ds->isValidHost($hostname)) {
+                cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
+        }
+
+        my $host = $ds->getHostByName($hostname);
+
+        my @buildportsqueue = $ds->getBuildPortsQueueByHost($host, $status);
+
+        if (@buildportsqueue) {
+                if ($raw ne 1) {
+                        print
+                            "+=====+===========================+=====================================+=====+\n";
+                        print
+                            "|  Id | Build Name                | Port Directory                      | Pri |\n";
+                        print
+                            "+=====+===========================+=====================================+=====+\n";
+                }
+                foreach my $buildport (@buildportsqueue) {
+                        if ($buildport) {
+                                my $build =
+                                    $ds->getBuildById($buildport->getBuildId());
+                                if ($raw eq 1) {
+                                        print $buildport->getId() . ":"
+                                            . $buildport->getUserId() . ":"
+                                            . $build->getName() . ":"
+                                            . $buildport->getPortDirectory()
+                                            . ":"
+                                            . $buildport->getEmailOnCompletion()
+                                            . "\n";
+                                } else {
+                                        printf(
+                                                "| %3d | %-25s | %-35s | %3d |\n",
+                                                $buildport->getId(),
+                                                $build->getName(),
+                                                $buildport->getPortDirectory(),
+                                                $buildport->getPriority()
+                                        );
+                                        print
+                                            "+-----+---------------------------+-------------------------------------+-----+\n";
+                                }
+                        }
+                }
+        } elsif (defined($ds->getError())) {
+                cleanup($ds, 1,
+                              "Failed to list BuildPortsQueue: "
+                            . $ds->getError()
+                            . "\n");
+        } else {
+                cleanup($ds, 1,
+                        "There is no BuildPortsQueue configured in the datastore.\n"
+                );
         }
 }
 
@@ -1599,6 +1792,136 @@ sub setPortsMount {
                 cleanup($ds, 1,
                               "Failed to set the PortsMount for portstree "
                             . $portstree->getName() . ": "
+                            . $ds->getError()
+                            . "\n");
+        }
+}
+
+sub reorgBuildPortsQueue {
+
+        my $hostname = getHostname();
+
+        if ($opts->{'h'}) {
+                $hostname = $opts->{'h'};
+        }
+
+        if (!$ds->isValidHost($hostname)) {
+                cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
+        }
+
+        my $host = $ds->getHostByName($hostname);
+
+        my $rc = $ds->reorgBuildPortsQueue($host);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to reorganize BuildPortsQueue for host "
+                            . $host->getName() . ": "
+                            . $ds->getError()
+                            . "\n");
+        }
+}
+
+sub updateBuildPortsQueueEntryStatus {
+
+        if (!$opts->{'i'} || !$opts->{'s'}) {
+                usage("updateBuildPortsQueueEntryStatus");
+        }
+
+        if (!$ds->isValidBuildPortsQueueId($opts->{'i'})) {
+                cleanup($ds, 1,
+                              "Unknown Build Ports Queue Entry, "
+                            . $opts->{'i'}
+                            . "\n");
+        }
+
+        my $rc =
+            $ds->updateBuildPortsQueueEntryStatus($opts->{'i'}, $opts->{'s'});
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to update BuildPortsQueueEntryStatus "
+                            . $opts->{'i'} . ": "
+                            . $ds->getError()
+                            . "\n");
+        }
+}
+
+sub rmBuildPortsQueue {
+
+        my $hostname = getHostname();
+
+        if ($opts->{'h'}) {
+                $hostname = $opts->{'h'};
+        }
+        if (!$ds->isValidHost($hostname)) {
+                cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
+        }
+
+        my $host = $ds->getHostByName($hostname);
+
+        my $rc = $ds->removeBuildPortsQueue($host);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to remove BuildPortsQueue for host "
+                            . $host->getName() . ": "
+                            . $ds->getError()
+                            . "\n");
+        }
+}
+
+sub rmBuildPortsQueueEntry {
+        my $buildportsqueue;
+
+        if (!$opts->{'i'} && (!$opts->{'b'} || !$opts->{'d'})) {
+                usage("rmBuildPortsQueueEntry");
+        }
+
+        if ($opts->{'i'}) {
+                if (!$ds->isValidBuildPortsQueueId($opts->{'i'})) {
+                        cleanup($ds, 1,
+                                      "Unknown BuildPortsQueueId "
+                                    . $opts->{'i'}
+                                    . "\n");
+                }
+
+                $buildportsqueue = $ds->getBuildPortsQueueById($opts->{'i'});
+        } else {
+                my $hostname = getHostname();
+
+                if ($opts->{'h'}) {
+                        $hostname = $opts->{'h'};
+                }
+                if (!$ds->isValidHost($hostname)) {
+                        cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
+                }
+
+                if (!$ds->isValidBuild($opts->{'b'})) {
+                        cleanup($ds, 1,
+                                "Unknown build, " . $opts->{'b'} . "\n");
+                }
+
+                my $build = $ds->getBuildByName($opts->{'b'});
+                my $host  = $ds->getHostByName($hostname);
+                $buildportsqueue =
+                    $ds->getBuildPortsQueueByKeys($build, $opts->{'d'}, $host);
+                if (!$buildportsqueue) {
+                        cleanup($ds, 1,
+                                      "Unknown BuildPortsQueueEntry "
+                                    . $opts->{'d'} . " "
+                                    . $opts->{'b'} . " "
+                                    . $hostname
+                                    . "\n");
+                }
+        }
+
+        my $rc = $ds->removeBuildPortsQueueEntry($buildportsqueue);
+
+        if (!$rc) {
+                cleanup($ds, 1,
+                              "Failed to remove BuildPortsQueue Entry "
+                            . $buildportsqueue->getId() . ": "
                             . $ds->getError()
                             . "\n");
         }
@@ -2003,6 +2326,29 @@ sub rmPortFailReason {
         }
 }
 
+sub updateBuildPortsQueueEntryCompletionDate {
+        if (!$opts->{'i'}) {
+                usage("updateBuildPortsQueueEntryCompletionDate");
+        }
+
+        if (!$ds->isValidBuildPortsQueueId($opts->{'i'})) {
+                cleanup($ds, 1,
+                        "Unknown BuildPortsQueueEntry, " . $opts->{'i'} . "\n");
+        }
+
+        my $buildportsqueue = $ds->getBuildPortsQueueById($opts->{'i'});
+
+        $buildportsqueue->setCompletionDate($opts->{'l'});
+
+        $ds->updateBuildPortsQueueEntryCompletionDate($buildportsqueue)
+            or cleanup(
+                $ds,
+                1,
+                "Failed to update completion time value in the datastore: "
+                    . $ds->getError() . "\n"
+            );
+}
+
 sub updateJailLastBuilt {
         if (!$opts->{'j'}) {
                 usage("updateJailLastBuilt");
@@ -2317,6 +2663,8 @@ EOD
                         cleanup($ds, 1, "Failed to send email.");
                 }
         }
+
+        $rc = $ds->moveBuildPortsQueueFromUserToUser($old_id, $user->getId());
 }
 
 sub addUser {

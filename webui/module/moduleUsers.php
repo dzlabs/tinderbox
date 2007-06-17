@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.16 2006/02/27 09:55:43 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.17 2007/06/17 00:05:47 ade Exp $
 #
 
 require_once 'module/module.php';
@@ -306,4 +306,31 @@ class moduleUsers extends module {
 		return $this->get_permission( '-1', 'users', $this->get_id(), 'IS_WWW_ADMIN' );
 	}
 }
+
+	function checkPermAddQueue( $host_id, $object_type, $object_id ) {
+		return $this->get_permission( $host_id, $object_type, $object_id, 'PERM_ADD_QUEUE' );
+	}
+
+	function checkPermModifyOwnQueue( $host_id, $object_type, $object_id ) {
+		return $this->get_permission( $host_id, $object_type, $object_id, 'PERM_MODIFY_OWN_QUEUE' );
+	}
+
+	function checkPermDeleteOwnQueue( $host_id, $object_type, $object_id ) {
+		return $this->get_permission( $host_id, $object_type, $object_id, 'PERM_DELETE_OWN_QUEUE' );
+	}
+
+	function checkPermPrioLower5( $host_id, $object_type, $object_id ) {
+		return $this->get_permission( $host_id, $object_type, $object_id, 'PERM_PRIO_LOWER_5' );
+	}
+
+	function checkPermModifyOtherQueue(  $host_id,$object_type, $object_id )
+ {
+		return $this->get_permission( $host_id, $object_type, $object_id, 'PERM_MODIFY_OTHER_QUEUE' );
+	}
+
+	function checkPermDeleteOtherQueue( $host_id, $object_type, $object_id )
+ {
+		return $this->get_permission( $host_id, $object_type, $object_id, 'PERM_DELETE_OTHER_QUEUE' );
+	}
+
 ?>
