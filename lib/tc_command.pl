@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.120 2007/06/17 19:35:53 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.121 2007/06/17 23:59:32 ade Exp $
 #
 
 my $pb;
@@ -548,6 +548,12 @@ my $ds = new Tinderbox::TinderboxDS();
                     "-b <build name> [-init] [-cleanpackages] [-updateports] [-skipmake] [-noclean] [-noduds] [-plistcheck] [-nullfs] [-cleandistfiles] [-fetch-original] [-onceonly] [portdir/portname [...]]",
                 optstr => 'b:',
         },
+
+	"updatePortsTree" => {
+		help   => "Update an existing ports tree",
+		usage  => "-p <portstreename>",
+		optstr => 'p',
+	},
 
 );
 
