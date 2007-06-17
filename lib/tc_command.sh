@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.51 2007/06/09 21:36:16 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.52 2007/06/17 19:36:30 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -1492,10 +1492,10 @@ addPortToBuild () {
 	    read -p "Generating options for ${build}; hit Enter to continue..." key
 	    echo ""
 	    if [ -z "${norecurse}" ]; then
-		( cd ${pdir} && make rmconfig-recursive
+		( cd ${pdir} && make rmconfig-recursive \
 		  && make config-recursive )
 	    else
-		( cd ${pdir} && make rmconfig
+		( cd ${pdir} && make rmconfig \
 		  && make config )
 	    fi
 	fi
