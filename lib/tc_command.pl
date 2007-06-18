@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.121 2007/06/17 23:59:32 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.122 2007/06/18 00:37:44 ade Exp $
 #
 
 my $pb;
@@ -368,6 +368,12 @@ my $ds = new Tinderbox::TinderboxDS();
                 usage  => "-j <jail name> [-l <last built timestamp>]",
                 optstr => 'j:l:',
         },
+	"updatePortsTreeLastBuilt" => {
+		func   => \&updatePortsTreeLastBuilt,
+		help   => "Update the specified portstree's last built time",
+		usage  => "-p <portstree name> [-l <last built timestamp>]",
+		optstr => 'l:p:',
+	},
         "updatePortStatus" => {
                 func => \&updatePortStatus,
                 help => "Update build information about a port",
@@ -2373,6 +2379,26 @@ sub updateJailLastBuilt {
                       "Failed to update last built value in the datastore: "
                     . $ds->getError()
                     . "\n");
+}
+
+sub updatePortsTreeLastBuilt {
+	if (!$opts->{'p'}) {
+		usage("updatePortsTreeLastBuilt");
+	}
+
+	if (!$ds->isValidPortsTree($opts->{'p'})) {
+		cleanup($ds, 1, "Unknown portstree, " . $opts->{'p'} . "\n");
+	}
+
+	my $portstree = $ds->getPortsTreeByName($opts->{'p'});
+
+	$portstree->setLastBuilt($opts->{'l'});
+
+	$ds->updatePortsTreeLastBuilt($portstree)
+	    or cleanup($ds, 1,
+		      "Failed to update last built value in the datastore: "
+		    . $ds->getError()
+		    . "\n");
 }
 
 sub updatePortStatus {
