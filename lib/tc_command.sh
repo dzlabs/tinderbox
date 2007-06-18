@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.54 2007/06/18 03:57:36 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.55 2007/06/18 06:27:43 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -1194,6 +1194,7 @@ tinderbuild_setup () {
 	    tinderbuild_cleanup 1
 	fi
 
+	echo "tinderbuild: ${build}: Setting up ccache"
 	tar -C ${buildRoot} -xf ${cctar}
 	if [ -n "${CCACHE_MAX_SIZE}" ]; then
 	    chroot ${buildRoot} /opt/ccache -M ${CCACHE_MAX_SIZE}

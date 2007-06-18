@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.75 2007/06/17 00:05:46 ade Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.76 2007/06/18 06:27:43 ade Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -121,11 +121,26 @@ sub getDSVersion {
         return $version;
 }
 
+sub verifyType {
+	my $self = shift;
+	my $argn = shift;
+	my $what = shift;
+	my $type = shift;
+
+	return if (!defined($what));
+
+	my $ref  = ref($what);
+	return if ($ref eq "Tinderbox::$type");
+
+	croak "ERROR: Argument $argn not of type $what ($ref)\n";
+}
+
 sub defaultConfig {
         my $self      = shift;
         my $configlet = shift;
         my $host      = shift;
-        croak "ERROR: Argument 2 not of type Host\n" if (!_isA("Host", $host));
+
+        $self->verifyType(2, $host, 'Host');
 
         my $rc = $self->_doQuery(
                 "DELETE FROM config WHERE config_option_name LIKE ? AND host_id=?",
@@ -139,9 +154,9 @@ sub getConfig {
         my $self      = shift;
         my $configlet = shift;
         my $host      = shift;
-        croak "ERROR: Argument 2 not of type Host\n"
-            if (defined($host) && !_isA("Host", $host));
-        my $merged = shift;
+        my $merged    = shift;
+
+        $self->verifyType(2, $host, 'Host');
 
         my @config = ();
         my $hostid;
@@ -187,9 +202,9 @@ sub updateConfig {
         my $configlet = shift;
         my $host      = shift;
         my @config    = @_;
-        croak "Argument 2 not of type Host\n"
-            if (defined($host) && !_isA("Host", $host));
         my $hostid;
+
+	$self->verifyType(2, $host, 'Host');
 
         if (defined($host)) {
                 $hostid = $host->getId();
@@ -258,10 +273,9 @@ sub isValidBuildPortsQueueId {
 sub updateBuildPortsQueueEntryCompletionDate {
         my $self  = shift;
         my $entry = shift;
-        croak "ERROR: Argument not of type BuildPortsQueue\n"
-            if (ref($entry) ne "BuildPortsQueue");
+	my $rc;
 
-        my $rc;
+	$self->verifyType(1, $entry, 'BuildPortsQueue');
 
         if (!defined($entry->getCompletionDate())) {
                 $rc = $self->_doQuery(
@@ -337,9 +351,9 @@ sub getBuildPortsQueueByKeys {
         my $build     = shift;
         my $directory = shift;
         my $host      = shift;
-        croak "ERROR: Argument 1 not of type Host\n" if (ref($host) ne "Host");
-        croak "ERROR: Argument 2 not of type Build\n"
-            if (ref($build) ne "Build");
+
+	$self->verifyType(1, $host, 'Host');
+	$self->verifyType(2, $build, 'Build');
 
         my @results = $self->getObjects(
                 "BuildPortsQueue",
@@ -674,9 +688,9 @@ sub addBuildPortsQueueEntry {
         my $host      = shift;
         my $priority  = shift;
         my $user      = shift;
-        croak "ERROR: Argument 1 not of type Host\n" if (ref($host) ne "Host");
-        croak "ERROR: Argument 2 not of type Build\n"
-            if (ref($build) ne "Build");
+
+	$self->verifyType(1, $host, 'Host');
+	$self->verifyType(2, $build, 'Build');
 
         my $rc = $self->_doQuery(
                 "INSERT INTO build_ports_queue
@@ -779,10 +793,9 @@ sub updateBuildUser {
         my $user         = shift;
         my $onCompletion = shift;
         my $onError      = shift;
-        croak "ERROR: Argument 1 is not of type build\n"
-            if (!_isA("Build", $build));
-        croak "ERROR: Argument 2 is not of type user\n"
-            if (!_isA("User", $user));
+
+	$self->verifyType(1, $build, 'Build');
+	$self->verifyType(1, $user,  'User');
 
         if (!defined($onCompletion)) {
                 $onCompletion = 0;
@@ -877,7 +890,8 @@ sub addPortsTree {
 sub updateJail {
         my $self = shift;
         my $jail = shift;
-        croak "ERROR: Argument not of type Jail\n" if (!_isA("Jail", $jail));
+
+	$self->verifyType(1, $jail, 'Jail');
 
         my $rc = $self->_doQuery(
                 "UPDATE jails SET jail_name=?, jail_tag=?, jail_update_cmd=?, jail_description=?, jail_src_mount=? WHERE jail_id=?",
@@ -894,7 +908,8 @@ sub updateJail {
 sub updateJailLastBuilt {
         my $self = shift;
         my $jail = shift;
-        croak "ERROR: Argument not of type Jail\n" if (!_isA("Jail", $jail));
+
+	$self->verifyType(1, $jail, 'Jail');
 
         my $rc;
         if ($jail->getLastBuilt()) {
@@ -920,10 +935,9 @@ sub updatePortLastBuilt {
         my $query;
         my $rc;
         my @results;
-        croak "ERROR: Argument 1 not of type Port\n"
-            if (ref($port) ne "Port");
-        croak "ERROR: Argument 2 not of type Build\n"
-            if (ref($build) ne "Build");
+
+	$self->verifyType(1, $port, 'Port');
+	$self->verifyType(2, $build, 'Build');
 
         if ($DB_DRIVER eq 'mysql') {
                 $query =
@@ -969,9 +983,9 @@ sub updatePortLastBuilts {
         my $build      = shift;
         my $last_built = shift;
         my $column     = shift;
-        croak "ERROR: Argument 1 not of type Port\n" if (!_isA("Port", $port));
-        croak "ERROR: Argument 2 not of type Build\n"
-            if (!_isA("Build", $build));
+
+	$self->verifyType(1, $port,  'Port');
+	$self->verifyType(2, $build, 'Build');
 
         my $rc;
         if (!defined($last_built) || $last_built eq "") {
@@ -994,9 +1008,9 @@ sub updatePortLastStatus {
         my $port   = shift;
         my $build  = shift;
         my $status = shift;
-        croak "ERROR: Argument 1 not of type Port\n" if (!_isA("Port", $port));
-        croak "ERROR: Argument 2 not of type Build\n"
-            if (!_isA("Build", $build));
+
+	$self->verifyType(1, $port,  'Port');
+	$self->verifyType(2, $build, 'Build');
 
         my %status_hash = (
                 UNKNOWN   => 0,
@@ -1025,9 +1039,9 @@ sub updatePortLastBuiltVersion {
         my $port    = shift;
         my $build   = shift;
         my $version = shift;
-        croak "ERROR: Argument 1 not of type Port\n" if (!_isA("Port", $port));
-        croak "ERROR: Argument 2 not of type Build\n"
-            if (!_isA("Build", $build));
+
+	$self->verifyType(1, $port,  'Port');
+	$self->verifyType(2, $build, 'Build');
 
         my $rc = $self->_doQuery(
                 "UPDATE build_ports SET last_built_version=? WHERE port_id=? AND build_id=?",
@@ -1041,9 +1055,9 @@ sub getPortLastBuiltVersion {
         my $self  = shift;
         my $port  = shift;
         my $build = shift;
-        croak "ERROR: Argument 1 not of type Port\n" if (!_isA("Port", $port));
-        croak "ERROR: Argument 2 not of type Build\n"
-            if (!_isA("Build", $build));
+
+	$self->verifyType(1, $port,  'Port');
+	$self->verifyType(2, $build, 'Build');
 
         my @results;
         my $rc = $self->_doQueryHashRef(
@@ -1061,8 +1075,8 @@ sub getPortLastBuiltVersion {
 sub updatePortsTree {
         my $self      = shift;
         my $portstree = shift;
-        croak "ERROR: Argument not of type PortsTree\n"
-            if (!_isA("PortsTree", $portstree));
+
+        $self->verifyType(1, $portstree, 'PortsTree');
 
         my $rc = $self->_doQuery(
                 "UPDATE ports_trees SET ports_tree_name=?, ports_tree_description=?, ports_tree_update_cmd=?, ports_tree_cvsweb_url=?, ports_tree_ports_mount=? WHERE ports_tree_id=?",
@@ -1082,8 +1096,8 @@ sub updatePortsTree {
 sub updatePortsTreeLastBuilt {
         my $self      = shift;
         my $portstree = shift;
-        croak "ERROR: Argument not of type PortsTree\n"
-            if (!_isA("PortsTree", $portstree));
+
+	$self->verifyType(1, $portstree, 'PortsTree');
 
         my $rc;
         if ($portstree->getLastBuilt()) {
@@ -1105,7 +1119,8 @@ sub updatePortsTreeLastBuilt {
 sub updateBuildStatus {
         my $self  = shift;
         my $build = shift;
-        croak "ERROR: Argument not of type build\n" if (!_isA("Build", $build));
+
+	$self->verifyType(1, $build, 'Build');
 
         my $rc = $self->_doQuery(
                 "UPDATE builds SET build_status=?,build_last_updated=NOW() WHERE build_id=?",
@@ -1120,8 +1135,8 @@ sub updateBuildCurrentPort {
         my $build   = shift;
         my $port    = shift;
         my $pkgname = shift;
-        croak "ERROR: Argument 1 not of type build\n"
-            if (!_isA("Build", $build));
+
+	$self->verifyType(1, $build, 'Build');
 
         my $rc = $self->_doQuery(
                 "UPDATE build_ports SET currently_building='0' WHERE build_id = ? AND currently_building='1'",
@@ -1148,8 +1163,7 @@ sub updateBuildCurrentPort {
         }
 
         if (defined($port)) {
-                croak "ERROR: Argument 2 not of type port\n"
-                    if (ref($port) ne "Port");
+		$self->verifyType(2, $port, 'Ports');
                 $rc = $self->_doQuery(
                         "UPDATE build_ports SET currently_building='1' WHERE build_id=? AND port_id=?",
                         [$build->getId(), $port->getId()]
@@ -1163,7 +1177,8 @@ sub updateHookCmd {
         my $self = shift;
         my $hook = shift;
         my $cmd  = shift;
-        croak "ERROR: Argument 1 not of type hook\n" if (ref($hook) ne "Hook");
+
+	$self->verifyType(1, $hook, 'Hook');
 
         my $rc;
         if (!defined($cmd)) {
@@ -1184,7 +1199,8 @@ sub updateHookCmd {
 sub getBuildCompletionUsers {
         my $self  = shift;
         my $build = shift;
-        croak "ERROR: Argument not of type build\n" if (!_isA("Build", $build));
+
+	$self->verifyType(1, $build, 'Build');
 
         my @users = $self->_getBuildUsers($build, "email_on_completion");
 
@@ -1194,7 +1210,8 @@ sub getBuildCompletionUsers {
 sub getBuildErrorUsers {
         my $self  = shift;
         my $build = shift;
-        croak "ERROR: Argument not of type build\n" if (!_isA("Build", $build));
+
+	$self->verifyType(1, $build, 'Build');
 
         my @addrs = $self->_getBuildUsers($build, "email_on_error");
 
@@ -1244,10 +1261,9 @@ sub isUserForBuild {
         my $self  = shift;
         my $user  = shift;
         my $build = shift;
-        croak "ERROR: Argument 1 is not of type user\n"
-            if (!_isA("User", $user));
-        croak "ERROR: Argument 2 is not of type build\n"
-            if (!_isA("Build", $build));
+
+	$self->verifyType(1, $user,  'User');
+	$self->verifyType(2, $build, 'Build');
 
         my $rc = $self->_doQueryNumRows(
                 "SELECT build_user_id FROM build_users WHERE build_id=? AND user_id=?",
@@ -1295,11 +1311,10 @@ sub getAllUsers {
 sub getUsersForBuild {
         my $self  = shift;
         my $build = shift;
-        croak "Argument is not of type build\n" if (!_isA("Build", $build));
-        my @users = ();
 
-        @users = $self->_getBuildUsers($build, undef);
+	$self->verifyType(1, $build, 'Build');
 
+        my @users =$self->_getBuildUsers($build, undef);
         return @users;
 }
 
@@ -1375,10 +1390,9 @@ sub addUserForBuild {
         my $build        = shift;
         my $onCompletion = shift;
         my $onError      = shift;
-        croak "ERROR: Argument 1 is not of type user\n"
-            if (!_isA("User", $user));
-        croak "ERROR: Argument 2 is not of type build\n"
-            if (!_isA("Build", $build));
+
+	$self->verifyType(1, $user,  'User');
+	$self->verifyType(2, $build, 'Build');
 
         if (!defined($onCompletion)) {
                 $onCompletion = 0;
@@ -1423,7 +1437,8 @@ sub removeHost {
 sub removeBuildPortsQueue {
         my $self = shift;
         my $host = shift;
-        croak "ERROR: Argument not of type Host\n" if (ref($host) ne "Host");
+
+	$self->verifyType(1, $host, 'Host');
 
         my $rc;
         $rc = $self->_doQuery("DELETE FROM build_ports_queue WHERE host_id=?",
@@ -1479,8 +1494,8 @@ sub removePortForBuild {
 sub removeUser {
         my $self = shift;
         my $user = shift;
-        croak "ERROR: Argument 1 is not of type user\n"
-            if (!_isA("User", $user));
+
+	$self->verifyType(1, $user, 'User');
 
         my $rc = $self->_doQuery("DELETE FROM build_users WHERE user_id=?",
                 [$user->getId()]);
@@ -1499,10 +1514,9 @@ sub removeUserForBuild {
         my $self  = shift;
         my $user  = shift;
         my $build = shift;
-        croak "ERROR: Argument 1 is not of type user\n"
-            if (!_isA("User", $user));
-        croak "ERROR: Argument 2 is not nof type build\n"
-            if (!_isA("Build", $build));
+
+	$self->verifyType(1, $user,  'User');
+	$self->verifyType(2, $build, 'Build');
 
         my $rc =
             $self->_doQuery(
@@ -1994,7 +2008,8 @@ sub getTime {
 sub getPackageSuffix {
         my $self = shift;
         my $jail = shift;
-        croak "ERROR: Argument not of type Jail\n" if (!_isA("Jail", $jail));
+
+	$self->verifyType(1, $jail, 'Jail');
 
         if (substr($jail->getName(), 0, 1) == "4") {
                 return ".tgz";
@@ -2007,7 +2022,8 @@ sub isLogCurrent {
         my $self  = shift;
         my $build = shift;
         my $log   = shift;
-        croak "ERROR: Argument not of type Build\n" if (!_isA("Build", $build));
+
+	$self->verifyType(1, $build, 'Build');
 
         my $rc = $self->_doQueryNumRows(
                 "SELECT build_port_id FROM build_ports WHERE build_id=? AND last_built_version=?",
