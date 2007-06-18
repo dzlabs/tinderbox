@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.19 2007/06/17 00:05:47 ade Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.20 2007/06/18 04:27:04 ade Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -79,30 +79,30 @@ switch( $action ) {
 					}
 					$display    = $moduleBuildPorts->display_list_buildports( $build, $sort );
 					break;
-	case 'list_tinderd_queue':	$host_id    = get_var( 'filter_host_id' );
-					$build_id   = get_var( 'filter_build_id' );
+	case 'list_tinderd_queue':	$host_id    = $_REQUEST['filter_host_id'];
+					$build_id   = $_REQUEST['filter_build_id'];
 					$display    = $moduleTinderd->list_tinderd_queue( $host_id, $build_id );
 					break;
-	case 'change_tinderd_queue':	$ctinderdq  = get_var( 'change_tinderd_queue' );
-					$entry_id   = get_var( 'entry_id' );
-					$host_id    = get_var( 'host_id' );
-					$build_id   = get_var( 'build_id' );
-					$priority   = get_var( 'priority' );
-					$emailoc    = get_var( 'email_on_completion' );
+	case 'change_tinderd_queue':	$ctinderdq  = $_REQUEST['change_tinderd_queue'];
+					$entry_id   = $_REQUEST['entry_id'];
+					$host_id    = $_REQUEST['host_id'];
+					$build_id   = $_REQUEST['build_id'];
+					$priority   = $_REQUEST['priority'];
+					$emailoc    = $_REQUEST['email_on_completion'];
 					$moduleTinderd->change_tinderd_queue( $ctinderdq, $entry_id, $host_id, $build_id, $priority, $emailoc );
-					$host_id    = get_var( 'filter_host_id' );
-					$build_id   = get_var( 'filter_build_id' );
+					$host_id    = $_REQUEST['filter_host_id'];
+					$build_id   = $_REQUEST['filter_build_id'];
 					$display    = $moduleTinderd->list_tinderd_queue( $host_id, $build_id );
 					break;
-	case 'add_tinderd_queue':	$atinderdq  = get_var( 'add_tinderd_queue' );
-					$host_id    = get_var( 'new_host_id' );
-					$build_id   = get_var( 'new_build_id' );
-					$priority   = get_var( 'new_priority' );
-					$directory  = get_var( 'new_port_directory' );
-					$emailoc    = get_var( 'new_email_on_completion' );
+	case 'add_tinderd_queue':	$atinderdq  = $_REQUEST['add_tinderd_queue'];
+					$host_id    = $_REQUEST['new_host_id'];
+					$build_id   = $_REQUEST['new_build_id'];
+					$priority   = $_REQUEST['new_priority'];
+					$directory  = $_REQUEST['new_port_directory'];
+					$emailoc    = $_REQUEST['new_email_on_completion'];
 					$moduleTinderd->add_tinderd_queue( $atinderdq, $host_id, $build_id, $priority, $directory, $emailoc );
-					$host_id    = get_var( 'filter_host_id' );
-					$build_id   = get_var( 'filter_build_id' );
+					$host_id    = $_REQUEST['filter_host_id'];
+					$build_id   = $_REQUEST['filter_build_id'];
 					$display    = $moduleTinderd->list_tinderd_queue( $host_id, $build_id );
 					break;
 	case 'display_add_user':	$display    = $moduleUsers->display_add_user( '', '', '', '', array() );
