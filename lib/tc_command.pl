@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.122 2007/06/18 00:37:44 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.123 2007/06/18 03:41:22 ade Exp $
 #
 
 my $pb;
@@ -192,6 +192,11 @@ my $ds = new Tinderbox::TinderboxDS();
                     "-p <portstree name> [-d <portstree description>] [-m <ports mount source>] [-u <updatecommand>|CVSUP|NONE>] [-w <CVSweb URL>]",
                 optstr => 'm:p:u:d:w:',
         },
+	"addPort" => {
+		help   => "Add a port to the datastore",
+		usage  => "{-b build name | -a} -d <port directory> [-o] [-R]",
+		optstr => 'ab:d:oR',
+	},
         "addPortToOneBuild" => {
                 func   => \&addPortToOneBuild,
                 help   => "INTERNAL function only",
