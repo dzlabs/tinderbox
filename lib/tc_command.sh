@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.53 2007/06/18 00:37:44 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.54 2007/06/18 03:57:36 ade Exp $
 #
 
 export defaultCvsupHost="cvsup12.FreeBSD.org"
@@ -1552,7 +1552,7 @@ addPort () {
 
 	for build in ${allBuilds}
 	do
-	    addPortToBuild ${build} ${portDir} ${norecurse} ${options}
+	    addPortToBuild ${build} ${portDir} "${norecurse}" ${options}
 	done
     else
 	if ! tcExists Builds ${build}; then
@@ -1560,7 +1560,7 @@ addPort () {
 	    return 1
 	fi
 
-	addPortToBuild ${build} ${portDir} ${norecurse} ${options}
+	addPortToBuild ${build} ${portDir} "${norecurse}" ${options}
     fi
 
     return 0
