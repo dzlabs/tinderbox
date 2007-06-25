@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.64 2007/06/18 05:46:18 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.65 2007/06/25 20:35:28 ade Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -303,6 +303,16 @@ will continue.
 ==============================================================================
 
 ADVANCED TOPICS
+
+Alternative means of creating Jail sources and PortsTrees:
+----------------------------------------------------------
+
+XXX: Document the fact that things now simply generate an appropriate
+     update.sh script
+
+XXX: Document the capability for using CVSUP/CSUP/USER/NONE options
+     at Jail/PortsTree creation time.
+
 
 Alternative Mounting:
 ---------------------

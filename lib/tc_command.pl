@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.123 2007/06/18 03:41:22 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.124 2007/06/25 20:35:28 ade Exp $
 #
 
 my $pb;
@@ -182,14 +182,14 @@ my $ds = new Tinderbox::TinderboxDS();
                 func => \&addJail,
                 help => "Add a jail to the datastore",
                 usage =>
-                    "-j <jail name> -t <jail tag> [-d <jail description>] [-m <src mount source>] [-u <updatecommand>|CVSUP|NONE>] [-a <arch>]",
+                    "-j <jail name> -u CSUP|CVSUP|USER|NONE -t <jail tag> [-d <jail description>] [-m <src mount source>] [-a <arch>]",
                 optstr => 'm:j:t:u:d:a:',
         },
         "addPortsTree" => {
                 func => \&addPortsTree,
                 help => "Add a portstree to the datastore",
                 usage =>
-                    "-p <portstree name> [-d <portstree description>] [-m <ports mount source>] [-u <updatecommand>|CVSUP|NONE>] [-w <CVSweb URL>]",
+		    "-p <portstree name> -u CSUP|CVSUP|USER|NONE [-d <portstree description>] [-m <ports mount source>] [-w <CVSweb URL>]",
                 optstr => 'm:p:u:d:w:',
         },
 	"addPort" => {
@@ -523,15 +523,15 @@ my $ds = new Tinderbox::TinderboxDS();
         "createJail" => {
                 help => "Create a new jail",
                 usage =>
-                    "-j <jailname> [-t <tag>] [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE> [-I] [-a <arch>]",
+                    "-j <jailname> -u CSUP|CVSUP|USER|NONE [-t <tag>] [-d <description>] [-C] [-H <updatehost>] [-m <mountsrc>] [-I] [-a <arch>]",
                 optstr => 'j:t:d:CH:m:u:Ia:',
         },
 
         "createPortsTree" => {
                 help => "Create a new portstree",
                 usage =>
-                    "-p <portstreename> [-d <description>] [-C] [-H <cvsuphost>] [-m <mountsrc>] -u <updatecommand>|CVSUP|NONE> [-w <cvsweburl>] [-I]",
-                optstr => 'p:d:CH:m:u:w:',
+		    "-p <portstreename> -u CSUP|CVSUP|USER|NONE [-d <description>] [-C] [-H <updatehost>] [-m <mountsrc>] [-w <cvsweburl>] [-I]",
+                optstr => 'p:d:CH:Im:u:w:',
         },
 
         "createBuild" => {
@@ -1327,13 +1327,14 @@ sub addBuild {
 }
 
 sub addJail {
-        if (!$opts->{'j'} || !$opts->{'t'}) {
-                usage("addJail");
-        }
-
         my $name = $opts->{'j'};
         my $arch = $opts->{'a'};
+	my $ucmd = $opts->{'u'};
         my $tag  = $opts->{'t'};
+
+	if (!$name || !$arch || !$ucmd || !$tag) {
+		usage("addJail");
+	}
 
         if ($ds->isValidJail($name)) {
                 cleanup($ds, 1,
@@ -1346,17 +1347,12 @@ sub addJail {
                 );
         }
 
-        my $update_cmd = "CVSUP";
-        if ($opts->{'u'}) {
-                $update_cmd = $opts->{'u'};
-        }
-
         my $jail = new Tinderbox::Jail();
 
         $jail->setName($name);
         $jail->setArch($arch);
         $jail->setTag($tag);
-        $jail->setUpdateCmd($update_cmd);
+        $jail->setUpdateCmd($ucmd);
         $jail->setDescription($opts->{'d'}) if ($opts->{'d'});
         $jail->setSrcMount($opts->{'m'})    if ($opts->{'m'});
 
@@ -1371,11 +1367,12 @@ sub addJail {
 }
 
 sub addPortsTree {
-        if (!$opts->{'p'}) {
-                usage("addPortsTree");
-        }
-
         my $name = $opts->{'p'};
+	my $ucmd = $opts->{'u'};
+
+	if (!$name || !$ucmd) {
+		usage("addPortsTree");
+	}
 
         if ($ds->isValidPortsTree($name)) {
                 cleanup($ds, 1,
@@ -1383,15 +1380,10 @@ sub addPortsTree {
                 );
         }
 
-        my $update_cmd = "CVSUP";
-        if ($opts->{'u'}) {
-                $update_cmd = $opts->{'u'};
-        }
-
         my $portstree = new Tinderbox::PortsTree();
 
         $portstree->setName($name);
-        $portstree->setUpdateCmd($update_cmd);
+        $portstree->setUpdateCmd($ucmd);
         $portstree->setDescription($opts->{'d'}) if ($opts->{'d'});
         $portstree->setPortsMount($opts->{'m'})  if ($opts->{'m'});
         $portstree->setCVSwebURL($opts->{'w'})   if ($opts->{'w'});

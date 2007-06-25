@@ -24,31 +24,100 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.55 2007/06/18 06:27:43 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.56 2007/06/25 20:35:28 ade Exp $
 #
 
-export defaultCvsupHost="cvsup12.FreeBSD.org"
-if [ -x "/usr/bin/csup" ]; then
-    export defaultCvsupProg="/usr/bin/csup"
-else
-    export defaultCvsupProg="/usr/local/bin/cvsup"
-fi
+export defaultUpdateHost="cvsup12.FreeBSD.org"
+export defaultUpdateType="CVSUP"
 
 #---------------------------------------------------------------------------
 # Generic routines
 #---------------------------------------------------------------------------
-generateSupFile () {
-    echo "*default host=$4"
-    echo "*default base=$1"
-    echo "*default prefix=$1"
-    echo "*default release=cvs tag=$3"
-    echo "*default delete use-rel-suffix"
+generateUpdateCode () {
+    case ${1} in
 
-    if [ $5 -eq 1 ]; then
-	echo "*default compress"
-    fi
+    "jail")	  treeDir=$(tinderLoc jail ${2})
+		  updateCollection="src-all"
+		  ;;
 
-    echo "$2-all"
+    "portstree")  treeDir=$(tinderLoc portstree ${2})
+		  updateCollection="ports-all"
+		  ;;
+
+    *)		  echo "ERROR: ${1} ${2}: unknown tree type"
+		  exit 1
+		  ;;
+
+    esac
+
+    case ${3} in
+
+    "NONE")	if [ -x ${treeDir}/update.sh ]; then
+		    echo "ERROR: ${1} ${2}: found update script (NONE)"
+		    exit 1
+		fi
+		;;
+
+    "USER")	if [ ! -x ${treeDir}/update.sh ]; then
+		    echo "ERROR: ${1} ${2}: no update script (USER)"
+		    exit 1
+		fi
+		;;
+
+    "CVSUP"|"CSUP")
+    		if [ -z "${5}" -o "${5}" = "UNUSED" ]; then
+		    echo "ERROR: ${1} ${2}: no tag specified for ${3}"
+		    exit 1
+		fi
+
+		updateCmd=""
+		if [ "${3}" = "CVSUP" ]; then
+		    updateCmd="/usr/local/bin/cvsup"
+		elif [ "${3}" = "CSUP" ]; then
+		    if [ -x /usr/bin/csup ]; then
+			updateCmd="/usr/bin/csup"
+		    else
+			updateCmd="/usr/local/bin/csup"
+		    fi
+		fi
+		if [ -z "${updateCmd}" ]; then
+		    echo "ERROR: ${2}: unable to determine updateCmd for ${3}"
+		    exit 1
+		fi
+		if [ ! -x "${updateCmd}" ]; then
+		    echo "ERROR: ${2} ${3}: ${updateCmd} missing"
+		    exit 1
+		fi
+		    
+		if [ -d ${treeDir} ]; then
+		    echo "${2}: cleaning out old directories"
+		    cleanDirs ${2} ${treeDir}
+		fi
+		if [ ! -d ${treeDir} ]; then
+		    echo "${2}: creating top-level directory"
+		    mkdir -p ${treeDir} >/dev/null 2>&1
+		fi
+
+		( echo "*default host=${4}"
+		  echo "*default base=${treeDir} prefix=${treeDir}"
+		  echo "*default release=cvs delete use-rel-suffix"
+		  if [ ${6} -eq 1 ]; then
+		      echo "*default compress"
+		  fi
+		  echo ""
+		  echo "${updateCollection} tag=${5}"
+		) > ${treeDir}/supfile
+
+		( echo "#!/bin/sh"
+		  echo "${updateCmd} ${treeDir}/supfile"
+		) > ${treeDir}/update.sh
+		chmod +x ${treeDir}/update.sh
+		;;
+
+    *)		echo "ERROR: ${1} ${2}: unknown update type: ${3}"
+		exit 1;;
+
+    esac
 }
 
 tcExists () {
@@ -67,21 +136,28 @@ updateTree () {
     name=$2
     flag=$3
     dir=$4
-    shift 4
-    cmd="$*"
 
-    if [ -z "${cmd}" -o "${cmd}" = "NONE" ]; then
+    tc=$(tinderLoc scripts tc)
+    updateCmd=$(${tc} getUpdateCmd ${flag} ${name})
+
+    if [ "${updateCmd}" = "NONE" ]; then
+	echo "updateTree: ${what} ${name}: nothing to do"
 	return 0
     fi
 
-    echo "updateTree: updating ${what} ${name}"
+    if [ ! -x ${dir}/update.sh ]; then
+	echo "updateTree: ${what} ${name}: missing update script!"
+	exit 1
+    fi
+
+    echo "${name}: updating ${what} with ${updateCmd}"
 
     if ! requestMount -t ${what} ${flag} ${name}; then
 	echo "updateTree: ${what} ${name}: mount failed"
 	exit 1
     fi
 
-    eval ${cmd} > ${dir}/update.log 2>&1
+    eval ${dir}/update.sh > ${dir}/update.log 2>&1
     if [ $? -ne 0 ]; then
 	echo "updateTree: ${what} ${name}: update failed"
 	echo "    see ${dir}/update.log for more details"
@@ -286,27 +362,14 @@ updateJail () {
 	return 1
     fi
 
-    tc=$(tinderLoc scripts tc)
-    updateCmdName=$(${tc} getUpdateCmd -j ${jailName})
-    jailDir=$(tinderLoc jail ${jailName})
-
-    case "${updateCmdName}" in
-
-    CVSUP)	updateCmd="${defaultCvsupProg} -g ${jailDir}/src-supfile";;
-    NONE)	updateCmd="NONE";;
-    "^/.*")	updateCmd="${updateCmdName} ${jailName}";;
-    *)		updateCmd="$(tinderLoc scripts ${updateCmd}) ${jailName}";;
-
-    esac
-
-    execute_hook "preJailUpdate" "JAIL=${jailName} UPDATE_CMD=${updateCmd} PB=${pb}"
+    execute_hook "preJailUpdate" "JAIL=${jailName} PB=${pb}"
     if [ $? -ne 0 ]; then
-	echo "updateJail: Terminating Jail update since hook preJailUpdate failed."
+	echo "updateJail: hook preJailUpdate failed. Terminating."
 	return 1
     fi
-    updateTree jail ${jailName} -j ${jailDir} ${updateCmd}
+    updateTree jail ${jailName} -j $(tinderLoc jail ${jailName})
     rc=$?
-    execute_hook "postJailUpdate" "JAIL=${jailName} RC=${rc} UPDATE_CMD=${updateCmd} PB=${pb}"
+    execute_hook "postJailUpdate" "JAIL=${jailName} RC=${rc} PB=${pb}"
     return 0
 }
 
@@ -526,15 +589,14 @@ makeJail () {
 
 createJail () {
     # set up defaults
-    cvsupHost=${defaultCvsupHost}
-    cvsupProg=${defaultCvsupProg}
-    cvsupCompress=0
+    updateHost=${defaultUpdateHost}
+    updateType=${defaultUpdateType}
+    updateTag="UNUSED"
+    updateCompress=0
     descr=""
     jailName=""
     jailArch=$(uname -m)
     mountSrc=""
-    tag=""
-    updateCmd="CVSUP"
     init=1
 
     # argument handling
@@ -546,10 +608,10 @@ createJail () {
 	d)	descr="${OPTARG}";;
 	j)	jailName="${OPTARG}";;
 	m)	mountSrc="${OPTARG}";;
-	t)	tag="${OPTARG}";;
-	u)	updateCmd="${OPTARG}";;
-	C)	cvsupCompress=1;;
-	H)	cvsupHost="${OPTARG}";;
+	t)	updateTag="${OPTARG}";;
+	u)	updateType="${OPTARG}";;
+	C)	updateCompress=1;;
+	H)	updateHost="${OPTARG}";;
 	I)	init=0;;
 	?)	return 1;;
 
@@ -573,58 +635,34 @@ createJail () {
 	return 1
     fi
 
-    if [ -z "${updateCmd}" ]; then
-	echo "createJail: no updatecommand specified"
+    if [ -z "${updateType}" ]; then
+	echo "createJail: no update type specified"
 	return 1
     fi
 
-    if [ "${updateCmd}" = "CVSUP" -a -z "${tag}" ]; then
-	echo "createJail: no src tag specified"
-	return 1
-    fi
-
-    # clean out any previous directories
-    basedir=$(tinderLoc jail ${jailName})
-    cleanDirs ${jailName} ${basedir}
-
-    # set up the directory
-    echo -n "${jailName}: set up directory... "
-    mkdir -p ${basedir}/src
-
-    # set up the sup file (if needed)
-    if [ "${updateCmd}" = "CVSUP" ]; then
-	echo -n "and supfile... "
-    	generateSupFile ${basedir} src ${tag} ${cvsupHost} ${cvsupCompress} \
-	    > ${basedir}/src-supfile
-    else
-	tag="UNUSED"
-    fi
-    echo "done."
-
-    # add jail to datastore
-    echo -n "${jailName}: adding Jail to datastore... "
-
+    echo "${jailName}: initializing tree"
+    generateUpdateCode jail ${jailName} ${updateType} ${updateHost} \
+		       ${updateTag} ${updateCompress}
+    
+    echo -n "${jailName}: adding to datastore... "
+    
     if [ ! -z "${descr}" ]; then
 	descr="-d ${descr}"
     fi
-
-    if [ ! -z "${updateCmd}" ]; then
-	updateCmd="-u ${updateCmd}"
-    fi
-
+    
     if [ ! -z "${mountSrc}" ]; then
 	mountSrc="-m ${mountSrc}"
     fi
-
+    
     tc=$(tinderLoc scripts tc)
-    ${tc} addJail -j ${jailName} -t ${tag} ${updateCmd} ${mountSrc} \
-		  -a ${jailArch} "${descr}"
+    ${tc} addJail -j ${jailName} -u ${updateType} ${mountSrc} \
+		  -t ${updateTag} -a ${jailArch} "${descr}"
     if [ $? -ne 0 ]; then
 	echo "FAILED."
 	exit 1
     fi
     echo "done."
-
+	
     # now initialize the jail (unless otherwise requested)
     if [ ${init} -eq 1 ]; then
 	echo "${jailName}: initializing new jail..."
@@ -671,27 +709,18 @@ updatePortsTree () {
 	return 1
     fi
 
-    tc=$(tinderLoc scripts tc)
-    updateCmdName=$(${tc} getUpdateCmd -p ${portsTreeName})
-    portsTreeDir=$(tinderLoc portstree ${portsTreeName})
-
-    case "${updateCmdName}" in
-
-    CVSUP)	updateCmd="${defaultCvsupProg} -g ${portsTreeDir}/ports-supfile";;
-    NONE)	updateCmd="NONE";;
-    "^/.*")	updateCmd="${updateCmdName} ${portsTreeName}";;
-    *)		updateCmd="$(tinderLoc scripts ${updateCmd}) ${portsTreeName}";;
-
-    esac
-
-    execute_hook "prePortsTreeUpdate" "PORTSTREE=${portsTreeName} UPDATE_CMD=${updateCmd} PB=${pb}"
+    execute_hook "prePortsTreeUpdate" "PORTSTREE=${portsTreeName} PB=${pb}"
     if [ $? -ne 0 ];then
-	echo "${portsTreeName}: terminating ports tree update since hook prePortsTreeUpdate failed."
+	echo "${portsTreeName}: hook prePortsTreeUpdate failed. Terminating."
 	return 1
     fi
-    updateTree portstree ${portsTreeName} -p ${portsTreeDir} ${updateCmd}
+    updateTree portstree ${portsTreeName} \
+	       -p $(tinderLoc portstree ${portsTreeName})
     rc=$?
-    execute_hook "postPortsTreeUpdate" "PORTSTREE=${portsTreeName} UPDATE_CMD=${updateCmd} PB=${pb} RC=${rc}"
+    execute_hook "postPortsTreeUpdate" "PORTSTREE=${portsTreeName} PB=${pb} RC=${rc}"
+
+    # Update the last-built time
+    ${tc} updatePortsTreeLastBuilt -p ${portsTreeName}
 
     # Update the last-built time
     ${tc} updatePortsTreeLastBuilt -p ${portsTreeName}
@@ -701,15 +730,14 @@ updatePortsTree () {
 
 createPortsTree () {
     # set up defaults
-    cvsupHost=${defaultCvsupHost}
-    cvsupProg=${defaultCvsupProg}
-    cvsupCompress=0
+    updateHost=${defaultUpdateHost}
+    updateType=${defaultUpdateType}
+    updateCompress=0
     cvswebUrl=""
     descr=""
     init=1
     mountSrc=""
     portsTreeName=""
-    updateCmd="CVSUP"
 
     # argument handling
     while getopts d:m:p:u:w:CH:I arg >/dev/null 2>&1
@@ -719,10 +747,10 @@ createPortsTree () {
 	d)	descr="${OPTARG}";;
 	m)	mountSrc="${OPTARG}";;
 	p)	portsTreeName="${OPTARG}";;
-	u)	updateCmd="${OPTARG}";;
+	u)	updateType="${OPTARG}";;
 	w)	cvswebUrl="${OPTARG}";;
-	C)	cvsupCompress=1;;
-	H)	cvsupHost="${OPTARG}";;
+	C)	updateCompress=1;;
+	H)	updateHost="${OPTARG}";;
 	I)	init=0;;
 	?)	return 1;;
 
@@ -740,58 +768,39 @@ createPortsTree () {
 	return 1
     fi
 
-    if [ -z "${updateCmd}" ]; then
-	echo "createPortsTree: no updatecommand specified"
+    if [ -z "${updateType}" ]; then
+	echo "createPortsTree: no update type specified"
 	return 1
     fi
 
-    # clean out any previous directories
-    basedir=$(tinderLoc portstree ${portsTreeName})
-    cleanDirs ${portsTreeName} ${basedir}
-
-    # set up the directory
-    echo -n "${portsTreeName}: set up directory... "
-    mkdir -p ${basedir}/ports
-
-    # set up the sup file (if needed)
-    if [ "${updateCmd}" = "CVSUP" ]; then
-	echo -n "and supfile... "
-	generateSupFile ${basedir} ports . ${cvsupHost} ${cvsupCompress} \
-	    > ${basedir}/ports-supfile
-    fi
-    echo "done."
+    echo "${portsTreeName}: initializing tree"
+    generateUpdateCode portstree ${portsTreeName} ${updateType} \
+		       ${updateHost} "." ${updateCompress}
 
     # add portstree to datastore
-    echo -n "${portsTreeName}: adding PortsTree to datastore... "
+    echo -n "${portsTreeName}: adding to datastore... "
 
     if [ ! -z "${descr}" ]; then
 	descr="-d ${descr}"
     fi
 
-    if [ "${updateCmd}" = "CVSUP" ]; then
-	updateProg="${cvsupProg} -g ${basedir}/ports-supfile"
-	updateCmd="CVSUP"
-    else
-	updateProg="${updateCmd}"
-    fi
-
     if [ ! -z "${mountSrc}" ]; then
 	mountSrc="-m ${mountSrc}"
     fi
-
+    
     if [ ! -z "${cvswebUrl}" ]; then
 	cvswebUrl="-w ${cvswebUrl}"
     fi
-
+    
     tc=$(tinderLoc scripts tc)
-    ${tc} addPortsTree -p ${portsTreeName} -u ${updateCmd} \
-	${mountSrc} ${cvswebUrl} "${descr}"
+    ${tc} addPortsTree -p ${portsTreeName} -u ${updateType} \
+		       ${mountSrc} ${cvswebUrl} "${descr}"
     if [ $? -ne 0 ]; then
 	echo "FAILED."
 	exit 1
     fi
     echo "done."
-
+    
     if [ ${init} -eq 1 ]; then
 	updatePortsTree -p ${portsTreeName}
     fi
