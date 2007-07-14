@@ -148,6 +148,8 @@ if [ $phase = 1 ]; then
 ./tmp/*
 ./etc/make.conf.bak
 ./etc/make.conf
+./etc/periodic.conf
+./etc/rc.conf
 ./work/*
 ./compat/linux/proc
 ./usr/share/man/cat*/*
@@ -282,6 +284,8 @@ EOF
 ./tmp/*
 ./etc/make.conf.bak
 ./etc/make.conf
+./etc/periodic.conf
+./etc/rc.conf
 ./work/*
 ./compat/linux/proc
 EOF
