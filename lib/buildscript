@@ -3,24 +3,6 @@
 # usage: $0 DIRNAME PHASE ED PD FD BD RD [PLISTCHECK]
 #   PHASE is 1 (checksum) or 2 (package)
 
-mountprocfs() {
-    arch=$1
-
-    if [ ${arch} = "i386" -o ${arch} = "amd64" ]; then
-	# JDK ports need linprocfs :(
-	mkdir -p /compat/linux/proc
-	mount -t linprocfs linprocfs /compat/linux/proc
-    fi
-}
-
-umountprocfs() {
-    arch=$1
-
-    if [ ${arch} = "i386" -o ${arch} = "amd64" ]; then
-	umount -f /compat/linux/proc 2> /dev/null > /dev/null
-    fi
-}
-
 cleanup() {
   status=$1
 
@@ -50,7 +32,6 @@ add_pkg() {
   export PKG_PATH=/tmp/depends
   if [ ! -z "${pkgs}" ]; then
     arch=$(uname -m)
-    umountprocfs ${arch}
     echo "adding dependencies"
     for i in $pkgs; do
       echo "pkg_add $i"
@@ -66,7 +47,6 @@ add_pkg() {
         fi
       fi
     done
-    mountprocfs ${arch}
   fi
 }
 
@@ -140,6 +120,10 @@ if [ $phase = 1 ]; then
 
   #Allow ports to notice they're being run in Tinderbox
   export PACKAGE_BUILDING=1
+
+  # Stash a copy of /etc/master.passwd and /etc/group to detect whether someone modifies it
+  cp /etc/master.passwd /etc/master.passwd-save
+  cp /etc/group /etc/group-save
 
   # Files we do not care about changing between pre-build and post-cleanup
   cat > /tmp/mtree.preexclude <<EOF
@@ -405,6 +389,9 @@ EOF
 	  touch /tmp/leftovers
       fi
   fi
+
+  cmp /etc/group /etc/group-save || (echo "=== /etc/group was modified:"; diff -du /etc/group-save /etc/group)
+  cmp /etc/master.passwd /etc/master.passwd-save || (echo "=== /etc/master.passwd was modified:"; diff -du /etc/master.passwd-save /etc/master.passwd)
 
   if [ ${xvfb} = 1 ]; then
     kill $(jobid %1)

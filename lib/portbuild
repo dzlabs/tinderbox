@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.111 2007/06/09 21:36:16 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.112 2007/07/29 21:20:52 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -176,15 +176,6 @@ else
     mtree -deU -f ${chroot}/etc/mtree/BSD.local.dist -p ${chroot}${LOCALBASE} \
     	>/dev/null 2>&1
 fi
-
-mkdir -p ${chroot}${X11BASE}
-case "${X_WINDOW_SYSTEM}" in
-  "xfree86-3")	_X_MTREE="BSD.x11.dist";;
-  *)		_X_MTREE="BSD.x11-4.dist";;
-esac
-mkdir -p ${chroot}${X11BASE}
-mtree -deU -f ${chroot}/etc/mtree/${_X_MTREE} -p ${chroot}${X11BASE} \
-      >/dev/null 2>&1
 
 # mount linprocfs if required
 if [ "${ARCH}" = "i386" -o "${ARCH}" = "amd64" ]; then
