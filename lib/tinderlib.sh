@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.38 2007/08/12 05:09:06 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.39 2007/08/12 19:48:43 marcus Exp $
 #
 
 tinderLocJail () {
@@ -492,7 +492,9 @@ buildenv () {
 buildenvNoHost () {
     build=$1
 
-    eval "export __MAKE_CONF=/dev/null" >/dev/null 2>&1
+    jail=$(${tc} getJailForBuild -b ${build})
+    jailBase=$(tinderLoc jail ${jail})
+    eval "export __MAKE_CONF=${jailBase}/make.conf" >/dev/null 2>&1
     eval "export LOCALBASE=/nonexistentlocal" >/dev/null 2>&1
     eval "export X11BASE=/nonexistentx" >/dev/null 2>&1
     eval "export PKG_DBDIR=/nonexistentdb" >/dev/null 2>&1

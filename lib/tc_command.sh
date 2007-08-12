@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.57 2007/07/29 21:20:52 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.58 2007/08/12 19:48:43 marcus Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -465,7 +465,8 @@ buildJail () {
     unset LANG
 
     # We don't want the host environment getting in the way
-    export __MAKE_CONF=/dev/null
+    export __MAKE_CONF="${jailBase}/make.conf"
+    export SRCCONF="${jailBase}/src.conf"
 
     # Get the architecture types for both the host and the jail
     jailArch=$(${tc} getJailArch -j ${jailName})

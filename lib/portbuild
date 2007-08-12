@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.113 2007/07/29 21:22:48 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.114 2007/08/12 19:48:43 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -198,6 +198,7 @@ mount -t procfs procfs ${chroot}/proc
 
 # Want to use the /etc/make.conf in the chroot (Jail)
 unset __MAKE_CONF
+unset SRCCONF
 
 export WRKDIRPREFIX=/work
 export DISTDIR=/tmp/distfiles
