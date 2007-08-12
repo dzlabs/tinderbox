@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.37 2007/06/09 21:36:16 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.38 2007/08/12 05:09:06 marcus Exp $
 #
 
 tinderLocJail () {
@@ -662,7 +662,7 @@ execute_hook () {
     (
       cleanenv
       cd ${pb}/scripts
-      env ${env} $(realpath ${hook_cmd})
+      eval "env ${env}" $(realpath ${hook_cmd})
       exit $?
     )
 
