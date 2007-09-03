@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.58 2007/08/12 19:48:43 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.59 2007/09/03 16:40:43 marcus Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1145,9 +1145,8 @@ tinderbuild_setup () {
     fi
 
     # For use by pnohang
-    # XXX: though killall may not work since it's a dynamic executable
-    cp -p /rescue/mount /rescue/umount ${buildRoot}/sbin
     cp -p /rescue/ps ${buildRoot}/bin
+    cp -p /usr/bin/killall ${chroot}/usr/bin
 
     # Mount /dev, since we're going to be chrooting shortly
     mount -t devfs devfs ${buildRoot}/dev >/dev/null 2>&1
