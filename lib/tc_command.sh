@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.60 2007/09/03 17:01:36 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.61 2007/09/23 06:03:01 ade Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1099,24 +1099,6 @@ tinderbuild_setup () {
     libc_hackery=""
     case ${osmajor} in
 
-    4)
-	mkdir -p ${buildRoot}/libexec
-	mkdir -p ${buildRoot}/lib
-	if [ "${ARCH}" = "i386" -o "${ARCH}" = "amd64" ]; then
-	    cp -p /sbin/mount /sbin/umount ${buildRoot}/sbin
-	    cp -p /lib/libufs.so.[0-9]* ${buildRoot}/lib
-	fi
-	cp -p /libexec/ld-elf.so.1 ${buildRoot}/libexec
-	cp -p /lib/libkvm.so.[0-9]* /lib/libm.so.[0-9]* ${buildRoot}/lib
-	if [ -f /lib/libc.so.7 ]; then
-	    libc_hackery="libc.so.7"
-	elif [ -f /lib/libc.so.6 ]; then
-	    libc_hackery="libc.so.6"
-	elif [ -f /lib/libc.so.5 ]; then
-	    libc_hackery="libc.so.5"
-	fi
-	;;
-
     5)
     	if [ -f /lib/libc.so.7 ]; then
 	    libc_hackery="libc.so.7"
@@ -1427,7 +1409,7 @@ tinderbuild () {
     # Set up the chrooted environment
     osmajor=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
     case ${osmajor} in
-    4|5|6|7)	tinderbuild_setup;;
+    5|6|7)	tinderbuild_setup;;
     *)		echo "tinderbuild: unhandled OS version: ${osmajor}"
 		tinderbuild_cleanup 1
 		;;
