@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.13 2007/06/09 22:09:12 marcus Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.14 2007/10/07 00:58:56 ade Exp $
 #
 
 require_once 'module/module.php';
@@ -91,7 +91,7 @@ class moduleBuildPorts extends module {
 		return $this->template_parse( 'list_buildports.tpl' );
 	}
 
-	function display_failed_buildports( $build_name, $maintainer ) {
+	function display_failed_buildports( $build_name, $maintainer, $all ) {
 
 		if( $build_name ) {
 			$build = $this->TinderboxDS->getBuildByName( $build_name );
@@ -100,7 +100,11 @@ class moduleBuildPorts extends module {
 			$build_id = false;
 		}
 
-		$ports = $this->TinderboxDS->getPortsByStatus( $build_id, $maintainer, 'FAIL' );
+		if ($all) {
+			$ports = $this->TinderboxDS->getPortsByStatus( $build_id, $maintainer, '', 'SUCCESS' );
+		} else {
+			$ports = $this->TinderboxDS->getPortsByStatus( $build_id, $maintainer, 'FAIL', '' );
+		}
 
 		if( is_array( $ports ) && count( $ports ) > 0 ) {
 			$this->template_assign( 'data', $this->modulePorts->get_list_data( $build_name, $ports ) );

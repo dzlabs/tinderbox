@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_builds.tpl,v 1.5 2007/06/17 00:26:53 ade Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_builds.tpl,v 1.6 2007/10/07 00:58:56 ade Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -54,6 +54,7 @@
 <p>
 <a href="index.php?action=latest_buildports">Current And Latest Builds</a><br />
 <a href="index.php?action=failed_buildports">All Build Failures</a><br />
+<a href="index.php?action=bad_buildports">All (really) Build Failures</a><br />
 <input type="hidden" name="action" value="failed_buildports" />
 All Build Failures for the maintainer <select name="maintainer">
 	<option></option>

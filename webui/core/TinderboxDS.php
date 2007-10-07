@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.34 2007/06/17 21:45:08 ade Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.35 2007/10/07 00:58:56 ade Exp $
 #
 
     require_once 'DB.php';
@@ -475,7 +475,7 @@
 	}
 
 
-        function getPortsByStatus($build_id,$maintainer,$status) {
+        function getPortsByStatus($build_id,$maintainer,$status,$notstatus) {
             $query = "SELECT p.*,
                              bp.build_id,
                              bp.last_built,
@@ -495,8 +495,10 @@
 
             if($build_id)
                  $query .= "AND bp.build_id=$build_id ";
-            if($status)
+            if($status<>'')
                  $query .= "AND bp.last_status='$status' ";
+	    if($notstatus<>'')
+		 $query .= "AND bp.last_status<>'$notstatus' AND bp.last_status<>'UNKNOWN'";
             if($maintainer)
                  $query .= "AND p.port_maintainer='$maintainer'";
             $query .= " ORDER BY bp.last_built DESC ";
