@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleConfig.php,v 1.3 2005/12/26 22:45:56 marcus Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleConfig.php,v 1.4 2007/10/13 02:28:47 ade Exp $
 #
 
 require_once 'module/module.php';
@@ -59,13 +59,7 @@ class moduleConfig extends module {
 		$builds          = $this->TinderboxDS->getAllBuilds();
 		$jails           = $this->TinderboxDS->getAllJails();
 		$ports_trees     = $this->TinderboxDS->getAllPortsTrees();
-		$hosts           = $this->TinderboxDS->getAllHosts();
 		$config_options  = $this->TinderboxDS->getAllConfig();
-
-		foreach( $hosts as $host ) {
-			$host_id = $host->getId();
-			$all_hosts[$host_id] = array( 'host_name' => $host->getName() );
-		};
 
 		foreach( $jails as $jail ) {
 			$jail_id = $jail->getId();
@@ -98,11 +92,9 @@ class moduleConfig extends module {
 
 		foreach( $config_options as $config_option ) {
 			$all_config_options[] = array( 'config_option_name'  => $config_option->getName(),
-			                               'config_option_value' => $config_option->getValue(),
-			                               'host_name'           => $all_hosts[$config_option->getHostId()]['host_name'] );
+			                               'config_option_value' => $config_option->getValue() );
 		};
 
-		$this->_array_sort_and_assign( $all_hosts,          'host'          );
 		$this->_array_sort_and_assign( $all_jails,          'jail'          );
 		$this->_array_sort_and_assign( $all_ports_trees,    'ports_tree'    );
 		$this->_array_sort_and_assign( $all_builds,         'build'         );

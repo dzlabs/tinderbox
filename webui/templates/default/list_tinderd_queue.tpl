@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.9 2007/06/17 00:05:47 ade Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.10 2007/10/13 02:28:48 ade Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -9,21 +9,6 @@
 <h1><?=$tinderbox_title?> - Tinderd Administration</h1>
 <form method="get" action="index.php">
 <table>
-<tr>
-<td>
-<input type="hidden" name="action" value="list_tinderd_queue" />
-Host
-</td>
-<td>
- <select name="filter_host_id">
-	<option></option>
-<?foreach($all_hosts as $host) {?>
-	<option value="<?=$host['host_id']?>" <?if ($host_id == $host['host_id']) {?>selected="selected"<?}?>><?=$host['host_name']?></option>
-<?}?>
-</select>
-</td>
-</tr>
-
 <tr>
 <td>
 Build
@@ -55,7 +40,6 @@ Build
 
 	<table>
 		<tr>
-			<th>Host</th>
 			<th>Build</th>
 			<th>Priority</th>
 			<th>Port Directory</th>
@@ -74,19 +58,7 @@ Build
 			<input type="hidden" name="action" value="change_tinderd_queue" />
 			<input type="hidden" name="entry_id" value="<?=$row['entry_id']?>" />
 			<input type="hidden" name="filter_build_id" value="<?=$build_id?>" />
-			<input type="hidden" name="filter_host_id" value="<?=$host_id?>" />
 			<tr>
-				<td>
-					<?if($row['modify'] == 1){?>
-						<select name="host_id">
-							<?foreach($all_hosts as $host) {?>
-								<option value="<?=$host['host_id']?>" <?if ($row['host'] == $host['host_name']) {?>selected<?}?>><?=$host['host_name']?></option>
-							<?}?>
-						</select>
-					<?}else{?>
-						<?=$row['host']?>
-					<?}?>
-				</td>
 				<td>
 					<?if($row['modify'] == 1){?>
 						<select name="build_id">
@@ -142,16 +114,7 @@ Build
 			<input type="hidden" name="action" value="add_tinderd_queue" />
 			<input type="hidden" name="entry_id" value="<?=$row['entry_id']?>" />
 			<input type="hidden" name="filter_build_id" value="<?=$build_id?>" />
-			<input type="hidden" name="filter_host_id" value="<?=$host_id?>" />
 			<tr>
-				<td>
-				<br />
-					<select name="new_host_id">
-						<?foreach($all_hosts as $host) {?>
-							<option value="<?=$host['host_id']?>" <?if ($new_host_id == $host['host_id']) {?>selected<?}?>><?=$host['host_name']?></option>
-						<?}?>
-					</select>
-				</td>
 				<td>
 				<br />
 					<select name="new_build_id">

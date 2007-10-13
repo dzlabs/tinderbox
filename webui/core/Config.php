@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/Config.php,v 1.1 2005/11/15 19:42:56 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/Config.php,v 1.2 2007/10/13 02:28:47 ade Exp $
 #
 
     require_once 'TinderObject.php';
@@ -34,8 +34,7 @@
 	function Config($argv = array()) {
 	    $object_hash = array(
                 'config_option_name' => '',
-		'config_option_value' => '',
-		'host_id' => ''
+		'config_option_value' => ''
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
@@ -47,10 +46,6 @@
 
 	function getValue() {
 	    return $this->config_option_value;
-	}
-
-	function getHostId() {
-	    return $this->host_id;
 	}
 
     }

@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/Config.pm,v 1.5 2006/02/18 19:57:21 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/Config.pm,v 1.6 2007/10/13 02:28:46 ade Exp $
 #
 
 package Tinderbox::Config;
@@ -38,7 +38,6 @@ sub new {
         my $object_hash = {
                 config_option_name  => "",
                 config_option_value => "",
-                host_id             => "",
         };
 
         my @args = ();
@@ -59,12 +58,6 @@ sub getOptionValue {
         return $self->{config_option_value};
 }
 
-sub getHostId {
-        my $self = shift;
-
-        return $self->{host_id};
-}
-
 sub setOptionName {
         my $self = shift;
         my $name = shift;
@@ -77,13 +70,6 @@ sub setOptionValue {
         my $value = shift;
 
         $self->{config_option_value} = $value;
-}
-
-sub setHostId {
-        my $self   = shift;
-        my $hostid = shift;
-
-        $self->{host_id} = $hostid;
 }
 
 1;

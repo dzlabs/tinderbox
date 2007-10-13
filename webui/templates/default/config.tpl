@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/config.tpl,v 1.4 2006/02/21 16:24:56 ade Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/config.tpl,v 1.5 2007/10/13 02:28:48 ade Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -36,25 +36,6 @@
 	</table>
 <?}else{?>
 	<p>There are no builds configured.</p>
-<?}?>
-
-
-<h2>configured hosts:</h2>
-<?if(!$no_host_list){?>
-	<table>
-		<tr>
-			<th>Name</th>
-		</tr>
-
-		<?foreach($host_data as $row) {?>
-			<tr>
-				<td><?=$row['host_name']?></td>
-			</tr>
-		<?}?>
-
-	</table>
-<?}else{?>
-	<p>There are no hosts configured.</p>
 <?}?>
 
 
@@ -123,14 +104,12 @@
 		<tr>
 			<th>Name</th>
 			<th>Value</th>
-			<th>Host Name</th>
 		</tr>
 
 		<?foreach($config_option_data as $row) {?>
 			<tr>
 				<td><?=$row['config_option_name']?></td>
 				<td><?=$row['config_option_value']?></td>
-				<td><?=$row['host_name']?></td>
 			</tr>
 		<?}?>
 

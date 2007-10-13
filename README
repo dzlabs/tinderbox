@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.65 2007/06/25 20:35:28 ade Exp $
+$MCom: portstools/tinderbox/README,v 1.66 2007/10/13 02:28:45 ade Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -440,19 +440,15 @@ and specify the path to the OPTIONS directory structure:
     ./tc configOptions -e
     ./tc configOptions -o /options
 
-The configOptions command takes the standard host arguments as well as -e
-(enable OPTIONS support), -d (disable OPTIONS support), and -o
-(set an OPTIONS source directory tree).
+The configOptions command takes the following arguments:
+    -e (enable OPTIONS support)
+    -d (disable OPTIONS support)
+    -o (set an OPTIONS source directory tree).
 
 If you would like to interactively choose OPTIONS for your ports, specify
 the -o option to ``./tc addPort''.  This will perform a ``make config''
 on all ports, displaying the ncurses OPTIONS dialog.  All OPTIONS settings
 will be automatically saved to the correct location.
-
-Creating Hosts:
----------------
-
-XXX: stuff needs to go in here.
 
 Using Hooks:
 ------------
@@ -489,7 +485,7 @@ update that user's account to give them a password as well as web access:
 and {PASSWORD} is the user's password for Tinderbox web access.)
 
 Then you have to define one web administrator who has full rights on
-all Hosts/Builds and is the only account that can add other users:
+all Builds and is the only account that can add other users:
 
 # cd ${pb}/scripts && ./tc setWwwAdmin -u {USER}
 
@@ -505,9 +501,9 @@ Automating/Queuing Port Builds:
 If you want to use tinderbox to test many different ports one after the other
 you probably want ``tinderd''. tinderd runs as a daemon and looks to see if
 something was added to the ``ports to build queue''. You can add different
-ports for different builds for different hosts with different priorities.
-tinderd will automatically pick up the port with the highest priority for its
-host and starts building it. That repeats until the queue is empty. After
+ports for different builds with different priorities.
+tinderd will automatically pick up the port with the highest priority
+and starts building it. That repeats until the queue is empty. After
 the queue empties tinderd will sleep for a configurable amount of time
 (default: 120 seconds) thereafter it starts searching for new queue entries
 again.  If you need tinderd to check the queue before the sleep timer has
@@ -518,11 +514,7 @@ expired, send the tinderd process a SIGHUP:
 Where {PID of tinderd} is the process ID of the tinderd script as seen in
 the output of ps(1).
 
-To set it up you must first add a Tinderbox host to the database:
-
-# cd ${pb}/scripts && ./tc addHost
-
-Right after that you can start tinderd (it will stay in foreground by default).
+You can start tinderd (it will stay in foreground by default).
 If you want to run tinderd automatically when the system boots, copy the
 include ${pb}/etc/rc.d/tinderd.sh script to /usr/local/etc/rc.d.  Be sure
 to check out the various rc.conf variables documented in this script before

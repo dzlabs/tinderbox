@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/BuildPortsQueue.pm,v 1.10 2007/06/17 19:35:15 ade Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/BuildPortsQueue.pm,v 1.11 2007/10/13 02:28:46 ade Exp $
 #
 
 package Tinderbox::BuildPortsQueue;
@@ -45,7 +45,6 @@ sub new {
                 user_id              => "",
                 port_directory       => "",
                 priority             => "",
-                host_id              => "",
                 email_on_completion  => "",
                 status               => "",
         };

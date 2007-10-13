@@ -21,7 +21,7 @@
 .\" (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 .\" THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.\" $MCom: portstools/tinderbox/man/man1/tc-configGet.1,v 1.1 2005/07/27 03:59:49 marcus Exp $
+.\" $MCom: portstools/tinderbox/man/man1/tc-configGet.1,v 1.2 2007/10/13 02:28:46 ade Exp $
 .\"
 .Dd July 21, 2005
 .Os FreeBSD
@@ -29,31 +29,16 @@
 .Sh NAME
 .Nm "tc configGet"
 .Nd Print current Tinderbox configuration
-.Sh SYNOPSIS
-.Nm
-.Op Fl G | Fl h Ar hostname
 .Sh DESCRIPTION
 .Nm
 fetches the current configuration for
 .Pa Tinderbox
 from the database.  The configuration will be printed to
 .Pa stdout .
-.Sh OPTIONS
-The following options are supported by
-.Nm :
-.Bl -tag -width indent
-.It Fl G
-Print the global (default) configuration.
-.It Fl h Ar hostname
-Fetch the specific configuration for
-.Ar hostname .
-These configuration settings will be used instead of the global settings.
-Any setting missing from the host configuration will be obtained from the
-global configuration.
 .El
 .Sh EXAMPLES
 .Pp
-Print the global (default) configuration:
+Print the configuration:
 .Pp
 .Cm ${pb}/scripts/tc
 .Cm configGet

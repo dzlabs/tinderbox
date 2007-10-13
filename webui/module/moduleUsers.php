@@ -24,12 +24,11 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.17 2007/06/17 00:05:47 ade Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.18 2007/10/13 02:28:48 ade Exp $
 #
 
 require_once 'module/module.php';
 require_once 'module/moduleBuilds.php';
-require_once 'module/moduleHosts.php';
 
 class moduleUsers extends module {
 
@@ -38,7 +37,6 @@ class moduleUsers extends module {
 	function moduleUsers() {
 		$this->module();
 		$this->moduleBuilds = new moduleBuilds();
-		$this->moduleHosts  = new moduleHosts();
 	}
 
 	function display_login() {
@@ -87,7 +85,6 @@ class moduleUsers extends module {
 			$user_name     = $user->getName();
 			$user_email    = $user->getEmail();
 			$www_enabled   = $user->getWwwEnabled();
-			$all_hosts     = $this->moduleHosts->get_all_hosts();
 			$all_builds    = $this->moduleBuilds->get_all_builds();
 		}
 
@@ -276,26 +273,26 @@ class moduleUsers extends module {
 		return $all_users;
 	}
 
-	function fetch_permissions( $host_id, $object_type, $object_id ) {
+	function fetch_permissions( $object_type, $object_id ) {
 		global $moduleSession;
 
 		if( $this->is_logged_in() ) {
 			$user = $moduleSession->getAttribute( 'user' );
-			foreach( $this->TinderboxDS->getUserPermissions( $user->getId(), $host_id, $object_type, $object_id ) as $perm ) {
-				$this->permissions[$host_id][$object_type][$object_id][$perm['user_permission']] = 1;
+			foreach( $this->TinderboxDS->getUserPermissions( $user->getId(), $object_type, $object_id ) as $perm ) {
+				$this->permissions[$object_type][$object_id][$perm['user_permission']] = 1;
 			}
-			$this->permissions[$host_id][$object_type][$object_id]['set'] = 1;
+			$this->permissions[$object_type][$object_id]['set'] = 1;
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	function get_permission( $host_id, $object_type, $object_id, $permission ) {
-		if( !is_array( $this->permissions[$host_id][$object_type][$object_id] ) && !isset( $this->permissions[$host_id][$object_type][$object_id]['set'] ) ) {
-			$this->fetch_permissions( $host_id, $object_type, $object_id );
+	function get_permission( $object_type, $object_id, $permission ) {
+		if( !is_array( $this->permissions[$object_type][$object_id] ) && !isset( $this->permissions[$object_type][$object_id]['set'] ) ) {
+			$this->fetch_permissions( $object_type, $object_id );
 		}
-		if( isset( $this->permissions[$host_id][$object_type][$object_id][$permission] ) ) {
+		if( isset( $this->permissions[$object_type][$object_id][$permission] ) ) {
 			return true;
 		} else {
 			return false;
@@ -303,34 +300,34 @@ class moduleUsers extends module {
 	}
 
 	function checkWwwAdmin() {
-		return $this->get_permission( '-1', 'users', $this->get_id(), 'IS_WWW_ADMIN' );
+		return $this->get_permission( 'users', $this->get_id(), 'IS_WWW_ADMIN' );
 	}
 }
 
-	function checkPermAddQueue( $host_id, $object_type, $object_id ) {
-		return $this->get_permission( $host_id, $object_type, $object_id, 'PERM_ADD_QUEUE' );
+	function checkPermAddQueue( $object_type, $object_id ) {
+		return $this->get_permission( $object_type, $object_id, 'PERM_ADD_QUEUE' );
 	}
 
-	function checkPermModifyOwnQueue( $host_id, $object_type, $object_id ) {
-		return $this->get_permission( $host_id, $object_type, $object_id, 'PERM_MODIFY_OWN_QUEUE' );
+	function checkPermModifyOwnQueue( $object_type, $object_id ) {
+		return $this->get_permission( $object_type, $object_id, 'PERM_MODIFY_OWN_QUEUE' );
 	}
 
-	function checkPermDeleteOwnQueue( $host_id, $object_type, $object_id ) {
-		return $this->get_permission( $host_id, $object_type, $object_id, 'PERM_DELETE_OWN_QUEUE' );
+	function checkPermDeleteOwnQueue( $object_type, $object_id ) {
+		return $this->get_permission( $object_type, $object_id, 'PERM_DELETE_OWN_QUEUE' );
 	}
 
-	function checkPermPrioLower5( $host_id, $object_type, $object_id ) {
-		return $this->get_permission( $host_id, $object_type, $object_id, 'PERM_PRIO_LOWER_5' );
+	function checkPermPrioLower5( $object_type, $object_id ) {
+		return $this->get_permission( $object_type, $object_id, 'PERM_PRIO_LOWER_5' );
 	}
 
-	function checkPermModifyOtherQueue(  $host_id,$object_type, $object_id )
+	function checkPermModifyOtherQueue( $object_type, $object_id )
  {
-		return $this->get_permission( $host_id, $object_type, $object_id, 'PERM_MODIFY_OTHER_QUEUE' );
+		return $this->get_permission( $object_type, $object_id, 'PERM_MODIFY_OTHER_QUEUE' );
 	}
 
-	function checkPermDeleteOtherQueue( $host_id, $object_type, $object_id )
+	function checkPermDeleteOtherQueue( $object_type, $object_id )
  {
-		return $this->get_permission( $host_id, $object_type, $object_id, 'PERM_DELETE_OTHER_QUEUE' );
+		return $this->get_permission( $object_type, $object_id, 'PERM_DELETE_OTHER_QUEUE' );
 	}
 
 ?>

@@ -58,11 +58,10 @@ CREATE TABLE users (
 DROP TABLE IF EXISTS user_permissions;
 CREATE TABLE user_permissions (
 	user_id INTEGER REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
-	host_id INTEGER REFERENCES hosts(host_id) ON UPDATE CASCADE ON DELETE RESTRICT,
 	user_permission_object_type ENUM('builds','users') NOT NULL,
 	user_permission_object_id INTEGER NOT NULL DEFAULT 0,
 	user_permission INTEGER NOT NULL DEFAULT 0,
-	PRIMARY KEY  (user_id,user_permission_object_type,user_permission_object_id,user_permission,host_id)
+	PRIMARY KEY  (user_id,user_permission_object_type,user_permission_object_id)
 );
 
 DROP TABLE IF EXISTS build_users;
@@ -97,19 +96,10 @@ CREATE TABLE build_ports (
 );
 CREATE INDEX build_ports_build_id_idx ON build_ports(build_id);
 
-DROP TABLE IF EXISTS hosts;
-CREATE TABLE hosts (
-	host_id SERIAL PRIMARY KEY,
-	host_name VARCHAR(255) NOT NULL
-);
-CREATE INDEX hosts_host_name_idx ON hosts(host_name);
-
 DROP TABLE IF EXISTS config;
 CREATE TABLE config (
-	config_option_name VARCHAR(255) NOT NULL,
-	config_option_value TEXT,
-	host_id INTEGER REFERENCES hosts(host_id) ON UPDATE CASCADE ON DELETE RESTRICT,
-	PRIMARY KEY (config_option_name, host_id)
+	config_option_name VARCHAR(255) NOT NULL PRIMARY KEY,
+	config_option_value TEXT
 );
 
 DROP TABLE IF EXISTS build_ports_queue;
@@ -121,11 +111,9 @@ CREATE TABLE build_ports_queue (
 	user_id INTEGER REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
 	port_directory VARCHAR(255) NOT NULL,
 	priority INTEGER NOT NULL DEFAULT 10,
-	host_id INTEGER REFERENCES hosts(host_id) ON UPDATE CASCADE,
 	email_on_completion BOOLEAN NOT NULL,
 	status ENUM('ENQUEUED','PROCESSING','SUCCESS','FAIL') NOT NULL DEFAULT 'ENQUEUED'
 );
-CREATE INDEX build_ports_queue_host_id_idx ON build_ports_queue(host_id);
 CREATE INDEX build_ports_queue_user_id_idx ON build_ports_queue(user_id);
 
 DROP TABLE IF EXISTS port_fail_patterns;
@@ -144,28 +132,25 @@ CREATE TABLE hooks (
 	hook_description TEXT
 );
 
-INSERT INTO hosts VALUES (-1, '__ALL__');
-
-
 /*
  Supported config commands.  If any new commands are added here,
  __DSVERSION__ must be bumped.  Use micro version bumps for new config
  commands, and minor version bumps for schema changes.
 */
 
-INSERT INTO config VALUES ('__DSVERSION__', '3.0', -1);
-INSERT INTO config VALUES ('CCACHE_ENABLED', '0', -1);
-INSERT INTO config VALUES ('CCACHE_DIR', '', -1);
-INSERT INTO config VALUES ('CCACHE_NOLINK', '1', -1);
-INSERT INTO config VALUES ('CCACHE_MAX_SIZE', '1G', -1);
-INSERT INTO config VALUES ('CCACHE_JAIL', '0', -1);
-INSERT INTO config VALUES ('CCACHE_LOGFILE', '', -1);
-INSERT INTO config VALUES ('DISTFILE_CACHE', '', -1);
-INSERT INTO config VALUES ('DISTFILE_URI', '', -1);
-INSERT INTO config VALUES ('OPTIONS_ENABLED', '0', -1);
-INSERT INTO config VALUES ('OPTIONS_DIR', '', -1);
-INSERT INTO config VALUES ('HOST_WORKDIR', '', -1);
-INSERT INTO config VALUES ('TINDERD_SLEEPTIME', '120', -1);
+INSERT INTO config VALUES ('__DSVERSION__', '3.0');
+INSERT INTO config VALUES ('CCACHE_ENABLED', '0');
+INSERT INTO config VALUES ('CCACHE_DIR', '');
+INSERT INTO config VALUES ('CCACHE_NOLINK', '1');
+INSERT INTO config VALUES ('CCACHE_MAX_SIZE', '1G');
+INSERT INTO config VALUES ('CCACHE_JAIL', '0');
+INSERT INTO config VALUES ('CCACHE_LOGFILE', '');
+INSERT INTO config VALUES ('DISTFILE_CACHE', '');
+INSERT INTO config VALUES ('DISTFILE_URI', '');
+INSERT INTO config VALUES ('OPTIONS_ENABLED', '0');
+INSERT INTO config VALUES ('OPTIONS_DIR', '');
+INSERT INTO config VALUES ('HOST_WORKDIR', '');
+INSERT INTO config VALUES ('TINDERD_SLEEPTIME', '120');
 
 /*
  Hooks.  These are commands to run when certain conditions are met within

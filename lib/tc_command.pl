@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.124 2007/06/25 20:35:28 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.125 2007/10/13 02:28:46 ade Exp $
 #
 
 my $pb;
@@ -74,51 +74,50 @@ my $ds = new Tinderbox::TinderboxDS();
         "configGet" => {
                 func   => \&configGet,
                 help   => "Print current Tinderbox configuration",
-                usage  => "[-G | -h <host name>]",
-                optstr => 'h:G',
+                usage  => "",
         },
         "configCcache" => {
                 func => \&configCcache,
                 help => "Configure Tinderbox ccache parameters",
                 usage =>
-                    "[-d | -e] [-c <cache mount src>] [-s <max cache size>] [-j | -J] [-l <debug logfile> | -L] [-h <host name> | -G] | -G -h <host name>",
-                optstr => 'dec:s:l:LjJh:G',
+                    "[-d | -e] [-c <cache mount src>] [-s <max cache size>] [-j | -J] [-l <debug logfile> | -L]",
+                optstr => 'dec:s:l:LjJ',
         },
         "configDistfile" => {
                 func => \&configDistfile,
                 help => "Configure Tinderbox distfile parameters",
                 usage =>
-                    "[-c <distfile cache mount src> | -C] [-u <distfile uri> | -U] [-h <host name> | -G] | -G -h <host name>",
-                optstr => 'c:Cu:Uh:G',
+                    "[-c <distfile cache mount src> | -C] [-u <distfile uri> | -U]",
+                optstr => 'c:Cu:U',
         },
         "configOptions" => {
                 func => \&configOptions,
                 help => "Configure Tinderbox port OPTIONS parameters",
                 usage =>
-                    "[-d | -e] [-o <options mount src>] [-h <host name> | -G] | -G -h <host name>",
-                optstr => 'deo:h:G',
+                    "[-d | -e] [-o <options mount src>]",
+                optstr => 'deo:',
         },
         "configPackage" => {
                 func => \&configPackage,
                 help => "Configure Tinderbox package parameters",
                 usage =>
-                    "[-u <uri> | -U] [-h <host name> | -G] -G -h <host name>",
-                optstr => 'u:Uh:G',
+                    "[-u <uri> | -U]",
+                optstr => 'u:U',
         },
         "configHost" => {
                 func => \&configHost,
                 help => "Configure Tinderbox Host parameters",
                 usage =>
-                    "[-w <work directory> | -W] [-h <host name> | -G] | -G -h <host name>",
-                optstr => 'w:Wh:G',
+                    "[-w <work directory> | -W]",
+                optstr => 'w:W',
         },
         "configTinderd" => {
                 func => \&configTinderd,
                 help =>
                     "Configure Tinderbox tinder daemon (tinderd) parameters",
                 usage =>
-                    "[-t <sleep time>] [-h <host name> | -G] | -G -h <host name>",
-                optstr => 't:h:G',
+                    "[-t <sleep time>]",
+                optstr => 't:',
         },
         "listJails" => {
                 func  => \&listJails,
@@ -143,8 +142,8 @@ my $ds = new Tinderbox::TinderboxDS();
         "listBuildPortsQueue" => {
                 func   => \&listBuildPortsQueue,
                 help   => "Lists the Ports to Build Queue",
-                usage  => "[-h <host>] [-r] [-s <status>]",
-                optstr => 'h:s:r',
+                usage  => "[-r] [-s <status>]",
+                optstr => 's:r',
         },
         "listPortFailPatterns" => {
                 func => \&listPortFailPatterns,
@@ -162,14 +161,7 @@ my $ds = new Tinderbox::TinderboxDS();
         "reorgBuildPortsQueue" => {
                 func   => \&reorgBuildPortsQueue,
                 help   => "Reorganizes the Ports to Build Queue",
-                usage  => "[-h <host>]",
-                optstr => 'h:',
-        },
-        "addHost" => {
-                func   => \&addHost,
-                help   => "Add a host to the datastore",
-                usage  => "[-h <hostname>]",
-                optstr => 'h:',
+                usage  => "",
         },
         "addBuild" => {
                 func => \&addBuild,
@@ -207,8 +199,8 @@ my $ds = new Tinderbox::TinderboxDS();
                 func  => \&addBuildPortsQueueEntry,
                 help  => "Adds a Port to the Ports to Build Queue",
                 usage =>
-                    "-b <build name> -d <port directory> [-h <hostname>] [-p <priority>]",
-                optstr => 'b:d:h:p:',
+                    "-b <build name> -d <port directory> [-p <priority>]",
+                optstr => 'b:d:p:',
         },
         "addPortFailPattern" => {
                 func => \&addPortFailPattern,
@@ -303,25 +295,18 @@ my $ds = new Tinderbox::TinderboxDS();
                 usage  => "-p <portstree name> -m <mountsource>",
                 optstr => 'p:m:',
         },
-        "rmHost" => {
-                func   => \&rmHost,
-                help   => "Removes a host from the datastore",
-                usage  => "[-h <hostname>]",
-                optstr => 'h:',
-        },
         "rmBuildPortsQueue" => {
                 func => \&rmBuildPortsQueue,
                 help =>
-                    "Removes all Ports from the Ports to Build Queue for one host",
-                usage  => "[-h <hostname>]",
-                optstr => 'h:',
+                    "Removes all Ports from the Ports to Build Queue",
+                usage  => ""
         },
         "rmBuildPortsQueueEntry" => {
                 func  => \&rmBuildPortsQueueEntry,
                 help  => "Removes a Port from the Ports to Build Queue",
                 usage =>
-                    "-i <Build_Ports_Queue_Id> | -b <build name> -d <port directory> [-h <hostname>]",
-                optstr => 'i:b:d:h:',
+                    "-i <Build_Ports_Queue_Id> | -b <build name> -d <port directory>",
+                optstr => 'i:b:d:',
         },
         "rmPort" => {
                 func => \&rmPort,
@@ -661,71 +646,10 @@ sub dsversion {
         print $version . "\n";
 }
 
-sub _configGetHost {
-        my $hostname = shift;
-        my $host;
-
-        if ($hostname) {
-                if (!$ds->isValidHost($hostname)) {
-                        cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
-                }
-                $host = $ds->getHostByName($hostname);
-        } else {
-                $host = undef;
-        }
-
-        return $host;
-}
-
-sub _configHandle {
-        my $item = shift;
-        my $host = _configGetHost($opts->{'h'});
-
-        if (scalar(keys %{$opts}) == 0
-                || (scalar(keys %{$opts}) == 1 && ($opts->{'h'} ^ $opts->{'G'}))
-            )
-        {
-                configGet($item, $host);
-                cleanup($ds, 0, undef);
-        }
-
-        if ($opts->{'G'} && $host) {
-                $ds->defaultConfig($item, $host);
-                cleanup($ds, 0, undef);
-        }
-
-        return $host;
-}
-
 sub configGet {
-        my $configlet = undef;
-        my $host      = undef;
-        my $merged    = 1;
-        my $hostname;
+        my $configlet = shift;
 
-        if (scalar(@_)) {
-                $configlet = shift;
-                $host      = shift;
-        }
-
-        if (!$host) {
-                if ($opts->{'h'}) {
-                        $host = _configGetHost($opts->{'h'});
-                } elsif ($opts->{'G'}) {
-                        $host = undef;
-                } else {
-                        $hostname = getHostname();
-                        if ($ds->isValidHost($hostname)) {
-                                $host = $ds->getHostByName($hostname);
-                        }
-                }
-        }
-
-        if ($opts->{'G'} || $opts->{'h'}) {
-                $merged = undef;
-        }
-
-        my @config = $ds->getConfig($configlet, $host, $merged);
+        my @config = $ds->getConfig($configlet);
 
         if (@config) {
                 map {
@@ -747,7 +671,6 @@ sub configGet {
 sub configCcache {
         my @config = ();
         my ($enabled, $logfile, $jail);
-        my $host;
 
         if (       ($opts->{'d'} && $opts->{'e'})
                 || ($opts->{'l'} && $opts->{'L'})
@@ -755,8 +678,6 @@ sub configCcache {
         {
                 usage("configCcache");
         }
-
-        $host = _configHandle("ccache");
 
         $enabled = new Tinderbox::Config();
         $enabled->setOptionName("enabled");
@@ -815,7 +736,7 @@ sub configCcache {
                 push @config, $logfile;
         }
 
-        $ds->updateConfig("ccache", $host, @config)
+        $ds->updateConfig("ccache", @config)
             or cleanup($ds, 1,
                       "Failed to update ccache configuration: "
                     . $ds->getError()
@@ -826,7 +747,6 @@ sub configDistfile {
         my @config = ();
         my $cache;
         my $uri;
-        my $host;
 
         if ($opts->{'c'} && $opts->{'C'}) {
                 usage("configDistfile");
@@ -834,8 +754,6 @@ sub configDistfile {
         if ($opts->{'u'} && $opts->{'U'}) {
                 usage("configDistFile");
         }
-
-        $host = _configHandle("distfile");
 
         $cache = new Tinderbox::Config();
         $cache->setOptionName("cache");
@@ -861,7 +779,7 @@ sub configDistfile {
                 push @config, $uri;
         }
 
-        $ds->updateConfig("distfile", $host, @config)
+        $ds->updateConfig("distfile", @config)
             or cleanup($ds, 1,
                       "Failed to update distfile configuration: "
                     . $ds->getError()
@@ -871,20 +789,10 @@ sub configDistfile {
 sub configTinderd {
         my @config = ();
         my $sleeptime;
-        my $host;
 
-        $host = _configGetHost($opts->{'h'});
-
-        if (scalar(keys %{$opts}) == 0
-                || (scalar(keys %{$opts}) == 1 && ($opts->{'h'} ^ $opts->{'G'}))
-            )
+        if (scalar(keys %{$opts}) == 0)
         {
-                configGet("tinderd", $host);
-                cleanup($ds, 0, undef);
-        }
-
-        if ($opts->{'G'} && $host) {
-                $ds->defaultConfig("tinderd", $host);
+                configGet("tinderd");
                 cleanup($ds, 0, undef);
         }
 
@@ -896,7 +804,7 @@ sub configTinderd {
                 push @config, $sleeptime;
         }
 
-        $ds->updateConfig("tinderd", $host, @config)
+        $ds->updateConfig("tinderd", @config)
             or cleanup($ds, 1,
                       "Failed to update tinderd configuration: "
                     . $ds->getError()
@@ -906,13 +814,10 @@ sub configTinderd {
 sub configOptions {
         my @config = ();
         my $enabled;
-        my $host;
 
         if ($opts->{'d'} && $opts->{'e'}) {
                 usage("configOptions");
         }
-
-        $host = _configHandle("options");
 
         $enabled = new Tinderbox::Config();
         $enabled->setOptionName("enabled");
@@ -934,7 +839,7 @@ sub configOptions {
                 push @config, $odir;
         }
 
-        $ds->updateConfig("options", $host, @config)
+        $ds->updateConfig("options", @config)
             or cleanup($ds, 1,
                       "Failed to update options configuration: "
                     . $ds->getError()
@@ -944,13 +849,10 @@ sub configOptions {
 sub configPackage {
         my @config = ();
         my $pkg;
-        my $host;
 
         if ($opts->{'c'} && $opts->{'C'}) {
                 usage("configPackage");
         }
-
-        $host = _configHandle("package");
 
         $pkg = new Tinderbox::Config();
         $pkg->setOptionName("uri");
@@ -965,7 +867,7 @@ sub configPackage {
                 push @config, $pkg;
         }
 
-        $ds->updateConfig("package", $host, @config)
+        $ds->updateConfig("package", @config)
             or cleanup($ds, 1,
                       "Failed to update package configuration: "
                     . $ds->getError()
@@ -973,16 +875,13 @@ sub configPackage {
 }
 
 sub configHost {
-        my @config = ();
-        my $workdir;
-        my $host;
+	my @config = ();
+	my $workdir;
 
-        if ($opts->{'w'} && $opts->{'W'}) {
-                usage("host");
-        }
-
-        $host = _configHandle("host");
-
+	if ($opts->{'w'} && $opts->{'W'}) {
+		usage("host");
+	}
+             
         $workdir = new Tinderbox::Config();
         $workdir->setOptionName("workdir");
 
@@ -996,7 +895,7 @@ sub configHost {
                 push @config, $workdir;
         }
 
-        $ds->updateConfig("host", $host, @config)
+        $ds->updateConfig("host", @config)
             or cleanup($ds, 1,
                       "Failed to update jail configuration: "
                     . $ds->getError()
@@ -1257,32 +1156,6 @@ sub getHookCmd {
         }
 }
 
-sub addHost {
-        my $hostname = getHostname();
-
-        if ($opts->{'h'}) {
-                $hostname = $opts->{'h'};
-        }
-
-        if ($ds->isValidHost($hostname)) {
-                cleanup($ds, 1,
-                        "A host named $hostname is already in the datastore.\n"
-                );
-        }
-
-        my $host = new Tinderbox::Host();
-        $host->setName($hostname);
-
-        my $rc = $ds->addHost($host);
-
-        if (!$rc) {
-                cleanup($ds, 1,
-                              "Failed to add host $hostname to the datastore: "
-                            . $ds->getError()
-                            . ".\n");
-        }
-}
-
 sub addBuild {
         if (!$opts->{'b'} || !$opts->{'j'} || !$opts->{'p'}) {
                 usage("addBuild");
@@ -1430,21 +1303,11 @@ sub addBuildPortsQueueEntry {
 
         my $priority = $opts->{'p'} ? $opts->{'p'} : 10;
 
-        my $hostname = getHostname();
-        if ($opts->{'h'}) {
-                $hostname = $opts->{'h'};
-        }
-
-        if (!$ds->isValidHost($hostname)) {
-                cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
-        }
-
         if (!$ds->isValidBuild($opts->{'b'})) {
                 cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
         }
 
         my $build = $ds->getBuildByName($opts->{'b'});
-        my $host  = $ds->getHostByName($hostname);
 
         if ($admin = $ds->getWwwAdmin()) {
                 $user_id = $admin->getId();
@@ -1452,8 +1315,7 @@ sub addBuildPortsQueueEntry {
                 $user_id = 0;
         }
 
-        $ds->addBuildPortsQueueEntry($build, $opts->{'d'}, $host, $priority,
-                $user_id);
+        $ds->addBuildPortsQueueEntry($build, $opts->{'d'}, $priority, $user_id);
 }
 
 sub addPortFailPattern {
@@ -1555,23 +1417,12 @@ sub addPortFailReason {
 sub listBuildPortsQueue {
         my $raw;
         my $status   = $opts->{'s'};
-        my $hostname = getHostname();
-
-        if ($opts->{'h'}) {
-                $hostname = $opts->{'h'}
-        }
 
         if ($opts->{'r'}) {
                 $raw = 1
         }
 
-        if (!$ds->isValidHost($hostname)) {
-                cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
-        }
-
-        my $host = $ds->getHostByName($hostname);
-
-        my @buildportsqueue = $ds->getBuildPortsQueueByHost($host, $status);
+        my @buildportsqueue = $ds->getBuildPortsQueueByStatus($status);
 
         if (@buildportsqueue) {
                 if ($raw ne 1) {
@@ -1807,32 +1658,17 @@ sub setPortsMount {
 }
 
 sub reorgBuildPortsQueue {
-
-        my $hostname = getHostname();
-
-        if ($opts->{'h'}) {
-                $hostname = $opts->{'h'};
-        }
-
-        if (!$ds->isValidHost($hostname)) {
-                cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
-        }
-
-        my $host = $ds->getHostByName($hostname);
-
-        my $rc = $ds->reorgBuildPortsQueue($host);
+        my $rc = $ds->reorgBuildPortsQueue();
 
         if (!$rc) {
                 cleanup($ds, 1,
-                              "Failed to reorganize BuildPortsQueue for host "
-                            . $host->getName() . ": "
+                              "Failed to reorganize BuildPortsQueue: "
                             . $ds->getError()
                             . "\n");
         }
 }
 
 sub updateBuildPortsQueueEntryStatus {
-
         if (!$opts->{'i'} || !$opts->{'s'}) {
                 usage("updateBuildPortsQueueEntryStatus");
         }
@@ -1857,24 +1693,11 @@ sub updateBuildPortsQueueEntryStatus {
 }
 
 sub rmBuildPortsQueue {
-
-        my $hostname = getHostname();
-
-        if ($opts->{'h'}) {
-                $hostname = $opts->{'h'};
-        }
-        if (!$ds->isValidHost($hostname)) {
-                cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
-        }
-
-        my $host = $ds->getHostByName($hostname);
-
-        my $rc = $ds->removeBuildPortsQueue($host);
+        my $rc = $ds->removeBuildPortsQueue();
 
         if (!$rc) {
                 cleanup($ds, 1,
-                              "Failed to remove BuildPortsQueue for host "
-                            . $host->getName() . ": "
+                              "Failed to remove BuildPortsQueue: "
                             . $ds->getError()
                             . "\n");
         }
@@ -1897,30 +1720,19 @@ sub rmBuildPortsQueueEntry {
 
                 $buildportsqueue = $ds->getBuildPortsQueueById($opts->{'i'});
         } else {
-                my $hostname = getHostname();
-
-                if ($opts->{'h'}) {
-                        $hostname = $opts->{'h'};
-                }
-                if (!$ds->isValidHost($hostname)) {
-                        cleanup($ds, 1, "Unknown host, " . $hostname . "\n");
-                }
-
                 if (!$ds->isValidBuild($opts->{'b'})) {
                         cleanup($ds, 1,
                                 "Unknown build, " . $opts->{'b'} . "\n");
                 }
 
                 my $build = $ds->getBuildByName($opts->{'b'});
-                my $host  = $ds->getHostByName($hostname);
                 $buildportsqueue =
-                    $ds->getBuildPortsQueueByKeys($build, $opts->{'d'}, $host);
+                    $ds->getBuildPortsQueueByKeys($build, $opts->{'d'});
                 if (!$buildportsqueue) {
                         cleanup($ds, 1,
                                       "Unknown BuildPortsQueueEntry "
                                     . $opts->{'d'} . " "
-                                    . $opts->{'b'} . " "
-                                    . $hostname
+                                    . $opts->{'b'}
                                     . "\n");
                 }
         }
@@ -1949,28 +1761,6 @@ sub getPackageSuffix {
         my $sufx = $ds->getPackageSuffix($jail);
 
         print $sufx . "\n";
-}
-
-sub rmHost {
-        my $hostname = getHostname();
-
-        if ($opts->{'h'}) {
-                $hostname = $opts->{'h'};
-        }
-
-        if (!$ds->isValidHost($hostname)) {
-                cleanup($ds, 1, "Not a valid host: $hostname\n");
-        }
-
-        my $host = $ds->getHostByName($hostname);
-        my $rc   = $ds->removeHost($host);
-
-        if (!$rc) {
-                cleanup($ds, 1,
-                        "Failed to remove host $hostname from the datastore: "
-                            . $ds->getError()
-                            . ".\n");
-        }
 }
 
 sub rmPort {

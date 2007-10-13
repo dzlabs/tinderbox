@@ -21,7 +21,7 @@
 .\" (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 .\" THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.\" $MCom: portstools/tinderbox/man/man1/tc-configTinderd.1,v 1.1 2005/08/20 20:04:12 marcus Exp $
+.\" $MCom: portstools/tinderbox/man/man1/tc-configTinderd.1,v 1.2 2007/10/13 02:28:47 ade Exp $
 .\"
 .Dd July 21, 2005
 .Os FreeBSD
@@ -32,16 +32,13 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl t Ar sleep-time
-.Op Fl G | Fl h Ar hostname
-.Nm
-.Fl G Fl h Ar hostname
 .Sh DESCRIPTION
 .Nm
 displays and configures
 .Pa Tinderbox
 tinder daemon (tinderd) settings.  Without any arguments
 .Nm
-will print the current global (default) tinderd configuration to
+will print the current tinderd configuration to
 .Pa stdout .
 .Sh OPTIONS
 The following options are supported by
@@ -50,20 +47,6 @@ The following options are supported by
 .It Fl t Ar sleep-time
 Specify the time in seconds for which to sleep between passes.  The default
 is 120 seconds.
-.It Fl h Ar hostname
-Set or display tinderd configuration on a per-host basis.  By default all
-configuration is done on a global basis.  Specifying this option along with
-.Fl G
-will cause the configuration for
-.Ar hostname
-to be reset to the global (default) configuration.
-.It Fl G
-Set or display the global (default) configuration.  This is the default.
-Specifying this option along with
-.Fl h Ar hostname
-will cause the configuration for
-.Ar hostname
-to be reset to the global (default) configuration.
 .El
 .Sh EXAMPLES
 .Pp

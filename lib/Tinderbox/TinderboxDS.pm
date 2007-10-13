@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.76 2007/06/18 06:27:43 ade Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.77 2007/10/13 02:28:46 ade Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -35,7 +35,6 @@ use Tinderbox::PortsTree;
 use Tinderbox::Build;
 use Tinderbox::BuildPortsQueue;
 use Tinderbox::User;
-use Tinderbox::Host;
 use Tinderbox::Config;
 use Tinderbox::PortFailPattern;
 use Tinderbox::PortFailReason;
@@ -62,7 +61,6 @@ $PKG_PREFIX = 'Tinderbox::';
 	"BuildPortsQueue" => "build_ports_queue",
         "PortsTree"       => "ports_trees",
         "User"            => "users",
-        "Host"            => "hosts",
         "Config"          => "config",
         "PortFailReason"  => "port_fail_reasons",
         "PortFailPattern" => "port_fail_patterns",
@@ -138,13 +136,10 @@ sub verifyType {
 sub defaultConfig {
         my $self      = shift;
         my $configlet = shift;
-        my $host      = shift;
-
-        $self->verifyType(2, $host, 'Host');
 
         my $rc = $self->_doQuery(
-                "DELETE FROM config WHERE config_option_name LIKE ? AND host_id=?",
-                [$configlet . '%', $host->getId()]
+                "DELETE FROM config WHERE config_option_name LIKE ?",
+		$configlet
         );
 
         return $rc;
@@ -153,28 +148,10 @@ sub defaultConfig {
 sub getConfig {
         my $self      = shift;
         my $configlet = shift;
-        my $host      = shift;
-        my $merged    = shift;
-
-        $self->verifyType(2, $host, 'Host');
 
         my @config = ();
-        my $hostid;
-        my $fallbackhostid;
         my @results;
         my $rc;
-
-        if (defined($host)) {
-                $hostid = $host->getId();
-        } else {
-                $hostid = -1;
-        }
-
-        if ($merged eq 1) {
-                $fallbackhostid = -1;
-        } else {
-                $fallbackhostid = $hostid;
-        }
 
         if (defined($configlet)) {
                 $configlet = uc $configlet;
@@ -185,8 +162,8 @@ sub getConfig {
 
         $rc =
             $self->_doQueryHashRef(
-                "SELECT * FROM config WHERE (config_option_name NOT IN (SELECT config_option_name FROM config WHERE host_id=?) AND host_id=? OR host_id=?) AND config_option_name LIKE ?",
-                \@results, $hostid, $fallbackhostid, $hostid, $configlet);
+                "SELECT * FROM config WHERE config_option_name LIKE ?",
+                \@results, $configlet);
 
         if (!$rc) {
                 return ();
@@ -200,17 +177,7 @@ sub getConfig {
 sub updateConfig {
         my $self      = shift;
         my $configlet = shift;
-        my $host      = shift;
         my @config    = @_;
-        my $hostid;
-
-	$self->verifyType(2, $host, 'Host');
-
-        if (defined($host)) {
-                $hostid = $host->getId();
-        } else {
-                $hostid = -1;
-        }
 
         foreach my $conf (@config) {
                 my $oname  = uc($configlet . '_' . $conf->getOptionName());
@@ -221,17 +188,16 @@ sub updateConfig {
                 }
 
                 my @results =
-                    $self->getObjects("Config",
-                        {config_option_name => $oname, host_id => $hostid});
+                    $self->getObjects("Config", {config_option_name => $oname});
 
                 my ($query, $values);
                 if (!@results) {
-                        $query = "INSERT INTO config VALUES(?, ?, ?)";
-                        $values = [$oname, $ovalue, $hostid];
+                        $query = "INSERT INTO config VALUES(?, ?)";
+                        $values = [$oname, $ovalue];
                 } else {
                         $query =
-                            "UPDATE config SET config_option_value=? WHERE config_option_name=? AND host_id=?";
-                        $values = [$ovalue, $oname, $hostid];
+                            "UPDATE config SET config_option_value=? WHERE config_option_name=?";
+                        $values = [$ovalue, $oname];
                 }
                 $rc = $self->_doQuery($query, $values);
 
@@ -350,17 +316,14 @@ sub getBuildPortsQueueByKeys {
         my $self      = shift;
         my $build     = shift;
         my $directory = shift;
-        my $host      = shift;
 
-	$self->verifyType(1, $host, 'Host');
-	$self->verifyType(2, $build, 'Build');
+	$self->verifyType(1, $build, 'Build');
 
         my @results = $self->getObjects(
                 "BuildPortsQueue",
                 {
                         build_id       => $build->getId(),
-                        port_directory => $directory,
-                        host_id        => $host->getId()
+                        port_directory => $directory
                 }
         );
 
@@ -371,9 +334,8 @@ sub getBuildPortsQueueByKeys {
         return $results[0];
 }
 
-sub getBuildPortsQueueByHost {
+sub getBuildPortsQueueByStatus {
         my $self   = shift;
-        my $host   = shift;
         my $status = shift;
         my @results;
 
@@ -381,7 +343,6 @@ sub getBuildPortsQueueByHost {
                 @results = $self->getObjects(
                         "BuildPortsQueue",
                         {
-                                host_id => $host->getId(),
                                 status  => $status,
                                 _ORDER_ =>
                                     "priority ASC, build_ports_queue_id ASC"
@@ -391,7 +352,6 @@ sub getBuildPortsQueueByHost {
                 @results = $self->getObjects(
                         "BuildPortsQueue",
                         {
-                                host_id => $host->getId(),
                                 _ORDER_ =>
                                     "priority ASC, build_ports_queue_id ASC"
                         }
@@ -407,11 +367,9 @@ sub getBuildPortsQueueByHost {
 
 sub reorgBuildPortsQueue {
         my $self = shift;
-        my $host = shift;
 
         my $rc = $self->_doQuery(
-                "DELETE FROM build_ports_queue WHERE host_id=? AND enqueue_date<=NOW()-25200 AND status != 'ENQUEUED'",
-                [$host->getId()]
+                "DELETE FROM build_ports_queue WHERE enqueue_date<=NOW()-25200 AND status != 'ENQUEUED'"
         );
 
         return $rc;
@@ -494,19 +452,6 @@ sub getBuildById {
         my $id   = shift;
 
         my @results = $self->getObjects("Build", {build_id => $id});
-
-        if (!@results) {
-                return undef;
-        }
-
-        return $results[0];
-}
-
-sub getHostByName {
-        my $self = shift;
-        my $name = shift;
-
-        my @results = $self->getObjects("Host", {host_name => $name});
 
         if (!@results) {
                 return undef;
@@ -685,34 +630,18 @@ sub addBuildPortsQueueEntry {
         my $self      = shift;
         my $build     = shift;
         my $directory = shift;
-        my $host      = shift;
         my $priority  = shift;
         my $user      = shift;
 
-	$self->verifyType(1, $host, 'Host');
-	$self->verifyType(2, $build, 'Build');
+	$self->verifyType(1, $build, 'Build');
 
         my $rc = $self->_doQuery(
                 "INSERT INTO build_ports_queue
-                    ( build_id, user_id, port_directory, priority, host_id )
+                    ( build_id, user_id, port_directory, priority )
                  VALUES
-                     ( ?, ?, ?, ?, ? )",
-                [$build->getId(), $user, $directory, $priority, $host->getId()]
+                     ( ?, ?, ?, ? )",
+                [$build->getId(), $user, $directory, $priority]
         );
-
-        return $rc;
-}
-
-sub addHost {
-        my $self = shift;
-        my $host = shift;
-        my $bCls = (ref($host) eq "REF") ? $$host : $host;
-
-        my $rc = $self->_addObject($bCls);
-
-        if (ref($host) eq "REF") {
-                $$host = $self->getHostByName($bCls->getName());
-        }
 
         return $rc;
 }
@@ -1348,8 +1277,8 @@ sub setWwwAdmin {
 
         if (!$rc) {
                 $rc = $self->_doQuery(
-                        'INSERT INTO user_permissions (user_id,host_id,user_permission_object_type,user_permission_object_id,user_permission) VALUES (?, ? , ?, ?, ?)',
-                        [$user->getId(), '-1', 'users', $user->getId(), 1]
+                        'INSERT INTO user_permissions (user_id,user_permission_object_type,user_permission_object_id,user_permission) VALUES (?, ?, ?, ?)',
+                        [$user->getId(), 'users', $user->getId(), 1]
                 );
         } else {
                 $rc = $self->_doQuery(
@@ -1423,27 +1352,11 @@ sub addPortForBuild {
         return $rc;
 }
 
-sub removeHost {
-        my $self = shift;
-        my $host = shift;
-
-        my $rc;
-        $rc = $self->_doQuery("DELETE FROM hosts WHERE host_id=?",
-                [$host->getId()]);
-
-        return $rc;
-}
-
 sub removeBuildPortsQueue {
         my $self = shift;
-        my $host = shift;
-
-	$self->verifyType(1, $host, 'Host');
 
         my $rc;
-        $rc = $self->_doQuery("DELETE FROM build_ports_queue WHERE host_id=?",
-                [$host->getId()]);
-
+        $rc = $self->_doQuery("DELETE FROM build_ports_queue WHERE 1");
         return $rc;
 }
 
@@ -1663,15 +1576,6 @@ sub isPortInDS {
                 $port->getDirectory());
 
         return (($rc > 0) ? 1 : 0);
-}
-
-sub isValidHost {
-        my $self     = shift;
-        my $hostname = shift;
-
-        my $host = $self->getHostByName($hostname);
-
-        return (defined($host));
 }
 
 sub isValidBuild {

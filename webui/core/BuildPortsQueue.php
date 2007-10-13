@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/BuildPortsQueue.php,v 1.9 2007/06/17 00:05:47 ade Exp $
+# $MCom: portstools/tinderbox/webui/core/BuildPortsQueue.php,v 1.10 2007/10/13 02:28:47 ade Exp $
 #
 
     require_once 'TinderObject.php';
@@ -36,15 +36,12 @@
                 'build_ports_queue_id' => '',
 		'enqueue_date' => '',
 		'completion_date'  => '',
-		'host_name' => '',
 		'build_id' => '',
 		'build_name' => '',
 		'user_id' => '',
 		'user_name' => '',
 		'port_directory' => '',
 		'priority' => '',
-		'host_id' => '',
-		'host_name' => '',
 		'email_on_completion' => '',
 		'status'  => ''
 	    );
@@ -88,14 +85,6 @@
 	    return $this->build_name;
 	}
 
-	function getHostId() {
-	    return $this->host_id;
-	}
-
-	function getHostName() {
-	    return $this->host_name;
-	}
-
 	function getUserId() {
 	    return $this->user_id;
 	}
@@ -106,10 +95,6 @@
 
 	function getBuildPortsQueueId() {
 	    return $this->build_ports_queue_id;
-	}
-
-	function setHostId( $host_id ) {
-	    return $this->host_id = $host_id;
 	}
 
 	function setBuildId( $build_id ) {

@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.19 2006/07/01 18:21:23 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.pl,v 1.20 2007/10/13 02:28:46 ade Exp $
 #
 
 use strict;
@@ -73,12 +73,6 @@ sub sendMail {
         $smtp->quit;
 
         return $rc;
-}
-
-sub getHostname {
-        my $hostname = hostname();
-
-        return $hostname;
 }
 
 sub tinderLoc {
