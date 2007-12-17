@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.125 2007/10/13 02:28:46 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.126 2007/12/17 06:25:00 marcus Exp $
 #
 
 my $pb;
@@ -72,9 +72,9 @@ my $ds = new Tinderbox::TinderboxDS();
                 usage => "",
         },
         "configGet" => {
-                func   => \&configGet,
-                help   => "Print current Tinderbox configuration",
-                usage  => "",
+                func  => \&configGet,
+                help  => "Print current Tinderbox configuration",
+                usage => "",
         },
         "configCcache" => {
                 func => \&configCcache,
@@ -91,32 +91,28 @@ my $ds = new Tinderbox::TinderboxDS();
                 optstr => 'c:Cu:U',
         },
         "configOptions" => {
-                func => \&configOptions,
-                help => "Configure Tinderbox port OPTIONS parameters",
-                usage =>
-                    "[-d | -e] [-o <options mount src>]",
+                func   => \&configOptions,
+                help   => "Configure Tinderbox port OPTIONS parameters",
+                usage  => "[-d | -e] [-o <options mount src>]",
                 optstr => 'deo:',
         },
         "configPackage" => {
-                func => \&configPackage,
-                help => "Configure Tinderbox package parameters",
-                usage =>
-                    "[-u <uri> | -U]",
+                func   => \&configPackage,
+                help   => "Configure Tinderbox package parameters",
+                usage  => "[-u <uri> | -U]",
                 optstr => 'u:U',
         },
         "configHost" => {
-                func => \&configHost,
-                help => "Configure Tinderbox Host parameters",
-                usage =>
-                    "[-w <work directory> | -W]",
+                func   => \&configHost,
+                help   => "Configure Tinderbox Host parameters",
+                usage  => "[-w <work directory> | -W]",
                 optstr => 'w:W',
         },
         "configTinderd" => {
                 func => \&configTinderd,
                 help =>
                     "Configure Tinderbox tinder daemon (tinderd) parameters",
-                usage =>
-                    "[-t <sleep time>]",
+                usage  => "[-t <sleep time>]",
                 optstr => 't:',
         },
         "listJails" => {
@@ -159,9 +155,9 @@ my $ds = new Tinderbox::TinderboxDS();
                 optstr => 't:',
         },
         "reorgBuildPortsQueue" => {
-                func   => \&reorgBuildPortsQueue,
-                help   => "Reorganizes the Ports to Build Queue",
-                usage  => "",
+                func  => \&reorgBuildPortsQueue,
+                help  => "Reorganizes the Ports to Build Queue",
+                usage => "",
         },
         "addBuild" => {
                 func => \&addBuild,
@@ -181,14 +177,14 @@ my $ds = new Tinderbox::TinderboxDS();
                 func => \&addPortsTree,
                 help => "Add a portstree to the datastore",
                 usage =>
-		    "-p <portstree name> -u CSUP|CVSUP|USER|NONE [-d <portstree description>] [-m <ports mount source>] [-w <CVSweb URL>]",
+                    "-p <portstree name> -u CSUP|CVSUP|USER|NONE [-d <portstree description>] [-m <ports mount source>] [-w <CVSweb URL>]",
                 optstr => 'm:p:u:d:w:',
         },
-	"addPort" => {
-		help   => "Add a port to the datastore",
-		usage  => "{-b build name | -a} -d <port directory> [-o] [-R]",
-		optstr => 'ab:d:oR',
-	},
+        "addPort" => {
+                help   => "Add a port to the datastore",
+                usage  => "{-b build name | -a} -d <port directory> [-o] [-R]",
+                optstr => 'ab:d:oR',
+        },
         "addPortToOneBuild" => {
                 func   => \&addPortToOneBuild,
                 help   => "INTERNAL function only",
@@ -196,10 +192,9 @@ my $ds = new Tinderbox::TinderboxDS();
                 optstr => 'b:d:R',
         },
         "addBuildPortsQueueEntry" => {
-                func  => \&addBuildPortsQueueEntry,
-                help  => "Adds a Port to the Ports to Build Queue",
-                usage =>
-                    "-b <build name> -d <port directory> [-p <priority>]",
+                func   => \&addBuildPortsQueueEntry,
+                help   => "Adds a Port to the Ports to Build Queue",
+                usage  => "-b <build name> -d <port directory> [-p <priority>]",
                 optstr => 'b:d:p:',
         },
         "addPortFailPattern" => {
@@ -296,14 +291,13 @@ my $ds = new Tinderbox::TinderboxDS();
                 optstr => 'p:m:',
         },
         "rmBuildPortsQueue" => {
-                func => \&rmBuildPortsQueue,
-                help =>
-                    "Removes all Ports from the Ports to Build Queue",
-                usage  => ""
+                func  => \&rmBuildPortsQueue,
+                help  => "Removes all Ports from the Ports to Build Queue",
+                usage => ""
         },
         "rmBuildPortsQueueEntry" => {
-                func  => \&rmBuildPortsQueueEntry,
-                help  => "Removes a Port from the Ports to Build Queue",
+                func => \&rmBuildPortsQueueEntry,
+                help => "Removes a Port from the Ports to Build Queue",
                 usage =>
                     "-i <Build_Ports_Queue_Id> | -b <build name> -d <port directory>",
                 optstr => 'i:b:d:',
@@ -358,12 +352,12 @@ my $ds = new Tinderbox::TinderboxDS();
                 usage  => "-j <jail name> [-l <last built timestamp>]",
                 optstr => 'j:l:',
         },
-	"updatePortsTreeLastBuilt" => {
-		func   => \&updatePortsTreeLastBuilt,
-		help   => "Update the specified portstree's last built time",
-		usage  => "-p <portstree name> [-l <last built timestamp>]",
-		optstr => 'l:p:',
-	},
+        "updatePortsTreeLastBuilt" => {
+                func   => \&updatePortsTreeLastBuilt,
+                help   => "Update the specified portstree's last built time",
+                usage  => "-p <portstree name> [-l <last built timestamp>]",
+                optstr => 'l:p:',
+        },
         "updatePortStatus" => {
                 func => \&updatePortStatus,
                 help => "Update build information about a port",
@@ -515,7 +509,7 @@ my $ds = new Tinderbox::TinderboxDS();
         "createPortsTree" => {
                 help => "Create a new portstree",
                 usage =>
-		    "-p <portstreename> -u CSUP|CVSUP|USER|NONE [-d <description>] [-C] [-H <updatehost>] [-m <mountsrc>] [-w <cvsweburl>] [-I]",
+                    "-p <portstreename> -u CSUP|CVSUP|USER|NONE [-d <description>] [-C] [-H <updatehost>] [-m <mountsrc>] [-w <cvsweburl>] [-I]",
                 optstr => 'p:d:CH:Im:u:w:',
         },
 
@@ -545,11 +539,17 @@ my $ds = new Tinderbox::TinderboxDS();
                 optstr => 'b:',
         },
 
-	"updatePortsTree" => {
-		help   => "Update an existing ports tree",
-		usage  => "-p <portstreename>",
-		optstr => 'p',
-	},
+        "updatePortsTree" => {
+                help   => "Update an existing ports tree",
+                usage  => "-p <portstreename>",
+                optstr => 'p',
+        },
+
+        "tbcleanup" => {
+                help =>
+                    "Cleanup old build logs, and prune old database entries for which no package exists",
+                usage => "",
+        },
 
 );
 
@@ -790,8 +790,7 @@ sub configTinderd {
         my @config = ();
         my $sleeptime;
 
-        if (scalar(keys %{$opts}) == 0)
-        {
+        if (scalar(keys %{$opts}) == 0) {
                 configGet("tinderd");
                 cleanup($ds, 0, undef);
         }
@@ -875,13 +874,13 @@ sub configPackage {
 }
 
 sub configHost {
-	my @config = ();
-	my $workdir;
+        my @config = ();
+        my $workdir;
 
-	if ($opts->{'w'} && $opts->{'W'}) {
-		usage("host");
-	}
-             
+        if ($opts->{'w'} && $opts->{'W'}) {
+                usage("host");
+        }
+
         $workdir = new Tinderbox::Config();
         $workdir->setOptionName("workdir");
 
@@ -1202,12 +1201,12 @@ sub addBuild {
 sub addJail {
         my $name = $opts->{'j'};
         my $arch = $opts->{'a'};
-	my $ucmd = $opts->{'u'};
+        my $ucmd = $opts->{'u'};
         my $tag  = $opts->{'t'};
 
-	if (!$name || !$arch || !$ucmd || !$tag) {
-		usage("addJail");
-	}
+        if (!$name || !$arch || !$ucmd || !$tag) {
+                usage("addJail");
+        }
 
         if ($ds->isValidJail($name)) {
                 cleanup($ds, 1,
@@ -1241,11 +1240,11 @@ sub addJail {
 
 sub addPortsTree {
         my $name = $opts->{'p'};
-	my $ucmd = $opts->{'u'};
+        my $ucmd = $opts->{'u'};
 
-	if (!$name || !$ucmd) {
-		usage("addPortsTree");
-	}
+        if (!$name || !$ucmd) {
+                usage("addPortsTree");
+        }
 
         if ($ds->isValidPortsTree($name)) {
                 cleanup($ds, 1,
@@ -1416,7 +1415,7 @@ sub addPortFailReason {
 
 sub listBuildPortsQueue {
         my $raw;
-        my $status   = $opts->{'s'};
+        my $status = $opts->{'s'};
 
         if ($opts->{'r'}) {
                 $raw = 1
@@ -2169,23 +2168,23 @@ sub updateJailLastBuilt {
 }
 
 sub updatePortsTreeLastBuilt {
-	if (!$opts->{'p'}) {
-		usage("updatePortsTreeLastBuilt");
-	}
+        if (!$opts->{'p'}) {
+                usage("updatePortsTreeLastBuilt");
+        }
 
-	if (!$ds->isValidPortsTree($opts->{'p'})) {
-		cleanup($ds, 1, "Unknown portstree, " . $opts->{'p'} . "\n");
-	}
+        if (!$ds->isValidPortsTree($opts->{'p'})) {
+                cleanup($ds, 1, "Unknown portstree, " . $opts->{'p'} . "\n");
+        }
 
-	my $portstree = $ds->getPortsTreeByName($opts->{'p'});
+        my $portstree = $ds->getPortsTreeByName($opts->{'p'});
 
-	$portstree->setLastBuilt($opts->{'l'});
+        $portstree->setLastBuilt($opts->{'l'});
 
-	$ds->updatePortsTreeLastBuilt($portstree)
-	    or cleanup($ds, 1,
-		      "Failed to update last built value in the datastore: "
-		    . $ds->getError()
-		    . "\n");
+        $ds->updatePortsTreeLastBuilt($portstree)
+            or cleanup($ds, 1,
+                      "Failed to update last built value in the datastore: "
+                    . $ds->getError()
+                    . "\n");
 }
 
 sub updatePortStatus {
@@ -2589,7 +2588,7 @@ sub setWwwAdmin {
                         "Failed to set www admin: " . $ds->getError() . "\n");
         }
 
-	$rc = $ds->moveBuildPortsQueueFromUserToUser($old_id, $user->getId());
+        $rc = $ds->moveBuildPortsQueueFromUserToUser($old_id, $user->getId());
 }
 
 sub addBuildUser {
