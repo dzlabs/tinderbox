@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.62 2007/10/21 22:58:03 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.63 2007/12/17 06:37:18 marcus Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1224,7 +1224,7 @@ tinderbuild_phase () {
     echo "ended at $(date)"
     end=$(date +%s)
 
-    echo "phase ${num} took $(date -u -j -r $((${end} - ${start})) |
+    echo "phase ${num} took $(env LANG=C date -u -j -r $((${end} - ${start})) |
 		awk '{print $4}')"
     echo $(echo $(ls -1 ${pkgDir}/All | wc -l) - 1 | bc) "packages built"
     echo $(echo $(du -sh ${pkgDir} | awk '{print $1}')) " of packages"
