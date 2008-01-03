@@ -109,6 +109,7 @@ if [ $phase = 1 ]; then
 
   cd $dir || exit 1
   echo "maintained by: $(make maintainer)"
+  echo "building for:  $(uname -rm)"
   echo "port directory: ${dir}"
   echo "build started at $(date)"
 
