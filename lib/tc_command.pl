@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.127 2007/12/28 18:43:58 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.128 2008/01/09 23:54:33 ade Exp $
 #
 
 my $pb;
@@ -45,6 +45,7 @@ use strict;
 use Tinderbox::TinderboxDS;
 use Tinderbox::MakeCache;
 use Getopt::Std;
+use Text::Wrap;
 use vars qw(
     %COMMANDS
     $TINDERBOX_HOST
@@ -58,6 +59,8 @@ use vars qw(
 
 require "tinderbox.ph";
 require "tinderlib.pl";
+
+$Text::Wrap::columns = 72;
 
 my $ds = new Tinderbox::TinderboxDS();
 
@@ -557,42 +560,40 @@ my $ds = new Tinderbox::TinderboxDS();
 # Helper functions
 #---------------------------------------------------------------------------
 
+sub _usageprint {
+		my ($cmd, $what) = @_;
+
+		printf STDERR "%s\n%s\n",
+			   		  $cmd, wrap("\t", "\t", $COMMANDS{$cmd}->{$what});
+}
+
 sub usage {
         my $cmd = shift;
 
-        print STDERR "usage: tc ";
+        print STDERR "usage:	tc ";
 
         if (!defined($cmd) || !defined($COMMANDS{$cmd})) {
-                my $max   = 0;
                 my $match = 0;
-                foreach (keys %COMMANDS) {
-                        if ((length $_) > $max) {
-                                $max = length $_;
-                        }
-                }
                 print STDERR "<command>\n";
-                print STDERR "Where <command> is one of:\n";
+                print STDERR "Where <command> is one of:\n\n";
                 foreach my $key (sort keys %COMMANDS) {
                         if (!defined($cmd)) {
-                                printf STDERR "  %-${max}s: %s\n", $key,
-                                    $COMMANDS{$key}->{'help'};
+								_usageprint($key, 'help');
                                 $match++;
                         } else {
                                 if ($key =~ /^$cmd/) {
-                                        printf STDERR "  %-${max}s: %s\n", $key,
-                                            $COMMANDS{$key}->{'help'};
+										_usageprint($key, 'help');
                                         $match++;
                                 }
                         }
                 }
                 if (!$match) {
                         foreach my $key (sort keys %COMMANDS) {
-                                printf STDERR "  %-${max}s: %s\n", $key,
-                                    $COMMANDS{$key}->{'help'};
+								_usageprint($key, 'help');
                         }
                 }
         } else {
-                print STDERR "$cmd " . $COMMANDS{$cmd}->{'usage'} . "\n";
+				_usageprint($cmd, 'usage');
         }
 
         cleanup($ds, 1, undef);
