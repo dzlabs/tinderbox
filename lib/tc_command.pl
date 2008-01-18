@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.129 2008/01/18 06:35:23 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.130 2008/01/18 06:39:33 marcus Exp $
 #
 
 my $pb;
@@ -561,10 +561,10 @@ my $ds = new Tinderbox::TinderboxDS();
 #---------------------------------------------------------------------------
 
 sub _usageprint {
-		my ($cmd, $what) = @_;
+        my ($cmd, $what) = @_;
 
-		printf STDERR "%s\n%s\n",
-			   		  $cmd, wrap("\t", "\t", $COMMANDS{$cmd}->{$what});
+        printf STDERR "%s\n%s\n", $cmd,
+            wrap("\t", "\t", $COMMANDS{$cmd}->{$what});
 }
 
 sub usage {
@@ -578,22 +578,22 @@ sub usage {
                 print STDERR "Where <command> is one of:\n\n";
                 foreach my $key (sort keys %COMMANDS) {
                         if (!defined($cmd)) {
-								_usageprint($key, 'help');
+                                _usageprint($key, 'help');
                                 $match++;
                         } else {
                                 if ($key =~ /^$cmd/) {
-										_usageprint($key, 'help');
+                                        _usageprint($key, 'help');
                                         $match++;
                                 }
                         }
                 }
                 if (!$match) {
                         foreach my $key (sort keys %COMMANDS) {
-								_usageprint($key, 'help');
+                                _usageprint($key, 'help');
                         }
                 }
         } else {
-				_usageprint($cmd, 'usage');
+                _usageprint($cmd, 'usage');
         }
 
         cleanup($ds, 1, undef);
@@ -819,10 +819,10 @@ sub configOptions {
                 usage("configOptions");
         }
 
-	if (scalar(keys %{$opts}) == 0) {
-		configGet("options");
-		cleanup($ds, 0, undef);
-	}
+        if (scalar(keys %{$opts}) == 0) {
+                configGet("options");
+                cleanup($ds, 0, undef);
+        }
 
         $enabled = new Tinderbox::Config();
         $enabled->setOptionName("enabled");
