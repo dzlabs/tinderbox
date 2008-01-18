@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.128 2008/01/09 23:54:33 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.129 2008/01/18 06:35:23 marcus Exp $
 #
 
 my $pb;
@@ -818,6 +818,11 @@ sub configOptions {
         if ($opts->{'d'} && $opts->{'e'}) {
                 usage("configOptions");
         }
+
+	if (scalar(keys %{$opts}) == 0) {
+		configGet("options");
+		cleanup($ds, 0, undef);
+	}
 
         $enabled = new Tinderbox::Config();
         $enabled->setOptionName("enabled");
