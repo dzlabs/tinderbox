@@ -5,7 +5,10 @@ $tinderbox_name	 = 'Example Tinderbox';
 $tinderbox_title = 'Example Tinderbox';
 $rootdir	 = '/space';
 $wwwrooturi	 = '/tb';
+# Comment out the next line, and uncomment the line after it to enable
+# the paefchen frontend template.
 $template_dir	 = 'default';
+#$template_dir	= 'paefchen';
 
 # These should probably be left alone
 $pkguri		 = '/packages';
