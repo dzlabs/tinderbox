@@ -1,0 +1,295 @@
+/* $Paefchen: FreeBSD/tinderbox/webui/templates/paefchen/tinderstyle.css,v 1.6 2008/01/18 21:36:24 as Exp $ */
+
+body {
+	background-color	: #FFF;
+	background-image	: url(images/hdr_fill.png);
+	background-repeat	: repeat-x;
+	background-position	: 0 -20px;
+	margin				: 0 20px;
+	padding				: 0;
+}
+
+body, td, li, input, select, label, #content h1, #content h2 {
+	color				: #000;
+	font-family			: Verdana, sans-serif;
+	font-size			: 11px;
+}
+
+a:link, a:visited {
+	color				: #900;
+}
+
+a:hover {
+	color				: #000;
+}
+
+table {
+	background-color	: #EEE;
+	border-collapse		: collapse;
+	border-color		: #CACACA;
+	border-spacing		: 0;
+	border-style		: solid solid none none;
+	border-width		: 1px 1px 0 0;
+}
+
+table th, table td {
+	border-width		: 1px;
+	border-style		: solid;
+	border-color		: #D4D4D4;
+	padding				: 1px 2px;
+	white-space			: nowrap;
+}
+
+table th {
+	font-weight			: bold;
+	background-color	: #737373;
+	color				: #FFF;
+}
+
+table th a:link, table th a:visited {
+	color				: #FFF;
+}
+
+form {
+	margin				: 0;
+	padding				: 0;
+}
+
+input, select {
+	background-color	: #F2F2F2;
+	border-color		: #868686 #d7d7d7 #d7d7d7 #868686;
+	border-style		: groove solid solid groove;
+	border-width		: 2px 1px 1px 2px;
+	margin				: 1px;
+}
+
+input[type="submit"] {
+	border-color		: #d7d7d7 #868686 #868686 #d7d7d7;
+	border-style		: solid groove groove solid;
+	border-width		: 1px 2px 2px 1px;
+}
+
+input:focus, input:hover, select:focus, select:hover {
+	background-color	: #FFF;
+}
+
+ul {
+	height				: 29px;
+	list-style-image	: none;
+	list-style-position	: outside;
+	list-style-type		: none;
+	margin				: 0;
+	padding				: 0; 
+}
+
+.right ul {
+	margin-right		: 16px;
+}
+
+li {
+	border-width		: 0 0 0 1px;
+	border-style		: solid;
+	border-color		: #B4B4B4;
+	display				: inline;
+	padding				: 0 4px 0 8px;
+}
+
+li:first-child {
+	border-left			: 0;
+	padding-left		: 0;
+}
+
+li a:link, li a:visited {
+	color				: #666;
+	font-weight			: bold;
+	text-decoration		: none;
+}
+
+fieldset {
+	border-width		: 0;
+	margin				: 0;
+	padding				: 0;
+}
+
+label {
+	display				: block;
+	font-weight			: bold;
+}
+
+#header {
+	color				: #FFF;
+	height				: 40px;
+}
+
+#header a {
+	color				: #FFF;
+	text-decoration		: none;
+}
+
+#header h1 {
+	font-size			: 22px;
+	margin-top			: 14px;
+}
+
+
+#topmenu {
+	position			: absolute;
+	top					: 64px;
+	width				: 100%;
+}
+
+#topmenu .right {
+	padding-right		: 20px;
+}
+
+#topmenu .right ul {
+	float				: left;
+}
+
+#topmenu input {
+	color				: #666;
+	font-weight			: bold;
+	padding				: 0;
+	margin				: 0;
+	border-width		: 0;
+	background-color	: transparent;
+	cursor				: pointer;
+}
+
+#content {
+	margin				: 64px 0 40px 0;
+}
+
+#content h1, #content h2, #content label {
+	border-width		: 1px 0 0 0;
+	border-color		: #b4b4b4;
+	border-style		: solid;
+	color				: #737373;
+	background-color	: #f7f7f7;
+	margin				: 5px 0 5px 0;
+	padding				: 2px 0;
+}
+
+#footer {
+	position			: fixed;
+	bottom				: 0;
+	left				: 0;
+	color				: #737373;
+	font-weight			: bold;
+	padding-top			: 4px;
+	width				: 100%;
+	height				: 19px;
+	background-color	: #DDD;
+	background-image	: url(images/hdr_fill.png);
+	background-repeat	: repeat-x;
+	background-position	: 0 -81px;
+	border-width		: 1px 0 0 0;
+	border-color		: #b4b4b4;
+	border-style		: solid;
+}
+
+#footer .left {
+	padding-left		: 20px;
+}
+
+#footer .right {
+	padding-right		: 20px;
+}
+
+#footer table {
+	float				: left;
+	margin-left			: 5px;
+}
+
+.left {
+	float				: left;
+}
+
+.right {
+	float				: right;
+}
+
+.description {
+	margin				: 20px 0;	
+}
+
+.subcontent {
+	margin				: 20px 0;	
+}
+
+.subcontent table th, .description table th {
+	background-color	: transparent;
+	color				: #737373;
+	text-align			: left;
+}
+
+td.port_success {
+	background-color	: #E8FFE8;
+}
+td.port_dud {
+	background-color	: yellow;
+	font-weight			: bold;
+	text-align			: center;
+}
+td.port_leftovers {
+	background-color	: #FFFFD8;
+	color				: red;
+	font-weight			: bold;
+	text-align			: center;
+}
+td.port_broken {
+	background-color	: #FFFFD8;
+	color				: red;
+	font-weight			: bold;
+	text-align			: center;
+}
+td.port_fail {
+	background-color	: red;
+}
+td.port_depend {
+	background-color	: #FFA500;
+}
+td.port_default {
+	background-color	: #808080;
+}
+
+td.build_portbuild {
+	background-color	: green;
+}
+td.build_prepare {
+	background-color	: #ADD8E6;
+}
+td.build_default {
+}
+
+td.queue_entry_enqueued {
+	background-color	: #808080;
+}
+td.queue_entry_processing {
+	background-color	: green;
+}
+td.queue_entry_success {
+	background-color	: #E8FFE8;
+}
+td.queue_entry_fail {
+	background-color	: red;
+}
+
+td.fail_reason_COMMON {
+	background-color	: red;
+	color				: white;
+}
+a.fail_reason_COMMON {
+	color				: white;
+}
+td.fail_reason_RARE {
+	background-color	: #FFA500;
+}
+td.fail_reason_TRANSIENT {
+	background-color	: yellow;
+}
+
+/* XXX */
+body > p {
+	display				: none;	
+}
