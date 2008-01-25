@@ -1,6 +1,6 @@
 <?php
 #-
-# Copyright (c) 2005 Oliver Lehmann <oliver@FreeBSD.org>
+# Copyright (c) 2005-2008 Oliver Lehmann <oliver@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.14 2007/10/07 00:58:56 ade Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.15 2008/01/25 20:12:50 marcus Exp $
 #
 
 require_once 'module/module.php';
@@ -38,6 +38,7 @@ class moduleBuildPorts extends module {
 	}
 
 	function display_list_buildports( $build_name, $sort ) {
+		global $starttimer, $with_timer;
 
 		$build = $this->TinderboxDS->getBuildByName( $build_name );
 		$ports = $this->TinderboxDS->getPortsForBuild( $build, $sort );
@@ -86,12 +87,18 @@ class moduleBuildPorts extends module {
 		$this->template_assign( 'ports_tree_description', $ports_tree->getDescription() );
 		$this->template_assign( 'ports_tree_lastbuilt',   prettyDatetime( $ports_tree->getLastBuilt() ) );
 		$this->template_assign( 'local_time',             prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
+		$elapsed_time = '';
+		if (isset($with_timer) && $with_timer == 1) {
+			$elapsed_time = get_ui_elapsed_time($starttimer);
+		}
+		$this->template_assign( 'ui_elapsed_time',           $elapsed_time);
 		$this->template_assign( 'querystring',            $qs);
 
 		return $this->template_parse( 'list_buildports.tpl' );
 	}
 
 	function display_failed_buildports( $build_name, $maintainer, $all ) {
+		global $with_timer, $starttimer;
 
 		if( $build_name ) {
 			$build = $this->TinderboxDS->getBuildByName( $build_name );
@@ -134,11 +141,17 @@ class moduleBuildPorts extends module {
 		$this->template_assign( 'build_name', $build_name );
 		$this->template_assign( 'maintainer', $maintainer );
 		$this->template_assign( 'local_time', prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
+		$elapsed_time = '';
+		if (isset($with_timer) && $with_timer == 1) {
+			$elapsed_time = get_ui_elapsed_time($starttimer);
+		}
+		$this->template_assign( 'ui_elapsed_time',           $elapsed_time);
 
 		return $this->template_parse( 'failed_buildports.tpl' );
 	}
 
 	function display_latest_buildports( $build_name ) {
+		global $with_timer, $starttimer;
 
 		$current_builds = $this->display_current_buildports( $build_name );
 
@@ -179,6 +192,11 @@ class moduleBuildPorts extends module {
 		$this->template_assign( 'current_builds',         $current_builds );
 		$this->template_assign( 'build_name',             $build_name );
 		$this->template_assign( 'local_time',             prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
+		$elapsed_time = '';
+		if (isset($with_timer) && $with_timer == 1) {
+			$elapsed_time = get_ui_elapsed_time($starttimer);
+		}
+		$this->template_assign( 'ui_elapsed_time',           $elapsed_time);
 
 		return $this->template_parse( 'latest_buildports.tpl' );
 	}

@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_buildports.tpl,v 1.9 2007/06/09 22:09:12 marcus Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_buildports.tpl,v 1.10 2008/01/25 20:12:50 marcus Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -108,6 +108,7 @@
  <a href="index.php">Back to homepage</a>
 </p>
  </form>
+<p style="color:#FF0000;font-size:10px;"><?=$ui_elapsed_time?></p>
 <?=$display_login?>
 </body>
 </html>

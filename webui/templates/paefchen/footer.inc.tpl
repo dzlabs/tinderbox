@@ -8,6 +8,7 @@
 				<li><a href="javascript:history.back()">back</a></li>
 				<li><a href="#top">top</a></li>
 				<li>Localtime: <?=date('Y-m-d H:i:s')?></li>
+				<li><?=$ui_elapsed_time?></li>
 			</ul>
 		</div>
 		<div class="right">

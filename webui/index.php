@@ -1,6 +1,6 @@
 <?php
 #-
-# Copyright (c) 2005 Oliver Lehmann <oliver@FreeBSD.org>
+# Copyright (c) 2005-2008 Oliver Lehmann <oliver@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.22 2007/10/13 02:28:47 ade Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.23 2008/01/25 20:12:50 marcus Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -143,10 +143,4 @@ switch( $action ) {
 
 echo $display;
 
-if( isset( $with_timer ) && $with_timer == 1 ) {
-        $endtimer = explode( ' ', microtime() );
-        $timer = ( $endtimer[1]-$starttimer[1] )+( $endtimer[0]-$starttimer[0] );
-        printf( '<p style="color:#FF0000;font-size:10px;">elapsed: %03.6f seconds, %s', $timer, ' </p>' );
-}
-echo '<p style="font-size:10px;"><b>Note:</b> The Tinderbox web interface requires cookies to be enable.</p>';
 ?>

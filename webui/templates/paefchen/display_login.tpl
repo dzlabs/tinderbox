@@ -21,6 +21,9 @@
 					<td>&nbsp;</td>
 					<td><input type="submit" name="do_login" value="login" /></td>
 				</tr>
+				<tr>
+					<td colspan="7"><small><b>Note:</b> The Tinderbox web interface requires cookies to be enable.</small></td>
+				</tr>
 			</table>
 		</fieldset>
 	</form>

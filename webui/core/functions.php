@@ -1,6 +1,6 @@
 <?php
 #-
-# Copyright (c) 2004-2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2004-2008 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/functions.php,v 1.5 2007/06/09 22:09:12 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/functions.php,v 1.6 2008/01/25 20:12:50 marcus Exp $
 #
 
 function prettyEmail($input) {
@@ -75,6 +75,12 @@ function time_elapsed($c) {
 			floor($c/3600),floor(($c%3600)/60),floor($c%60));
 	return sprintf("%02d:%02d",
 		floor(($c%3600)/60),floor($c%60));
+}
+
+function get_ui_elapsed_time($starttimer) {
+	$endtimer = explode( ' ', microtime() );
+        $timer = ( $endtimer[1]-$starttimer[1] )+( $endtimer[0]-$starttimer[0] );
+        return sprintf( 'Elapsed: %03.6f sec.', $timer );
 }
 
 ?>

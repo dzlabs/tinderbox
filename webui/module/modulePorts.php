@@ -1,6 +1,6 @@
 <?php
 #-
-# Copyright (c) 2005 Oliver Lehmann <oliver@FreeBSD.org>
+# Copyright (c) 2005-2008 Oliver Lehmann <oliver@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.11 2007/06/09 22:09:12 marcus Exp $
+# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.12 2008/01/25 20:12:50 marcus Exp $
 #
 
 require_once 'module/module.php';
@@ -36,6 +36,7 @@ class modulePorts extends module {
 	}
 
 	function display_describe_port( $port_id ) {
+		global $with_timer, $starttimer;
 
 		$ports = $this->TinderboxDS->getAllPortsByPortID( $port_id );
 
@@ -69,6 +70,11 @@ class modulePorts extends module {
 		$this->template_assign( 'port_name',         $ports[0]->getName() );
 		$this->template_assign( 'ports_trees_links', $ports_trees_links );
 		$this->template_assign( 'local_time',        prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
+                $elapsed_time = '';
+                if (isset($with_timer) && $with_timer == 1) {
+                	$elapsed_time = get_ui_elapsed_time($starttimer);
+		}
+		$this->template_assign( 'ui_elapsed_time',      $elapsed_time);
 
 		return $this->template_parse( 'describe_port.tpl' );
 	}
