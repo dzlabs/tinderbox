@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.130 2008/01/18 06:39:33 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.131 2008/03/20 05:17:01 marcus Exp $
 #
 
 my $pb;
@@ -141,8 +141,8 @@ my $ds = new Tinderbox::TinderboxDS();
         "listBuildPortsQueue" => {
                 func   => \&listBuildPortsQueue,
                 help   => "Lists the Ports to Build Queue",
-                usage  => "[-r] [-s <status>]",
-                optstr => 's:r',
+                usage  => "[-b <build name>] [-r] [-s <status>]",
+                optstr => 'b:h:s:r',
         },
         "listPortFailPatterns" => {
                 func => \&listPortFailPatterns,
@@ -1420,11 +1420,23 @@ sub addPortFailReason {
 }
 
 sub listBuildPortsQueue {
+        my $build_filter;
         my $raw;
         my $status = $opts->{'s'};
 
         if ($opts->{'r'}) {
                 $raw = 1
+        }
+
+        $build_filter = undef;
+
+        if ($opts->{'b'}) {
+                if (!$ds->isValidBuild($opts->{'b'})) {
+                        cleanup($ds, 1,
+                                "Unknown Build, " . $opts->{'b'} . "\n");
+                }
+
+                $build_filter = $ds->getBuildByName($opts->{'b'});
         }
 
         my @buildportsqueue = $ds->getBuildPortsQueueByStatus($status);
@@ -1442,6 +1454,13 @@ sub listBuildPortsQueue {
                         if ($buildport) {
                                 my $build =
                                     $ds->getBuildById($buildport->getBuildId());
+
+                                if (defined($build_filter)) {
+                                        next
+                                            if $build->getId() !=
+                                                    $build_filter->getId();
+                                }
+
                                 if ($raw eq 1) {
                                         print $buildport->getId() . ":"
                                             . $buildport->getUserId() . ":"
