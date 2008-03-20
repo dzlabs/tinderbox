@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.43 2007/10/13 02:28:45 ade Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.44 2008/03/20 05:30:07 marcus Exp $
 
 VERSION=	3.0.0
 
@@ -6,7 +6,7 @@ DATA=		README ds.ph.dist tc tinderbox.ph.dist tinderd \
 		tinderbox-mysql.schema tinderbox-pgsql.schema
 LIBDATA=	buildscript enterbuild makemake pnohang.c portbuild \
 		setup-mysql.sh setup-pgsql.sh \
-		tc_commands.pl tc_commands.sh tinderlib.pl tinderlib.sh \
+		tc_command.pl tc_command.sh tinderlib.pl tinderlib.sh \
 		tinderbox.env
 PERLMODDATA=	Build.pm BuildPortsQueue.pm Config.pm Hook.pm Jail.pm \
 		MakeCache.pm Port.pm PortFailPattern.pm PortFailReason.pm \
@@ -16,17 +16,26 @@ MIGDATA=
 MAN1DATA=	tc-configCcache.1 tc-configDistfile.1 tc-configGet.1 \
 		tc-configJail.1 tc-configTinderd.1 tc-init.1
 WEBUIDATA=	inc_ds.php.dist inc_tinderbox.php.dist index.php
-WEBUICDATA=	Build.php BuildPortsQueue.php Jail.php Port.php \
-		PortsTree.php TinderObject.php TinderboxDS.php User.php \
-		functions.php
+WEBUICDATA=	Build.php BuildPortsQueue.php Config.php Jail.php Port.php \
+		PortFailReason.php PortsTree.php TinderObject.php \
+		TinderboxDS.php User.php functions.php
 WEBUIMDATA=	module.php moduleBuildPorts.php moduleBuilds.php \
-		modulePorts.php moduleSession.php moduleTinderd.php \
-		moduleUsers.php
-WEBUITDATA=	current_buildports.tpl describe_port.tpl display_login.tpl \
-		failed_buildports.tpl latest_buildports.tpl \
-		list_buildports.tpl list_builds.tpl list_tinderd_queue.tpl \
-		messages.inc please_login.tpl tinderstyle.css user_admin.tpl \
-		user_permissions.tpl user_properties.tpl
+		moduleConfig.php modulePorts.php moduleSession.php \
+		moduleTinderd.php moduleUsers.php
+WEBUITDDATA=	config.tpl current_buildports.tpl describe_port.tpl \
+		display_login.tpl failed_buildports.tpl latest_buildports.tpl \
+		list_buildports.tpl list_builds.tpl list_failure_reasons.tpl \
+		list_tinderd_queue.tpl messages.inc please_login.tpl \
+		tinderstyle.css user_admin.tpl user_permissions.tpl \
+		user_properties.tpl
+WEUITpaefchenDATA=config.tpl current_buildports.tpl describe_port.tpl \
+		  display_login.tpl failed_buildports.tpl footer.inc.tpl \
+		  header.inc.tpl latest_buildports.tpl list_buildports.tpl \
+		  list_builds.tpl list_failure_reasons.tpl \
+		  list_tinderd_queue.tpl messages.inc please_login.tpl \
+		  rss.tpl tinderstyle.css user_admin.tpl user_permissions.tpl \
+		  user_properties.tpl
+WEBUIpaefchenIMAGEDATA=hdr_fill.png
 
 release:
 	-rm -rf ${.CURDIR}/tinderbox-${VERSION} \
@@ -48,8 +57,16 @@ release:
 	cp ${.CURDIR}/webui/module/${wemf} ${.CURDIR}/tinderbox-${VERSION}/webui/module
 .endfor
 	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/webui/templates/default
-.for wetf in ${WEBUITDATA}
+.for wetf in ${WEBUITDDATA}
 	cp ${.CURDIR}/webui/templates/default/${wetf} ${.CURDIR}/tinderbox-${VERSION}/webui/templates/default
+.endfor
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/webui/templates/paefchen
+.for wetf in ${WEBUITpaefchenDATA}
+	cp ${.CURDIR}/webui/templates/paefchen/${wetf} ${.CURDIR}/tinderbox-${VERSION}/webui/templates/paefchen
+.endfor
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/webui/templates/paefchen/images
+.for wetif in ${WEBUITpaefchenIMAGEDATA}
+	cp ${.CURDIR}/webui/templates/paefchen/images/${wetif} ${.CURDIR}/tinderbox-${VERSION}/webui/templates/paefchen/images
 .endfor
 	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/lib
 .for lf in ${LIBDATA}
