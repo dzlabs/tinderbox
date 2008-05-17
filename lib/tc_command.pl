@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #-
-# Copyright (c) 2004-2007 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2004-2008 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.131 2008/03/20 05:17:01 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.132 2008/05/17 15:08:05 marcus Exp $
 #
 
 my $pb;
@@ -385,6 +385,13 @@ my $ds = new Tinderbox::TinderboxDS();
                 func => \&getPortLastBuiltVersion,
                 help =>
                     "Get the last built version for the specified port and build",
+                usage  => "-d <port directory> -b <build name>",
+                optstr => 'd:b:',
+        },
+        "getPortLastBuiltStatus" => {
+                func => \&getPortLastBuiltStatus,
+                help =>
+                    "Get the last built status for the specified port and build",
                 usage  => "-d <port directory> -b <build name>",
                 optstr => 'd:b:',
         },
@@ -2356,6 +2363,48 @@ sub getPortLastBuiltVersion {
         }
 
         print $version . "\n";
+}
+
+sub getPortLastBuiltStatus {
+        if (!$opts->{'d'} || !$opts->{'b'}) {
+                usage("getPortLastBuiltStatus");
+        }
+
+        my $port = $ds->getPortByDirectory($opts->{'d'});
+        if (!defined($port)) {
+                cleanup($ds, 1,
+                              "Port, "
+                            . $opts->{'d'}
+                            . " is not in the datastore.\n");
+        }
+
+        if (!$ds->isValidBuild($opts->{'b'})) {
+                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
+        }
+
+        my $build = $ds->getBuildByName($opts->{'b'});
+
+        if (!$ds->isPortForBuild($port, $build)) {
+                cleanup($ds, 1,
+                              "Port, "
+                            . $opts->{'d'}
+                            . " is not a valid port for build, "
+                            . $opts->{'b'}
+                            . "\n");
+        }
+
+        my $status = $ds->getPortLastBuiltStatus($port, $build);
+        if (!defined($version) && $ds->getError()) {
+                cleanup($ds, 1,
+                              "Failed to get last built status for port "
+                            . $opts->{'d'}
+                            . " for build "
+                            . $opts->{'b'} . ": "
+                            . $ds->getError()
+                            . "\n");
+        }
+
+        print $status . "\n";
 }
 
 sub updateBuildCurrentPort {

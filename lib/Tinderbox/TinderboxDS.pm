@@ -1,5 +1,5 @@
 #-
-# Copyright (c) 2004-2007 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2004-2008 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.78 2007/10/24 02:48:12 ade Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.79 2008/05/17 15:08:06 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -58,7 +58,7 @@ $PKG_PREFIX = 'Tinderbox::';
         "Port"            => "ports",
         "Jail"            => "jails",
         "Build"           => "builds",
-	"BuildPortsQueue" => "build_ports_queue",
+        "BuildPortsQueue" => "build_ports_queue",
         "PortsTree"       => "ports_trees",
         "User"            => "users",
         "Config"          => "config",
@@ -120,17 +120,17 @@ sub getDSVersion {
 }
 
 sub verifyType {
-	my $self = shift;
-	my $argn = shift;
-	my $what = shift;
-	my $type = shift;
+        my $self = shift;
+        my $argn = shift;
+        my $what = shift;
+        my $type = shift;
 
-	return if (!defined($what));
+        return if (!defined($what));
 
-	my $ref  = ref($what);
-	return if ($ref eq "Tinderbox::$type");
+        my $ref = ref($what);
+        return if ($ref eq "Tinderbox::$type");
 
-	croak "ERROR: Argument $argn not of type $what ($ref)\n";
+        croak "ERROR: Argument $argn not of type $what ($ref)\n";
 }
 
 sub defaultConfig {
@@ -139,8 +139,7 @@ sub defaultConfig {
 
         my $rc = $self->_doQuery(
                 "DELETE FROM config WHERE config_option_name LIKE ?",
-		$configlet
-        );
+                $configlet);
 
         return $rc;
 }
@@ -160,8 +159,7 @@ sub getConfig {
                 $configlet = '%';
         }
 
-        $rc =
-            $self->_doQueryHashRef(
+        $rc = $self->_doQueryHashRef(
                 "SELECT * FROM config WHERE config_option_name LIKE ?",
                 \@results, $configlet);
 
@@ -239,9 +237,9 @@ sub isValidBuildPortsQueueId {
 sub updateBuildPortsQueueEntryCompletionDate {
         my $self  = shift;
         my $entry = shift;
-	my $rc;
+        my $rc;
 
-	$self->verifyType(1, $entry, 'BuildPortsQueue');
+        $self->verifyType(1, $entry, 'BuildPortsQueue');
 
         if (!defined($entry->getCompletionDate())) {
                 $rc = $self->_doQuery(
@@ -317,7 +315,7 @@ sub getBuildPortsQueueByKeys {
         my $build     = shift;
         my $directory = shift;
 
-	$self->verifyType(1, $build, 'Build');
+        $self->verifyType(1, $build, 'Build');
 
         my @results = $self->getObjects(
                 "BuildPortsQueue",
@@ -343,19 +341,15 @@ sub getBuildPortsQueueByStatus {
                 @results = $self->getObjects(
                         "BuildPortsQueue",
                         {
-                                status  => $status,
+                                status => $status,
                                 _ORDER_ =>
                                     "priority ASC, build_ports_queue_id ASC"
                         }
                 );
         } else {
-                @results = $self->getObjects(
-                        "BuildPortsQueue",
-                        {
-                                _ORDER_ =>
-                                    "priority ASC, build_ports_queue_id ASC"
-                        }
-                );
+                @results =
+                    $self->getObjects("BuildPortsQueue",
+                        {_ORDER_ => "priority ASC, build_ports_queue_id ASC"});
         }
 
         if (!@results) {
@@ -633,7 +627,7 @@ sub addBuildPortsQueueEntry {
         my $priority  = shift;
         my $user      = shift;
 
-	$self->verifyType(1, $build, 'Build');
+        $self->verifyType(1, $build, 'Build');
 
         my $rc = $self->_doQuery(
                 "INSERT INTO build_ports_queue
@@ -723,8 +717,8 @@ sub updateBuildUser {
         my $onCompletion = shift;
         my $onError      = shift;
 
-	$self->verifyType(1, $build, 'Build');
-	$self->verifyType(1, $user,  'User');
+        $self->verifyType(1, $build, 'Build');
+        $self->verifyType(1, $user,  'User');
 
         if (!defined($onCompletion)) {
                 $onCompletion = 0;
@@ -820,7 +814,7 @@ sub updateJail {
         my $self = shift;
         my $jail = shift;
 
-	$self->verifyType(1, $jail, 'Jail');
+        $self->verifyType(1, $jail, 'Jail');
 
         my $rc = $self->_doQuery(
                 "UPDATE jails SET jail_name=?, jail_tag=?, jail_update_cmd=?, jail_description=?, jail_src_mount=? WHERE jail_id=?",
@@ -838,13 +832,12 @@ sub updateJailLastBuilt {
         my $self = shift;
         my $jail = shift;
 
-	$self->verifyType(1, $jail, 'Jail');
+        $self->verifyType(1, $jail, 'Jail');
 
         my $rc;
         if ($jail->getLastBuilt()) {
                 my $last_built = $jail->getLastBuilt();
-                $rc =
-                    $self->_doQuery(
+                $rc = $self->_doQuery(
                         "UPDATE jails SET jail_last_built=? WHERE jail_id=?",
                         [$last_built, $jail->getId()]);
         } else {
@@ -865,8 +858,8 @@ sub updatePortLastBuilt {
         my $rc;
         my @results;
 
-	$self->verifyType(1, $port, 'Port');
-	$self->verifyType(2, $build, 'Build');
+        $self->verifyType(1, $port,  'Port');
+        $self->verifyType(2, $build, 'Build');
 
         if ($DB_DRIVER eq 'mysql') {
                 $query =
@@ -913,8 +906,8 @@ sub updatePortLastBuilts {
         my $last_built = shift;
         my $column     = shift;
 
-	$self->verifyType(1, $port,  'Port');
-	$self->verifyType(2, $build, 'Build');
+        $self->verifyType(1, $port,  'Port');
+        $self->verifyType(2, $build, 'Build');
 
         my $rc;
         if (!defined($last_built) || $last_built eq "") {
@@ -938,8 +931,8 @@ sub updatePortLastStatus {
         my $build  = shift;
         my $status = shift;
 
-	$self->verifyType(1, $port,  'Port');
-	$self->verifyType(2, $build, 'Build');
+        $self->verifyType(1, $port,  'Port');
+        $self->verifyType(2, $build, 'Build');
 
         my %status_hash = (
                 UNKNOWN   => 0,
@@ -969,8 +962,8 @@ sub updatePortLastBuiltVersion {
         my $build   = shift;
         my $version = shift;
 
-	$self->verifyType(1, $port,  'Port');
-	$self->verifyType(2, $build, 'Build');
+        $self->verifyType(1, $port,  'Port');
+        $self->verifyType(2, $build, 'Build');
 
         my $rc = $self->_doQuery(
                 "UPDATE build_ports SET last_built_version=? WHERE port_id=? AND build_id=?",
@@ -985,8 +978,8 @@ sub getPortLastBuiltVersion {
         my $port  = shift;
         my $build = shift;
 
-	$self->verifyType(1, $port,  'Port');
-	$self->verifyType(2, $build, 'Build');
+        $self->verifyType(1, $port,  'Port');
+        $self->verifyType(2, $build, 'Build');
 
         my @results;
         my $rc = $self->_doQueryHashRef(
@@ -999,6 +992,27 @@ sub getPortLastBuiltVersion {
         }
 
         return $results[0]->{'last_built_version'};
+}
+
+sub getPortLastBuiltStatus {
+        my $self  = shift;
+        my $port  = shift;
+        my $build = shift;
+
+        $self->verifyType(1, $port,  'Port');
+        $self->verifyType(2, $build, 'Build');
+
+        my @results;
+        my $rc = $self->_doQueryHashRef(
+                "SELECT last_status FROM build_ports WHERE port_id=? AND build_id=?",
+                \@results, $port->getId(), $build->getId()
+        );
+
+        if (!$rc) {
+                return undef;
+        }
+
+        return $results[0]->{'last_status'};
 }
 
 sub updatePortsTree {
@@ -1026,7 +1040,7 @@ sub updatePortsTreeLastBuilt {
         my $self      = shift;
         my $portstree = shift;
 
-	$self->verifyType(1, $portstree, 'PortsTree');
+        $self->verifyType(1, $portstree, 'PortsTree');
 
         my $rc;
         if ($portstree->getLastBuilt()) {
@@ -1049,7 +1063,7 @@ sub updateBuildStatus {
         my $self  = shift;
         my $build = shift;
 
-	$self->verifyType(1, $build, 'Build');
+        $self->verifyType(1, $build, 'Build');
 
         my $rc = $self->_doQuery(
                 "UPDATE builds SET build_status=?,build_last_updated=NOW() WHERE build_id=?",
@@ -1065,7 +1079,7 @@ sub updateBuildCurrentPort {
         my $port    = shift;
         my $pkgname = shift;
 
-	$self->verifyType(1, $build, 'Build');
+        $self->verifyType(1, $build, 'Build');
 
         my $rc = $self->_doQuery(
                 "UPDATE build_ports SET currently_building='0' WHERE build_id = ? AND currently_building='1'",
@@ -1092,7 +1106,7 @@ sub updateBuildCurrentPort {
         }
 
         if (defined($port)) {
-		$self->verifyType(2, $port, 'Ports');
+                $self->verifyType(2, $port, 'Ports');
                 $rc = $self->_doQuery(
                         "UPDATE build_ports SET currently_building='1' WHERE build_id=? AND port_id=?",
                         [$build->getId(), $port->getId()]
@@ -1107,17 +1121,15 @@ sub updateHookCmd {
         my $hook = shift;
         my $cmd  = shift;
 
-	$self->verifyType(1, $hook, 'Hook');
+        $self->verifyType(1, $hook, 'Hook');
 
         my $rc;
         if (!defined($cmd)) {
-                $rc =
-                    $self->_doQuery(
+                $rc = $self->_doQuery(
                         "UPDATE hooks SET hook_cmd=NULL WHERE hook_name=?",
                         [$hook->getName()]);
         } else {
-                $rc =
-                    $self->_doQuery(
+                $rc = $self->_doQuery(
                         "UPDATE hooks SET hook_cmd=? WHERE hook_name=?",
                         [$cmd, $hook->getName()]);
         }
@@ -1129,7 +1141,7 @@ sub getBuildCompletionUsers {
         my $self  = shift;
         my $build = shift;
 
-	$self->verifyType(1, $build, 'Build');
+        $self->verifyType(1, $build, 'Build');
 
         my @users = $self->_getBuildUsers($build, "email_on_completion");
 
@@ -1140,7 +1152,7 @@ sub getBuildErrorUsers {
         my $self  = shift;
         my $build = shift;
 
-	$self->verifyType(1, $build, 'Build');
+        $self->verifyType(1, $build, 'Build');
 
         my @addrs = $self->_getBuildUsers($build, "email_on_error");
 
@@ -1191,8 +1203,8 @@ sub isUserForBuild {
         my $user  = shift;
         my $build = shift;
 
-	$self->verifyType(1, $user,  'User');
-	$self->verifyType(2, $build, 'Build');
+        $self->verifyType(1, $user,  'User');
+        $self->verifyType(2, $build, 'Build');
 
         my $rc = $self->_doQueryNumRows(
                 "SELECT build_user_id FROM build_users WHERE build_id=? AND user_id=?",
@@ -1241,9 +1253,9 @@ sub getUsersForBuild {
         my $self  = shift;
         my $build = shift;
 
-	$self->verifyType(1, $build, 'Build');
+        $self->verifyType(1, $build, 'Build');
 
-        my @users =$self->_getBuildUsers($build, undef);
+        my @users = $self->_getBuildUsers($build, undef);
         return @users;
 }
 
@@ -1320,8 +1332,8 @@ sub addUserForBuild {
         my $onCompletion = shift;
         my $onError      = shift;
 
-	$self->verifyType(1, $user,  'User');
-	$self->verifyType(2, $build, 'Build');
+        $self->verifyType(1, $user,  'User');
+        $self->verifyType(2, $build, 'Build');
 
         if (!defined($onCompletion)) {
                 $onCompletion = 0;
@@ -1344,8 +1356,7 @@ sub addPortForBuild {
         my $port  = shift;
         my $build = shift;
 
-        my $rc =
-            $self->_doQuery(
+        my $rc = $self->_doQuery(
                 "INSERT INTO build_ports (build_id, port_id) VALUES (?, ?)",
                 [$build->getId(), $port->getId()]);
 
@@ -1365,8 +1376,7 @@ sub removeBuildPortsQueueEntry {
         my $entry = shift;
 
         my $rc;
-        $rc =
-            $self->_doQuery(
+        $rc = $self->_doQuery(
                 "DELETE FROM build_ports_queue WHERE build_ports_queue_id=?",
                 [$entry->getId()]);
 
@@ -1396,8 +1406,7 @@ sub removePortForBuild {
         my $port  = shift;
         my $build = shift;
 
-        my $rc =
-            $self->_doQuery(
+        my $rc = $self->_doQuery(
                 "DELETE FROM build_ports WHERE port_id=? AND build_id=?",
                 [$port->getId(), $build->getId()]);
 
@@ -1408,7 +1417,7 @@ sub removeUser {
         my $self = shift;
         my $user = shift;
 
-	$self->verifyType(1, $user, 'User');
+        $self->verifyType(1, $user, 'User');
 
         my $rc = $self->_doQuery("DELETE FROM build_users WHERE user_id=?",
                 [$user->getId()]);
@@ -1428,11 +1437,10 @@ sub removeUserForBuild {
         my $user  = shift;
         my $build = shift;
 
-	$self->verifyType(1, $user,  'User');
-	$self->verifyType(2, $build, 'Build');
+        $self->verifyType(1, $user,  'User');
+        $self->verifyType(2, $build, 'Build');
 
-        my $rc =
-            $self->_doQuery(
+        my $rc = $self->_doQuery(
                 "DELETE FROM build_users WHERE build_id=? AND user_id=?",
                 [$build->getId(), $user->getId()]);
 
@@ -1489,8 +1497,7 @@ sub removePortFailPattern {
         my $self    = shift;
         my $pattern = shift;
 
-        my $rc =
-            $self->_doQuery(
+        my $rc = $self->_doQuery(
                 "DELETE FROM port_fail_patterns WHERE port_fail_pattern_id=?",
                 [$pattern->getId()]);
 
@@ -1501,8 +1508,7 @@ sub removePortFailReason {
         my $self   = shift;
         my $reason = shift;
 
-        my $rc =
-            $self->_doQuery(
+        my $rc = $self->_doQuery(
                 "DELETE FROM port_fail_reasons WHERE port_fail_reason_tag=?",
                 [$reason->getTag()]);
 
@@ -1570,8 +1576,7 @@ sub isPortInDS {
         my $self = shift;
         my $port = shift;
 
-        my $rc =
-            $self->_doQueryNumRows(
+        my $rc = $self->_doQueryNumRows(
                 "SELECT port_id FROM ports WHERE port_directory=?",
                 $port->getDirectory());
 
@@ -1792,8 +1797,8 @@ sub _doQuery {
 
         if (defined($ENV{'TINDERBOX_QUERY_DEBUG'})) {
                 printf STDERR "TINDERBOX_SQL:\n\tquery = %s\n", $query;
-		printf STDERR "\tvalues = %s\n", join(', ', @{$params})
-			if (defined($params));
+                printf STDERR "\tvalues = %s\n", join(', ', @{$params})
+                    if (defined($params));
         }
 
         $_sth = $self->{'dbh'}->prepare($query);
@@ -1914,7 +1919,7 @@ sub getPackageSuffix {
         my $self = shift;
         my $jail = shift;
 
-	$self->verifyType(1, $jail, 'Jail');
+        $self->verifyType(1, $jail, 'Jail');
 
         if (substr($jail->getName(), 0, 1) == "4") {
                 return ".tgz";
@@ -1928,7 +1933,7 @@ sub isLogCurrent {
         my $build = shift;
         my $log   = shift;
 
-	$self->verifyType(1, $build, 'Build');
+        $self->verifyType(1, $build, 'Build');
 
         my $rc = $self->_doQueryNumRows(
                 "SELECT build_port_id FROM build_ports WHERE build_id=? AND last_built_version=?",
