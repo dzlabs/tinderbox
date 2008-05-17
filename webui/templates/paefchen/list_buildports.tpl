@@ -99,6 +99,7 @@ include 'header.inc.tpl';
 	</tr>
 	<?}?>
 </table>
+<p>Total: <?=count($data)?></p>
 <?}else{?>
 <p>No ports are being built.</p>
 <?}?>
