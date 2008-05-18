@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.132 2008/05/17 15:08:05 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.133 2008/05/18 04:36:29 marcus Exp $
 #
 
 my $pb;
@@ -2394,7 +2394,7 @@ sub getPortLastBuiltStatus {
         }
 
         my $status = $ds->getPortLastBuiltStatus($port, $build);
-        if (!defined($version) && $ds->getError()) {
+        if (!defined($status) && $ds->getError()) {
                 cleanup($ds, 1,
                               "Failed to get last built status for port "
                             . $opts->{'d'}
