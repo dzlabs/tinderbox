@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.63 2007/12/17 06:37:18 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.64 2008/05/20 16:10:17 marcus Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1245,6 +1245,7 @@ tinderbuild () {
     pbargs=""
     skipmake=0
     updateports=0
+    norebuild=0
 
     # argument processing
     while [ $# -gt 0 ]; do
@@ -1277,6 +1278,7 @@ tinderbuild () {
 	x-skipmake)		skipmake=1;;
 	x-onlymake)		onlymake=1;;
 	x-updateports)		updateports=1;;
+	x-norebuild)		norebuild=1;;
 
 	# various arguments passed through to makemake and portbuild
 	x-noduds)		noduds="-n";;
@@ -1344,12 +1346,14 @@ tinderbuild () {
 
     # Clean up packages if specific ports dirs were specified
     # on the command line
-    for port in ${ports}; do
-	pkgname=$(${tc} getPortLastBuiltVersion -b ${build} -d ${port})
-	if [ ! -z "${pkgname}" ]; then
-	    find -H ${pkgDir} -name ${pkgname}${PKGSUFFIX} -delete
-	fi
-    done
+    if [ ${norebuild} = 0 ]; then
+        for port in ${ports}; do
+	    pkgname=$(${tc} getPortLastBuiltVersion -b ${build} -d ${port})
+	    if [ ! -z "${pkgname}" ]; then
+	        find -H ${pkgDir} -name ${pkgname}${PKGSUFFIX} -delete
+	    fi
+        done
+    fi
 
     buildLogs=$(tinderLoc buildlogs ${build})
     buildErrors=$(tinderLoc builderrors ${build})
