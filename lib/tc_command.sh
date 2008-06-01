@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.64 2008/05/20 16:10:17 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.65 2008/06/01 22:53:41 marcus Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1659,4 +1659,41 @@ tbcleanup () {
 	    fi
 	done
     done
+}
+
+#---------------------------------------------------------------------------
+# kill a tinderbuild
+#---------------------------------------------------------------------------
+tbkill () {
+    # set up defaults
+    build=""
+    sig=15
+
+    # argument handling
+    while getopts b:s: arg >/dev/null 2>&1
+    do
+	case "${arg}" in
+
+	b)	build="${OPTARG}";;
+	s)	sig="${OPTARG}";;
+	?)	return 1;;
+
+	esac
+    done
+
+    if [ -z "${build}" ]; then
+	echo "tbkill: no Build specified"
+	return 1
+    fi
+
+    tbpid=$(pgrep -f -f "/bin/sh.*tinderbuild.*${build}")
+    if [ -z "${tbpid}" ]; then
+	return 0
+    fi
+
+    makepid=$(pgrep -f -f -P ${tbpid} "make")
+    makechild=$(pgrep -P ${makepid})
+    pbpid=$(pgrep -f -f "/bin/sh.*/portbuild")
+
+    kill -${sig} ${pbpid} ${makechild} ${makepid} ${tbpid}
 }
