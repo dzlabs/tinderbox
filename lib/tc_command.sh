@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.65 2008/06/01 22:53:41 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.66 2008/06/01 23:40:35 marcus Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -710,7 +710,8 @@ updatePortsTree () {
 	return 1
     fi
 
-    execute_hook "prePortsTreeUpdate" "PORTSTREE=${portsTreeName} PB=${pb}"
+    updateCmd=$(${tc} getUpdateCmd -p ${portsTreeName})
+    execute_hook "prePortsTreeUpdate" "PORTSTREE=${portsTreeName} \"UPDATE_CMD=${updateCmd}\" PB=${pb}"
     if [ $? -ne 0 ];then
 	echo "${portsTreeName}: hook prePortsTreeUpdate failed. Terminating."
 	return 1
@@ -718,7 +719,7 @@ updatePortsTree () {
     updateTree portstree ${portsTreeName} \
 	       -p $(tinderLoc portstree ${portsTreeName})
     rc=$?
-    execute_hook "postPortsTreeUpdate" "PORTSTREE=${portsTreeName} PB=${pb} RC=${rc}"
+    execute_hook "postPortsTreeUpdate" "PORTSTREE=${portsTreeName} \"UPDATE_CMD=${updateCmd}\" PB=${pb} RC=${rc}"
 
     # Update the last-built time
     ${tc} updatePortsTreeLastBuilt -p ${portsTreeName}
