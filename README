@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.67 2007/10/15 19:30:53 ade Exp $
+$MCom: portstools/tinderbox/README,v 1.68 2008/06/02 03:39:02 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -269,6 +269,20 @@ cleanup old, unreferenced, files, use the ${pb}/scripts/tc application
 with the ``tbcleanup'' command:
 
 # cd ${pb}/scripts && ./tc tbcleanup
+
+If you want to terminate a running tinderbuild, run the command:
+
+# cd ${pb}/scripts && ./tc tbkill -b BUILD
+
+This will gracefully terminate a running tinderbuild for Build ``BUILD''.
+If you want to force the tinderbuild to die, then specify the kill signal:
+
+# cd ${pb}/scripts && ./tc tbkill -b BUILD -s 9
+
+Note: It may take a few minutes after executing a graceful termination of
+the tinderbuild before all processes exit.  This is because the processes
+are cleaning up the build environment.  If, after five minutes, the build
+is still running, then you should consider killing it with signal 9.
 
 Troubleshooting:
 ----------------
