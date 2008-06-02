@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.69 2008/06/02 04:10:35 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.70 2008/06/02 05:52:15 ade Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -16,7 +16,7 @@ Requirements:
 -------------
 
 Recent FreeBSD (development happens on -CURRENT only, but Tinderbox is known
-to work on RELENG_5 and RELENG_6 too), Perl 5.8 or later (lang/perl5.8) and
+to work on RELENG_6 and RELENG_7 too), Perl 5.8 or later (lang/perl5.8) and
 either MySQL 4.1 or later (databases/mysql41-server) or PostgreSQL 7.4 or
 later (databases/postgres74-server).
 
@@ -124,13 +124,13 @@ nfs_reserved_port_only="YES"
 
 12. Create the required Jails using the tc command.  A Jail is nothing
     more than a version of FreeBSD.  For example, to create a jail for
-    FreeBSD 5.4-RELEASE:
+    FreeBSD 6.3-RELEASE:
 
-# cd ${pb}/scripts && ./tc createJail -j 5.4 -d "FreeBSD 5.4-RELEASE" \
-	-t RELENG_5_4_0_RELEASE -u CVSUP
+# cd ${pb}/scripts && ./tc createJail -j 6.3 -d "FreeBSD 6.3-RELEASE" \
+	-t RELENG_6_3_0_RELEASE -u CVSUP
 
     Note: all Jail names _MUST_ begin with their FreeBSD major version number.
-    That is, the following is an illegal jail name: ``FreeBSD-5.4''.
+    That is, the following is an illegal jail name: ``FreeBSD-6.3''.
 
 13. Create the required PortsTrees using the tc command.  A PortsTree is
     a set of ports you wish to build.  A PortsTree does not have to be a
@@ -146,10 +146,10 @@ nfs_reserved_port_only="YES"
 14. Create the required Builds using the tc command.  A Build is a
     combination of a Jail and a PortsTree.  The build is the object in
     which packages are created.  To create a build that combines a
-    5.4-RELEASE Jail with the FreeBSD ports tree:
+    6.3-RELEASE Jail with the FreeBSD ports tree:
 
-# cd ${pb}/scripts && ./tc createBuild -b 5.4-FreeBSD -j 5.4 -p FreeBSD \
-	-d "5.4-RELEASE with FreeBSD ports tree"
+# cd ${pb}/scripts && ./tc createBuild -b 6.3-FreeBSD -j 6.3 -p FreeBSD \
+	-d "6.3-RELEASE with FreeBSD ports tree"
 
     Note: the recommended way to name Builds is ``Jail-PortsTree''.  All builds
     must also begin with their FreeBSD major version number.
@@ -161,8 +161,8 @@ use the -H and -C line arguments to the create script respectively.
 For example, to use cvsup2.freebsd.org and enable cvsup compression
 for all Jail updates, use the following command:
 
-# cd ${pb}/scripts && ./tc createJail -j 5-STABLE -d "FreeBSD 5-STABLE" \
-	-t RELENG_5 -u CVSUP -C -H cvsup2.freebsd.org
+# cd ${pb}/scripts && ./tc createJail -j 6-STABLE -d "FreeBSD 6-STABLE" \
+	-t RELENG_6 -u CVSUP -C -H cvsup2.freebsd.org
 
 Upgrading:
 ----------
@@ -190,9 +190,9 @@ ${pb}/scripts/tc application:
 Where {BUILD} is the name of the Build for which this port should be built,
 and {PORT DIRECTORY} is the directory within the PortsTree where this port
 can be found.  For example, to build the GNOME 2 Desktop port for the
-Build ``5.4-FreeBSD'':
+Build ``6.3-FreeBSD'':
 
-# cd ${pb}/scripts && ./tc addPort -b 5.4-FreeBSD -d x11/gnome2
+# cd ${pb}/scripts && ./tc addPort -b 6.3-FreeBSD -d x11/gnome2
 
 Note: a port does not have to be added to the database for Tinderbox to
 build it.  If you just want to do a quick ad hoc port build, forgo the
@@ -202,9 +202,9 @@ To start a Tinderbox build, use the tc command:
 
 # cd ${pb}/scripts && ./tc tinderbuild -b {BUILD} {PORT DIRECTORY}
 
-For example, to build the GNOME 2 Desktop for the Build 5.4-FreeBSD:
+For example, to build the GNOME 2 Desktop for the Build 6.3-FreeBSD:
 
-# cd ${pb}/scripts && ./tc tinderbuild -b 5.4-FreeBSD x11/gnome2
+# cd ${pb}/scripts && ./tc tinderbuild -b 6.3-FreeBSD x11/gnome2
 
 TIP: The example above will run the build in the foreground with all messages
 and errors echoing to the terminal.  To capture all of this,  it is
@@ -212,13 +212,13 @@ recommended to redirect tinderbuild output to a log file.  For example:
 
 Bourne shell equivalents:
 
-# cd ${pb}/scripts && ./tc tinderbuild -b 5.4-FreeBSD x11/gnome2 \
-	> ${pb}/builds/5.4-FreeBSD/build.log 2>&1 &
+# cd ${pb}/scripts && ./tc tinderbuild -b 6.3-FreeBSD x11/gnome2 \
+	> ${pb}/builds/6.3-FreeBSD/build.log 2>&1 &
 
 C shell equivalents:
 
-# cd ${pb}/scripts && ./tc tinderbuild -b 5.4-FreeBSD x11/gnome2 \
-	>& ${pb}/builds/5.4-FreeBSD/build.log &
+# cd ${pb}/scripts && ./tc tinderbuild -b 6.3-FreeBSD x11/gnome2 \
+	>& ${pb}/builds/6.3-FreeBSD/build.log &
 
 The tinderbuild function also accepts some additional command line arguments:
 
@@ -255,7 +255,7 @@ Maintenance:
 
 To update existing Jails:
 
-# cd ${pb}/scripts && ./tc makeJail -j 5.4
+# cd ${pb}/scripts && ./tc makeJail -j 6.3
 
 The output of the Jail build will go to stdout.  The output of the update
 command (e.g. cvsup) will go to ${pb}/jails/{JAIL}/update.log (where
@@ -394,7 +394,7 @@ opt/g++ -> ccache
 opt/c++ -> ccache
 
 This tarball must be called ccache.tar, and be placed in the Jail directory
-for each Jail that will use ccache (e.g. ${pb}/jails/5.4).
+for each Jail that will use ccache (e.g. ${pb}/jails/6.3).
 
 Once the tarball is created, run (-e for enabling, -d for disabling,
 -c specifies directory, -s maximal size):
@@ -416,9 +416,9 @@ portstree.env, or build.env respectively, and placing it in the root of
 the Jail (${pb}/jails/{JAIL}), PortsTree (${pb}/portstrees/{PORTSTREE}),
 or Build (${pb}/builds/{BUILD}) in question.
 
-For example, if you want a particular Build (e.g. "5.X-Perl56") to use Perl
+For example, if you want a particular Build (e.g. "6.X-Perl56") to use Perl
 5.6.2 instead of Perl 5.8.x, create a file named build.env in
-${pb}/builds/5.X-Perl56 that contains the following:
+${pb}/builds/6.X-Perl56 that contains the following:
 
 export PERL_VER=5.6.2
 export PERL_VERSION=5.6.2
