@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.68 2008/06/02 03:39:02 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.69 2008/06/02 04:10:35 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -247,6 +247,8 @@ The tinderbuild function also accepts some additional command line arguments:
                    is 1, and for best results should not exceed the number
                    of physical CPUs in the Tinderbox host)
  -onceonly       : only performs one build pass (i.e. tinderbuild Phase 1)
+ -norebuild      : do not force a rebuild of packages specified on the
+                   command line
 
 Maintenance:
 ------------
