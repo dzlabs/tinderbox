@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.66 2008/06/01 23:40:35 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.67 2008/06/02 06:06:12 ade Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -498,9 +498,7 @@ buildJail () {
     # Make a complete distribution
     echo "${jailName}: making distribution"
 
-    # determine if we're cross-building world - unfortunately 5.x
-    # and below doesn't appear to have the "distribute" target in
-    # the top-level makefile, so we have to do a little bit of hackery
+    # determine if we're cross-building world
     crossEnv=""
     if [ "${jailArch}" != "${myArch}" ]; then
 	crossEnv="TARGET_ARCH=${jailArch} MACHINE_ARCH=${jailArch} MAKEOBJDIRPREFIX=${J_OBJDIR}/${jailArch} MACHINE=${jailArch}"
@@ -1096,37 +1094,6 @@ tinderbuild_setup () {
 	tinderbuild_cleanup 1
     fi
 
-    # handle OS version dependent bits and pieces
-    libc_hackery=""
-    case ${osmajor} in
-
-    5)
-    	if [ -f /lib/libc.so.7 ]; then
-	    libc_hackery="libc.so.7"
-	elif [ -f /lib/libc.so.6 ]; then
-	    libc_hackery="libc.so.6"
-	fi
-	;;
-
-    6|7|8)
-	if [ -f /lib/libc.so.5 ]; then
-	    libc_hackery="libc.so.5"
-	fi
-	if [ ${osmajor} = 6 -a -f /lib/libc.so.7 ]; then
-	    if [ -f ${buildRoot}/lib/libc.so.7 ]; then
-		chflags noschg ${buildRoot}/lib/libc.so.7 >/dev/null 2>&1
-	    fi
-	    cp -p /lib/libc.so.7 ${buildRoot}/lib
-	fi
-	;;
-
-    esac
-
-    if [ -n "${libc_hackery}" ]; then
-	chflags noschg ${buildRoot}/lib/${libc_hackery} >/dev/null 2>&1
-	cp -p /lib/${libc_hackery} ${buildRoot}/lib
-    fi
-
     # For use by pnohang
     # XXX: though killall may not work since it's a dynamic executable
     cp -p /rescue/mount /rescue/umount ${buildRoot}/sbin
@@ -1414,7 +1381,7 @@ tinderbuild () {
     # Set up the chrooted environment
     osmajor=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
     case ${osmajor} in
-    5|6|7|8)	tinderbuild_setup;;
+    6|7|8)	tinderbuild_setup;;
     *)		echo "tinderbuild: unhandled OS version: ${osmajor}"
 		tinderbuild_cleanup 1
 		;;
