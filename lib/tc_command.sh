@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.67 2008/06/02 06:06:12 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.68 2008/06/03 02:33:01 marcus Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1379,7 +1379,7 @@ tinderbuild () {
     fi
 
     # Set up the chrooted environment
-    osmajor=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
+    osmajor=$(echo ${jail} | sed -E -e 's|(^[[:digit:]]+).*$|\1|')
     case ${osmajor} in
     6|7|8)	tinderbuild_setup;;
     *)		echo "tinderbuild: unhandled OS version: ${osmajor}"

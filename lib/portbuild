@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.115 2007/09/03 16:40:43 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.116 2008/06/03 02:33:01 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -247,7 +247,7 @@ ${tc} updateBuildStatus -b ${build} -s PORTBUILD
 ${tc} updateBuildCurrentPort -b ${build} -n ${pkgname}
 
 packages=$(tinderLoc packages ${build})
-major_version=$(echo ${jail} | sed -E -e 's|(^.).*$|\1|')
+major_version=$(echo ${jail} | sed -E -e 's|(^[[:digit:]]+).*$|\1|')
 
 if [ -n "${DISTFILE_CACHE}" ]; then
     export DISTCACHE=/distcache
