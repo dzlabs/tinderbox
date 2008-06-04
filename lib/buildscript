@@ -73,7 +73,7 @@ del_pkg() {
       done
       pkgs="${nextpkg}"
       if [ "$dellist" != "" -a "$dellist" = "$delpkg" ]; then
-        echo "deleted list =\""$dellist"\", packages to delete ="\"$delpkg\"
+        echo "deleted list =\""$dellist"\", packages to delete ="\"$delpkg\" #"
         echo "The following packages were left behind (perhaps your dependency list is incomplete):"
         ls /var/db/pkg
         echo "error in pkg_delete, exiting"
