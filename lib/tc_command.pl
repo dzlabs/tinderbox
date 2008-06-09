@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.133 2008/05/18 04:36:29 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.134 2008/06/09 19:14:47 marcus Exp $
 #
 
 my $pb;
@@ -2288,6 +2288,14 @@ sub updatePortStatus {
                 $ds->updatePortLastFailedDep($port, $build, $opts->{'p'})
                     or cleanup($ds, 1,
                         "FAILED: last_failed_dep: " . $ds->getError() . "\n");
+        } else {
+                $ds->updatePortLastFailedDep($port, $build, undef)
+                    or cleanup(
+                        $ds,
+                        1,
+                        "FAILED: unset_last_failed_dep: "
+                            . $ds->getError() . "\n"
+                    );
         }
 }
 

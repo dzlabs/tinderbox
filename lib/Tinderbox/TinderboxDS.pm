@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.79 2008/05/17 15:08:06 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.80 2008/06/09 19:14:47 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -910,7 +910,9 @@ sub updatePortLastBuilts {
         $self->verifyType(2, $build, 'Build');
 
         my $rc;
-        if (!defined($last_built) || $last_built eq "") {
+        if ((!defined($last_built) || $last_built eq "")
+                && $column ne "last_failed_dependency")
+        {
                 $rc = $self->_doQuery(
                         "UPDATE build_ports SET $column=NOW() WHERE port_id=? AND build_id=?",
                         [$port->getId(), $build->getId()]
