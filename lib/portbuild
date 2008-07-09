@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.116 2008/06/03 02:33:01 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.117 2008/07/09 21:10:27 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -147,7 +147,7 @@ if [ -f ${dudsfile} ]; then
 	${tc} updatePortStatus -d ${portdir} -b ${build} \
 		-L -s DUD -v ${pkgname}
 	mark_failed ${tc} ${build} ${pkgname} ${portdir}
-	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=DUD PORTDIR=${portdir} PB=${pb}"
+	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=DUD PORTDIR=${portdir} PB=${pb} FAIL_REASON=dud"
         exit 1
     fi
 fi
@@ -381,28 +381,34 @@ if [ "${error}" = "0" ]; then
     else
 	ln -f ${logsDir}/${pkgname}.log ${errorsDir}/${pkgname}.log
 	reason=""
+	reasonenv=""
 	if [ ${nolog} -eq 0 ]; then
-	    reason="-r $(${tc} processLog -l ${logsDir}/${pkgname}.log)"
+	    reasontxt=$(${tc} processLog -l ${logsDir}/${pkgname}.log)
+	    reason="-r ${reasontxt}"
+	    reasonenv="FAIL_REASON=${reasontxt}"
 	fi
 	${tc} updatePortStatus -d ${portdir} -b ${build} \
 		-L -s FAIL -v ${pkgname} ${reason}
 	mark_failed ${tc} ${build} ${pkgname} ${portdir}
         ${tc} sendBuildErrorMail -d ${portdir} -b ${build} -p ${pkgname}
-	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=FAIL PORTDIR=${portdir} PB=${pb}"
+	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=FAIL PORTDIR=${portdir} PB=${pb} ${reasonenv}"
     fi
 else
     cp ${chroot}/tmp/${pkgname}.log ${logsDir}/${pkgname}.log
     ln -f ${logsDir}/${pkgname}.log ${errorsDir}/${pkgname}.log
 
     reason=""
+    reasonenv=""
     if [ ${nolog} -eq 0 ]; then
-        reason="-r $(${tc} processLog -l ${logsDir}/${pkgname}.log)"
+	reasontxt=$(${tc} processLog -l ${logsDir}/${pkgname}.log)
+        reason="-r ${reasontxt}"
+	reasonenv="FAIL_REASON=${reasontxt}"
     fi
     ${tc} updatePortStatus -d ${portdir} -b ${build} \
 		-L -s FAIL -v ${pkgname} ${reason}
     mark_failed ${tc} ${build} ${pkgname} ${portdir}
     ${tc} sendBuildErrorMail -d ${portdir} -b ${build} -p ${pkgname}
-    execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=FAIL PORTDIR=${portdir} PB=${pb}"
+    execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=FAIL PORTDIR=${portdir} PB=${pb} ${reasonenv}"
 fi
 
 cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${build}
