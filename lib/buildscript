@@ -114,6 +114,23 @@ if [ $phase = 1 ]; then
   echo "port directory: ${dir}"
   echo "build started at $(date)"
   echo "prefixes: LOCALBASE=${L} X11BASE=${X} PREFIX=$(make -V PREFIX)"
+  echo "Begin Configuration:"
+  echo "---Begin Environment---"
+  printenv
+  echo "---End Environment---"
+  echo ""
+  echo "---Begin OPTIONS List---"
+  make showconfig
+  echo "---End OPTIONS List---"
+  echo ""
+  optionsfile=$(make -V OPTIONSFILE)
+  if [ -f "${optionsfile}" ]; then
+      echo "---Begin OPTIONS configuration---"
+      cat ${optionsfile}
+      echo "---End OPTIONS configuration---"
+      echo ""
+  fi
+  echo "End Configuration."
 
   echo "FETCH_DEPENDS=${FD}"
   echo "PATCH_DEPENDS=${PD}"
