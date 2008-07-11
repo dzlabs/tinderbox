@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.69 2008/07/11 01:38:03 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.70 2008/07/11 02:04:08 marcus Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1546,13 +1546,15 @@ tbcleanup_cleanup () {
 tbcleanup () {
     # set up defaults
     cleanErrors=1
+    cleanPkgs=0
 
     # argument handling
-    while getopts E arg >/dev/null 2>&1
+    while getopts Ep arg >/dev/null 2>&1
     do
 	case "${arg}" in
 
 	E)	cleanErrors=0;;
+	p)	cleanPkgs=1;;
 	?)	return 1;;
 
 	esac
@@ -1605,12 +1607,14 @@ tbcleanup () {
         fi
         trap "tbcleanup_cleanup ${portstree}" 1 2 3 9 10 11 15
 
+	pkgs_seen=""
+	pkg_path=$(tinderLoc packages ${build})
 	for port in ${ports} ; do
 	    path="/nonexistent"
 	    if ${tc} getPortLastBuiltVersion -d ${port} -b ${build} >/dev/null 2>&1 ; then
-		pkg_path=$(tinderLoc packages ${build})
 		lbv=$(${tc} getPortLastBuiltVersion -d ${port} -b ${build} 2>/dev/null)
 		path="${pkg_path}/All/${lbv}${package_suffix}"
+		pkgs_seen="${pkgs_seen} ${lbv}${package_suffix}"
 	    fi
 	    if [ ! -e ${path} ]; then
 		echo "Removing database entry for nonexistent port ${port}/${build}"
@@ -1625,6 +1629,18 @@ tbcleanup () {
 		${tc} rmPort -d ${port} -b ${build} -f -c
 	    fi
 	done
+
+	if [ ${cleanPkgs} = 1 ]; then
+		for pkg in $(/bin/ls -1 ${pkg_path}/All/*.${package_suffix}); do
+	    		if ! echo ${pkgs_seen} | grep -qw ${pkg}; then
+			    	echo "Removing stale package ${build}/${pkg}"
+		    		/bin/rm -f "${pkg_path}/All/${pkg}"
+			fi
+	        done
+
+		echo "Pruning broken package symlinks for build ${build}"
+		find -L ${pkg_path} -type l -delete
+        fi
 
         tbcleanup_cleanup ${portstree}
 
