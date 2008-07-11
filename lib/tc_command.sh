@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.68 2008/06/03 02:33:01 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.69 2008/07/11 01:38:03 marcus Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1544,6 +1544,20 @@ tbcleanup_cleanup () {
 }
 
 tbcleanup () {
+    # set up defaults
+    cleanErrors=1
+
+    # argument handling
+    while getopts E arg >/dev/null 2>&1
+    do
+	case "${arg}" in
+
+	E)	cleanErrors=0;;
+	?)	return 1;;
+
+	esac
+    done
+
     tc=$(tinderLoc scripts tc)
     builds=$(${tc} listBuilds 2>/dev/null)
     ports=$(${tc} listPorts 2>/dev/null)
@@ -1616,6 +1630,7 @@ tbcleanup () {
 
 	# Delete unreferenced log files.
 	dir=$(tinderLoc buildlogs ${build})
+	errorDir=$(tinderLoc builderrors ${build})
 
 	for file_name in $(/bin/ls -1 ${dir}) ; do
 	    if expr -- ${file_name} : '^.*\.log$' >/dev/null ; then
@@ -1623,6 +1638,9 @@ tbcleanup () {
 		if [ ${result} != 1 ]; then
 		    echo "Deleting stale log ${dir}/${file_name}"
 		    /bin/rm -f "${dir}/${file_name}"
+		    if [ ${clenErrors} = 1 ]; then
+			/bin/rm -f "${errorDir}/${file_name}"
+		    fi
 		fi
 	    fi
 	done
