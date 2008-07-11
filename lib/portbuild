@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.117 2008/07/09 21:10:27 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.118 2008/07/11 16:15:32 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -238,7 +238,7 @@ if [ x"${CCACHE_ENABLED}" = x"1" ]; then
 fi
 
 if [ x"${OPTIONS_ENABLED}" = x"1" ]; then
-    export PORT_DBDIR=$(tinderLoc buildoptions ${build})
+    export PORT_DBDIR=/var/db/ports
 fi
 
 echo "building $pkgname in $chroot"
