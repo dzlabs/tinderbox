@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.71 2008/07/12 22:12:39 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.72 2008/07/12 22:19:19 marcus Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1624,6 +1624,7 @@ tbcleanup () {
     tbcleanup_cleanup ${portstrees}
 
     if [ ${cleanDistfiles} = 1 ]; then
+	echo "Pruning stale distfiles from distfile cache: ${DISTFILE_CACHE}"
 	for df in $(find ${DISTFILE_CACHE} -type f); do
 	    relfile=$(echo ${df} | sed -e "s|^${DISTFILE_CACHE}/||")
 	    if ! grep -q "^${relfile}\$" ${disttmp}; then
