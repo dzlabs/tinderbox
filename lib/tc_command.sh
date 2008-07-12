@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.70 2008/07/11 02:04:08 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.71 2008/07/12 22:12:39 marcus Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1545,14 +1545,16 @@ tbcleanup_cleanup () {
 
 tbcleanup () {
     # set up defaults
+    cleanDistfiles=0
     cleanErrors=1
     cleanPkgs=0
 
     # argument handling
-    while getopts Ep arg >/dev/null 2>&1
+    while getopts dEp arg >/dev/null 2>&1
     do
 	case "${arg}" in
 
+	d)	cleanDistfiles=1;;
 	E)	cleanErrors=0;;
 	p)	cleanPkgs=1;;
 	?)	return 1;;
@@ -1572,14 +1574,44 @@ tbcleanup () {
             exit 1
         fi
     done
+    disttmp=""
+    DISTFILE_CACHE=""
+    if [ ${cleanDistfiles} = 1 ]; then
+	DISTFILE_CACHE=$(${tc} configGet | awk -F= '/^DISTFILE_CACHE/ {print $2}')
+	if [ -n "${DISTFILE_CACHE}" ]; then
+	    disttmp=$(mktemp -q /tmp/tbcleanup.XXXXXX)
+	    if [ $? != 0 ]; then
+	        echo "Failed to create temp file; distfile cleanup will not be done"
+	        cleanDistfiles=0
+	    fi
+	else
+	    cleanDistfiles=0
+        fi
+    fi
     for port in ${ports} ; do
 	pathFound=0
         for portstree in ${portstrees} ; do
 	    path=$(tinderLoc portstree ${portstree})
 	    path="${path}/ports/${port}/Makefile"
 	    if [ -e ${path} ]; then
-		pathFound=1
-		break
+	        if [ ${cleanDistfiles} = 1 ]; then
+		    oldcwd=${PWD}
+		    path=$(tinderLoc portstree ${portstree})
+		    cd "${path}/ports/${port}"
+		    distinfo=$(env PORTSDIR="${path}/ports" make -V MD5_FILE)
+		    if [ -f "${distinfo}" ]; then
+			for df in $(grep '^MD5' ${distinfo} | awk -F '[\(\)]' '{print $2}'); do
+			    if ! grep -q "^${df}\$" ${disttmp}; then
+				echo ${df} >> ${disttmp}
+			    fi
+			done
+		    fi
+		    cd ${oldcwd}
+		    pathFound=1
+		else
+		    pathFound=1
+		    break
+	        fi
 	    fi
 	done
 
@@ -1590,6 +1622,18 @@ tbcleanup () {
     done
 
     tbcleanup_cleanup ${portstrees}
+
+    if [ ${cleanDistfiles} = 1 ]; then
+	for df in $(find ${DISTFILE_CACHE} -type f); do
+	    relfile=$(echo ${df} | sed -e "s|^${DISTFILE_CACHE}/||")
+	    if ! grep -q "^${relfile}\$" ${disttmp}; then
+		echo "Removing stale distfile ${relfile}"
+		/bin/rm -f ${df}
+	    fi
+        done
+	find ${DISTFILE_CACHE} -type d -empty | xargs rmdir
+	/bin/rm -f ${disttmp}
+    fi
 
     for build in ${builds} ; do
 	jail=$(${tc} getJailForBuild -b ${build} 2>/dev/null)
