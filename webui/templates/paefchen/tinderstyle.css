@@ -82,10 +82,6 @@ ul {
 	padding				: 0; 
 }
 
-.right ul {
-	margin-right		: 16px;
-}
-
 li {
 	border-width		: 0 0 0 1px;
 	border-style		: solid;
@@ -133,17 +129,18 @@ label {
 
 
 #topmenu {
+}
+
+#topmenu .left {
 	position			: absolute;
+	left				: 20px;
 	top					: 64px;
-	width				: 100%;
 }
 
 #topmenu .right {
-	padding-right		: 20px;
-}
-
-#topmenu .right ul {
-	float				: left;
+	position			: absolute;
+	right				: 16px;
+	top					: 64px;
 }
 
 #topmenu input {
