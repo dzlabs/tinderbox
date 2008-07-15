@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.80 2008/06/09 19:14:47 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.81 2008/07/15 21:26:00 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -631,9 +631,9 @@ sub addBuildPortsQueueEntry {
 
         my $rc = $self->_doQuery(
                 "INSERT INTO build_ports_queue
-                    ( build_id, user_id, port_directory, priority )
+                    ( build_id, user_id, port_directory, priority, enqueue_date )
                  VALUES
-                     ( ?, ?, ?, ? )",
+                     ( ?, ?, ?, ?, NOW() )",
                 [$build->getId(), $user, $directory, $priority]
         );
 
