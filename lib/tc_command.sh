@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.72 2008/07/12 22:19:19 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.73 2008/07/20 22:39:58 marcus Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1699,7 +1699,7 @@ tbcleanup () {
 		if [ ${result} != 1 ]; then
 		    echo "Deleting stale log ${dir}/${file_name}"
 		    /bin/rm -f "${dir}/${file_name}"
-		    if [ ${clenErrors} = 1 ]; then
+		    if [ ${cleanErrors} = 1 ]; then
 			/bin/rm -f "${errorDir}/${file_name}"
 		    fi
 		fi
