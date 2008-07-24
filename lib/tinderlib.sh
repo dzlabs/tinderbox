@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.43 2008/07/24 16:53:47 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.44 2008/07/24 18:36:31 marcus Exp $
 #
 
 tinderLocJail () {
@@ -829,6 +829,7 @@ createDb () {
 		    echo "WARN: Passwords do not match!"
 		fi
 	    done
+	fi
 	echo "Are these the settings you want:"
 	echo "    Database username      : ${db_user}"
 	if [ -n "${db_pass}" ]; then
