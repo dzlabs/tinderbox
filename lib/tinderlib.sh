@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.44 2008/07/24 18:36:31 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.45 2008/07/24 18:37:39 marcus Exp $
 #
 
 tinderLocJail () {
@@ -585,7 +585,7 @@ loadSchema () {
     PGSQL_LOAD='/usr/local/bin/psql -U ${db_admin} -W -h ${db_host} -d ${db_name} < "${schema_file}"'
     PGSQL_LOAD_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
 
-    if [ -f ${schema_file} ]; then
+    if [ ! -f ${schema_file} ]; then
 	tinderEcho "ERROR: Schema file ${schema_file} does not exist."
 	return 1
     fi
