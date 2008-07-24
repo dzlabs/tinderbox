@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.70 2008/06/02 05:52:15 ade Exp $
+$MCom: portstools/tinderbox/README,v 1.71 2008/07/24 23:52:33 ade Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -79,11 +79,13 @@ Delete_priv
 
 MySQL:
 ------
-mysql -u{$DB_ADMIN} -p -h {$DB_HOST} {$DB_NAME} < tinderbox-mysql.schema
+cd sql
+./genschema mysql | mysql -u{$DB_ADMIN} -p -h {$DB_HOST} {$DB_NAME}
 
 PostgreSQL:
 -----------
-psql -U {$DB_USER} -W -h {$DB_HOST} -d {$DB_NAME} < tinderbox-pgsql.schema
+cd sql
+./genschema pgsql | psql -U {$DB_USER} -W -h {$DB_HOST} -d {$DB_NAME}
 
    Where {$DB_HOST} and {$DB_NAME} are the values of $DB_HOST and $DB_NAME
    from ds.ph respectively, {$DB_ADMIN} is the database administrator username,

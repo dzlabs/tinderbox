@@ -1,0 +1,57 @@
+/*
+ Port failure reasons.  These are reasons why a port may fail to build.
+ One reason may have multiple supporting patterns.  The tag column should
+ be a short identifier for the given reason description.  Changes to the
+ reasons list require a micro version bump to __DSVERSION__.
+*/
+
+INSERT INTO port_fail_reasons VALUES ('__parent__', 'This is a parent reason.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('__nofail__', 'The port was built successfully.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('gcc_bug', 'You have tickled a bug in gcc itself. See the GNU bug report documentation for further information.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('checksum', 'The checksum of one or more of the files is incorrect.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('perl', 'perl is no longer included by default in the base system, but your port''s configuration process depends on it. While this change helps avoid having a stale version of perl in the base system, it also means that many ports now need to include USE_PERL5.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('threads', 'This port is attempting to use the wrong pthread library.  You should replace static instances of -pthread, -lpthread, and -lc_r with ${PTHREAD_LIBS}.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('distinfo_update', 'The contents of distinfo does not match the list of distfiles or patchfiles.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('arch', 'The port does not build on a particular architecture, due to assembler or linker errors. In some easy cases this is due to not picking up the various ARCH configuration variables in the Makefile; you''ll see this via, e.g., a Sparc make failing while looking for an i386 subdirectory. For the 64-bit architectures, a common problem is the assumption many programmers make that pointers may be cast to and from 32-bit ints. In other cases the problems run much deeper, in which case ONLY_FOR_ARCHS may be needed.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('configure_error', 'The port''s configure script produced some kind of error.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('fetch', 'One or more of the files could not be fetched.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('patch', 'One or more of the patches failed.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('WRKDIR', 'The port is attempting to change something outside ${WRKDIR}. See <a href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/porters-handbook/porting-wrkdir.html">handbook</a> for details.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('perl5', 'There is a problem in processing a perl5 module.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('LIB_DEPENDS', 'The LIB_DEPENDS line specifies a library name incorrectly. This often happens when a port is upgraded and the shared library version number changes.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('missing_header', 'There is a missing header file. This is usually caused by either (1) a missing dependency, or (2) specifying an incorrect location with -I in the compiler command line.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('USE_XLIB', 'You should specify USE_XLIB for this port since it appears to use X.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('fetch_timeout', 'Your fetch process was killed because it took too long. (More accurately, it did not produce any output for a long time.) Please put sites with better connectivity near the beginning of MASTER_SITES.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('runaway_process', 'Your make package process was killed because it took too long. (More accurately, it did not produce any output for a long time.) It is probably because there is a process spinning in an infinite loop. Please check the log to determine the exact cause of the problem.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('disk_full', 'The disk filled up on the build system. It is not your fault.', 'TRANSIENT');
+INSERT INTO port_fail_reasons VALUES ('compiler_error', 'There is a C compiler error which is caused by something other than e.g. "new compiler error".', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('new_compiler_error', 'The new gcc (2.95.x or above) does not like the source code. This is usually due to stricter C++ type checking or changes in register allocation policy.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('bad_C++_code', 'There is a compiler error which is caused by something specific to C++.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('linker_error', 'There is a linker error which is caused by something other than those flagged by e.g. MOTIF or MOTIFLIB.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('chown', 'POSIX has deprecated the usage "chown user.group filename" in favor of "chown user:group filename". This happened quite some time ago, actually, but it is only now being enforced. (The change was made to allow ''.'' in usernames).', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('cgi-bin', 'Your port assumes that a directory (usually /usr/local/www/cgi-bin) already exists, but by default it doesn''t.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('install_error', 'There was an error during installation.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('manpage', 'There is a manpage listed in a MAN? macro that does not exist or is not installed in the right place.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('DISPLAY', 'This port requires an X display to build. There is nothing you can do about it unless you can somehow make it not require an X connection.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('depend_object', 'The port is trying to reinstall a dependency that already exists. This is usually caused by the first field of a *_DEPENDS line (the obj of obj:dir[:target]) indicating a file that is not installed by the dependency, causing it to be rebuilt even though it has already been added from a package.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('depend_package', 'There was an error during adding dependencies from packages. It is the fault of the package being added, not this port.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('coredump', 'Some process in the build chain dropped core. While your port may indeed be faulty, the process that dropped core should also be fixed.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('segfault', 'Some process in the build chain dereferenced a NULL pointer, and encountered a segmentation fault.  While your port may indeed be faulty, the process that dropped core should also be fixed.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('stdio', 'You need to bring your port up to date with the current <stdio.h>.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('struct_changes', 'Your port is trying to refer to structure elements that are not really there. This is often due to changes in the underlying include files.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('autoconf', 'Your port depends on autoconf, but the Makefile either doesn''t have USE_AUTOCONF, or does not use USE_AUTOCONF_VER correctly.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('autoheader', 'Your port depends on autoheader, but the Makefile cannot find it; set USE_AUTOHEADER.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('automake', 'Your port depends on automake, but the Makefile either doesn''t have USE_AUTOMAKE, or does not use USE_AUTOMAKE_VER correctly.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('makefile', 'There is an error in the Makefile, possibly in the default targets.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('mtree', 'The port leaves ${PREFIX} in a state that is not consistent with the mtree definition after pkg_delete. This usually means some files are missing from PLIST. It could also mean that your installation scripts create files or directories not properly deleted by the deinstallation scripts. Another possibility is that your port is deleting some directories it is not supposed to, or incorrectly modifying some directory''s permission.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('process_failed', 'The make process terminated unexpectedly, due to something like a signal 6 or bus error.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('python', 'The Makefile needs to define USE_PYTHON.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('varargs', '<varags.h> is obsolete; use <stdarg.h> instead.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('NFS', 'There was either a temporary NFS error on the build system (which is not your fault), or the WRKSRC is invalid (which is your fault).', 'TRANSIENT');
+INSERT INTO port_fail_reasons VALUES ('PLIST', 'There is a missing item in the PLIST. Note that this is often caused by an earlier error that went undetected. In this case, you should fix the error and also the build process so it will fail upon an error instead of continuing, since that makes debugging that much harder.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('compat6x', 'This port relies on libraries from FreeBSD 6.X, and the compat6x package is not installed.  A dependency to misc/compat6x must be added.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('gcc4_error', 'Your code does not run with the latest gcc version (pending import to -CURRENT). See http://wiki.freebsd.org/gcc4 for further information.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('sysvipc', 'Your port is interacting badly with the System V InterProcess Communication code.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('???', 'The automated script cannot even guess what is wrong with your port. Either the script is really stupid (more likely), or your port has ventured into unknown lands (congratulations!).', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('hook', 'A pre-condition hook failed to execute successfully', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('f77', 'The Fortran 77 compiler is no longer installed in the base OS.  This port requires USE_FORTRAN.', 'COMMON');
