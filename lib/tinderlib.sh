@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.42 2008/07/24 14:48:45 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.43 2008/07/24 16:53:47 marcus Exp $
 #
 
 tinderLocJail () {
@@ -635,7 +635,7 @@ backupDb () {
     db_host=$4
     db_name=$5
 
-    table_file=$(tinderLoc scripts upgrade)/tables.lst
+    table_file=$(tinderLoc scripts upgrade/tables.lst)
 
     MYSQL_DUMP='/usr/local/bin/mysqldump --no-create-info --skip-opt -u${db_admin} -p -h ${db_host} ${db_name} %%TABLE%% >> ${tmpfile}'
     MYSQL_DUMP_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
