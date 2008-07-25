@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.73 2008/07/20 22:39:58 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.74 2008/07/25 05:56:25 marcus Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -88,7 +88,7 @@ generateUpdateCode () {
 		    echo "ERROR: ${2} ${3}: ${updateCmd} missing"
 		    exit 1
 		fi
-		    
+
 		if [ -d ${treeDir} ]; then
 		    echo "${2}: cleaning out old directories"
 		    cleanDirs ${2} ${treeDir}
@@ -132,7 +132,7 @@ tcExists () {
 }
 
 updateTree () {
-    what=$1 
+    what=$1
     name=$2
     flag=$3
     dir=$4
@@ -224,14 +224,28 @@ Setup () {
     # Now create the database if we can.
     tinderEcho "INFO: Beginning database configuration."
 
+    db_host=""
+    db_name=""
+    db_admin=""
+    do_load=0
     db_driver=$(getDbDriver)
-    db_setup=$(tinderLoc scripts lib/setup-${db_driver}.sh)
-    if [ ! -f "${db_setup}" ]; then
-	tinderEcho "ERROR: Failed to locate a setup script for the ${db_driver} database driver."
-	exit 1
+    dbinfo=$(getDbInfo ${db_driver})
+    genschema=$(tinderLoc scripts sql/genschema)
+    if [ $? = 0 ]; then
+        db_admin_host=${dbinfo%:*}
+        db_name=${dbinfo##*:}
+        db_admin=${db_admin_host%:*}
+        db_host=${db_admin_host#*:}
+        do_load=1
     fi
 
-    . ${db_setup}
+    if [ ${do_load} = 0 ]; then
+	tinderEcho "WARN: You must first create a database for Tinderbox, and generate the schema by running ${genschema} with the appropriate database driver argument.  Once the schema is generated, it must be loaded into the newly created database.  Consult ${TINDERBOX_URL} for more information on creating and initializing the Tinderbox database."
+    else
+        if ! createDb ${db_driver} ${db_admin} ${db_host} ${db_name} 1; then
+    	    tinderExit "ERROR: Error creating the new database!  Consult the output above for more information." $?
+        fi
+    fi
 
     tinderEcho "INFO: Database configuration complete."
     echo ""
@@ -239,7 +253,7 @@ Setup () {
     # We're done now.  However, we don't want to be calling 'tc init'
     # here since the user may need to configure tinderbox.ph first
     tph=$(tinderLoc scripts tinderbox.ph)
-    tinit=$(tinderLoc scripts init)
+    tinit="$(tinderLoc scripts tc) init"
 
     tinderExit "Congratulations!  The scripted portion of Tinderbox has completed successfully.  You should now verify the settings in ${tph} are correct for your environment, then run \"${tinit}\" to complete the setup.  Be sure to checkout ${TINDERBOX_URL} for further instructions." 0
 }
@@ -249,37 +263,32 @@ Setup () {
 #---------------------------------------------------------------------------
 
 Upgrade () {
-    VERSION="3.0.0"
-
-    # DB_MIGRATION_PATH contains all versions where upgradeable SQL
-    # schemas are available.
-    # For example, with:
-    #	DB_MIGRATION_PATH="1.X 2.0.0 2.0.1 2.1.0"
-    # then there are scripts for 1.X->2.0.0, 2.0.0->2.0.1 and 2.0.1->2.1.0
-    # so it is possible through intermediaries from 1.X->2.1.0 without having
-    # to maintain scripts for every possible combination of existing and
-    # new version numbers
-    DB_MIGRATION_PATH="${VERSION}"
-
-    REMOVE_FILES=""
+    VERSION="3.0"
     TINDERBOX_URL="http://tinderbox.marcuscom.com/"
+
+    tc=$(tinderLoc scripts tc)
 
     clear
 
     tinderEcho "Welcome to the Tinderbox Upgrade and Migration script.  This script will guide you through an upgrade to Tinderbox ${VERSION}."
     echo ""
 
-    read -p "Hit <ENTER> to get started: " dummy
+    read -p "Hit <ENTER> to get started: " i
 
     # Check if the current Datasource Version is ascertainable
-    tc=$(tinderLoc scripts tc)
-    if ${tc} dsversion >/dev/null 2>&1 ; then
-	DSVERSION=$(${tc} dsversion)
-    else
-	tinderExit "ERROR: Database migration failed!  Consult the output above for more information." $?
+    if ! ${tc} dsversion >/dev/null 2>&1 ; then
+        tinderExit "ERROR: Upgrade is only supported from Tinderbox 2.x." $?
     fi
 
-    # First, migrate the database, if needed.
+    # Cleanup files that are no longer needed.
+    echo ""
+    tinderEcho "INFO: Cleaning up stale files..."
+    REMOVE_FILES="buildscript create enterbuild makemake mkbuild mkjail pnohang.c portbuild rawenv rawenv.dist tbkill.sh tinderbuild tinderd lib/Build.pm lib/BuildPortsQueue.pm lib/Hook.pm lib/Host.pm lib/Jail.pm lib/MakeCache.pm lib/Port.pm lib/PortFailPattern.pm lib/PortFailReason.pm lib/PortsTree.pm lib/TBConfig.pm lib/TinderObject.pm lib/TinderboxDS.pm lib/User.pm lib/tinderbox_shlib.sh"
+    for f in ${REMOVE_FILES}; do
+        rm -f "${pb}/scripts/${f}"
+    done
+
+    # First, backup the current data.
     echo ""
     db_host=""
     db_name=""
@@ -287,49 +296,80 @@ Upgrade () {
     do_load=0
     db_driver=$(getDbDriver)
     dbinfo=$(getDbInfo ${db_driver})
-
-    if [ $? -eq 0 ]; then
-	db_admin_host=${dbinfo%:*}
-	db_name=${dbinfo##*:}
-	db_admin=${db_admin_host%:*}
-	db_host=${db_admin_host#*:}
-	do_load=1
+    if [ $? = 0 ]; then
+        db_admin_host=${dbinfo%:*}
+        db_name=${dbinfo##*:}
+        db_admin=${db_admin_host%:*}
+        db_host=${db_admin_host#*:}
+        do_load=1
     fi
 
-    set -- $DB_MIGRATION_PATH
-    while [ -n "${1}" -a -n "${2}" ] ; do
-	MIG_VERSION_FROM=${1}
-	MIG_VERSION_TO=${2}
+    if [ ${do_load} = 0 ]; then
+        tinderEcho "WARN: Database migration was not done.  If you have already loaded the database schema, type 'y' or 'yes' to continue the migration."
+        echo ""
+        read -p "Do you wish to continue? (y/n)" i
+        case ${i} in
+    	    [Yy]|[Yy][Ee][Ss])
+    	        # continue
+    	        ;;
+    	    *)
+    	        tinderExit "INFO: Upgrade aborted by user." 0
+    	        ;;
+        esac
+    else
+        bkup_file=$(mktemp /tmp/tb_dbbak.XXXXXX)
+        if [ $? != 0 ]; then
+    	    tinderExit "Failed to create temp file for database backup." $?
+        fi
+        if ! backupDb ${bkup_file} ${db_driver} ${db_admin} ${db_host} ${db_name} ; do
+    	    tinderExit "ERROR: Database backup failed!  Consult the output above for more information." $?
+    	    rm -f ${bkup_file}
+        fi
+        if ! dropDb ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
+    	    tinderExit "ERROR: Error dropping the old database!  Consult the output above for more information.  Once the problem is corrected, run \"update.sh -backup ${bkup_file}\" to resume migration." $?
+        fi
+        if ! createDb ${db_driver} ${db_admin} ${db_host} ${db_name} 0; then
+    	    tinderExit "ERROR: Error creating the new database!  Consult the output above for more information.  Once the problem is corrected, run \"update.sh -backup ${bkup_file}\" to resume migration." $?
+        fi
+        if ! loadSchema ${bkup_file} ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
+    	    tinderExit "ERROR: Database restoration failed!  Consult the output above for more information.  Once the problem is corrected, run \"update.sh -backup ${bkup_file}\" to resume migration." $?
+        fi
+        rm -f ${bkup_file}
+    fi
 
-	if [ ${MIG_VERSION_FROM} = ${DSVERSION} ] ; then
-	    migDb ${do_load} ${db_driver} ${db_admin} ${db_host} ${db_name}
-	    case $? in
-
-            2)	tinderExit "ERROR: Database migration failed!  Consult the output above for more information." 2;;
-            1)	tinderExit "ERROR: No Migration Script available to migrate ${MIG_VERSION_FROM} to ${MIG_VERSION_TO}" 1;;
-            0)	DSVERSION=${MIG_VERSION_TO};;
-
-	    esac
-	fi
-
-	shift
+    # Migrate .env files.
+    echo ""
+    tinderEcho "INFO: Migrating .env files..."
+    envdir=$(tinderLoc scripts etc/env)
+    if [ ! -d ${envdir} ]; then
+        mkdir -p ${envdir}
+    fi
+    jails=$(${tc} listJails 2>/dev/null)
+    for jail in ${jails}; do
+        f=$(tinderLoc jail ${jail})
+        if [ -f "${f}/jail.env" ]; then
+    	    mv -f "${f}/jail.env" "${envdir}/jail.${jail}"
+        fi
     done
 
-    if [ ${do_load} -eq 0 ]; then
-	tinderEcho "WARN: Database migration was not done.  If you proceed, you may encounter errors.  It is recommended you manually load any necessary schema updates, then re-run this script.  If you have already loaded the database schema, type 'y' or 'yes' to continue the migration."
-	echo ""
+    builds=$(${tc} listBuilds 2>/dev/null)
+    for build in ${builds}; do
+        f=$(tinderLoc build ${build})
+        if [ -f "${f}/build.env" ]; then
+    	    mv -f "${f}/build.env" "${envdir}/build.${build}"
+        fi
+    done
 
-	read -p "Do you wish to continue? (y/n)" dummy
-	case ${i} in
-
-        [Yy]|[Yy][Ee][Ss])	;;	# continue
-	*)			tinderExit "INFO: Upgrade aborted by user.";;
-
-	esac
-    fi
+    portstrees=$(${tc} listPortsTrees 2>/dev/null)
+    for portstree in ${portstrees}; do
+        f=$(tinderLoc portstree ${portstree})
+        if [ -f "${f}/portstree.env" ]; then
+    	    mv -f "${f}/portstree.env" "${envdir}/portstree.${portstree}"
+        fi
+    done
 
     echo ""
-    tinderExit "Congratulations!  Tinderbox migration is complete.  Please refer to ${TINDERBOX_URL} for a list of what is new in this version as well as general Tinderbox documentation." 0
+    tinderExit "Congratulations! Tinderbox migration is complete.  Please refer to ${TINDERBOX_URL} for a list of what is new in this version as well as general Tinderbox documentation." 0
 }
 
 #---------------------------------------------------------------------------
@@ -642,17 +682,17 @@ createJail () {
     echo "${jailName}: initializing tree"
     generateUpdateCode jail ${jailName} ${updateType} ${updateHost} \
 		       ${updateTag} ${updateCompress}
-    
+
     echo -n "${jailName}: adding to datastore... "
-    
+
     if [ ! -z "${descr}" ]; then
 	descr="-d ${descr}"
     fi
-    
+
     if [ ! -z "${mountSrc}" ]; then
 	mountSrc="-m ${mountSrc}"
     fi
-    
+
     tc=$(tinderLoc scripts tc)
     ${tc} addJail -j ${jailName} -u ${updateType} ${mountSrc} \
 		  -t ${updateTag} -a ${jailArch} "${descr}"
@@ -661,7 +701,7 @@ createJail () {
 	exit 1
     fi
     echo "done."
-	
+
     # now initialize the jail (unless otherwise requested)
     if [ ${init} -eq 1 ]; then
 	echo "${jailName}: initializing new jail..."
@@ -787,11 +827,11 @@ createPortsTree () {
     if [ ! -z "${mountSrc}" ]; then
 	mountSrc="-m ${mountSrc}"
     fi
-    
+
     if [ ! -z "${cvswebUrl}" ]; then
 	cvswebUrl="-w ${cvswebUrl}"
     fi
-    
+
     tc=$(tinderLoc scripts tc)
     ${tc} addPortsTree -p ${portsTreeName} -u ${updateType} \
 		       ${mountSrc} ${cvswebUrl} "${descr}"
@@ -800,7 +840,7 @@ createPortsTree () {
 	exit 1
     fi
     echo "done."
-    
+
     if [ ${init} -eq 1 ]; then
 	updatePortsTree -p ${portsTreeName}
     fi

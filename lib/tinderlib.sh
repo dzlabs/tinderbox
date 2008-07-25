@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.45 2008/07/24 18:37:39 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.46 2008/07/25 05:56:25 marcus Exp $
 #
 
 tinderLocJail () {
@@ -741,34 +741,66 @@ createDb () {
     MYSQL_CREATE='/usr/local/bin/mysqladmin -u${db_admin} -p -h ${db_host} create ${db_name}'
     MYSQL_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
     MYSQL_GRANT='/usr/local/bin/mysql -u${db_admin} -p -h ${db_host} -e "GRANT SELECT, INSERT, UPDATE, DELETE ON ${db_name}.* TO '"'"'${db_user}'"'"'@'"'"'${grant_host}'"'"' IDENTIFIED BY '"'"'${db_pass}'"'"' ; FLUSH PRIVILEGES" mysql'
+    MYSQL_MAN_PREREQS="databases/p5-DBD-mysql50 databases/mysql40-client"
+    MYSQL_OPT_PREREQS="databases/php[45]-mysql"
 
     PGSQL_CHECK='/usr/local/bin/psql -U ${db_admin} -h ${db_host} -W -c "SELECT 0" ${db_name}'
     PGSQL_CREATE='/usr/local/bin/createdb -U ${db_admin} -h ${db_host} -W ${db_name}'
     PGSQL_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
     PGSQL_GRANT='echo "Please manually grant SELECT, INSERT, UPDATE, and DELETE privileges for ${db_user} to all tables in ${db_name}"'
+    PGSQL_MAN_PREREQS="databases/p5-DBD-Pg databases/postgresql*-client"
+    PGSQL_OPT_PREREQS="databases/php[45]-pgsql"
 
     prompt=""
     check=""
     create=""
     grant=""
+    manprereqs=""
+    optprereqs=""
     case "${db_driver}" in
 	mysql)
 	    prompt=${MYSQL_PROMPT}
 	    check=${MYSQL_CHECK}
 	    create=${MYSQL_CREATE}
 	    grant=${MYSQL_GRANT}
+	    manprereqs=${MYSQL_MAN_PREREQS}
+	    optprereqs=${MYSQL_OPT_PREREQS}
 	    ;;
 	pgsql)
 	    prompt=${PGSQL_PROMPT}
 	    check=${PGSQL_CHECK}
 	    create=${PGSQL_CREATE}
 	    grant=${PGSQL_GRANT}
+	    manprereqs=${PGSQL_MAN_PREREQS}
+	    optprereqs=${PGSQL_OPT_PREREQS}
 	    ;;
 	*)
 	    echo "Unsupported database driver: ${db_driver}"
 	    return 1
 	    ;;
     esac
+
+    tinderEcho "INFO: Checking for prerequisites for ${db_driver} database driver ..."
+    if [ -n "${manprereqs}" ]; then
+	missing=$(checkPreReqs ${manprereqs})
+
+	if [ $? = 1 ]; then
+	    tinderEcho "ERROR: The following mandatory dependencies are missing.  These must be installed prior to creating the Tinderbox database."
+	    tinderEcho "ERROR:     ${missing}"
+	    return 1
+	fi
+    fi
+
+    if [ -n "${optprereqs}" ]; then
+	missing=$(checkPreReqs ${optprereqs})
+
+	if [ $? = 1 ]; then
+	    tinderEcho "WARN: The following option dependencies are missing.  These are required to use the Tinderbox web front-end."
+	    tinderEcho "WARN:     ${missing}"
+	fi
+    fi
+    tinderEcho "DONE."
+    echo ""
 
     tinderEcho "INFO: Checking to see if database ${db_name} already exists on ${db_host} ..."
     eval ${prompt}
@@ -795,15 +827,19 @@ createDb () {
     fi
 
     tinderEcho "INFO: Loading Tinderbox schema into ${db_name} ..."
-    schema=$(tinderLoc scripts tinderbox-${db_driver}.schema)
+    schema=$(tinderLoc scripts sql/tinderbox-${db_driver}.schema)
+    genschema=$(tinderLoc scripts sql/genschema)
+    ${genschema} ${db_driver} > ${schema}
     if [ ! -f ${schema} ]; then
 	tinderEcho "ERROR: Schema file ${schema} does not exist."
 	return 1
     fi
 
     loadSchema ${schema} ${db_driver} ${db_admin} ${db_host} ${db_name}
+    rc=$?
+    rm -f ${schema}
 
-    if [ $? != 0 ]; then
+    if [ ${rc} != 0 ]; then
 	tinderEcho "ERROR: Database schema load failed!  Consult the output above for more information."
 	return 1
     fi
