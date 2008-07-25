@@ -62,9 +62,9 @@ INSERT INTO port_fail_patterns VALUES (5200, '(/usr/bin/ld: cannot find -l(pthre
 INSERT INTO port_fail_patterns VALUES (5300, '<varargs.h> is obsolete with this version of GCC', 'varargs', 0);
 INSERT INTO port_fail_patterns VALUES (5400, '[Rr]ead-[Oo]nly [Ff]ile [Ss]ystem', 'WRKDIR', 0);
 INSERT INTO port_fail_patterns VALUES (5500, 'cc1.*warnings being treated as errors', 'compiler_error', 0);
-INSERT INTO port_fail_patterns VALUES (5600, 'tar: Error exit delayed from previous errors', 'install_error', 0);
+INSERT INTO port_fail_patterns VALUES (5600, 'pkg_create: make_dist: tar command failed with code', 'PLIST', 0);
 INSERT INTO port_fail_patterns VALUES (5700, 'Cannot stat: ', 'configure_error', 0);
 INSERT INTO port_fail_patterns VALUES (5800, '/usr/bin/ld: cannot find -l', 'linker_error', 0);
 INSERT INTO port_fail_patterns VALUES (5900, 'cd: can.t cd to', 'NFS', 0);
-INSERT INTO port_fail_patterns VALUES (6000, 'pkg_create: make_dist: tar command failed with code', 'PLIST', 0);
+INSERT INTO port_fail_patterns VALUES (6000, 'tar: Error exit delayed from previous errors', 'install_error', 0);
 INSERT INTO port_fail_patterns VALUES (2147483647, '.*', '???', 0);
