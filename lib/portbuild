@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.118 2008/07/11 16:15:32 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.119 2008/07/25 23:27:25 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -244,7 +244,7 @@ fi
 echo "building $pkgname in $chroot"
 
 ${tc} updateBuildStatus -b ${build} -s PORTBUILD
-${tc} updateBuildCurrentPort -b ${build} -n ${pkgname}
+${tc} updateBuildCurrentPort -b ${build} -d ${portdir} -n ${pkgname}
 
 packages=$(tinderLoc packages ${build})
 major_version=$(echo ${jail} | sed -E -e 's|(^[[:digit:]]+).*$|\1|')

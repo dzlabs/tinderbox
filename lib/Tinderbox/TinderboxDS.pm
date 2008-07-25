@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.81 2008/07/15 21:26:00 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.82 2008/07/25 23:27:25 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -1108,7 +1108,7 @@ sub updateBuildCurrentPort {
         }
 
         if (defined($port)) {
-                $self->verifyType(2, $port, 'Ports');
+                $self->verifyType(2, $port, 'Port');
                 $rc = $self->_doQuery(
                         "UPDATE build_ports SET currently_building='1' WHERE build_id=? AND port_id=?",
                         [$build->getId(), $port->getId()]
