@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.74 2008/07/25 05:56:25 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.75 2008/07/25 06:04:32 marcus Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -283,7 +283,7 @@ Upgrade () {
     # Cleanup files that are no longer needed.
     echo ""
     tinderEcho "INFO: Cleaning up stale files..."
-    REMOVE_FILES="buildscript create enterbuild makemake mkbuild mkjail pnohang.c portbuild rawenv rawenv.dist tbkill.sh tinderbuild tinderd lib/Build.pm lib/BuildPortsQueue.pm lib/Hook.pm lib/Host.pm lib/Jail.pm lib/MakeCache.pm lib/Port.pm lib/PortFailPattern.pm lib/PortFailReason.pm lib/PortsTree.pm lib/TBConfig.pm lib/TinderObject.pm lib/TinderboxDS.pm lib/User.pm lib/tinderbox_shlib.sh"
+    REMOVE_FILES="buildscript create enterbuild makemake mkbuild mkjail pnohang.c portbuild rawenv rawenv.dist tbkill.sh tinderbuild lib/Build.pm lib/BuildPortsQueue.pm lib/Hook.pm lib/Host.pm lib/Jail.pm lib/MakeCache.pm lib/Port.pm lib/PortFailPattern.pm lib/PortFailReason.pm lib/PortsTree.pm lib/TBConfig.pm lib/TinderObject.pm lib/TinderboxDS.pm lib/User.pm lib/tinderbox_shlib.sh"
     for f in ${REMOVE_FILES}; do
         rm -f "${pb}/scripts/${f}"
     done
