@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.46 2008/07/25 06:05:49 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.47 2008/07/25 06:09:52 marcus Exp $
 
 VERSION=	3.0.0
 
@@ -29,14 +29,14 @@ WEBUITDDATA=	config.tpl current_buildports.tpl describe_port.tpl \
 		list_tinderd_queue.tpl messages.inc please_login.tpl \
 		tinderstyle.css user_admin.tpl user_permissions.tpl \
 		user_properties.tpl
-WEUITpaefchenDATA=config.tpl current_buildports.tpl describe_port.tpl \
+WEBUITpaefchenDATA=config.tpl current_buildports.tpl describe_port.tpl \
 		  display_login.tpl failed_buildports.tpl footer.inc.tpl \
 		  header.inc.tpl latest_buildports.tpl list_buildports.tpl \
 		  list_builds.tpl list_failure_reasons.tpl \
 		  list_tinderd_queue.tpl messages.inc please_login.tpl \
 		  rss.tpl tinderstyle.css user_admin.tpl user_permissions.tpl \
 		  user_properties.tpl
-WEBUIpaefchenIMAGEDATA=hdr_fill.png
+WEBUITpaefchenIMAGEDATA=hdr_fill.png
 
 release:
 	-rm -rf ${.CURDIR}/tinderbox-${VERSION} \
