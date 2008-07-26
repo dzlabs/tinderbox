@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.75 2008/07/25 06:04:32 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.76 2008/07/26 00:25:32 marcus Exp $
 #
 
 export defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -321,7 +321,7 @@ Upgrade () {
         if [ $? != 0 ]; then
     	    tinderExit "Failed to create temp file for database backup." $?
         fi
-        if ! backupDb ${bkup_file} ${db_driver} ${db_admin} ${db_host} ${db_name} ; do
+	if ! backupDb ${bkup_file} ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
     	    tinderExit "ERROR: Database backup failed!  Consult the output above for more information." $?
     	    rm -f ${bkup_file}
         fi
