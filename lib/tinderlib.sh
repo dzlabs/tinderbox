@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.46 2008/07/25 05:56:25 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.47 2008/07/27 22:54:18 marcus Exp $
 #
 
 tinderLocJail () {
@@ -747,7 +747,7 @@ createDb () {
     PGSQL_CHECK='/usr/local/bin/psql -U ${db_admin} -h ${db_host} -W -c "SELECT 0" ${db_name}'
     PGSQL_CREATE='/usr/local/bin/createdb -U ${db_admin} -h ${db_host} -W ${db_name}'
     PGSQL_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
-    PGSQL_GRANT='echo "Please manually grant SELECT, INSERT, UPDATE, and DELETE privileges for ${db_user} to all tables in ${db_name}"'
+    PGSQL_GRANT='echo "Make sure ${db_user} owns the database ${db_name} as well as all of its tables."'
     PGSQL_MAN_PREREQS="databases/p5-DBD-Pg databases/postgresql*-client"
     PGSQL_OPT_PREREQS="databases/php[45]-pgsql"
 
