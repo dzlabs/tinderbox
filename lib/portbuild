@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.120 2008/07/27 19:39:32 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.121 2008/07/27 20:06:03 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -132,7 +132,8 @@ chroot=$(tinderLoc buildroot ${build})
 echo "chroot is: ${chroot}"
 portdir=$(echo ${dirname} | sed -e 's|^/usr/ports/||')
 
-execute_hook "prePortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} PORTDIR=${portdir} PB=${pb}"
+total_size=$(${tc} getPortTotalSize -d ${portdir} -b ${build})
+execute_hook "prePortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} PORTDIR=${portdir} PB=${pb} TOTAL_SIZE=${total_size}"
 if [ $? -ne 0 ]; then
     echo "portbuild: Terminating build for ${pkgname} since prePortBuild hook failed"
     ${tc} updatePortStatus -d ${portdir} -b ${build} -L -s FAIL -v ${pkgname} -r "hook"
@@ -147,7 +148,8 @@ if [ -f ${dudsfile} ]; then
 	${tc} updatePortStatus -d ${portdir} -b ${build} \
 		-L -s DUD -v ${pkgname}
 	mark_failed ${tc} ${build} ${pkgname} ${portdir}
-	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=DUD PORTDIR=${portdir} PB=${pb} FAIL_REASON=dud"
+	total_size=$(${tc} getPortTotalSize -d ${portdir} -b ${build})
+	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=DUD PORTDIR=${portdir} PB=${pb} FAIL_REASON=dud TOTAL_SIZE=${total_size}"
         exit 1
     fi
 fi
@@ -379,7 +381,7 @@ if [ "${error}" = "0" ]; then
 	${tc} updatePortStatus -d ${portdir} -b ${build} \
 		-L -S -s ${status} -v ${pkgname} -r "__nofail__" \
 		-t ${total_size}
-	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=${status} PORTDIR=${portdir} PB=${pb}"
+	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=${status} PORTDIR=${portdir} PB=${pb} TOTAL_SIZE=${total_size}"
 	if [ ${status} = "LEFTOVERS" ]; then
 	    ${tc} sendBuildErrorMail -d ${portdir} -b ${build} -p ${pkgname} -l
 	fi
@@ -396,11 +398,15 @@ if [ "${error}" = "0" ]; then
 	if [ -f ${chroot}/tmp/size ]; then
 	    total_size=$(cat ${chroot}/tmp/size)
 	fi
+	old_size=$(${tc} getPortTotalSize -d ${portdir} -b ${build})
+	if [ ${old_size} -gt ${total_size} ]; then
+	    total_size=${old_size}
+	fi
 	${tc} updatePortStatus -d ${portdir} -b ${build} \
 		-L -s FAIL -v ${pkgname} ${reason} -t ${total_size}
 	mark_failed ${tc} ${build} ${pkgname} ${portdir}
         ${tc} sendBuildErrorMail -d ${portdir} -b ${build} -p ${pkgname}
-	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=FAIL PORTDIR=${portdir} PB=${pb} ${reasonenv}"
+	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=FAIL PORTDIR=${portdir} PB=${pb} ${reasonenv} TOTAL_SIZE=${total_size}"
     fi
 else
     cp ${chroot}/tmp/${pkgname}.log ${logsDir}/${pkgname}.log
@@ -417,11 +423,15 @@ else
     if [ -f ${chroot}/tmp/size ]; then
 	total_size=$(cat ${chroot}/tmp/size)
     fi
+    old_size=$(${tc} getPortTotalSize -d ${portdir} -b ${build})
+    if [ ${old_size} -gt ${total_size} ]; then
+	total_size=${old_size}
+    fi
     ${tc} updatePortStatus -d ${portdir} -b ${build} \
 		-L -s FAIL -v ${pkgname} ${reason} -t ${total_size}
     mark_failed ${tc} ${build} ${pkgname} ${portdir}
     ${tc} sendBuildErrorMail -d ${portdir} -b ${build} -p ${pkgname}
-    execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=FAIL PORTDIR=${portdir} PB=${pb} ${reasonenv}"
+    execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=FAIL PORTDIR=${portdir} PB=${pb} ${reasonenv} TOTAL_SIZE=${total_size}"
 fi
 
 cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${build}
