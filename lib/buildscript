@@ -314,6 +314,7 @@ EOF
 
   cat /tmp/make.log7
   prefix=$(make -V PREFIX)
+  du -skx / | awk '{print $1}' > /tmp/size
   del_pkg ${pkgname}
 
 

@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.82 2008/07/25 23:27:25 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.83 2008/07/27 19:39:33 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -899,6 +899,11 @@ sub updatePortLastFailedDep {
         return $self->updatePortLastBuilts(@_, "last_failed_dependency");
 }
 
+sub updatePortTotalSize {
+        my $self = shift;
+        return $self->updatePortLastBuilts(@_, "total_size");
+}
+
 sub updatePortLastBuilts {
         my $self       = shift;
         my $port       = shift;
@@ -1015,6 +1020,27 @@ sub getPortLastBuiltStatus {
         }
 
         return $results[0]->{'last_status'};
+}
+
+sub getPortTotalSize {
+        my $self  = shift;
+        my $port  = shift;
+        my $build = shift;
+
+        $self->verifyType(1, $port,  'Port');
+        $self->verifyType(2, $build, 'Build');
+
+        my @results;
+        my $rc = $self->_doQueryHashRef(
+                "SELECT total_size FROM build_ports WHERE port_id=? AND build_id=?",
+                \@results, $port->getId(), $build->getId()
+        );
+
+        if (!$rc) {
+                return undef;
+        }
+
+        return $results[0]->{'total_size'};
 }
 
 sub updatePortsTree {

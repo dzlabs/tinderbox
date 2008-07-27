@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.119 2008/07/25 23:27:25 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.120 2008/07/27 19:39:32 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -372,8 +372,13 @@ if [ "${error}" = "0" ]; then
 	else
 	    status="SUCCESS"
 	fi
+	total_size=0
+	if [ -f ${chroot}/tmp/size ]; then
+	    total_size=$(cat ${chroot}/tmp/size)
+	fi
 	${tc} updatePortStatus -d ${portdir} -b ${build} \
-		-L -S -s ${status} -v ${pkgname} -r "__nofail__"
+		-L -S -s ${status} -v ${pkgname} -r "__nofail__" \
+		-t ${total_size}
 	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=${status} PORTDIR=${portdir} PB=${pb}"
 	if [ ${status} = "LEFTOVERS" ]; then
 	    ${tc} sendBuildErrorMail -d ${portdir} -b ${build} -p ${pkgname} -l
@@ -387,8 +392,12 @@ if [ "${error}" = "0" ]; then
 	    reason="-r ${reasontxt}"
 	    reasonenv="FAIL_REASON=${reasontxt}"
 	fi
+	total_size=0
+	if [ -f ${chroot}/tmp/size ]; then
+	    total_size=$(cat ${chroot}/tmp/size)
+	fi
 	${tc} updatePortStatus -d ${portdir} -b ${build} \
-		-L -s FAIL -v ${pkgname} ${reason}
+		-L -s FAIL -v ${pkgname} ${reason} -t ${total_size}
 	mark_failed ${tc} ${build} ${pkgname} ${portdir}
         ${tc} sendBuildErrorMail -d ${portdir} -b ${build} -p ${pkgname}
 	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=FAIL PORTDIR=${portdir} PB=${pb} ${reasonenv}"
@@ -404,8 +413,12 @@ else
         reason="-r ${reasontxt}"
 	reasonenv="FAIL_REASON=${reasontxt}"
     fi
+    total_size=0
+    if [ -f ${chroot}/tmp/size ]; then
+	total_size=$(cat ${chroot}/tmp/size)
+    fi
     ${tc} updatePortStatus -d ${portdir} -b ${build} \
-		-L -s FAIL -v ${pkgname} ${reason}
+		-L -s FAIL -v ${pkgname} ${reason} -t ${total_size}
     mark_failed ${tc} ${build} ${pkgname} ${portdir}
     ${tc} sendBuildErrorMail -d ${portdir} -b ${build} -p ${pkgname}
     execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=FAIL PORTDIR=${portdir} PB=${pb} ${reasonenv}"

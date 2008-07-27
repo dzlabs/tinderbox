@@ -92,7 +92,8 @@ CREATE TABLE build_ports (
 	last_built_version VARCHAR(100),
 	last_failed_dependency VARCHAR(255),
 	last_run_duration INTEGER,
-	currently_building INTEGER NOT NULL DEFAULT 0
+	currently_building INTEGER NOT NULL DEFAULT 0,
+	total_size INTEGER
 );
 CREATE INDEX build_ports_build_id_idx ON build_ports(build_id);
 

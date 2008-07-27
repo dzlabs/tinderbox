@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.137 2008/07/12 22:12:39 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.138 2008/07/27 19:39:32 marcus Exp $
 #
 
 my $pb;
@@ -365,8 +365,8 @@ my $ds = new Tinderbox::TinderboxDS();
                 func => \&updatePortStatus,
                 help => "Update build information about a port",
                 usage =>
-                    "-d <portdir> -b <build> [-L] [-S] [-s <status>] [-r <reason>] [-v <version>] [-p <dependency port directory>]",
-                optstr => 'b:d:Lr:Ss:v:p:',
+                    "-d <portdir> -b <build> [-L] [-S] [-s <status>] [-r <reason>] [-v <version>] [-p <dependency port directory>] [-t <total size>]",
+                optstr => 'b:d:Lr:Ss:v:p:t:',
         },
         "updateBuildStatus" => {
                 func   => \&updateBuildStatus,
@@ -392,6 +392,13 @@ my $ds = new Tinderbox::TinderboxDS();
                 func => \&getPortLastBuiltStatus,
                 help =>
                     "Get the last built status for the specified port and build",
+                usage  => "-d <port directory> -b <build name>",
+                optstr => 'd:b:',
+        },
+        "getPortTotalSize" => {
+                func => \&getPortTotalSize,
+                help =>
+                    "Get the total size (in KB) required for the specified port and build",
                 usage  => "-d <port directory> -b <build name>",
                 optstr => 'd:b:',
         },
@@ -558,8 +565,8 @@ my $ds = new Tinderbox::TinderboxDS();
         "tbcleanup" => {
                 help =>
                     "Cleanup old build logs, and prune old database entries for which no package exists",
-                usage => "[-d] [-E] [-p]",
-		optstr => 'dEp',
+                usage  => "[-d] [-E] [-p]",
+                optstr => 'dEp',
         },
 
 );
@@ -2298,6 +2305,12 @@ sub updatePortStatus {
                             . $ds->getError() . "\n"
                     );
         }
+
+        if (defined($opts->{'t'})) {
+                $ds->updatePortTotalSize($port, $build, $opts->{'t'})
+                    or cleanup($ds, 1,
+                        "FAILED: total_size: " . $ds->getError() . "\n");
+        }
 }
 
 sub updateBuildStatus {
@@ -2414,6 +2427,48 @@ sub getPortLastBuiltStatus {
         }
 
         print $status . "\n";
+}
+
+sub getPortTotalSize {
+        if (!$opts->{'d'} || !$opts->{'b'}) {
+                usage("getPortTotalSize");
+        }
+
+        my $port = $ds->getPortByDirectory($opts->{'d'});
+        if (!defined($port)) {
+                cleanup($ds, 1,
+                              "Port, "
+                            . $opts->{'d'}
+                            . " is not in the datastore.\n");
+        }
+
+        if (!$ds->isValidBuild($opts->{'b'})) {
+                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
+        }
+
+        my $build = $ds->getBuildByName($opts->{'b'});
+
+        if (!$ds->isPortForBuild($port, $build)) {
+                cleanup($ds, 1,
+                              "Port, "
+                            . $opts->{'d'}
+                            . " is not a valid port for build, "
+                            . $opts->{'b'}
+                            . "\n");
+        }
+
+        my $size = $ds->getPortTotalSize($port, $build);
+        if (!defined($size) && $ds->getError()) {
+                cleanup($ds, 1,
+                              "Failed to get total size for port "
+                            . $opts->{'d'}
+                            . " for build "
+                            . $opts->{'b'} . ": "
+                            . $ds->getError()
+                            . "\n");
+        }
+
+        print $size . "\n";
 }
 
 sub updateBuildCurrentPort {
