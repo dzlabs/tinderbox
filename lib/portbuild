@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.121 2008/07/27 20:06:03 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.122 2008/07/27 20:07:22 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -148,8 +148,7 @@ if [ -f ${dudsfile} ]; then
 	${tc} updatePortStatus -d ${portdir} -b ${build} \
 		-L -s DUD -v ${pkgname}
 	mark_failed ${tc} ${build} ${pkgname} ${portdir}
-	total_size=$(${tc} getPortTotalSize -d ${portdir} -b ${build})
-	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=DUD PORTDIR=${portdir} PB=${pb} FAIL_REASON=dud TOTAL_SIZE=${total_size}"
+	execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=DUD PORTDIR=${portdir} PB=${pb} FAIL_REASON=dud TOTAL_SIZE=0"
         exit 1
     fi
 fi
