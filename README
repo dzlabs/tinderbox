@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.71 2008/07/24 23:52:33 ade Exp $
+$MCom: portstools/tinderbox/README,v 1.72 2008/07/27 20:48:27 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -80,16 +80,16 @@ Delete_priv
 MySQL:
 ------
 cd sql
-./genschema mysql | mysql -u{$DB_ADMIN} -p -h {$DB_HOST} {$DB_NAME}
+./genschema mysql | mysql -u{DB_ADMIN} -p -h {DB_HOST} {DB_NAME}
 
 PostgreSQL:
 -----------
 cd sql
-./genschema pgsql | psql -U {$DB_USER} -W -h {$DB_HOST} -d {$DB_NAME}
+./genschema pgsql | psql -U {DB_USER} -W -h {DB_HOST} -d {DB_NAME}
 
-   Where {$DB_HOST} and {$DB_NAME} are the values of $DB_HOST and $DB_NAME
-   from ds.ph respectively, {$DB_ADMIN} is the database administrator username,
-   and {$DB_USER} is the Tinderbox user.  Note: do not do this if you are
+   Where {DB_HOST} and {DB_NAME} are the values of $DB_HOST and $DB_NAME
+   from ds.ph respectively, {DB_ADMIN} is the database administrator username,
+   and {DB_USER} is the Tinderbox user.  Note: do not do this if you are
    upgrading! If you do, you will overwrite all of your previous data.  If
    schema changes are required for upgrading, a separate upgrade schema file
    will be included, and instructions will be available at
@@ -114,7 +114,8 @@ cd sql
 ${pb} -alldirs -maproot=0:0 localhost
 
    Note: ${pb} _CANNOT_ be a symlink.  It should be a real, fully-qualified
-   path.
+   path (hint: use realpath(1) on your desired ${pb} to find out what this
+   needs to be).
 
 11. Add the following to /etc/rc.conf to enable the NFS client and server:
 
@@ -133,6 +134,10 @@ nfs_reserved_port_only="YES"
 
     Note: all Jail names _MUST_ begin with their FreeBSD major version number.
     That is, the following is an illegal jail name: ``FreeBSD-6.3''.
+
+    Hint: It is recommended that the Jail begin with the FreeBSD
+    major.minor numbers (i.e. ``6.3-FreeBSD'' instead of just ``6-FreeBSD'')
+    as this may prove useful when using things such as Hooks.
 
 13. Create the required PortsTrees using the tc command.  A PortsTree is
     a set of ports you wish to build.  A PortsTree does not have to be a
@@ -273,6 +278,13 @@ cleanup old, unreferenced, files, use the ${pb}/scripts/tc application
 with the ``tbcleanup'' command:
 
 # cd ${pb}/scripts && ./tc tbcleanup
+
+The ``tbcleanup'' command supports a few arguments which will tell it to
+perform additional cleanups:
+
+ -d : Cleanup unreferenced distfiles from the distfile cache
+ -E : Do NOT remove old error logs (regular port build logs are still removed)
+ -p : Cleanup stale packages
 
 If you want to terminate a running tinderbuild, run the command:
 
