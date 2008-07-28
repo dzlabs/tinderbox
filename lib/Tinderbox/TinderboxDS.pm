@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.83 2008/07/27 19:39:33 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.84 2008/07/28 15:31:57 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -682,6 +682,112 @@ sub addPort {
         return $rc;
 }
 
+sub addDependencyForPort {
+        my $self    = shift;
+        my $port    = shift;
+        my $build   = shift;
+        my $deptype = shift;
+        my $dep     = shift;
+
+        $self->verifyType(1, $port,  'Port');
+        $self->verifyType(2, $build, 'Build');
+        $self->verifyType(4, $dep,   'Port');
+
+        my @results;
+        my $rc = $self->_doQueryHashRef(
+                "SELECT build_port_id FROM build_ports WHERE build_id=? AND port_id=?",
+                \@results, $build->getId(), $port->getId()
+        );
+        if (!$rc) {
+                return $rc;
+        }
+
+        my $bp_id = $results[0]->{'build_port_id'};
+
+        $rc = $self->_doQuery(
+                "INSERT INTO port_dependencies (build_port_id, port_id, dependency_type) VALUES (?, ?, ?)",
+                [$bp_id, $dep->getId(), $deptype]
+        );
+
+        return $rc;
+}
+
+sub clearDependenciesForPort {
+        my $self    = shift;
+        my $port    = shift;
+        my $build   = shift;
+        my $deptype = shift;
+
+        $self->verifyType(1, $port,  'Port');
+        $self->verifyType(2, $build, 'Build');
+
+        my @results;
+        my $rc = $self->_doQueryHashRef(
+                "SELECT build_port_id FROM build_ports WHERE build_id=? AND port_id=?",
+                \@results, $build->getId(), $port->getId()
+        );
+        if (!$rc) {
+                return $rc;
+        }
+
+        my $bp_id = $results[0]->{'build_port_id'};
+
+        my @params = ($bp_id);
+        my $query  = "DELETE FROM port_dependencies WHERE build_port_id=?";
+
+        if (defined($deptype)) {
+                $query .= " AND dependency_type=?";
+                push @params, $deptype;
+        }
+
+        $rc = $self->_doQuery($query, @params);
+
+        return $rc;
+}
+
+sub getDependenciesForPort {
+        my $self    = shift;
+        my $port    = shift;
+        my $build   = shift;
+        my $deptype = shift;
+
+        $self->verifyType(1, $port,  'Port');
+        $self->verifyType(2, $build, 'Build');
+
+        my @results;
+        my $rc = $self->_doQueryHashRef(
+                "SELECT build_port_id FROM build_ports WHERE build_id=? AND port_id=?",
+                \@results, $build->getId(), $port->getId()
+        );
+        if (!$rc) {
+                return undef;
+        }
+
+        my $bp_id = $results[0]->{'build_port_id'};
+
+        @results = ();
+        my @params = ($bp_id);
+        $query = "SELECT port_id FROM port_dependencies WHERE build_port_id=?";
+
+        if (defined($deptype)) {
+                $query .= " AND dependency_type=?";
+                push @params, $deptype;
+        }
+
+        $rc = $self->_doQueryHashRef($query, \@results, @params);
+        if (!$rc) {
+                return undef;
+        }
+
+        my @deps = ();
+        foreach my $result (@results) {
+                my $pCls = $self->getPortById($result->{'port_id'});
+                push @deps, $pCls if (defined($pCls));
+        }
+
+        return @deps;
+}
+
 sub addPortFailPattern {
         my $self    = shift;
         my $pattern = shift;
@@ -718,7 +824,7 @@ sub updateBuildUser {
         my $onError      = shift;
 
         $self->verifyType(1, $build, 'Build');
-        $self->verifyType(1, $user,  'User');
+        $self->verifyType(2, $user,  'User');
 
         if (!defined($onCompletion)) {
                 $onCompletion = 0;

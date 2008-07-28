@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.138 2008/07/27 19:39:32 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.139 2008/07/28 15:31:57 marcus Exp $
 #
 
 my $pb;
@@ -213,6 +213,13 @@ my $ds = new Tinderbox::TinderboxDS();
                 usage =>
                     "-t <tag> [-d <description>] [-y COMMON|RARE|TRANSIENT]",
                 optstr => 't:d:y:',
+        },
+        "getDependenciesForPort" => {
+                func => \&getDependenciesForPort,
+                help => "Get stored dependencies for a given port and build",
+                usage =>
+                    "-b <build name> -d <port directory> [-t EXTRACT_DEPENDS|PATCH_DEPENDS|FETCH_DEPENDS|BUILD_DEPENDS|LIB_DEPENDS|DEPENDS|RUN_DEPENDS]",
+                optstr => 'b:d:t:',
         },
         "listHooks" => {
                 func => \&listHooks,
@@ -1306,10 +1313,46 @@ sub addPortToOneBuild {
                 my %seen = ();
                 while (my $port = shift @deps) {
                         if (!$seen{$port}) {
-                                addPorts($port, $build, $makecache, \@deps);
-                                $seen{$port} = 1;
+                                my $pCls =
+                                    addPorts($port, $build, $makecache, \@deps);
+                                $seen{$port} = $pCls;
                         }
                 }
+                foreach my $port (keys %seen) {
+                        my $pCls      = $seen{$port};
+                        my %oper_hash = (
+                                EXTRACT_DEPENDS => 'ExtractDependsList',
+                                PATCH_DEPENDS   => 'PatchDependsList',
+                                FETCH_DEPENDS   => 'FetchDependsList',
+                                BUILD_DEPENDS   => 'BuildDependsList',
+                                LIB_DEPENDS     => 'LibDependsList',
+                                DEPENDS         => 'DependsList',
+                                RUN_DEPENDS     => 'RunDependsList',
+                        );
+
+                        $ds->clearDependenciesForPort($pCls, $build, undef);
+
+                        foreach my $deptype (keys %oper_hash) {
+                                my $oper = $oper_hash{$deptype};
+                                foreach my $depname ($makecache->$oper($port)) {
+                                        my $dep =
+                                            $ds->getPortByDirectory($depname);
+                                        next if (!defined($dep));
+                                        if (
+                                                !$ds->addDependencyForPort(
+                                                        $pCls,    $build,
+                                                        $deptype, $dep
+                                                )
+                                            )
+                                        {
+                                                warn
+                                                    "WARN: Failed to add $deptype entry for $port: "
+                                                    . $ds->getError() . "\n";
+                                        }
+                                }
+                        }
+                }
+
         }
 }
 
@@ -1431,6 +1474,69 @@ sub addPortFailReason {
                             . " to the datastore: "
                             . $ds->getError()
                             . ".\n");
+        }
+}
+
+sub getDependenciesForPort {
+        my %depends_hash = (
+                EXTRACT_DEPENDS => 0,
+                PATCH_DEPENDS   => 1,
+                FETCH_DEPENDS   => 2,
+                BUILD_DEPENDS   => 3,
+                LIB_DEPENDS     => 4,
+                DEPENDS         => 5,
+                RUN_DEPENDS     => 6,
+        );
+
+        if (!$opts->{'b'} || !$opts->{'d'}) {
+                usage("getDependenciesForPort");
+        }
+
+        my $port = $ds->getPortByDirectory($opts->{'d'});
+        if (!defined($port)) {
+                cleanup($ds, 1,
+                              "Port, "
+                            . $opts->{'d'}
+                            . " is not in the datastore.\n");
+        }
+
+        if (!$ds->isValidBuild($opts->{'b'})) {
+                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
+        }
+
+        my $build = $ds->getBuildByName($opts->{'b'});
+
+        if (!$ds->isPortForBuild($port, $build)) {
+                cleanup($ds, 1,
+                              "Port, "
+                            . $opts->{'d'}
+                            . " is not a valid port for build, "
+                            . $opts->{'b'}
+                            . "\n");
+        }
+
+        my $deptype = undef;
+        if ($opts->{'t'}) {
+                $deptype = $opts->{'t'};
+        }
+
+        if (defined($deptype) && !defined($depends_hash{$deptype})) {
+                cleanup($ds, 1, "$deptype is not a valid dependency type\n");
+        }
+
+        my @deps = $ds->getDependenciesForPort($port, $build, $deptype);
+
+        if (@deps) {
+                map { print $_ . "\n" } @deps;
+        } elsif (defined($ds->getError())) {
+                cleanup($ds, 1,
+                        "Failed to get dependencies for this port from the datastore: "
+                            . $ds->getError()
+                            . "\n");
+        } else {
+                cleanup($ds, 0,
+                        "There are no dependencies for this port in the datastore.\n"
+                );
         }
 }
 
@@ -2946,6 +3052,8 @@ sub addPorts {
                             . $ds->getError() . "\n";
                 }
         }
+
+        return $pCls;
 }
 
 sub isLogCurrent {
