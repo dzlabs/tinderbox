@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.139 2008/07/28 15:31:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.140 2008/07/28 15:39:46 marcus Exp $
 #
 
 my $pb;
@@ -1527,7 +1527,7 @@ sub getDependenciesForPort {
         my @deps = $ds->getDependenciesForPort($port, $build, $deptype);
 
         if (@deps) {
-                map { print $_ . "\n" } @deps;
+                map { print $_->getDirectory() . "\n" } @deps;
         } elsif (defined($ds->getError())) {
                 cleanup($ds, 1,
                         "Failed to get dependencies for this port from the datastore: "
