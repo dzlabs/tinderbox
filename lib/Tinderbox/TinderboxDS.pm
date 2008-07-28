@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.84 2008/07/28 15:31:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.85 2008/07/28 19:14:24 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -767,7 +767,8 @@ sub getDependenciesForPort {
 
         @results = ();
         my @params = ($bp_id);
-        $query = "SELECT port_id FROM port_dependencies WHERE build_port_id=?";
+        my $query =
+            "SELECT port_id FROM port_dependencies WHERE build_port_id=?";
 
         if (defined($deptype)) {
                 $query .= " AND dependency_type=?";
