@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.48 2008/07/28 19:17:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.49 2008/07/28 19:19:14 marcus Exp $
 #
 
 tinderLocJail () {
@@ -741,7 +741,7 @@ createDb () {
     MYSQL_CREATE='/usr/local/bin/mysqladmin -u${db_admin} -p -h ${db_host} create ${db_name}'
     MYSQL_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
     MYSQL_GRANT='/usr/local/bin/mysql -u${db_admin} -p -h ${db_host} -e "GRANT SELECT, INSERT, UPDATE, DELETE ON ${db_name}.* TO '"'"'${db_user}'"'"'@'"'"'${grant_host}'"'"' IDENTIFIED BY '"'"'${db_pass}'"'"' ; FLUSH PRIVILEGES" mysql'
-    MYSQL_MAN_PREREQS="databases/p5-DBD-mysql50 databases/mysql40-client"
+    MYSQL_MAN_PREREQS="databases/p5-DBD-mysql50 databases/mysql50-client"
     MYSQL_OPT_PREREQS="databases/php[45]-mysql"
 
     PGSQL_CHECK='/usr/local/bin/psql -U ${db_admin} -h ${db_host} -W -c "SELECT 0" ${db_name}'
