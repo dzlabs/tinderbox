@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.79 2008/07/29 16:28:14 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.80 2008/07/29 16:49:54 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -278,6 +278,7 @@ Setup () {
 Upgrade () {
     VERSION="3.0"
     TINDERBOX_URL="http://tinderbox.marcuscom.com/"
+    DB_MIGRATION_PATH="${VERSION}"
 
     tc=$(tinderLoc scripts tc)
 
@@ -288,9 +289,20 @@ Upgrade () {
 
     read -p "Hit <ENTER> to get started: " i
 
-    # Check if the current Datasource Version is ascertainable
-    if ! ${tc} dsversion >/dev/null 2>&1 ; then
-        tinderExit "ERROR: Upgrade is only supported from Tinderbox 2.x." $?
+    # Check if the current Datastore Version is ascertainable
+    dsversion=$(${tc} dsversion >/dev/null 2>&1)
+    if [ $? != 0 ]; then
+	tinderExit "ERROR: Failed to detect datastore version.  Check the output of '${tc} dsversion'" $?
+    fi
+    if [ "${dsversion}" = "1.X" ]; then
+	tinderExit "ERROR: Upgrades are only supported from 2.0 onwards." 1
+    fi
+
+    dsmajor=$(echo ${dsversion} | awk -F'\\.' '{print $1}')
+    curmajor=$(echo ${VERSION} | awk -F'\\.' '{print $1}')
+    major_upgrade=0
+    if [ ${dsmajor} -lt ${curmajor} ]; then
+	major_upgrade=1
     fi
 
     # Cleanup files that are no longer needed.
@@ -330,24 +342,48 @@ Upgrade () {
     	        ;;
         esac
     else
-        bkup_file=$(mktemp /tmp/tb_dbbak.XXXXXX)
-        if [ $? != 0 ]; then
-    	    tinderExit "Failed to create temp file for database backup." $?
+	if [ ${major_upgrade} = 1 ]; then
+            bkup_file=$(mktemp /tmp/tb_dbbak.XXXXXX)
+            if [ $? != 0 ]; then
+    	        tinderExit "Failed to create temp file for database backup." $?
+            fi
+	    if ! backupDb ${bkup_file} ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
+    	        tinderExit "ERROR: Database backup failed!  Consult the output above for more information." $?
+    	        rm -f ${bkup_file}
+            fi
+            if ! dropDb ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
+    	        tinderExit "ERROR: Error dropping the old database!  Consult the output above for more information.  Once the problem is corrected, run \"update.sh -backup ${bkup_file}\" to resume migration." $?
+            fi
+            if ! createDb ${db_driver} ${db_admin} ${db_host} ${db_name} 0; then
+    	        tinderExit "ERROR: Error creating the new database!  Consult the output above for more information.  Once the problem is corrected, run \"update.sh -backup ${bkup_file}\" to resume migration." $?
+            fi
+            if ! loadSchema ${bkup_file} ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
+    	        tinderExit "ERROR: Database restoration failed!  Consult the output above for more information.  Once the problem is corrected, run \"update.sh -backup ${bkup_file}\" to resume migration." $?
+            fi
+            rm -f ${bkup_file}
         fi
-	if ! backupDb ${bkup_file} ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
-    	    tinderExit "ERROR: Database backup failed!  Consult the output above for more information." $?
-    	    rm -f ${bkup_file}
-        fi
-        if ! dropDb ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
-    	    tinderExit "ERROR: Error dropping the old database!  Consult the output above for more information.  Once the problem is corrected, run \"update.sh -backup ${bkup_file}\" to resume migration." $?
-        fi
-        if ! createDb ${db_driver} ${db_admin} ${db_host} ${db_name} 0; then
-    	    tinderExit "ERROR: Error creating the new database!  Consult the output above for more information.  Once the problem is corrected, run \"update.sh -backup ${bkup_file}\" to resume migration." $?
-        fi
-        if ! loadSchema ${bkup_file} ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
-    	    tinderExit "ERROR: Database restoration failed!  Consult the output above for more information.  Once the problem is corrected, run \"update.sh -backup ${bkup_file}\" to resume migration." $?
-        fi
-        rm -f ${bkup_file}
+    else
+	set -- ${DB_MIGRATION_PATH}
+	while [ -n "${1}" -a -n "${2}" ] ; do
+	    MIG_VERSION_FROM=${1}
+	    MIG_VERSION_TO=${2}
+
+	    if [ ${MIG_VERSION_FROM} = ${dsversion} ] ; then
+		migDb ${do_load} ${db_driver} ${db_admin} ${db_host} ${db_name}
+		case $? in
+		    2)
+		        tinderExit "ERROR: Database migration failed!  Consult the output above for more information." 2
+			;;
+	            1)
+		        tinderExit "ERROR: No Migration Script available to migrate ${MIG_VERSION_FROM} to ${MIG_VERSION_TO}" 1
+			;;
+		    0)
+		        dsversion=${MIG_VERSION_TO}
+			;;
+		esac
+	    fi
+	    shift
+	done
     fi
 
     # Migrate .env files.
