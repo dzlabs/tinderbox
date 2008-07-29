@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.77 2008/07/29 02:22:25 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.78 2008/07/29 16:27:41 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -379,6 +379,70 @@ Upgrade () {
         if [ -f "${f}/portstree.env" ]; then
     	    mv -f "${f}/portstree.env" "${envdir}/portstree.${portstree}"
         fi
+    done
+
+    echo ""
+    tinderEcho "INFO: Migrating user-defined update scripts ..."
+    for jail in ${jails}; do
+	f=$(tinderLoc jail ${jail})
+	ucmd=$(${tc} getUpdateCmd -j ${jail} 2>/dev/null)
+	if [ x"${ucmd}" != x"CVSUP" -a x"${ucmd}" != x"CSUP" -a x"${ucmd}" != x"NONE" ]; then
+	    if [ -f "${ucmd}" ]; then
+		mv -f ${ucmd} "${f}/update.sh"
+		chmod +x "${f}/update.sh"
+		query="UPDATE jails SET update_cmd='USER' WHERE jail_name='${jail}'"
+		if [ ${db_load} != 0 ]; then
+		    tinderEcho "The next prompt will be for ${db_admin}'s password to the ${db_name} database."
+		    rc=0
+		    case "${db_driver}" in
+		        mysql)
+		            /usr/local/bin/mysql -u${db_admin} -p -h ${db_host}  -e "${query}" ${db_name}
+			    rc=$?
+			    ;;
+			pgsql)
+			    /usr/local/bin/psql -U ${db_admin} -h ${db_host} -W -c "${query}" ${db_name}
+			    rc=$?
+			    ;;
+		    esac
+		    if [ ${rc} != 0 ]; then
+			tinderEcho "WARN: Failed to set the update command for Jail ${jail}.  See the output above for more details.  Before this Jail can be updated, you must manually run the SQL query ${query}."
+		    fi
+		else
+		    tinderEcho "WARN: You must manually set the update command for ${jail} to \"USER\" using ther query ${query}."
+		fi
+	    fi
+	fi
+    done
+
+    for portstree in ${portstrees}; do
+	f=$(tinderLoc portstree ${portstree})
+	ucmd=$(${tc} getUpdateCmd -p ${portstree} 2>/dev/null)
+	if [ x"${ucmd}" != x"CVSUP" -a x"${ucmd}" != x"CSUP" -a x"${ucmd}" != x"NONE" ]; then
+	    if [ -f "${ucmd}" ]; then
+		mv -f ${ucmd} "${f}/update.sh"
+		chmod +x "${f}/update.sh"
+		query="UPDATE ports_trees SET update_cmd='USER' WHERE ports_tree_name='${portstree}'"
+		if [ ${db_load} != 0 ]; then
+		    tinderEcho "The next prompt will be for ${db_admin}'s password to the ${db_name} database."
+		    rc=0
+		    case "${db_driver}" in
+		        mysql)
+		            /usr/local/bin/mysql -u${db_admin} -p -h ${db_host}  -e "${query}" ${db_name}
+			    rc=$?
+			    ;;
+			pgsql)
+			    /usr/local/bin/psql -U ${db_admin} -h ${db_host} -W -c "${query}" ${db_name}
+			    rc=$?
+			    ;;
+		    esac
+		    if [ ${rc} != 0 ]; then
+			tinderEcho "WARN: Failed to set the update command for PortsTree ${portstree}.  See the output above for more details.  Before this PortsTree can be updated, you must manually run the SQL query ${query}."
+		    fi
+		else
+		    tinderEcho "WARN: You must manually set the update command for ${portstree} to \"USER\" using ther query ${query}."
+		fi
+	    fi
+	fi
     done
 
     echo ""
