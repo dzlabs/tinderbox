@@ -1,5 +1,5 @@
 #-
-# Copyright (c) 2004-2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2004-2008 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.51 2008/07/29 02:22:25 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.52 2008/07/29 16:51:40 marcus Exp $
 #
 
 tinderLocJail () {

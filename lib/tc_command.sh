@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2005-2008 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.80 2008/07/29 16:49:54 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.81 2008/07/29 16:51:40 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
