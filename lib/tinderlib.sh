@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.50 2008/07/28 20:25:04 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.51 2008/07/29 02:22:25 marcus Exp $
 #
 
 tinderLocJail () {
@@ -479,6 +479,7 @@ buildenv () {
     do
 	var=$(echo "${_tb_var}" | sed \
 		-e "s|^#${major_version}||" \
+		-e "s|^export ||" \
 		-E -e 's|\^\^([^\^]+)\^\^|${\1}|g' -e 's|^#.*$||')
 
 	if [ -n "${var}" ]; then

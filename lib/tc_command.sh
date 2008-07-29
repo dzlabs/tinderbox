@@ -24,11 +24,11 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.76 2008/07/26 00:25:32 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.77 2008/07/29 02:22:25 marcus Exp $
 #
 
-export defaultUpdateHost="cvsup12.FreeBSD.org"
-export defaultUpdateType="CVSUP"
+export _defaultUpdateHost="cvsup12.FreeBSD.org"
+export _defaultUpdateType="CVSUP"
 
 #---------------------------------------------------------------------------
 # Generic routines
@@ -118,6 +118,19 @@ generateUpdateCode () {
 		exit 1;;
 
     esac
+}
+
+setupDefaults () {
+    globalenv=$(tinderLoc scripts etc/env)/GLOBAL
+    if [ -f ${globalenv} ]; then
+	. ${globalenv}
+    fi
+    if [ -z "${defaultUpdateHost}" ]; then
+        export defaultUpdateHost=${_defaultUpdateHost}
+    fi
+    if [ -z "${defaultUpdateType}" ]; then
+        export defaultUpdateType=${_defaultUpdateType}
+    fi
 }
 
 tcExists () {
@@ -367,6 +380,9 @@ Upgrade () {
     	    mv -f "${f}/portstree.env" "${envdir}/portstree.${portstree}"
         fi
     done
+
+    echo ""
+    init
 
     echo ""
     tinderExit "Congratulations! Tinderbox migration is complete.  Please refer to ${TINDERBOX_URL} for a list of what is new in this version as well as general Tinderbox documentation." 0
@@ -628,8 +644,6 @@ makeJail () {
 
 createJail () {
     # set up defaults
-    updateHost=${defaultUpdateHost}
-    updateType=${defaultUpdateType}
     updateTag="UNUSED"
     updateCompress=0
     descr=""
@@ -637,6 +651,10 @@ createJail () {
     jailArch=$(uname -m)
     mountSrc=""
     init=1
+
+    setupDefaults
+    updateHost=${defaultUpdateHost}
+    updateType=${defaultUpdateType}
 
     # argument handling
     while getopts a:d:j:m:t:u:CH:I arg >/dev/null 2>&1
@@ -770,14 +788,16 @@ updatePortsTree () {
 
 createPortsTree () {
     # set up defaults
-    updateHost=${defaultUpdateHost}
-    updateType=${defaultUpdateType}
     updateCompress=0
     cvswebUrl=""
     descr=""
     init=1
     mountSrc=""
     portsTreeName=""
+
+    setupDefaults
+    updateHost=${defaultUpdateHost}
+    updateType=${defaultUpdateType}
 
     # argument handling
     while getopts d:m:p:u:w:CH:I arg >/dev/null 2>&1
@@ -1449,6 +1469,22 @@ init () {
     do
 	mkdir -p ${pb}/${dir}
     done
+
+    read -p "Enter a default cvsup host [${_defaultUpdateHost}]: " host
+    if [ -z "${host}" ]; then
+	host=${_defaultUpdateHost}
+    fi
+
+    read -p "Enter a default update type or command [${_defaultUpdateType}]: " type
+    if [ -z "${type}" ]; then
+	type=${_defaultUpdateType}
+    fi
+
+    globalenv=$(tinderLoc scripts etc/env)/GLOBAL
+    echo "export defaultUpdateHost=${host}" >> ${globalenv}
+    echo "export defaultUpdateType=${type}" >> ${globalenv}
+
+    tinderEcho "Default update host and type have been set.  These can be changed later by modifying ${globalenv}."
 
     return 0
 }
