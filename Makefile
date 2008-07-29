@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.47 2008/07/25 06:09:52 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.48 2008/07/29 02:21:36 marcus Exp $
 
 VERSION=	3.0.0
 
@@ -13,6 +13,7 @@ PERLMODDATA=	Build.pm BuildPortsQueue.pm Config.pm Hook.pm Jail.pm \
 		MakeCache.pm Port.pm PortFailPattern.pm PortFailReason.pm \
 		PortsTree.pm TinderObject.pm TinderboxDS.pm User.pm
 ETCRCDATA=	tinderd.sh
+ENVDATA=	.keep_me
 MIGDATA=	tables.lst
 MAN1DATA=	tc-configCcache.1 tc-configDistfile.1 tc-configGet.1 \
 		tc-configJail.1 tc-configTinderd.1 tc-init.1
@@ -81,11 +82,15 @@ release:
 .for pmf in ${PERLMODDATA}
 	cp ${.CURDIR}/lib/Tinderbox/${pmf} ${.CURDIR}/tinderbox-${VERSION}/lib/Tinderbox
 .endfor
-	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/upgrade
-.for erf in ${ETCRCDATA}
 	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/etc/rc.d
+.for erf in ${ETCRCDATA}
 	cp ${.CURDIR}/etc/rc.d/${erf} ${.CURDIR}/tinderbox-${VERSION}/etc/rc.d
 .endfor
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/etc/env
+.for eef in ${ENVDATA}
+	cp ${.CURDIR}/etc/env/${eef} ${.CURDIR}/tinderbox-${VERSION}/etc/env
+.endfor
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/upgrade
 .for mf in ${MIGDATA}
 	cp ${.CURDIR}/upgrade/${mf} ${.CURDIR}/tinderbox-${VERSION}/upgrade
 .endfor
