@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.72 2008/07/27 20:48:27 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.73 2008/07/29 15:55:32 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -341,12 +341,27 @@ ADVANCED TOPICS
 Alternative means of creating Jail sources and PortsTrees:
 ----------------------------------------------------------
 
-XXX: Document the fact that things now simply generate an appropriate
-     update.sh script
+By default, Jails and PortsTrees are updated using csup (/usr/bin/csup).
+Every time a new Jail or PortsTree is created, they will inherit the default
+update type.  This update type is stored in ${pb}/scripts/etc/env/GLOBAL as
+defaultUpdateType.  The allowed values are CVSUP, CSUP, USER, and NONE.
+for CVSUP and CSUP there is also a defaultUpdateHost.  This can also be
+changed in ${pb}/scripts/etc/env/GLOBAL.
 
-XXX: Document the capability for using CVSUP/CSUP/USER/NONE options
-     at Jail/PortsTree creation time.
+A Jail or PortsTree's update type can also be set when creating the Jail
+or PortsTree.  To do this, specify the -u option to the appropriate
+create command.  If the value of the update type is CVSUP, then
+/usr/local/bin/cvsup will be used to update the Jail or PortsTree.  If the
+value is NONE, then no updates can be performed once the Jail or
+PortsTree is created.  Instead, it is assumed these trees already exist
+in the appropriate format.
 
+If the value is USER, then a an update.sh script must be created under the
+Jail or PortsTree's root directory.  This script will be called when an update
+is required.  For example, if you have a Jail called ``6.3'', an executable
+update.sh script must be placed under ${pb}/jails/6.3.  If you have a
+PortsTree called ``FreeBSD'', and executable update.sh script must be
+placed under ${pb}/portstrees/FreeBSD.
 
 Alternative Mounting:
 ---------------------
@@ -424,25 +439,24 @@ will let you know if the cache is working.
 Customizing the Environment:
 ----------------------------
 
-It is possible to export environment variables on a per-Jail, per-PortsTree,
-and/or per-Build basis.  This is done by creating a file named jail.env,
-portstree.env, or build.env respectively, and placing it in the root of
-the Jail (${pb}/jails/{JAIL}), PortsTree (${pb}/portstrees/{PORTSTREE}),
-or Build (${pb}/builds/{BUILD}) in question.
+It is possible to export environment variables on a global, per-Jail,
+per-PortsTree, and/or per-Build basis.  This is done by creating a file
+named GLOBAL, jail.{JAIL}, portstree.{PORTSTREE}, or build.{BUILD}
+respectively, and placing it in ${pb}/scripts/etc/env.
 
-For example, if you want a particular Build (e.g. "6.X-Perl56") to use Perl
-5.6.2 instead of Perl 5.8.x, create a file named build.env in
-${pb}/builds/6.X-Perl56 that contains the following:
+For example, if you want a particular Build (e.g. "6.3-Perl56") to use Perl
+5.6.2 instead of Perl 5.8.x, create a file named build.6.3-Perl56 in
+${pb}/scripts/etc/env that contains the following:
 
-export PERL_VER=5.6.2
-export PERL_VERSION=5.6.2
+PERL_VER=5.6.2
+PERL_VERSION=5.6.2
 
 Likewise, if you want to enable debugging for a particular PortsTree
-(e.g. "FreeBSD-debug"), create the following portstree.env in
-${pb}/portstrees/FreeBSD-debug:
+(e.g. "FreeBSD-debug"), create the following portstree.FreeBSD-debug in
+${pb}/scripts/etc/env:
 
-export CFLAGS="-O -g -pipe"
-export STRIP=
+CFLAGS="-O -g -pipe"
+STRIP=
 
 Configuring port OPTIONS:
 -------------------------
