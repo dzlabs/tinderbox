@@ -24,11 +24,11 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.78 2008/07/29 16:27:41 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.79 2008/07/29 16:28:14 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
-export _defaultUpdateType="CVSUP"
+export _defaultUpdateType="CSUP"
 
 #---------------------------------------------------------------------------
 # Generic routines

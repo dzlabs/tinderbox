@@ -18,7 +18,7 @@ CREATE TABLE jails (
 	jail_arch VARCHAR(32),
 	jail_tag VARCHAR(32),
 	jail_last_built DATETIME,
-	jail_update_cmd VARCHAR(255) DEFAULT 'CVSUP',
+	jail_update_cmd VARCHAR(255) DEFAULT 'CSUP',
 	jail_description TEXT,
 	jail_src_mount TEXT
 );
@@ -29,7 +29,7 @@ CREATE TABLE ports_trees (
 	ports_tree_name VARCHAR(32) UNIQUE NOT NULL,
 	ports_tree_description TEXT,
 	ports_tree_last_built DATETIME,
-	ports_tree_update_cmd VARCHAR(255) DEFAULT 'CVSUP',
+	ports_tree_update_cmd VARCHAR(255) DEFAULT 'CSUP',
 	ports_tree_cvsweb_url VARCHAR(255),
 	ports_tree_ports_mount TEXT
 );
