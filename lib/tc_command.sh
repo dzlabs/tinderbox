@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.81 2008/07/29 16:51:40 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.82 2008/07/31 06:22:06 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -361,29 +361,29 @@ Upgrade () {
     	        tinderExit "ERROR: Database restoration failed!  Consult the output above for more information.  Once the problem is corrected, run \"update.sh -backup ${bkup_file}\" to resume migration." $?
             fi
             rm -f ${bkup_file}
-        fi
-    else
-	set -- ${DB_MIGRATION_PATH}
-	while [ -n "${1}" -a -n "${2}" ] ; do
-	    MIG_VERSION_FROM=${1}
-	    MIG_VERSION_TO=${2}
+        else
+	    set -- ${DB_MIGRATION_PATH}
+	    while [ -n "${1}" -a -n "${2}" ] ; do
+	        MIG_VERSION_FROM=${1}
+	        MIG_VERSION_TO=${2}
 
-	    if [ ${MIG_VERSION_FROM} = ${dsversion} ] ; then
-		migDb ${do_load} ${db_driver} ${db_admin} ${db_host} ${db_name}
-		case $? in
-		    2)
-		        tinderExit "ERROR: Database migration failed!  Consult the output above for more information." 2
-			;;
-	            1)
-		        tinderExit "ERROR: No Migration Script available to migrate ${MIG_VERSION_FROM} to ${MIG_VERSION_TO}" 1
-			;;
-		    0)
-		        dsversion=${MIG_VERSION_TO}
-			;;
-		esac
-	    fi
-	    shift
-	done
+	        if [ ${MIG_VERSION_FROM} = ${dsversion} ] ; then
+		    migDb ${do_load} ${db_driver} ${db_admin} ${db_host} ${db_name}
+		    case $? in
+		        2)
+		            tinderExit "ERROR: Database migration failed!  Consult the output above for more information." 2
+			    ;;
+	                1)
+		            tinderExit "ERROR: No Migration Script available to migrate ${MIG_VERSION_FROM} to ${MIG_VERSION_TO}" 1
+			    ;;
+		        0)
+		            dsversion=${MIG_VERSION_TO}
+			    ;;
+		    esac
+	        fi
+	        shift
+	    done
+	fi
     fi
 
     # Migrate .env files.
