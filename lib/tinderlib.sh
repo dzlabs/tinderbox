@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.52 2008/07/29 16:51:40 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.53 2008/07/31 17:07:18 marcus Exp $
 #
 
 tinderLocJail () {
@@ -688,11 +688,25 @@ backupDb () {
 	fi
 
 	if [ -n "${value}" ]; then
-	    echo "UPDATE hooks SET hook_cmd='${value}' WHERE hook_name='${hname}'" >> ${tmpfile}
+	    echo "UPDATE hooks SET hook_cmd='${value}' WHERE hook_name='${hname}';" >> ${tmpfile}
 	fi
     done
 
     IFS=${old_IFS}
+
+    configs=$(${tc} configGet 2>/dev/null)
+    for config in ${configs}; do
+	cname=${config%%=*}
+	cvalue=${config##*=}
+
+	if [ "${cname}" = "__DSVERSION__" ]; then
+	    continue
+	fi
+
+	if [ -n "${cvalue}" ]; then
+	    echo "UPDATE config SET config_option_value='${cvalue}' WHERE config_option_name='${cname}';" >> ${tmpfile}
+	fi
+    done
 
     return 0
 }

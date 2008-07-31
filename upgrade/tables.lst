@@ -6,5 +6,4 @@ users
 user_permissions
 build_users
 build_ports
-config
 build_ports_queue
