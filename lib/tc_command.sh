@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.82 2008/07/31 06:22:06 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.83 2008/07/31 06:23:25 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -444,7 +444,7 @@ Upgrade () {
 			tinderEcho "WARN: Failed to set the update command for Jail ${jail}.  See the output above for more details.  Before this Jail can be updated, you must manually run the SQL query ${query}."
 		    fi
 		else
-		    tinderEcho "WARN: You must manually set the update command for ${jail} to \"USER\" using ther query ${query}."
+		    tinderEcho "WARN: You must manually set the update command for ${jail} to \"USER\" using the query ${query}."
 		fi
 	    fi
 	fi
@@ -475,7 +475,7 @@ Upgrade () {
 			tinderEcho "WARN: Failed to set the update command for PortsTree ${portstree}.  See the output above for more details.  Before this PortsTree can be updated, you must manually run the SQL query ${query}."
 		    fi
 		else
-		    tinderEcho "WARN: You must manually set the update command for ${portstree} to \"USER\" using ther query ${query}."
+		    tinderEcho "WARN: You must manually set the update command for ${portstree} to \"USER\" using the query ${query}."
 		fi
 	    fi
 	fi
