@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.140 2008/07/28 15:39:46 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.141 2008/07/31 16:43:18 marcus Exp $
 #
 
 my $pb;
@@ -1321,13 +1321,13 @@ sub addPortToOneBuild {
                 foreach my $port (keys %seen) {
                         my $pCls      = $seen{$port};
                         my %oper_hash = (
-                                EXTRACT_DEPENDS => 'ExtractDependsList',
-                                PATCH_DEPENDS   => 'PatchDependsList',
-                                FETCH_DEPENDS   => 'FetchDependsList',
-                                BUILD_DEPENDS   => 'BuildDependsList',
-                                LIB_DEPENDS     => 'LibDependsList',
-                                DEPENDS         => 'DependsList',
-                                RUN_DEPENDS     => 'RunDependsList',
+                                EXTRACT_DEPENDS => 'ExtractDepends',
+                                PATCH_DEPENDS   => 'PatchDepends',
+                                FETCH_DEPENDS   => 'FetchDepends',
+                                BUILD_DEPENDS   => 'BuildDepends',
+                                LIB_DEPENDS     => 'LibDepends',
+                                DEPENDS         => 'Depends',
+                                RUN_DEPENDS     => 'RunDepends',
                         );
 
                         $ds->clearDependenciesForPort($pCls, $build, undef);

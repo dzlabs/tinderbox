@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.85 2008/07/28 19:14:24 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.86 2008/07/31 16:43:18 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -740,7 +740,7 @@ sub clearDependenciesForPort {
                 push @params, $deptype;
         }
 
-        $rc = $self->_doQuery($query, @params);
+        $rc = $self->_doQuery($query, \@params);
 
         return $rc;
 }
