@@ -1,6 +1,6 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.50 2008/08/01 16:48:35 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.51 2008/08/01 17:20:31 marcus Exp $
 
-VERSION=	3.0.0.b1
+VERSION=	3.0.0.b2
 
 DATA=		README ds.ph.dist tc tinderbox.ph.dist tinderd
 LIBDATA=	buildscript enterbuild makemake pnohang.c portbuild \
