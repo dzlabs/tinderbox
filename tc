@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.79 2008/06/01 22:53:41 marcus Exp $
+# $MCom: portstools/tinderbox/tc,v 1.80 2008/08/01 20:19:33 marcus Exp $
 
 # Make sure we're root.  Things aren't going to work so well if not.
 if [ `id -u` != 0 ]; then
@@ -57,6 +57,7 @@ fi
 # extract the command
 command=$1
 shift
+rc=0
 
 # pass control over to the relevant subprogram
 case ${command} in
@@ -78,11 +79,13 @@ tbkill|\
 updatePortsTree)
 		${command} ${1+"$@"} || \
 		    perl ${pb}/scripts/lib/tc_command.pl ${command} ${1+"$@"}
+		rc=$?
 		;;
 
 # Otherwise we punt over to the perl dispatcher
 *)		perl ${pb}/scripts/lib/tc_command.pl ${command} ${1+"$@"}
+		rc=$?
 		;;
 
 esac
-exit 0
+exit ${rc}
