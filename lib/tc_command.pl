@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.141 2008/07/31 16:43:18 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.142 2008/08/01 04:49:14 marcus Exp $
 #
 
 my $pb;
@@ -184,8 +184,8 @@ my $ds = new Tinderbox::TinderboxDS();
                 optstr => 'm:p:u:d:w:',
         },
         "addPort" => {
-                help   => "Add a port to the datastore",
-                usage  => "{-b build name | -a} -d <port directory> [-o] [-R]",
+                help  => "Add a port to the datastore",
+                usage => "{-b <build name> | -a} -d <port directory> [-o] [-R]",
                 optstr => 'ab:d:oR',
         },
         "addPortToOneBuild" => {
@@ -193,6 +193,11 @@ my $ds = new Tinderbox::TinderboxDS();
                 help   => "INTERNAL function only",
                 usage  => "",
                 optstr => 'b:d:R',
+        },
+        "rescanPorts" => {
+                help   => "Update properties for all ports in the datastore",
+                usage  => "{-b <build name> | -a} [-o] [-R]",
+                optstr => 'ab:oR',
         },
         "addBuildPortsQueueEntry" => {
                 func   => \&addBuildPortsQueueEntry,
@@ -1305,11 +1310,22 @@ sub addPortToOneBuild {
         my $build = $ds->getBuildByName($opts->{'b'});
         my $makecache =
             new Tinderbox::MakeCache($ENV{'PORTSDIR'}, $ENV{'PKGSUFFIX'});
+        my @bports = ();
+
+        if (!$opts->{'d'}) {
+                foreach my $port ($ds->getPortsForBuild($build)) {
+                        push @bports, $port->getDirectory();
+                }
+        } else {
+                push @bports, $opts->{'d'};
+        }
 
         if ($opts->{'R'}) {
-                addPorts($opts->{'d'}, $build, $makecache, undef);
+                foreach my $pdir (@bports) {
+                        addPorts($pdir, $build, $makecache, undef);
+                }
         } else {
-                my @deps = ($opts->{'d'});
+                my @deps = @bports;
                 my %seen = ();
                 while (my $port = shift @deps) {
                         if (!$seen{$port}) {

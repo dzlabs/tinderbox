@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.85 2008/07/31 07:59:45 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.86 2008/08/01 04:49:14 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1638,21 +1638,32 @@ addPortToBuild () {
     buildenvNoHost ${build}
 
     export PORTSDIR=$(tinderLoc portstree ${portsTree})/ports
-    ${tc} addPortToOneBuild -b ${build} -d ${portDir} ${norecurse}
+    if [ -z "${portDir}" ]; then
+	${tc} addPortToOneBuild -b ${build} ${norecurse}
+    else
+        ${tc} addPortToOneBuild -b ${build} -d ${portDir} ${norecurse}
+    fi
     if [ ${options} -eq 1 -a ${OPTIONS_ENABLED} -eq 1 ]; then
-	pdir="${PORTSDIR}/${portDir}"
-	if [ -d ${pdir} ]; then
-	    export TERM=${save_TERM}
-	    read -p "Generating options for ${build}; hit Enter to continue..." key
-	    echo ""
-	    if [ -z "${norecurse}" ]; then
-		( cd ${pdir} && make rmconfig-recursive \
-		  && make config-recursive )
-	    else
-		( cd ${pdir} && make rmconfig \
-		  && make config )
-	    fi
+	pdirs=""
+	if [ -z "${portDir}" ]; then
+	    pdirs=$(${tc} getPortsForBuild -b ${build} 2>/dev/null)
+	else
+	    pdirs="${PORTSDIR}/${portDir}"
 	fi
+	for pdir in ${pdirs}; do
+	    if [ -d ${pdir} ]; then
+	        export TERM=${save_TERM}
+	        read -p "Generating options for ${build}; hit Enter to continue..." key
+	        echo ""
+	        if [ -z "${norecurse}" ]; then
+		    ( cd ${pdir} && make rmconfig-recursive \
+		      && make config-recursive )
+	        else
+		    ( cd ${pdir} && make rmconfig \
+		      && make config )
+	        fi
+	    fi
+	done
     fi
 
     addPortToBuild_cleanup ${jail} ${portsTree}
@@ -1711,6 +1722,58 @@ addPort () {
 	fi
 
 	addPortToBuild ${build} ${portDir} "${norecurse}" ${options}
+    fi
+
+    return 0
+}
+
+rescanPorts () {
+    # set up defaults
+    build=""
+    allBuilds=0
+    norecurse=""
+    options=0
+
+    # argument handling
+    while getopts ab:R arg >/dev/null 2>&1
+    do
+	case "${arg}" in
+
+	a)	allBuilds=1;;
+	b)	build="${OPTARG}";;
+	d)	portDir="${OPTARG}";;
+	o)      options=1;;
+	R)	norecurse="-R";;
+	?)	return 1;;
+
+	esac
+    done
+
+    # argument validation
+    if [ ${allBuilds} -eq 1 ]; then
+	if [ ! -z "${build}" ]; then
+	    echo "addPort: -a and -b are mutually exclusive"
+	    return 1
+	fi
+
+	tc=$(tinderLoc scripts tc)
+	allBuilds=$(${tc} listBuilds 2>/dev/null)
+	if [ -z "${allBuilds}" ]; then
+	    echo "addPort: no builds are configured"
+	    return 1
+	fi
+
+	for build in ${allBuilds}
+	do
+	    addPortToBuild ${build} "" "${norecurse}" ${options}
+	done
+    else
+	if ! tcExists Builds ${build}; then
+	    echo "addPort: no such build: ${build}"
+	    return 1
+	fi
+
+	addPortToBuild ${build} "" "${norecurse}" ${options}
     fi
 
     return 0
