@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.87 2008/08/02 23:04:49 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.88 2008/08/02 23:41:17 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -288,6 +288,19 @@ Upgrade () {
     TINDERBOX_URL="http://tinderbox.marcuscom.com/"
     DB_MIGRATION_PATH="${VERSION}"
 
+    bkup_file=""
+
+    # argument processing
+    while [ $# -gt 0 ]; do
+	case "x$1" in
+	    x-backup)
+	        shift
+	        bkup_file="$1"
+		;;
+	    x-*) return 1;;
+	esac
+    done
+
     tc=$(tinderLoc scripts tc)
 
     clear
@@ -366,14 +379,16 @@ Upgrade () {
         fi
 
 	if [ ${major_upgrade} = 1 ]; then
-            bkup_file=$(mktemp /tmp/tb_dbbak.XXXXXX)
-            if [ $? != 0 ]; then
-    	        tinderExit "Failed to create temp file for database backup." $?
-            fi
-	    if ! backupDb ${bkup_file} ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
-    	        tinderExit "ERROR: Database backup failed!  Consult the output above for more information." $?
-    	        rm -f ${bkup_file}
-            fi
+	    if [ -z "${bkup_file}" ]; then
+                bkup_file=$(mktemp /tmp/tb_dbbak.XXXXXX)
+                if [ $? != 0 ]; then
+    	            tinderExit "Failed to create temp file for database backup." $?
+                fi
+	        if ! backupDb ${bkup_file} ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
+    	            tinderExit "ERROR: Database backup failed!  Consult the output above for more information." $?
+    	            rm -f ${bkup_file}
+                fi
+	    fi
             if ! dropDb ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
     	        tinderExit "ERROR: Error dropping the old database!  Consult the output above for more information.  Once the problem is corrected, run \"${tc} Upgrade -backup ${bkup_file}\" to resume migration." $?
             fi
@@ -447,7 +462,7 @@ Upgrade () {
 	ucmd=$(${tc} getUpdateCmd -j ${jail} 2>/dev/null)
 	if [ x"${ucmd}" != x"CVSUP" -a x"${ucmd}" != x"CSUP" -a x"${ucmd}" != x"NONE" ]; then
 	    if [ -f "${ucmd}" ]; then
-		mv -f ${ucmd} "${f}/update.sh"
+		mv -f "${ucmd}" "${f}/update.sh"
 		chmod +x "${f}/update.sh"
 		query="UPDATE jails SET update_cmd='USER' WHERE jail_name='${jail}'"
 		if [ ${do_load} != 0 ]; then
@@ -468,7 +483,7 @@ Upgrade () {
 	ucmd=$(${tc} getUpdateCmd -p ${portstree} 2>/dev/null)
 	if [ x"${ucmd}" != x"CVSUP" -a x"${ucmd}" != x"CSUP" -a x"${ucmd}" != x"NONE" ]; then
 	    if [ -f "${ucmd}" ]; then
-		mv -f ${ucmd} "${f}/update.sh"
+		mv -f "${ucmd}" "${f}/update.sh"
 		chmod +x "${f}/update.sh"
 		query="UPDATE ports_trees SET update_cmd='USER' WHERE ports_tree_name='${portstree}'"
 		if [ ${do_load} != 0 ]; then

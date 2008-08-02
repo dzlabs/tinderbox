@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.142 2008/08/01 04:49:14 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.143 2008/08/02 23:41:17 marcus Exp $
 #
 
 my $pb;
@@ -519,13 +519,13 @@ my $ds = new Tinderbox::TinderboxDS();
         # and niceties such as command listing/completion.
 
         "Setup" => {
-                help  => "Set up a new tinderbox",
+                help  => "Set up a new Tinderbox",
                 usage => "",
         },
 
         "Upgrade" => {
-                help  => "Upgrade an existing tinderbox",
-                usage => "",
+                help  => "Upgrade an existing Tinderbox",
+                usage => "[-backup <backup file>]",
         },
 
         "createJail" => {
