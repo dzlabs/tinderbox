@@ -1,0 +1,11 @@
+ports:dump
+jails:map
+ports_trees:dump
+builds:dump
+users:dump
+user_permissions:map
+build_users:dump
+build_ports:map
+build_ports_queue:map
+config:map
+hooks:map

@@ -1,0 +1,3 @@
+MAP_SELECT_QUERY="SELECT Hook_Name, Hook_Cmd FROM hooks WHERE Hook_Cmd IS NOT NULL"
+MAP_PROPERTIES="hook_name hook_cmd"
+MAP_UPGRADE_QUERY='UPDATE hooks SET hook_cmd=${hook_cmd} WHERE hook_name=${hook_name}'

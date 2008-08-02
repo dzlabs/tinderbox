@@ -1,9 +1,0 @@
-ports
-jails
-ports_trees
-builds
-users
-user_permissions
-build_users
-build_ports
-build_ports_queue

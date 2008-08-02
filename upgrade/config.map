@@ -1,0 +1,3 @@
+MAP_SELECT_QUERY="SELECT Config_Option_Name, Config_Option_Value FROM config WHERE Host_Id='-1' AND Config_Option_Name != '__DSVERSION__'"
+MAP_PROPERTIES="config_option_name config_option_value"
+MAP_UPGRADE_QUERY='UPDATE config SET config_option_value=${config_option_value} WHERE config_option_name=${config_option_name}'

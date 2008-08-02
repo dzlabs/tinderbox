@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.53 2008/07/31 17:07:18 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.54 2008/08/02 23:04:49 marcus Exp $
 #
 
 tinderLocJail () {
@@ -535,7 +535,7 @@ getDbInfo () {
     db_name=""
     db_admin=""
 
-    read -p "Does this host have access to connect to the Tinderbox database as a database administrator? (y/n)" option
+    read -p "Does this host have access to connect to the Tinderbox database as a database administrator? (y/N)" option
 
     finished=0
     while [ ${finished} != 1 ]; do
@@ -558,7 +558,7 @@ getDbInfo () {
 	echo 1>&2 "    Database Administrative User : ${db_admin}"
 	echo 1>&2 "    Database Host                : ${db_host}"
 	echo 1>&2 "    Database Name                : ${db_name}"
-	read -p "(y/n)" option
+	read -p "(y/N)" option
 
 	case "${option}" in
 	    [Yy]|[Yy][Ee][Ss])
@@ -568,7 +568,31 @@ getDbInfo () {
 	option="YES"
     done
 
-    echo "${db_admin}:${db_host}:${db_name}"
+    db_pass=""
+    read -p "Do you want to cache ${db_admin}'s password, and pass it to subsequent database command calls (note: this presents a security risk) (y/N) ?" option
+
+    case "${option}" in
+	[Yy]|[Yy][Ee][Ss])
+	    pwfinished=0
+	    while [ ${pwfinished} != 1 ]; do
+		stty -echo
+		read -p "Enter ${db_admin}'s password : " db_pass
+		stty echo
+		echo 1>&2 ""
+		stty -echo
+		read -p "Confirm password for ${db_admin} : " confirm_pass
+		stty echo
+		echo 1>&2 ""
+		if [ x"${db_pass}" = x"${confirm_pass}" ]; then
+		    pwfinished=1
+		else
+		    echo 1>&2 "WARN: Passwords do not match!"
+		fi
+	    done
+	    ;;
+    esac
+
+    echo "${db_admin}:${db_host}:${db_name}:${db_pass}"
 
     return 0
 }
@@ -580,36 +604,15 @@ loadSchema () {
     db_host=$4
     db_name=$5
 
-    MYSQL_LOAD='/usr/local/bin/mysql -u${db_admin} -p -h ${db_host} ${db_name} < "${schema_file}"'
-    MYSQL_LOAD_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
-
-    PGSQL_LOAD='/usr/local/bin/psql -U ${db_admin} -W -h ${db_host} -d ${db_name} < "${schema_file}"'
-    PGSQL_LOAD_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
-
     if [ ! -f ${schema_file} ]; then
 	tinderEcho "ERROR: Schema file ${schema_file} does not exist."
 	return 1
     fi
 
-    rc=0
-    case "${db_driver}" in
-	mysql)
-	    eval ${MYSQL_LOAD_PROMPT}
-	    eval ${MYSQL_LOAD}
-	    rc=$?
-	    ;;
-	pgsql)
-	    eval ${PGSQL_LOAD_PROMPT}
-	    eval ${PGSQL_LOAD}
-	    rc=$?
-	    ;;
-	*)
-	    echo "Unsupported database driver: ${db_driver}"
-	    return 1
-	    ;;
-    esac
+    eval ${DB_PROMPT}
+    eval ${DB_SCHEMA_LOAD}
 
-    return ${rc}
+    return $?
 }
 
 checkPreReqs () {
@@ -629,6 +632,65 @@ checkPreReqs () {
     return ${error}
 }
 
+backupDbDump () {
+    tmpfile=$1
+    table=$2
+    db_drvier=$3
+    db_admin=$4
+    db_host=$5
+    db_name=$6
+
+    cmd=$(echo ${DB_DUMP} | sed -e "s|%%TABLE%%|${table}|")
+    eval ${DB_PROMPT}
+    eval ${cmd}
+    if [ $? != 0 ]; then
+        return $?
+    fi
+
+    return 0
+}
+
+backupDbMap () {
+    tmpfile=$1
+    table=$2
+    db_drvier=$3
+    db_admin=$4
+    db_host=$5
+    db_name=$6
+
+    mapfile=$(tinderLoc scripts upgrade/${table}.map)
+
+    . ${mapfile}
+    query=${MAP_SELECT_QUERY}
+    results=$(eval ${DB_QUERY})
+
+    old_IFS=${IFS}
+    IFS='
+'
+    for result in ${results}; do
+        vcount=$(echo ${MAP_PROPERTIES} | wc -w)
+	i=1
+	while [ ${i} -le ${vcount} ]; do
+	    pname=$(echo ${MAP_PROPERTIES} | awk "{print \$${i}}")
+	    pvalue=$(echo ${result} | awk -F'	' "{print \$${i}}")
+	    if [ x"${pvalue}" = x"NULL" ]; then
+		eval "${pname}=${pvalue}"
+	    else
+	        eval "${pname}=\"'${pvalue}'\""
+	    fi
+	    i=$(expr ${i} + 1)
+        done
+
+        query=$(eval "echo \"${MAP_UPGRADE_QUERY}\"")
+        echo "${query};" >> ${tmpfile}
+
+    done
+
+    IFS=${old_IFS}
+
+    return 0
+}
+
 backupDb () {
     tmpfile=$1
     db_driver=$2
@@ -636,77 +698,28 @@ backupDb () {
     db_host=$4
     db_name=$5
 
-    table_file=$(tinderLoc scripts upgrade/tables.lst)
+    tinderEcho "INFO: Backing up database ${db_name} ..."
 
-    MYSQL_DUMP='/usr/local/bin/mysqldump --no-create-info --skip-opt -u${db_admin} -p -h ${db_host} ${db_name} %%TABLE%% >> ${tmpfile}'
-    MYSQL_DUMP_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
+    order=$(tinderLoc scripts upgrade/order.lst)
+    for line in $(cat ${order}); do
+	table=${line%%:*}
+	type=${line##*:}
 
-    PGSQL_DUMP='/usr/local/bin/pg_dump -U ${db_admin} -W -h ${db_host} --data-only --inserts --table=%%TABLE%% ${db_name} >> ${tmpfile}'
-    PGSQL_DUMP_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
+	tinderEcho "INFO: Backing up database table ${table} ..."
+	if [ "${type}" = "dump" ]; then
+            backupDbDump ${tmpfile} ${table} ${db_driver} ${db_admin} ${db_host} ${db_name}
+	else
+	    backupDbMap ${tmpfile} ${table} ${db_driver} ${db_admin} ${db_host} ${db_name}
+	fi
 
-    tables=$(cat ${table_file})
-
-    for table in ${tables}; do
-	cmd=""
-	case "${db_driver}" in
-	    mysql)
-	        cmd=${MYSQL_DUMP}
-		eval ${MYSQL_DUMP_PROMPT}
-		;;
-	    pgsql)
-	        cmd=${PGSQL_DUMP}
-		eval ${PGSQL_DUMP_PROMPT}
-		;;
-	    *)
-	        echo "Unsupported database driver: ${db_driver}"
-		return 1
-		;;
-	esac
-	cmd=$(echo ${cmd} | sed -e "s|%%TABLE%%|${table}|")
-	eval ${cmd}
-	if [ $? != 0 ]; then
+        if [ $? != 0 ]; then
 	    return $?
-	fi
+        fi
+
+	tinderEcho "DONE."
     done
 
-    tc=$(tinderLoc scripts tc)
-    hooks=$(${tc} listHooks | egrep '^(Name|Command)' 2>/dev/null)
-    if [ $? != 0 ]; then
-	return 0
-    fi
-
-    old_IFS=${IFS}
-    IFS='
-'
-    hname=""
-    for line in ${hooks}; do
-	name=$(echo ${line} | awk -F'[[:space:]]+:[[:space:]]+' '{print $1}')
-	value=$(echo ${line} | awk -F'[[:space:]]+:[[:space:]]+' '{print $2}')
-	if [ "${name}" = "Name" ]; then
-	    hname=${value}
-	    continue
-	fi
-
-	if [ -n "${value}" ]; then
-	    echo "UPDATE hooks SET hook_cmd='${value}' WHERE hook_name='${hname}';" >> ${tmpfile}
-	fi
-    done
-
-    IFS=${old_IFS}
-
-    configs=$(${tc} configGet 2>/dev/null)
-    for config in ${configs}; do
-	cname=${config%%=*}
-	cvalue=${config##*=}
-
-	if [ "${cname}" = "__DSVERSION__" ]; then
-	    continue
-	fi
-
-	if [ -n "${cvalue}" ]; then
-	    echo "UPDATE config SET config_option_value='${cvalue}' WHERE config_option_name='${cname}';" >> ${tmpfile}
-	fi
-    done
+    tinderEcho "DONE."
 
     return 0
 }
@@ -717,28 +730,7 @@ dropDb () {
     db_host=$3
     db_name=$4
 
-    MYSQL_DROP='/usr/local/bin/mysqladmin -u${db_admin} -p -h ${db_host} drop ${db_name}'
-    MYSQL_DROP_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
-
-    PGSQL_DROP='/usr/local/bin/dropdb -U ${db_admin} -h ${db_host} -W ${db_name}'
-    PGSQL_DROP_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
-
-    cmd=""
-    case "${db_driver}" in
-	mysql)
-	    cmd=${MYSQL_DROP}
-	    eval ${MYSQL_DROP_PROMPT}
-	    ;;
-	pgsql)
-	    cmd=${PGSQL_DROP}
-	    eval ${PGSQL_DROP_PROMPT}
-	    ;;
-	*)
-	    echo "Unsupported database driver: ${db_driver}"
-	    return 1
-	    ;;
-    esac
-    eval ${cmd}
+    eval ${DB_DROP}
 
     # This may fail if the database has already been dropped.  Just return
     # true.
@@ -752,52 +744,9 @@ createDb () {
     db_name=$4
     create_ds_ph=$5
 
-    MYSQL_CHECK='/usr/local/bin/mysql -u${db_admin} -B -s -p -h ${db_host} -e "SELECT 0" ${db_name}'
-    MYSQL_CREATE='/usr/local/bin/mysqladmin -u${db_admin} -p -h ${db_host} create ${db_name}'
-    MYSQL_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
-    MYSQL_GRANT='/usr/local/bin/mysql -u${db_admin} -p -h ${db_host} -e "GRANT SELECT, INSERT, UPDATE, DELETE ON ${db_name}.* TO '"'"'${db_user}'"'"'@'"'"'${grant_host}'"'"' IDENTIFIED BY '"'"'${db_pass}'"'"' ; FLUSH PRIVILEGES" mysql'
-    MYSQL_MAN_PREREQS="databases/p5-DBD-mysql50 databases/mysql50-client"
-    MYSQL_OPT_PREREQS="databases/php[45]-mysql"
-
-    PGSQL_CHECK='/usr/local/bin/psql -U ${db_admin} -h ${db_host} -W -c "SELECT 0" ${db_name}'
-    PGSQL_CREATE='/usr/local/bin/createdb -U ${db_admin} -h ${db_host} -W ${db_name}'
-    PGSQL_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
-    PGSQL_GRANT='echo "Make sure ${db_user} owns the database ${db_name} as well as all of its tables."'
-    PGSQL_MAN_PREREQS="databases/p5-DBD-Pg databases/postgresql*-client"
-    PGSQL_OPT_PREREQS="databases/php[45]-pgsql"
-
-    prompt=""
-    check=""
-    create=""
-    grant=""
-    manprereqs=""
-    optprereqs=""
-    case "${db_driver}" in
-	mysql)
-	    prompt=${MYSQL_PROMPT}
-	    check=${MYSQL_CHECK}
-	    create=${MYSQL_CREATE}
-	    grant=${MYSQL_GRANT}
-	    manprereqs=${MYSQL_MAN_PREREQS}
-	    optprereqs=${MYSQL_OPT_PREREQS}
-	    ;;
-	pgsql)
-	    prompt=${PGSQL_PROMPT}
-	    check=${PGSQL_CHECK}
-	    create=${PGSQL_CREATE}
-	    grant=${PGSQL_GRANT}
-	    manprereqs=${PGSQL_MAN_PREREQS}
-	    optprereqs=${PGSQL_OPT_PREREQS}
-	    ;;
-	*)
-	    echo "Unsupported database driver: ${db_driver}"
-	    return 1
-	    ;;
-    esac
-
     tinderEcho "INFO: Checking for prerequisites for ${db_driver} database driver ..."
-    if [ -n "${manprereqs}" ]; then
-	missing=$(checkPreReqs ${manprereqs})
+    if [ -n "${DB_MAN_PREREQS}" ]; then
+	missing=$(checkPreReqs ${DB_MAN_PREREQS})
 
 	if [ $? = 1 ]; then
 	    tinderEcho "ERROR: The following mandatory dependencies are missing.  These must be installed prior to creating the Tinderbox database."
@@ -806,8 +755,8 @@ createDb () {
 	fi
     fi
 
-    if [ -n "${optprereqs}" ]; then
-	missing=$(checkPreReqs ${optprereqs})
+    if [ -n "${DB_OPT_PREREQS}" ]; then
+	missing=$(checkPreReqs ${DB_OPT_PREREQS})
 
 	if [ $? = 1 ]; then
 	    tinderEcho "WARN: The following option dependencies are missing.  These are required to use the Tinderbox web front-end."
@@ -818,11 +767,11 @@ createDb () {
     echo ""
 
     tinderEcho "INFO: Checking to see if database ${db_name} already exists on ${db_host} ..."
-    eval ${prompt}
-    eval ${check} 2>/dev/null
+    eval ${DB_PROMPT}
+    eval ${DB_CHECK} >/dev/null 2>&1
     if [ $? = 0 ]; then
 	tinderEcho "WARN: A database with the name ${db_name} already exists on ${db_host}.  Do you want to use this database for Tinderbox (note: if you type 'n', database creation will abort)?"
-	read -p "(y/n) " i
+	read -p "(y/N) " i
 	case "${i}" in
 	    [Yy]|[Yy][Ee][Ss])
 	        # continue
@@ -834,8 +783,8 @@ createDb () {
 	esac
     else
 	tinderEcho "INFO: Database ${db_name} does not exist.  Creating ${db_name} on ${db_host} ..."
-	eval ${prompt}
-	eval ${create}
+	eval ${DB_PROMPT}
+	eval ${DB_CREATE}
 	if [ $? != 0 ]; then
 	    return $?
 	fi
@@ -867,14 +816,14 @@ createDb () {
 	    pwfinished=0
 	    while [ ${pwfinished} != 1 ]; do
 		stty -echo
-		reap -p "Enter the desired password for ${db_user} : " db_pass
+		read -p "Enter the desired password for ${db_user} : " db_pass
 		stty echo
 		echo ""
 		stty -echo
-		reap -p "Confirm password for ${db_user} : " confirm_pass
+		read -p "Confirm password for ${db_user} : " confirm_pass
 		stty echo
 		echo ""
-		if [ ${db_pass} = ${confirm_pass} ]; then
+		if [ x"${db_pass}" = x"${confirm_pass}" ]; then
 		    pwfinished=1
 		else
 		    echo "WARN: Passwords do not match!"
@@ -886,7 +835,7 @@ createDb () {
 	if [ -n "${db_pass}" ]; then
 	    echo "    Database user password : ****"
 	fi
-	read -p "(y/n) " option
+	read -p "(y/N) " option
 
 	case "${option}" in
 	    [Yy]|[Yy][Ee][Ss])
@@ -904,9 +853,9 @@ createDb () {
 
     if [ "${db_driver}" != "pgsql" ]; then
         tinderEcho "INFO: Adding permissions to ${db_name} for ${db_user} ..."
-        eval ${prompt}
+        eval ${DB_PROMPT}
     fi
-    eval ${grant}
+    eval ${DB_GRANT}
 
     if [ $? != 0 ]; then
 	tinderEcho "ERROR: Database privilege configuration failed! Consult the output above for more information."

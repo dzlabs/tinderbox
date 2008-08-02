@@ -1,0 +1,3 @@
+MAP_SELECT_QUERY="SELECT User_Id, User_Permission_Object_Type, User_Permission_Object_Id, User_Permission FROM user_permissions"
+MAP_PROPERTIES="user_id user_permission_object_type user_permission_object_id user_permission"
+MAP_UPGRADE_QUERY='INSERT INTO user_permissions (user_id,user_permission_object_type,user_permission_object_id,user_permission) VALUES (${user_id},${user_permission_object_type},${user_permission_object_id},${user_permission})'

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.86 2008/08/01 04:49:14 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.87 2008/08/02 23:04:49 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -245,16 +245,24 @@ Setup () {
     dbinfo=$(getDbInfo ${db_driver})
     genschema=$(tinderLoc scripts sql/genschema)
     if [ $? = 0 ]; then
-        db_admin_host=${dbinfo%:*}
-        db_name=${dbinfo##*:}
+        db_admin_host_name=${dbinfo%:*}
+	db_admin_host=${db_admin_host_name%:*}
+        db_name=${db_admin_host_name##*:}
         db_admin=${db_admin_host%:*}
         db_host=${db_admin_host#*:}
+	db_admin_pass=${dbinfo##*:}
         do_load=1
     fi
 
     if [ ${do_load} = 0 ]; then
 	tinderEcho "WARN: You must first create a database for Tinderbox, and generate the schema by running ${genschema} with the appropriate database driver argument.  Once the schema is generated, it must be loaded into the newly created database.  Consult ${TINDERBOX_URL} for more information on creating and initializing the Tinderbox database."
     else
+	dblib=$(tinderLoc scripts lib/db-${db_driver}.sh)
+	if [ ! -f ${dblib} ]; then
+	    tinderExit "ERROR: There is no database library file for database driver: ${db_driver}" 1
+	fi
+	. ${dblib}
+
         if ! createDb ${db_driver} ${db_admin} ${db_host} ${db_name} 1; then
     	    tinderExit "ERROR: Error creating the new database!  Consult the output above for more information." $?
         fi
@@ -290,25 +298,16 @@ Upgrade () {
     read -p "Hit <ENTER> to get started: " i
 
     # Check if the current Datastore Version is ascertainable
+    good_dsversion=1
     dsversion=$(${tc} dsversion >/dev/null 2>&1)
     if [ $? != 0 ]; then
-	tinderExit "ERROR: Failed to detect datastore version.  Check the output of '${tc} dsversion'" $?
-    fi
-    if [ "${dsversion}" = "1.X" ]; then
-	tinderExit "ERROR: Upgrades are only supported from 2.0 onwards." 1
-    fi
-
-    dsmajor=$(echo ${dsversion} | awk -F'\\.' '{print $1}')
-    curmajor=$(echo ${VERSION} | awk -F'\\.' '{print $1}')
-    major_upgrade=0
-    if [ ${dsmajor} -lt ${curmajor} ]; then
-	major_upgrade=1
+	good_dsversion=0
     fi
 
     # Cleanup files that are no longer needed.
     echo ""
     tinderEcho "INFO: Cleaning up stale files..."
-    REMOVE_FILES="buildscript create enterbuild makemake mkbuild mkjail pnohang.c portbuild rawenv rawenv.dist tbkill.sh tinderbuild lib/Build.pm lib/BuildPortsQueue.pm lib/Hook.pm lib/Host.pm lib/Jail.pm lib/MakeCache.pm lib/Port.pm lib/PortFailPattern.pm lib/PortFailReason.pm lib/PortsTree.pm lib/TBConfig.pm lib/TinderObject.pm lib/TinderboxDS.pm lib/User.pm lib/tinderbox_shlib.sh"
+    REMOVE_FILES="buildscript create enterbuild makemake mkbuild mkjail pnohang.c portbuild rawenv rawenv.dist tbkill.sh tinderbuild tinderbox-mysql.schema tinderbox-pgsql.schema setup.sh upgrade.sh lib/Build.pm lib/BuildPortsQueue.pm lib/Hook.pm lib/Host.pm lib/Jail.pm lib/MakeCache.pm lib/Port.pm lib/PortFailPattern.pm lib/PortFailReason.pm lib/PortsTree.pm lib/TBConfig.pm lib/TinderObject.pm lib/TinderboxDS.pm lib/User.pm lib/tinderbox_shlib.sh lib/setup-mysql.sh lib/setup-pgsql.sh lib/setup_shlib.sh upgrade/mig_mysql_tinderbox-1.X_to_2.0.0.sql upgrade/mig_mysql_tinderbox-2.0.0_to_2.1.0.sql upgrade/mig_mysql_tinderbox-2.1.0_to_2.1.1.sql upgrade/mig_mysql_tinderbox-2.1.1_to_2.2.0.sql upgrade/mig_mysql_tinderbox-2.2.0_to_2.3.0.sql upgrade/mig_mysql_tinderbox-2.3.0_to_2.3.1.sql upgrade/mig_mysql_tinderbox-2.3.1_to_2.3.2.sql upgrade/mig_mysql_tinderbox-2.3.2_to_2.3.3.sql upgrade/mig_mysql_tinderbox-2.3.3_to_2.4.0.sql upgrade/mig_pgsql_tinderbox-2.1.1_to_2.2.0.sql upgrade/mig_pgsql_tinderbox-2.2.0_to_2.3.0.sql upgrade/mig_pgsql_tinderbox-2.3.0_to_2.3.1.sql upgrade/mig_pgsql_tinderbox-2.3.1_to_2.3.2.sql upgrade/mig_pgsql_tinderbox-2.3.2_to_2.3.3.sql upgrade/mig_pgsql_tinderbox-2.3.3_to_2.4.0.sql upgrade/mig_shlib.sh"
     for f in ${REMOVE_FILES}; do
         rm -f "${pb}/scripts/${f}"
     done
@@ -322,17 +321,19 @@ Upgrade () {
     db_driver=$(getDbDriver)
     dbinfo=$(getDbInfo ${db_driver})
     if [ $? = 0 ]; then
-        db_admin_host=${dbinfo%:*}
-        db_name=${dbinfo##*:}
+        db_admin_host_name=${dbinfo%:*}
+	db_admin_host=${db_admin_host_name%:*}
+        db_name=${db_admin_host_name##*:}
         db_admin=${db_admin_host%:*}
         db_host=${db_admin_host#*:}
+	db_admin_pass=${dbinfo##*:}
         do_load=1
     fi
 
     if [ ${do_load} = 0 ]; then
         tinderEcho "WARN: Database migration was not done.  If you have already loaded the database schema, type 'y' or 'yes' to continue the migration."
         echo ""
-        read -p "Do you wish to continue? (y/n)" i
+        read -p "Do you wish to continue? (y/N)" i
         case ${i} in
     	    [Yy]|[Yy][Ee][Ss])
     	        # continue
@@ -342,6 +343,28 @@ Upgrade () {
     	        ;;
         esac
     else
+	dblib=$(tinderLoc scripts lib/db-${db_driver}.sh)
+	if [ ! -f ${dblib} ]; then
+	    tinderExit "ERROR: There is no database library file for database driver: ${db_driver}" 1
+	fi
+	. ${dblib}
+	if [ ${good_dsversion} = 0 ]; then
+	    eval ${DB_PROMPT}
+	    query="SELECT Config_Option_Value FROM config WHERE Config_Option_Name='__DSVERSION__' AND Host_Id='-1'"
+	    dsversion=$(eval ${DB_QUERY})
+	fi
+
+        if [ "${dsversion}" = "1.X" ]; then
+	    tinderExit "ERROR: Upgrades are only supported from 2.0 onwards." 1
+        fi
+
+        dsmajor=$(echo ${dsversion} | awk -F'\\.' '{print $1}')
+        curmajor=$(echo ${VERSION} | awk -F'\\.' '{print $1}')
+        major_upgrade=0
+        if [ ${dsmajor} -lt ${curmajor} ]; then
+	    major_upgrade=1
+        fi
+
 	if [ ${major_upgrade} = 1 ]; then
             bkup_file=$(mktemp /tmp/tb_dbbak.XXXXXX)
             if [ $? != 0 ]; then
@@ -352,13 +375,13 @@ Upgrade () {
     	        rm -f ${bkup_file}
             fi
             if ! dropDb ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
-    	        tinderExit "ERROR: Error dropping the old database!  Consult the output above for more information.  Once the problem is corrected, run \"update.sh -backup ${bkup_file}\" to resume migration." $?
+    	        tinderExit "ERROR: Error dropping the old database!  Consult the output above for more information.  Once the problem is corrected, run \"${tc} Upgrade -backup ${bkup_file}\" to resume migration." $?
             fi
             if ! createDb ${db_driver} ${db_admin} ${db_host} ${db_name} 0; then
-    	        tinderExit "ERROR: Error creating the new database!  Consult the output above for more information.  Once the problem is corrected, run \"update.sh -backup ${bkup_file}\" to resume migration." $?
+    	        tinderExit "ERROR: Error creating the new database!  Consult the output above for more information.  Once the problem is corrected, run \"${tc} Upgrade -backup ${bkup_file}\" to resume migration." $?
             fi
             if ! loadSchema ${bkup_file} ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
-    	        tinderExit "ERROR: Database restoration failed!  Consult the output above for more information.  Once the problem is corrected, run \"update.sh -backup ${bkup_file}\" to resume migration." $?
+    	        tinderExit "ERROR: Database restoration failed!  Consult the output above for more information.  Once the problem is corrected, run \"${tc} Upgrade -backup ${bkup_file}\" to resume migration." $?
             fi
             rm -f ${bkup_file}
         else
@@ -427,20 +450,10 @@ Upgrade () {
 		mv -f ${ucmd} "${f}/update.sh"
 		chmod +x "${f}/update.sh"
 		query="UPDATE jails SET update_cmd='USER' WHERE jail_name='${jail}'"
-		if [ ${db_load} != 0 ]; then
-		    tinderEcho "The next prompt will be for ${db_admin}'s password to the ${db_name} database."
-		    rc=0
-		    case "${db_driver}" in
-		        mysql)
-		            /usr/local/bin/mysql -u${db_admin} -p -h ${db_host}  -e "${query}" ${db_name}
-			    rc=$?
-			    ;;
-			pgsql)
-			    /usr/local/bin/psql -U ${db_admin} -h ${db_host} -W -c "${query}" ${db_name}
-			    rc=$?
-			    ;;
-		    esac
-		    if [ ${rc} != 0 ]; then
+		if [ ${do_load} != 0 ]; then
+		    eval ${DB_PROMPT}
+		    eval ${DB_QUERY}
+		    if [ $? != 0 ]; then
 			tinderEcho "WARN: Failed to set the update command for Jail ${jail}.  See the output above for more details.  Before this Jail can be updated, you must manually run the SQL query ${query}."
 		    fi
 		else
@@ -458,20 +471,10 @@ Upgrade () {
 		mv -f ${ucmd} "${f}/update.sh"
 		chmod +x "${f}/update.sh"
 		query="UPDATE ports_trees SET update_cmd='USER' WHERE ports_tree_name='${portstree}'"
-		if [ ${db_load} != 0 ]; then
-		    tinderEcho "The next prompt will be for ${db_admin}'s password to the ${db_name} database."
-		    rc=0
-		    case "${db_driver}" in
-		        mysql)
-		            /usr/local/bin/mysql -u${db_admin} -p -h ${db_host}  -e "${query}" ${db_name}
-			    rc=$?
-			    ;;
-			pgsql)
-			    /usr/local/bin/psql -U ${db_admin} -h ${db_host} -W -c "${query}" ${db_name}
-			    rc=$?
-			    ;;
-		    esac
-		    if [ ${rc} != 0 ]; then
+		if [ ${do_load} != 0 ]; then
+		    eval ${DB_PROMPT}
+		    eval ${DB_QUERY}
+		    if [ $? != 0 ]; then
 			tinderEcho "WARN: Failed to set the update command for PortsTree ${portstree}.  See the output above for more details.  Before this PortsTree can be updated, you must manually run the SQL query ${query}."
 		    fi
 		else

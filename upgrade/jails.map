@@ -1,0 +1,3 @@
+MAP_SELECT_QUERY="SELECT Jail_Id, Jail_Name, Jail_Tag, Jail_Last_Built, Jail_Update_Cmd, Jail_Description, Jail_Src_Mount FROM jails"
+MAP_PROPERTIES="jail_id jail_name jail_tag jail_last_built jail_update_cmd jail_description jail_src_mount"
+MAP_UPGRADE_QUERY='INSERT INTO jails (jail_id,jail_name,jail_arch,jail_tag,jail_last_built,jail_update_cmd,jail_description,jail_src_mount) VALUES (${jail_id},${jail_name},'"'"'$(uname -m)'"'"',${jail_tag},${jail_last_built},${jail_update_cmd},${jail_description},${jail_src_mount})'
