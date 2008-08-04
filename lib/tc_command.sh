@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.88 2008/08/02 23:41:17 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.89 2008/08/04 23:18:09 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -589,7 +589,7 @@ buildJail () {
     if [ ! -d ${jailBase} ]; then
 	mkdir -p ${jailBase}
 	if [ $? -ne 0 ]; then
-	    echo "buildJail: cant create: ${jailBase}"
+	    echo "buildJail: cannot create: ${jailBase}"
 	    return 0
 	fi
     fi
@@ -612,7 +612,7 @@ buildJail () {
 
     if [ -n "${reqmt}" ]; then
 	if ! requestMount -t jail -j ${jailName} ${reqmt}; then
-	    echo "buildJail: cant mount source directory"
+	    echo "buildJail: cannot mount source directory"
 	    return 1
 	fi
     fi
@@ -1262,14 +1262,14 @@ tinderbuild_setup () {
 
     # Mount ports/
     if ! requestMount -t buildports -b ${build} -r ${nullfs}; then
-	echo "tinderbuild: cant mount ports source"
+	echo "tinderbuild: cannot mount ports source"
 	tinderbuild_cleanup 1
     fi
     ln -sf ../a/ports ${buildRoot}/usr/ports
 
     # Mount src/
     if ! requestMount -t buildsrc -b ${build} -r ${nullfs}; then
-	echo "tinderbuild: cant mount jail source"
+	echo "tinderbuild: cannot mount jail source"
 	tinderbuild_cleanup 1
     fi
 
@@ -1283,13 +1283,13 @@ tinderbuild_setup () {
 
     # Install a couple of tinderbox binaries
     if ! cp -p $(tinderLoc scripts lib/buildscript) ${buildRoot}; then
-	echo "tinderbuild: ${build}: cant copy buildscript"
+	echo "tinderbuild: ${build}: cannot copy buildscript"
 	tinderbuild_cleanup 1
     fi
 
     if ! cc -o ${buildRoot}/pnohang -static \
 	$(tinderLoc scripts lib/pnohang.c); then
-	echo "tinderbuild: ${build}: cant compile pnohang"
+	echo "tinderbuild: ${build}: can compile pnohang"
 	tinderbuild_cleanup 1
     fi
 
@@ -1303,7 +1303,7 @@ tinderbuild_setup () {
     if [ -n "${DISTFILE_CACHE}" ]; then
 	if ! requestMount -t builddistcache -b ${build} \
 		-s ${DISTFILE_CACHE}; then
-	    echo "tinderbuild: cant mount distfile cache"
+	    echo "tinderbuild: cannot mount distfile cache"
 	    tinderbuild_cleanup 1
 	fi
 
@@ -1329,7 +1329,7 @@ tinderbuild_setup () {
 
 	if ! requestMount -t buildccache -b ${build} \
 		-s ${ccacheDir} ${nullfs}; then
-	    echo "tinderbuild: cant mount ccache"
+	    echo "tinderbuild: cannot mount ccache"
 	    tinderbuild_cleanup 1
 	fi
 
@@ -1347,7 +1347,7 @@ tinderbuild_setup () {
 
 	if ! requestMount -t buildoptions -b ${build} \
 	    	-s ${optionsDir} ${nullfs}; then
-	    echo "tinderbuild: cant mount options"
+	    echo "tinderbuild: cannot mount options"
 	    tinderbuild_cleanup 1
 	fi
     fi
@@ -1364,6 +1364,10 @@ tinderbuild_phase () {
 
     echo "started at $(date)"
     start=$(date +%s)
+
+    remake_cnt=$(cd ${pkgDir}/All && make -n all | wc -l)
+    tc=$(tinderLoc scripts tc)
+    ${tc} updateBuildRemakeCount -b ${build} -c ${remake_cnt}
 
     cd ${pkgDir}/All && make PACKAGES=${pkgDir} -k -j${jobs} all \
 	> $(tinderLoc builddata ${build})/make.${num} 2>&1 </dev/null
@@ -1545,7 +1549,7 @@ tinderbuild () {
 	    export PORTBUILD_ARGS="$(echo ${pbargs})"
 	    buildenvNoHost ${build}
 	    if ! requestMount -t portstree -p ${portstree}; then
-		echo "tinderbuild: cant mount portstree: ${portstree}"
+		echo "tinderbuild: cannot mount portstree: ${portstree}"
 		exit 1
 	    fi
 	    env PORTSDIR=$(tinderLoc portstree ${portstree})/ports \
@@ -1639,11 +1643,11 @@ addPortToBuild () {
     portsTree=$(${tc} getPortsTreeForBuild -b ${build})
 
     if ! requestMount -t jail -j ${jail} -r; then
-	echo "addPortToBuild: cant mount jail source"
+	echo "addPortToBuild: cannot mount jail source"
 	exit 1
     fi
     if ! requestMount -t portstree -p ${portsTree} -r; then
-	echo "addPortToBuild: cant mount portstree source"
+	echo "addPortToBuild: cannot mount portstree source"
 	exit 1
     fi
 

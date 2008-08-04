@@ -1,6 +1,6 @@
 <?php
 #-
-# Copyright (c) 2004-2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2004-2008 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/Build.php,v 1.4 2005/12/26 23:59:28 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/Build.php,v 1.5 2008/08/04 23:18:10 marcus Exp $
 #
 
     require_once 'TinderObject.php';
@@ -40,7 +40,8 @@
 		'build_description' => '',
 		'build_status' => '',
 		'build_current_port' => '',
-		'build_last_updated' => ''
+		'build_last_updated' => '',
+		'build_remake_count' => ''
 	    );
 
 	    $this->TinderObject($object_hash, $argv);
@@ -78,6 +79,10 @@
 	    return $this->build_last_updated;
 	}
 
+	function getBuildRemakeCount() {
+	    return $this->build_remake_count;
+	}
+
 	function setName($name) {
 	    $this->build_name = $name;
 	}
@@ -100,6 +105,10 @@
 
 	function setBuildCurrentPort($port) {
 	    $this->build_current_port = $port;
+	}
+
+	function setBuildRemakeCount($cnt) {
+	    $this->build_remake_count = $cnt;
 	}
 
     }

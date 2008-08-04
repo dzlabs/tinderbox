@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.143 2008/08/02 23:41:17 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.144 2008/08/04 23:18:09 marcus Exp $
 #
 
 my $pb;
@@ -385,6 +385,12 @@ my $ds = new Tinderbox::TinderboxDS();
                 help   => "Update the current status for the specific build",
                 usage  => "-b <build name> -s <IDLE|PORTBUILD>",
                 optstr => 'b:s:',
+        },
+        "updateBuildRemakeCount" => {
+                func => \&updateBuildRemakeCount,
+                help => "Update the count of number of ports needing a rebuild",
+                usage  => "-b <build name> {-c <count> | -d}",
+                optstr => 'b:c:d',
         },
         "updateBuildPortsQueueEntryStatus" => {
                 func => \&updateBuildPortsQueueEntryStatus,
@@ -2463,6 +2469,43 @@ sub updateBuildStatus {
         $ds->updateBuildStatus($build)
             or cleanup($ds, 1,
                 "Failed to update last build status value in the datastore: "
+                    . $ds->getError()
+                    . "\n");
+}
+
+sub updateBuildRemakeCount {
+        if (       !$opts->{'b'}
+                || (!$opts->{'c'} && !$opts->{'d'})
+                || ($opts->{'c'}  && $opts->{'d'}))
+        {
+                usage("updateBuildRemakeCount");
+        }
+
+        if (!$ds->isValidBuild($opts->{'b'})) {
+                cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
+        }
+
+        my $build = $ds->getBuildByName($opts->{'b'});
+        my $count = $build->getRemakeCount();
+
+        if ($opts->{'c'}) {
+                $count = $opts->{'c'}
+                    if ($count !~ /^\d+$/)
+                {
+                        cleanup($ds, 1,
+                                "The count must be a non-negative integer\n");
+                }
+
+        } else {
+                $count--;
+                if ($count < 0) {
+                        cleanup($ds, 0, undef);
+                }
+        }
+
+        $ds->updateBuildRemakeCount($build, $count)
+            or cleanup($ds, 1,
+                      "Failed to update the remake count in the datastore: "
                     . $ds->getError()
                     . "\n");
 }

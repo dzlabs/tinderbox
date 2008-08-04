@@ -1,7 +1,7 @@
 ports:dump
 jails:map
 ports_trees:dump
-builds:dump
+builds:map
 users:dump
 user_permissions:map
 build_users:dump

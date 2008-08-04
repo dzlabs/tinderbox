@@ -43,7 +43,8 @@ CREATE TABLE builds (
 	build_description TEXT,
 	build_status ENUM('IDLE','PREPARE','PORTBUILD') DEFAULT 'IDLE',
 	build_current_port VARCHAR(255),
-	build_last_updated DATETIME
+	build_last_updated DATETIME,
+	build_remake_count INTEGER NOT NULL DEFAULT 0
 );
 
 DROP TABLE IF EXISTS users;

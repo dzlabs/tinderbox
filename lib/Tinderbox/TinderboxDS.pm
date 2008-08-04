@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.86 2008/07/31 16:43:18 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.87 2008/08/04 23:18:09 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -1204,6 +1204,28 @@ sub updateBuildStatus {
                 "UPDATE builds SET build_status=?,build_last_updated=NOW() WHERE build_id=?",
                 [$build->getStatus(), $build->getId()]
         );
+
+        return $rc;
+}
+
+sub updateBuildRemakeCount {
+        my $self  = shift;
+        my $build = shift;
+        my $count = shift;
+
+        $self->verifyType(1, $build, 'Build');
+
+        my $query;
+        my @params = ();
+        if ($count >= 0) {
+                $query =
+                    "UPDATE builds SET build_remake_count=? WHERE build_id=?";
+                push @params, $count, $build->getId();
+        } else {
+                return 0;
+        }
+
+        my $rc = $self->_doQuery($query, \@params);
 
         return $rc;
 }

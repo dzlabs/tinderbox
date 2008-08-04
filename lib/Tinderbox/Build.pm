@@ -1,5 +1,5 @@
 #-
-# Copyright (c) 2004-2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2004-2008 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/Build.pm,v 1.12 2006/02/18 19:57:21 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/Build.pm,v 1.13 2008/08/04 23:18:09 marcus Exp $
 #
 
 package Tinderbox::Build;
@@ -52,6 +52,7 @@ sub new {
                 build_description  => "",
                 build_current_port => "",
                 build_last_updated => "",
+                build_remake_count => "",
         };
 
         my @args = ();
@@ -111,6 +112,12 @@ sub getLastUpdated {
         return $self->{build_last_updated};
 }
 
+sub getRemakeCount {
+        my $self = shift;
+
+        return $self->{build_remake_count};
+}
+
 sub setName {
         my $self = shift;
         my $name = shift;
@@ -153,6 +160,15 @@ sub setCurrentPort {
         my $port = shift;
 
         $self->{build_current_port} = $port;
+}
+
+sub setRemakeCount {
+        my $self = shift;
+        my $cnt  = shift;
+
+        if ($cnt =~ /^\d+$/) {
+                $self->{build_remake_count} = $cnt;
+        }
 }
 
 1;
