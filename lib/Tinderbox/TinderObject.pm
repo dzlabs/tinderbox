@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderObject.pm,v 1.15 2006/02/18 19:57:21 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderObject.pm,v 1.16 2008/08/05 18:45:24 marcus Exp $
 #
 
 package Tinderbox::TinderObject;
@@ -76,6 +76,44 @@ sub toHashRef {
         }
 
         return $hashRef;
+}
+
+sub toString {
+        my $self   = shift;
+        my $string = "";
+
+        my $hRef = $self->toHashRef();
+
+        $string = "TinderObject Type : " . (ref($self)) . "\n";
+        $string .= "ID : " . $self->getId() . "\n";
+        foreach my $field (keys %{$hRef}) {
+                $string .= "$field : " . $hRef->{$field} . "\n";
+        }
+
+        return $string;
+}
+
+sub toXMLString {
+        my $self = shift;
+        my $xml  = "";
+
+        my $hRef = $self->toHashRef();
+
+        $xml = "<?xml version=\"1.0\"?>\n";
+        $xml .= "<TinderObject class=\"" . (ref($self)) . "\">\n";
+        $xml .= "  <ID>" . $self->getId() . "</ID>\n";
+        foreach my $field (keys %{$hRef}) {
+                my $value = $hRef->{$field};
+                $value =~ s/\</\&lt;/g;
+                $value =~ s/\>/\&gt;/g;
+                $value =~ s/\&/\&amp;/g;
+                $value =~ s/\t/    /g;
+                $xml .= "  <$field>$value</$field>\n";
+        }
+
+        $xml .= "</TinderObject>\n";
+
+        return $xml;
 }
 
 1;

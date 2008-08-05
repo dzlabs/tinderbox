@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.146 2008/08/05 00:43:33 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.147 2008/08/05 18:45:24 marcus Exp $
 #
 
 my $pb;
@@ -73,6 +73,13 @@ my $ds = new Tinderbox::TinderboxDS();
                 func  => \&dsversion,
                 help  => "Print the datastore version",
                 usage => "",
+        },
+        "dumpObject" => {
+                func => \&dumpObject,
+                help => "Dump the contents of a TinderObject",
+                usage =>
+                    "[-x] {-j <jail name>|-b <build name>|-p <port directory>|-t <ports tree name>}",
+                optstr => 'xj:b:p:t:',
         },
         "configGet" => {
                 func  => \&configGet,
@@ -678,6 +685,34 @@ sub dsversion {
                     . "\n");
 
         print $version . "\n";
+}
+
+sub dumpObject {
+        if (!$opts->{'j'} && !$opts->{'b'} && !$opts->{'p'} && !$opts->{'t'}) {
+                usage("dumpObject");
+        }
+
+        my $object = undef;
+
+        if ($opts->{'j'}) {
+                $object = $ds->getJailByName($opts->{'j'});
+        } elsif ($opts->{'b'}) {
+                $object = $ds->getBuildByName($opts->{'b'});
+        } elsif ($opts->{'p'}) {
+                $object = $ds->getPortByDirectory($opts->{'p'});
+        } elsif ($opts->{'t'}) {
+                $object = $ds->getPortsTreeByName($opts->{'t'});
+        }
+
+        if (defined($object)) {
+                if ($opts->{'x'}) {
+                        print $object->toXMLString();
+                } else {
+                        print $object->toString();
+                }
+        } else {
+                cleanup($ds, 1, "Failed to find object.");
+        }
 }
 
 sub configGet {
