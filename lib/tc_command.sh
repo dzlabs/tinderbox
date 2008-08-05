@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.91 2008/08/05 05:43:05 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.92 2008/08/05 20:39:29 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -312,7 +312,7 @@ Upgrade () {
 
     # Check if the current Datastore Version is ascertainable
     good_dsversion=1
-    dsversion=$(${tc} dsversion >/dev/null 2>&1)
+    dsversion=$(${tc} dsversion 2>/dev/null)
     if [ $? != 0 ]; then
 	good_dsversion=0
     fi
