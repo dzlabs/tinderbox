@@ -22,13 +22,14 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/db-mysql.sh,v 1.1 2008/08/02 23:04:49 marcus Exp $
+# $MCom: portstools/tinderbox/lib/db-mysql.sh,v 1.2 2008/08/05 05:02:04 marcus Exp $
 #
 export DB_MAN_PREREQS="databases/p5-DBD-mysql50 databases/mysql50-client"
 export DB_OPT_PREREQS="databases/php[45]-mysql"
 
 if [ -n "${db_admin_pass}" ]; then
     export DB_PROMPT='true'
+    export db_admin_pass
     export DB_SCHEMA_LOAD='/usr/local/bin/mysql -u${db_admin} --password="${db_admin_pass}" -h ${db_host} ${db_name} < "${schema_file}"'
     export DB_DUMP='/usr/local/bin/mysqldump --no-create-info --skip-opt -u${db_admin} --password="${db_admin_pass}" -h ${db_host} ${db_name} %%TABLE%% >> ${tmpfile}'
     export DB_DROP='/usr/local/bin/mysqladmin -u${db_admin} --password=${db_admin_pass} -h ${db_host} drop ${db_name}'
