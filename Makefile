@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.52 2008/08/02 23:04:49 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.53 2008/08/05 00:47:30 marcus Exp $
 
 VERSION=	3.0.0.b2
 
@@ -14,8 +14,8 @@ PERLMODDATA=	Build.pm BuildPortsQueue.pm Config.pm Hook.pm Jail.pm \
 		PortsTree.pm TinderObject.pm TinderboxDS.pm User.pm
 ETCRCDATA=	tinderd.sh
 ENVDATA=	.keep_me
-MIGDATA=	build_ports.map build_ports_queue.map config.map hooks.map \
-		jails.map order.lst user_permissions.map
+MIGDATA=	build_ports.map build_ports_queue.map builds.map config.map \
+		hooks.map jails.map order.lst user_permissions.map
 MAN1DATA=	tc-configCcache.1 tc-configDistfile.1 tc-configGet.1 \
 		tc-configJail.1 tc-configTinderd.1 tc-init.1
 WEBUIDATA=	inc_ds.php.dist inc_tinderbox.php.dist index.php
