@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2005 Ade Lovett <ade@FreeBSD.org>
+# Copyright (c) 2008 Ade Lovett <ade@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,12 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.81 2008/08/05 22:46:47 marcus Exp $
-
-notReady () {
-    tinderEcho "ERROR: Please run \"${pb}/scripts/tc Setup\" before running any other commands."
-    return 1
-}
+# $MCom: portstools/tinderbox/tc,v 1.82 2008/08/05 22:52:21 marcus Exp $
 
 # Make sure we're root.  Things aren't going to work so well if not.
 if [ `id -u` != 0 ]; then
@@ -64,6 +59,11 @@ command=$1
 shift
 rc=0
 
+if [ x"${commands}" != x"Setup" -a \( ! -f ${pb}/scripts/ds.ph -o ! -f ${pb}/scripts/tinderbox.ph \) ]; then
+    tinderEcho "ERROR: Please run \"${pb}/scripts/tc Setup\" before running any other commands."
+    exit 1
+fi
+
 # pass control over to the relevant subprogram
 case ${command} in
 
@@ -82,25 +82,15 @@ enterBuild|\
 tbcleanup|\
 tbkill|\
 updatePortsTree)
-		${command} ${1+"$@"}
-		if [ $? != 0 ]; then
-		    if [ -f ${pb}/scripts/ds.ph -a -f ${pb}/scripts/tinderbox.ph ]; then
-		        perl ${pb}/scripts/lib/tc_command.pl ${command} ${1+"$@"}
-		    else
-			notReady
-		    fi
-		fi
+		${command} ${1+"$@"} || \
+		    perl ${pb}/scripts/lib/tc_command.pl ${command} ${1+"$@"}
 		rc=$?
 		;;
 
 # Otherwise we punt over to the perl dispatcher
-*)
-		if [ -f ${pb}/scripts/ds.ph -a -f ${pb}/scripts/tinderbox.ph ]; then
-		    perl ${pb}/scripts/lib/tc_command.pl ${command} ${1+"$@"}
-		else
-		    notReady
-		fi
+*)		perl ${pb}/scripts/lib/tc_command.pl ${command} ${1+"$@"}
 		rc=$?
 		;;
+
 esac
 exit ${rc}
