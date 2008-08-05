@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.145 2008/08/05 00:15:36 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.146 2008/08/05 00:43:33 marcus Exp $
 #
 
 my $pb;
@@ -2490,8 +2490,7 @@ sub updateBuildRemakeCount {
 
         if ($opts->{'c'}) {
                 $count = $opts->{'c'};
-                if ($count !~ /^\d+$/)
-                {
+                if ($count !~ /^\d+$/) {
                         cleanup($ds, 1,
                                 "The count must be a non-negative integer\n");
                 }
