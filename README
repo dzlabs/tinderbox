@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.73 2008/07/29 15:55:32 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.74 2008/08/05 05:43:04 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -250,9 +250,6 @@ The tinderbuild function also accepts some additional command line arguments:
  -nolog          : disables log analysis code
  -trybroken      : builds ports marked as BROKEN (this does NOT require
                    -noduds)
- -jobs <n>       : starts <n> number of parallel port builds (NOTE: the default
-                   is 1, and for best results should not exceed the number
-                   of physical CPUs in the Tinderbox host)
  -onceonly       : only performs one build pass (i.e. tinderbuild Phase 1)
  -norebuild      : do not force a rebuild of packages specified on the
                    command line

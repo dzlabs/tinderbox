@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.90 2008/08/05 00:38:34 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.91 2008/08/05 05:43:05 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1420,17 +1420,17 @@ tinderbuild () {
 	    build=$1
 	    ;;
 
-	x-jobs)
-	    shift
-	    if ! expr -- "$1" : "^[[:digit:]]\{1,\}$" >/dev/null 2>&1 ; then
-		echo "tinderbuild: The argument to -jobs must be a number."
-		exit 1
-	    elif [ $1 -lt 1 ]; then
-		echo "tinderbuild: The argument to -jobs must be a number >= 1."
-		exit 1
-	    fi
-	    jobs=$1
-	    ;;
+#	x-jobs)
+#	    shift
+#	    if ! expr -- "$1" : "^[[:digit:]]\{1,\}$" >/dev/null 2>&1 ; then
+#		echo "tinderbuild: The argument to -jobs must be a number."
+#		exit 1
+#	    elif [ $1 -lt 1 ]; then
+#		echo "tinderbuild: The argument to -jobs must be a number >= 1."
+#		exit 1
+#	    fi
+#	    jobs=$1
+#	    ;;
 
 	x-cleandistfiles)	cleandistfiles=1;;
 	x-cleanpackages)	cleanpackages=1;;
