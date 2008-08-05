@@ -24,7 +24,12 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.80 2008/08/01 20:19:33 marcus Exp $
+# $MCom: portstools/tinderbox/tc,v 1.81 2008/08/05 22:46:47 marcus Exp $
+
+notReady () {
+    tinderEcho "ERROR: Please run \"${pb}/scripts/tc Setup\" before running any other commands."
+    return 1
+}
 
 # Make sure we're root.  Things aren't going to work so well if not.
 if [ `id -u` != 0 ]; then
@@ -77,15 +82,25 @@ enterBuild|\
 tbcleanup|\
 tbkill|\
 updatePortsTree)
-		${command} ${1+"$@"} || \
-		    perl ${pb}/scripts/lib/tc_command.pl ${command} ${1+"$@"}
+		${command} ${1+"$@"}
+		if [ $? != 0 ]; then
+		    if [ -f ${pb}/scripts/ds.ph -a -f ${pb}/scripts/tinderbox.ph ]; then
+		        perl ${pb}/scripts/lib/tc_command.pl ${command} ${1+"$@"}
+		    else
+			notReady
+		    fi
+		fi
 		rc=$?
 		;;
 
 # Otherwise we punt over to the perl dispatcher
-*)		perl ${pb}/scripts/lib/tc_command.pl ${command} ${1+"$@"}
+*)
+		if [ -f ${pb}/scripts/ds.ph -a -f ${pb}/scripts/tinderbox.ph ]; then
+		    perl ${pb}/scripts/lib/tc_command.pl ${command} ${1+"$@"}
+		else
+		    notReady
+		fi
 		rc=$?
 		;;
-
 esac
 exit ${rc}
