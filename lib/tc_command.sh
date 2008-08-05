@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.89 2008/08/04 23:18:09 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.90 2008/08/05 00:38:34 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1236,6 +1236,7 @@ tinderbuild_cleanup () {
 
     tc=$(tinderLoc scripts tc)
     ${tc} updateBuildStatus -b ${build} -s IDLE
+    ${tc} updateBuildRemakeCount -b ${build} -c 0
     ${tc} sendBuildCompletionMail -b ${build}
     tinderbuild_reset ${build}
     cleanupMounts -t portstree -p ${portstree}
