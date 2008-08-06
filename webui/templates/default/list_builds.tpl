@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_builds.tpl,v 1.7 2008/06/01 21:45:20 marcus Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_builds.tpl,v 1.8 2008/08/06 22:29:05 marcus Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -14,8 +14,8 @@
 			<th>Build Name</th>
 			<th>Build Description</th>
 			<th>
-				<span title="success / unknown / fail / leftovers / total">
-				S / U / F / L / T
+				<span title="success / unknown / fail / leftovers / remake / total">
+				S / U / F / L / R / T
 				</span>
 			</th>
 			<th>Build Packages</th>
@@ -27,7 +27,7 @@
 				<td><a href="index.php?action=list_buildports&amp;build=<?=$row['name']?>"><?=$row['name']?></a></td>
 				<td><?=$row['description']?></td>
 				<td align="center">
-					<span title="success / unknown / fail / leftovers / total">
+					<span title="success / unknown / fail / leftovers / remake / total">
 					<?=$row['results']['SUCCESS']?>
 					/
 					<?=$row['results']['UNKNOWN']?>
@@ -35,6 +35,8 @@
 					<?=$row['results']['FAIL']?>
 					/
 					<?=$row['results']['LEFTOVERS']?>
+					/
+					<?=$row['results']['REMAKE']?>
 					/
 					<?=$row['results']['TOTAL']?>
 					</span>
