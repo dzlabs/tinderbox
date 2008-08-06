@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.92 2008/08/05 20:39:29 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.93 2008/08/06 21:37:20 ade Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1366,7 +1366,7 @@ tinderbuild_phase () {
     echo "started at $(date)"
     start=$(date +%s)
 
-    remake_cnt=$(cd ${pkgDir}/All && make -n all | wc -l)
+    remake_cnt=$(cd ${pkgDir}/All && make -n all 2>/dev/null | wc -l)
     tc=$(tinderLoc scripts tc)
     ${tc} updateBuildRemakeCount -b ${build} -c ${remake_cnt}
 
