@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.93 2008/08/06 21:37:20 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.94 2008/08/06 22:27:14 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -170,7 +170,11 @@ updateTree () {
 	exit 1
     fi
 
-    eval ${dir}/update.sh > ${dir}/update.log 2>&1
+    if [ "${updateCmd}" = "USER" ]; then
+        eval ${dir}/update.sh ${name} > ${dir}/update.log 2>&1
+    else
+	eval ${dir}/update.sh > ${dir}/update.log 2>&1
+    fi
     if [ $? -ne 0 ]; then
 	echo "updateTree: ${what} ${name}: update failed"
 	echo "    see ${dir}/update.log for more details"
