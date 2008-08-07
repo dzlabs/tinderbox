@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderObject.pm,v 1.17 2008/08/05 19:18:54 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderObject.pm,v 1.18 2008/08/07 04:27:49 marcus Exp $
 #
 
 package Tinderbox::TinderObject;
@@ -55,6 +55,12 @@ sub new {
         }
         bless($self, $class);
         $self;
+}
+
+sub getIdField() {
+        my $self = shift;
+
+        return $self->{'_id_field'};
 }
 
 sub toHashRef {

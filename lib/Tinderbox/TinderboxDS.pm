@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.87 2008/08/04 23:18:09 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.88 2008/08/07 04:27:49 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -2044,6 +2044,44 @@ sub _addObject {
         my $rc =
             $self->_doQuery("INSERT INTO $table ($names) VALUES ($valueStr)",
                 \@values);
+
+        return $rc;
+}
+
+sub commitObject {
+        my $self      = shift;
+        my $object    = shift;
+        my $objectRef = ref($object);
+
+        if ($PKG_PREFIX eq '') {
+                $objectRef =~ s/^$PKG_PREFIX//;
+        }
+
+        croak "ERROR: Unknown object type, $objectRef\n"
+            unless defined($OBJECT_MAP{$objectRef});
+        croak "ERROR: ID field is undefined\n"
+            unless (defined($object->getIdField())
+                && $object->getIdField() ne '');
+
+        my $table      = $OBJECT_MAP{$objectRef};
+        my $objectHash = $object->toHashRef();
+
+        my $query = "UPDATE $table SET ";
+
+        my @fields = ();
+        my @values = ();
+        foreach my $key (keys %{$objectHash}) {
+                if (defined($objectHash->{$key})) {
+                        push @fields, "$key=?";
+                        push @values, $objectHash->{$key};
+                }
+        }
+
+        $query .= join(",", @fields);
+        $query .= " WHERE " . $object->getIdField() . "=?";
+        push @values, $object->getId();
+
+        my $rc = $self->_doQuery($query, \@values);
 
         return $rc;
 }
