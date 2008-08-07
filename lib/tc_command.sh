@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.94 2008/08/06 22:27:14 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.95 2008/08/07 04:41:39 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1951,7 +1951,7 @@ tbcleanup () {
 	done
 
 	if [ ${cleanPkgs} = 1 ]; then
-		for pkg in $(/bin/ls -1 ${pkg_path}/All/*.${package_suffix}); do
+		for pkg in $(/bin/ls -1 ${pkg_path}/All/*${package_suffix}); do
 	    		if ! echo ${pkgs_seen} | grep -qw ${pkg}; then
 			    	echo "Removing stale package ${build}/${pkg}"
 		    		/bin/rm -f "${pkg_path}/All/${pkg}"
