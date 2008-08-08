@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.147 2008/08/05 18:45:24 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.148 2008/08/08 23:19:12 marcus Exp $
 #
 
 my $pb;
@@ -2510,8 +2510,8 @@ sub updateBuildStatus {
 
 sub updateBuildRemakeCount {
         if (       !$opts->{'b'}
-                || (!$opts->{'c'} && !$opts->{'d'})
-                || ($opts->{'c'}  && $opts->{'d'}))
+                || (!defined($opts->{'c'}) && !defined($opts->{'d'}))
+                || (defined($opts->{'c'})  && defined($opts->{'d'})))
         {
                 usage("updateBuildRemakeCount");
         }
@@ -2523,7 +2523,7 @@ sub updateBuildRemakeCount {
         my $build = $ds->getBuildByName($opts->{'b'});
         my $count = $build->getRemakeCount();
 
-        if ($opts->{'c'}) {
+        if (defined($opts->{'c'})) {
                 $count = $opts->{'c'};
                 if ($count !~ /^\d+$/) {
                         cleanup($ds, 1,
