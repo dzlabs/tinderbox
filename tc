@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.82 2008/08/05 22:52:21 marcus Exp $
+# $MCom: portstools/tinderbox/tc,v 1.83 2008/08/08 18:00:39 ade Exp $
 
 # Make sure we're root.  Things aren't going to work so well if not.
 if [ `id -u` != 0 ]; then
@@ -59,7 +59,7 @@ command=$1
 shift
 rc=0
 
-if [ x"${commands}" != x"Setup" -a \( ! -f ${pb}/scripts/ds.ph -o ! -f ${pb}/scripts/tinderbox.ph \) ]; then
+if [ x"${command}" != x"Setup" -a \( ! -f ${pb}/scripts/ds.ph -o ! -f ${pb}/scripts/tinderbox.ph \) ]; then
     tinderEcho "ERROR: Please run \"${pb}/scripts/tc Setup\" before running any other commands."
     exit 1
 fi
