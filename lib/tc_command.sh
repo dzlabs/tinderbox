@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.96 2008/08/08 20:02:34 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.97 2008/08/08 21:56:05 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -303,6 +303,7 @@ Upgrade () {
 		;;
 	    x-*) return 1;;
 	esac
+	shift
     done
 
     tc=$(tinderLoc scripts tc)
@@ -365,7 +366,7 @@ Upgrade () {
 	    tinderExit "ERROR: There is no database library file for database driver: ${db_driver}" 1
 	fi
 	. ${dblib}
-	if [ ${good_dsversion} = 0 ]; then
+	if [ -z "${bkup_file}" -a ${good_dsversion} = 0 ]; then
 	    eval ${DB_PROMPT}
 	    query="SELECT Config_Option_Value FROM config WHERE Config_Option_Name='__DSVERSION__' AND Host_Id='-1'"
 	    dsversion=$(eval ${DB_QUERY})
@@ -378,7 +379,9 @@ Upgrade () {
         dsmajor=$(echo ${dsversion} | awk -F'\\.' '{print $1}')
         curmajor=$(echo ${VERSION} | awk -F'\\.' '{print $1}')
         major_upgrade=0
-        if [ ${dsmajor} -lt ${curmajor} ]; then
+	if [ -n "${bkup_file}" ]; then
+	    major_upgrade=1
+        elif [ ${dsmajor} -lt ${curmajor} ]; then
 	    major_upgrade=1
         fi
 
@@ -468,7 +471,7 @@ Upgrade () {
 	    if [ -f "${ucmd}" ]; then
 		mv -f "${ucmd}" "${f}/update.sh"
 		chmod +x "${f}/update.sh"
-		query="UPDATE jails SET update_cmd='USER' WHERE jail_name='${jail}'"
+		query="UPDATE jails SET jail_update_cmd='USER' WHERE jail_name='${jail}'"
 		if [ ${do_load} != 0 ]; then
 		    eval ${DB_PROMPT}
 		    eval ${DB_QUERY}
@@ -489,7 +492,7 @@ Upgrade () {
 	    if [ -f "${ucmd}" ]; then
 		mv -f "${ucmd}" "${f}/update.sh"
 		chmod +x "${f}/update.sh"
-		query="UPDATE ports_trees SET update_cmd='USER' WHERE ports_tree_name='${portstree}'"
+		query="UPDATE ports_trees SET ports_tree_update_cmd='USER' WHERE ports_tree_name='${portstree}'"
 		if [ ${do_load} != 0 ]; then
 		    eval ${DB_PROMPT}
 		    eval ${DB_QUERY}
