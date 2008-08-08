@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.95 2008/08/07 04:41:39 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.96 2008/08/08 20:02:34 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -507,7 +507,7 @@ Upgrade () {
     init
 
     echo ""
-    tinderExit "Congratulations! Tinderbox migration is complete.  Please refer to ${TINDERBOX_URL} for a list of what is new in this version as well as general Tinderbox documentation." 0
+    tinderExit "Congratulations! Tinderbox migration is complete.  Please refer to ${TINDERBOX_URL} for a list of what is new in this version as well as general Tinderbox documentation.  You must also go through ${pb}/scripts/tinderbox.ph, and synchronize it with the new properties in ${pb}/scripts/tinderbox.ph.dist." 0
 }
 
 #---------------------------------------------------------------------------
