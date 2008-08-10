@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.74 2008/08/05 05:43:04 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.75 2008/08/10 20:15:29 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -162,7 +162,7 @@ nfs_reserved_port_only="YES"
     must also begin with their FreeBSD major version number.
 
 
-NOTE: The create script uses cvsup12 as their default cvsup mirror.
+NOTE: The create script uses cvsup12 as its default cvsup mirror.
 If you would like to use another server or enable cvsup compression
 use the -H and -C line arguments to the create script respectively.
 For example, to use cvsup2.freebsd.org and enable cvsup compression
@@ -184,6 +184,11 @@ Note: This command may require administrative access to the database.  If such
 access is not available from your Tinderbox host, you may have to load an
 upgrade schema file manually.  The upgrade script will provide such
 instructions if needed.
+
+CAVEAT: If you are doing a major upgrade (i.e. moving from one major version
+of Tinderbox to another), be sure to backup your database BEFORE running
+tc Upgrade.  Major upgrades may drop and recreate the database, and this
+has the potential for data loss.
 
 Using Tinderbox:
 ----------------
@@ -459,11 +464,11 @@ Configuring port OPTIONS:
 -------------------------
 
 It is possible to manipulate port OPTIONS on a per-Build basis.  To do
-this, create a directory under which all build OPTIONS subdirectories
+this, create a directory under which all build OPTIONS sub-directories
 will go (e.g. ${pb}/options).  For each Build that you wish to use to
 use OPTIONS, create a subdirectory named for that build (e.g.
 6-STABLE-FreeBSD).  This directory should look like /var/db/ports in
-that it contains subdirectories for each OPTIONS-supporting port.
+that it contains sub-directories for each OPTIONS-supporting port.
 
 For example, if you wanted to build net/wireshark with RTP support for
 the Build 6-STABLE-FreeBSD, you would have the following directory
