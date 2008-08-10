@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.54 2008/08/02 23:04:49 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.55 2008/08/10 20:18:45 marcus Exp $
 #
 
 tinderLocJail () {
@@ -81,7 +81,7 @@ tinderLoc () {
     *)			echo "/nonexistent/tinderbox/${type}/${what}";;
 
     esac
-}	
+}
 
 tinderEcho () {
     echo "$1" | /usr/bin/fmt 75 79
@@ -112,7 +112,7 @@ cleanDirs () {
 	    rm -rf ${dir} >/dev/null 2>&1
 	    if [ $? != 0 ]; then
 		echo "*** FAILED (rm ${dir})"
-		exit 1 
+		exit 1
 	    fi
 	fi
 
@@ -179,7 +179,7 @@ cleanupMounts () {
     jail)
 	if [ -z "${_jail}" ]; then
 	    echo "cleanupMounts: ${_type}: missing jail"
-	    return 
+	    return
 	fi
 	_dstloc=${_dstloc:-$(tinderLoc jail ${_jail})/src}
 	;;
@@ -345,7 +345,7 @@ requestMount () {
 	echo "requestMount: ${_type}: missing destination location"
 	return 1
     fi
-    
+
     # is the filesystem already mounted?
     fsys=$(df ${_dstloc} 2>/dev/null | awk '{a=$1}  END {print a}')
     mtpt=$(df ${_dstloc} 2>/dev/null | awk '{a=$NF} END {print a}')
