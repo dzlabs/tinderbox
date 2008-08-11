@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.98 2008/08/10 20:19:30 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.99 2008/08/11 19:51:18 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1645,6 +1645,7 @@ addPortToBuild () {
     portDir=$2
     norecurse=$3
     options=$4
+    cleanOptions=$5
 
     tc=$(tinderLoc scripts tc)
     jail=$(${tc} getJailForBuild -b ${build})
@@ -1680,16 +1681,24 @@ addPortToBuild () {
 	else
 	    pdirs="${PORTSDIR}/${portDir}"
 	fi
+	rmconfig=true
+	if [ ${cleanOptions} -eq 1 ]; then
+	    if [ -z "${norecurse}" ]; then
+		rmconfig="make rmconfig-recursive"
+	    else
+		rmconfig="make rmconfig"
+	    fi
+	fi
 	for pdir in ${pdirs}; do
 	    if [ -d ${pdir} ]; then
 	        export TERM=${save_TERM}
 	        read -p "Generating options for ${build}; hit Enter to continue..." key
 	        echo ""
 	        if [ -z "${norecurse}" ]; then
-		    ( cd ${pdir} && make rmconfig-recursive \
+		    ( cd ${pdir} && ${rmconfig} \
 		      && make config-recursive )
 	        else
-		    ( cd ${pdir} && make rmconfig \
+		    ( cd ${pdir} && ${rmconfig} \
 		      && make config )
 	        fi
 	    fi
@@ -1706,6 +1715,7 @@ addPort () {
     portDir=""
     norecurse=""
     options=0
+    cleanOptions=1
 
     # argument handling
     while getopts ab:d:R arg >/dev/null 2>&1
@@ -1716,6 +1726,7 @@ addPort () {
 	b)	build="${OPTARG}";;
 	d)	portDir="${OPTARG}";;
 	o)      options=1;;
+	O)	options=1 ; cleanOptions=0;;
 	R)	norecurse="-R";;
 	?)	return 1;;
 
@@ -1743,7 +1754,7 @@ addPort () {
 
 	for build in ${allBuilds}
 	do
-	    addPortToBuild ${build} ${portDir} "${norecurse}" ${options}
+	    addPortToBuild ${build} ${portDir} "${norecurse}" ${options} ${cleanOptions}
 	done
     else
 	if ! tcExists Builds ${build}; then
@@ -1751,7 +1762,7 @@ addPort () {
 	    return 1
 	fi
 
-	addPortToBuild ${build} ${portDir} "${norecurse}" ${options}
+	addPortToBuild ${build} ${portDir} "${norecurse}" ${options} ${cleanOptions}
     fi
 
     return 0
@@ -1763,6 +1774,7 @@ rescanPorts () {
     allBuilds=0
     norecurse=""
     options=0
+    cleanOptions=1
 
     # argument handling
     while getopts ab:R arg >/dev/null 2>&1
@@ -1773,6 +1785,7 @@ rescanPorts () {
 	b)	build="${OPTARG}";;
 	d)	portDir="${OPTARG}";;
 	o)      options=1;;
+	O)	options=1 ; cleanOptions=0;;
 	R)	norecurse="-R";;
 	?)	return 1;;
 
@@ -1795,7 +1808,7 @@ rescanPorts () {
 
 	for build in ${allBuilds}
 	do
-	    addPortToBuild ${build} "" "${norecurse}" ${options}
+	    addPortToBuild ${build} "" "${norecurse}" ${options} ${cleanOptions}
 	done
     else
 	if ! tcExists Builds ${build}; then
@@ -1803,7 +1816,7 @@ rescanPorts () {
 	    return 1
 	fi
 
-	addPortToBuild ${build} "" "${norecurse}" ${options}
+	addPortToBuild ${build} "" "${norecurse}" ${options} ${cleanOptions}
     fi
 
     return 0

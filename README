@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.75 2008/08/10 20:15:29 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.76 2008/08/11 19:51:18 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -460,6 +460,15 @@ ${pb}/scripts/etc/env:
 CFLAGS="-O -g -pipe"
 STRIP=
 
+Updateing port properties:
+--------------------------
+
+Every time ``./tc addPort'' is called, it will determine if a port is already
+present in the datastore.  If it is, the port's properties (i.e. MAINTAINER,
+COMMENT, etc.) are updated.  If you just want rescan all of the ports
+currently in the datastore, and update their properties, use the command
+``./tc rescanPorts''.  It accepts many of the same options as addPort.
+
 Configuring port OPTIONS:
 -------------------------
 
@@ -498,7 +507,9 @@ The configOptions command takes the following arguments:
 If you would like to interactively choose OPTIONS for your ports, specify
 the -o option to ``./tc addPort''.  This will perform a ``make config''
 on all ports, displaying the ncurses OPTIONS dialog.  All OPTIONS settings
-will be automatically saved to the correct location.
+will be automatically saved to the correct location.  Each time addPort or
+rescanPorts is run with the -o flag, all existing OPTIONS settings will be
+purged.  If you want to retain existing OPTIONS, use the -O flag instead.
 
 Using Hooks:
 ------------
