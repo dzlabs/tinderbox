@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.76 2008/08/11 19:51:18 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.77 2008/08/12 04:42:06 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -185,6 +185,14 @@ access is not available from your Tinderbox host, you may have to load an
 upgrade schema file manually.  The upgrade script will provide such
 instructions if needed.
 
+Tinderbox upgrades to 3.0 are supported only from Tinderbox 2.4.x.  If you
+are running a release prior to 2.4.0, you must first upgrade to the latest
+2.4 release, then upgrade to 3.0.
+
+The 3.0 upgrade will migrate all data, configuration, and scripts from 2.x
+EXCEPT any customized port fail reasons and port fail patterns.  These
+will have to be re-entered by hand after completing the 3.0 upgrade.
+
 CAVEAT: If you are doing a major upgrade (i.e. moving from one major version
 of Tinderbox to another), be sure to backup your database BEFORE running
 tc Upgrade.  Major upgrades may drop and recreate the database, and this
@@ -209,6 +217,10 @@ Build ``6.3-FreeBSD'':
 Note: a port does not have to be added to the database for Tinderbox to
 build it.  If you just want to do a quick ad hoc port build, forgo the
 previously mentioned step.
+
+Note: in Tinderbox 2.x, addPort took a -r argument which resursively added
+ports to the datastore.  In Tinderbox 3.0 and higher, this option is assumed.
+If you do not want to enable recursion, specify the -R argument to addPort.
 
 To start a Tinderbox build, use the tc command:
 
