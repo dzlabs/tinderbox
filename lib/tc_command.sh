@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.100 2008/08/15 18:54:27 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.101 2008/08/15 21:55:26 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -464,6 +464,7 @@ Upgrade () {
 
     echo ""
     tinderEcho "INFO: Migrating user-defined update scripts ..."
+    setupDefaults
     for jail in ${jails}; do
 	f=$(tinderLoc jail ${jail})
 	ucmd=$(${tc} getUpdateCmd -j ${jail} 2>/dev/null)
@@ -481,6 +482,18 @@ Upgrade () {
 		else
 		    tinderEcho "WARN: You must manually set the update command for ${jail} to \"USER\" using the query ${query}."
 		fi
+	    fi
+	elif [ x"${ucmd}" = x"CVSUP" -o x"${ucmd}" = x"CSUP" ]; then
+	    updateCmd="/usr/bin/csup"
+	    if [ x"${ucmd}" = x"CVSUP" ]; then
+		updateCmd="/usr/local/bin/cvsup"
+	    fi
+	    ( echo "#!/bin/sh"
+	      echo "${updateCmd} ${f}/supfile"
+	    ) > ${f}/update.sh
+	    chmod +x ${f}/update.sh
+	    if [ -f "${f}/src-supfile" ]; then
+		mv -f "${f}/src-supfile" "${f}/supfile"
 	    fi
 	fi
     done
@@ -502,6 +515,18 @@ Upgrade () {
 		else
 		    tinderEcho "WARN: You must manually set the update command for ${portstree} to \"USER\" using the query ${query}."
 		fi
+	    fi
+	elif [ x"${ucmd}" = x"CVSUP" -o x"${ucmd}" = "CSUP" ]; then
+	    updateCmd="/usr/bin/csup"
+	    if [ x"${ucmd}" = x"CVSUP" ]; then
+		updateCmd="/usr/local/bin/cvsup"
+	    fi
+	    ( echo "#!/bin/sh"
+	      echo "${updateCmd} ${f}/supfile"
+	    ) > ${f}/update.sh
+	    chmod +x ${f}/update.sh
+	    if [ -f "${f}/ports-supfile" ]; then
+		mv -f "${f}/ports-supfile" "${f}/supfile"
 	    fi
 	fi
     done
