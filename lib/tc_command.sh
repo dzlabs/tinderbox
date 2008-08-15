@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.99 2008/08/11 19:51:18 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.100 2008/08/15 18:54:27 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1297,7 +1297,7 @@ tinderbuild_setup () {
 
     if ! cc -o ${buildRoot}/pnohang -static \
 	$(tinderLoc scripts lib/pnohang.c); then
-	echo "tinderbuild: ${build}: can compile pnohang"
+	echo "tinderbuild: ${build}: cannot compile pnohang"
 	tinderbuild_cleanup 1
     fi
 
