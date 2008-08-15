@@ -127,7 +127,6 @@ label {
 	margin-top			: 14px;
 }
 
-
 #topmenu {
 }
 
@@ -153,8 +152,25 @@ label {
 	cursor				: pointer;
 }
 
+#legend {
+    position            : relative;
+    top                 : 50px;
+    height              : 7em;
+    clear               : both;
+}   
+ 
+#legend ul {
+    height              : 100px;
+}   
+    
+#legend li{
+    display             : block;
+    border-width        : 0 0 0 0;
+    padding             : 0px 0px 0px 0px;
+}
+
 #content {
-	margin				: 64px 0 40px 0;
+	margin				: 84px 0 40px 0;
 }
 
 #content h1, #content h2, #content label {

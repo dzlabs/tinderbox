@@ -5,6 +5,8 @@ $header_title = $build_name
 	: "All Build Failures";
 if ($maintainer)
 	$header_title .= " for $maintainer";
+if ($reason)
+	$header_title = "Build by reason: $reason";
 include 'header.inc.tpl';
 ?>
 <!-- $Paefchen: FreeBSD/tinderbox/webui/templates/paefchen/failed_buildports.tpl,v 1.1 2008/01/05 12:25:17 as Exp $ //-->

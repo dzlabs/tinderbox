@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.15 2008/01/25 20:12:50 marcus Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.16 2008/08/15 01:07:58 marcus Exp $
 #
 
 require_once 'module/module.php';
@@ -97,7 +97,7 @@ class moduleBuildPorts extends module {
 		return $this->template_parse( 'list_buildports.tpl' );
 	}
 
-	function display_failed_buildports( $build_name, $maintainer, $all ) {
+	function display_failed_buildports( $build_name, $maintainer, $all, $wanted_reason  ) {
 		global $with_timer, $starttimer;
 
 		if( $build_name ) {
@@ -107,10 +107,15 @@ class moduleBuildPorts extends module {
 			$build_id = false;
 		}
 
-		if ($all) {
-			$ports = $this->TinderboxDS->getPortsByStatus( $build_id, $maintainer, '', 'SUCCESS' );
-		} else {
-			$ports = $this->TinderboxDS->getPortsByStatus( $build_id, $maintainer, 'FAIL', '' );
+		if ($wanted_reason) {
+			$ports = $this->TinderboxDS->getPortsByStatus( $build_id, NULL, $wanted_reason, '' );
+		}
+		else {
+			if ($all) {
+				$ports = $this->TinderboxDS->getPortsByStatus( $build_id, $maintainer, '', 'SUCCESS' );
+			} else {
+				$ports = $this->TinderboxDS->getPortsByStatus( $build_id, $maintainer, 'FAIL', '' );
+			}
 		}
 
 		if( is_array( $ports ) && count( $ports ) > 0 ) {
@@ -146,6 +151,7 @@ class moduleBuildPorts extends module {
 			$elapsed_time = get_ui_elapsed_time($starttimer);
 		}
 		$this->template_assign( 'ui_elapsed_time',           $elapsed_time);
+		$this->template_assign( 'reason',                    $wanted_reason );
 
 		return $this->template_parse( 'failed_buildports.tpl' );
 	}

@@ -50,5 +50,14 @@ if (preg_match('@<!-- (\w+):(\w+);(\w+):(\d*);(\w+):(\d*) //-->@', $display_logi
 <? } ?>
 		</div>
 	</div>
+	<? if (is_array($legend) && count($legend) > 0) { ?>
+	<div id="legend">
+		<ul>
+			<? foreach ($legend as $items) { ?>
+				<li><?=$items?></li>
+	<? } ?>
+		</ul>
+	</div>
+	<? } ?>
 	<div id="content">
 

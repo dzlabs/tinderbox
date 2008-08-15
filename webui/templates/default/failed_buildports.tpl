@@ -1,20 +1,25 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/failed_buildports.tpl,v 1.7 2008/01/25 20:12:50 marcus Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/failed_buildports.tpl,v 1.8 2008/08/15 01:07:58 marcus Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 
 	<h1>
-	<?if($build_name){?>
-		Build Failures in <?=$build_name?>
+
+	<?if($reason){?>
+		Build by reason: <?=$reason?>
 	<?}else{?>
-		All Build Failures
-	<?}?>
-	<?if($maintainer){?>
-		for <?=$maintainer?>
+		<?if($build_name){?>
+			Build Failures in <?=$build_name?>
+		<?}else{?>
+			All Build Failures
+		<?}?>
+		<?if($maintainer){?>
+			for <?=$maintainer?>
+		<?}?>
 	<?}?>
 	</h1>
 

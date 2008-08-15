@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.23 2008/01/25 20:12:50 marcus Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.24 2008/08/15 01:07:58 marcus Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -67,11 +67,16 @@ switch( $action ) {
 					break;
 	case 'failed_buildports':	$build      = $_REQUEST['build'];
 					$maintainer = $_REQUEST['maintainer'];
-					$display    = $moduleBuildPorts->display_failed_buildports( $build, $maintainer, null );
+					$display    = $moduleBuildPorts->display_failed_buildports( $build, $maintainer, null, null );
+					break;
+	case 'buildports_by_reason':	$build      = $_REQUEST['build'];
+					$maintainer = $_REQUEST['maintainer'];
+					$reason = $_REQUEST['reason'];
+					$display    = $moduleBuildPorts->display_failed_buildports( $build, $maintainer, null, $reason );
 					break;
 	case 'bad_buildports':		$build      = $_REQUEST['build'];
 					$maintainer = $_REQUEST['maintainer'];
-					$display    = $moduleBuildPorts->display_failed_buildports( $build, $maintainer, 'foo' );
+					$display    = $moduleBuildPorts->display_failed_buildports( $build, $maintainer, 'foo', null );
 					break;
 	case 'latest_buildports':	$build      = $_REQUEST['build'];
 					$display    = $moduleBuildPorts->display_latest_buildports( $build );
