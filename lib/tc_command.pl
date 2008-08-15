@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.149 2008/08/12 04:42:46 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.150 2008/08/15 17:23:07 marcus Exp $
 #
 
 my $pb;
@@ -2991,6 +2991,7 @@ sub processLog {
         my $verbose = 0;
         my $id;
         my $expr;
+        my $matchtext;
 
         if (!$opts->{'l'}) {
                 usage("processLog");
@@ -3019,13 +3020,14 @@ sub processLog {
         foreach my $pattern (@patterns) {
                 next if $pattern->getId() <= 0;
                 $expr = $pattern->getExpr();
-                if ($log_text =~ /$expr/m) {
+                if ($log_text =~ /($expr)/m) {
                         if ($pattern->getReason() eq '__parent__') {
                                 $parents{$pattern->getId()} = 1;
                         } else {
                                 if ($parents{$pattern->getParent()}) {
-                                        $reason = $pattern->getReason();
-                                        $id     = $pattern->getId();
+                                        $reason    = $pattern->getReason();
+                                        $id        = $pattern->getId();
+                                        $matchtext = $1;
                                         last;
                                 }
                         }
@@ -3036,6 +3038,7 @@ sub processLog {
                 print "id:     " . $id . "\n";
                 print "expr:   " . $expr . "\n";
                 print "reason: " . $reason . "\n";
+                print "matching text: " . $matchtext . "\n";
         } else {
                 print $reason . "\n";
         }
