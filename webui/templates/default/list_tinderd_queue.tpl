@@ -1,13 +1,14 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.10 2007/10/13 02:28:48 ade Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.11 2008/08/19 19:30:19 beat Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <h1><?=$tinderbox_title?> - Tinderd Administration</h1>
 <form method="get" action="index.php">
+<input type="hidden" name="action" value="list_tinderd_queue" />
 <table>
 <tr>
 <td>

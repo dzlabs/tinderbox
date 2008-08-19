@@ -5,6 +5,7 @@ include 'header.inc.tpl';
 <!-- $Paefchen: FreeBSD/tinderbox/webui/templates/paefchen/list_tinderd_queue.tpl,v 1.1 2008/01/05 12:25:17 as Exp $ //-->
 <div class="subcontent">
 	<form method="get" action="index.php">
+	<input type="hidden" name="action" value="list_tinderd_queue" />
 	<table>
 		<tr>
 			<th>Build</th>
