@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.77 2008/08/12 04:42:06 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.78 2008/08/27 18:18:17 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -21,7 +21,7 @@ either MySQL 4.1 or later (databases/mysql41-server) or PostgreSQL 7.4 or
 later (databases/postgres74-server).
 
 If MySQL is used, the MySQL Perl module must also be installed
-(databases/p5-DBD-mysql41).  Is PostgreSQL is used, the Pg Perl module
+(databases/p5-DBD-mysql41).  If PostgreSQL is used, the Pg Perl module
 must also be installed (databases/p5-DBD-Pg).
 
 Please note, however, that it is recommended that either MySQL 5.0 or
@@ -162,9 +162,9 @@ nfs_reserved_port_only="YES"
     must also begin with their FreeBSD major version number.
 
 
-NOTE: The create script uses cvsup12 as its default cvsup mirror.
+NOTE: The tc script uses cvsup12 as its default cvsup mirror.
 If you would like to use another server or enable cvsup compression
-use the -H and -C line arguments to the create script respectively.
+use the -H and -C line arguments to the tc script respectively.
 For example, to use cvsup2.freebsd.org and enable cvsup compression
 for all Jail updates, use the following command:
 
@@ -352,7 +352,7 @@ will continue.
 
 ADVANCED TOPICS
 
-Alternative means of creating Jail sources and PortsTrees:
+Alternative Means of Creating Jail Sources and PortsTrees:
 ----------------------------------------------------------
 
 By default, Jails and PortsTrees are updated using csup (/usr/bin/csup).
@@ -370,7 +370,7 @@ value is NONE, then no updates can be performed once the Jail or
 PortsTree is created.  Instead, it is assumed these trees already exist
 in the appropriate format.
 
-If the value is USER, then a an update.sh script must be created under the
+If the value is USER, then an update.sh script must be created under the
 Jail or PortsTree's root directory.  This script will be called when an update
 is required.  For example, if you have a Jail called ``6.3'', an executable
 update.sh script must be placed under ${pb}/jails/6.3.  If you have a
@@ -472,7 +472,7 @@ ${pb}/scripts/etc/env:
 CFLAGS="-O -g -pipe"
 STRIP=
 
-Updateing port properties:
+Updating port properties:
 --------------------------
 
 Every time ``./tc addPort'' is called, it will determine if a port is already
@@ -571,7 +571,7 @@ users easily by using the "Add User" or "Modify User" links.
 Automating/Queuing Port Builds:
 -------------------------------
 
-If you want to use tinderbox to test many different ports one after the other
+If you want to use Tinderbox to test many different ports one after the other
 you probably want ``tinderd''. tinderd runs as a daemon and looks to see if
 something was added to the ``ports to build queue''. You can add different
 ports for different builds with different priorities.
