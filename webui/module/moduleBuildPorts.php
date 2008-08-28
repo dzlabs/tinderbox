@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.16 2008/08/15 01:07:58 marcus Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.17 2008/08/28 20:58:54 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -241,6 +241,11 @@ class moduleBuildPorts extends module {
 					$diff = time() - $then;
 					if ($bp->getLastRunDuration() - $diff >= 0)
 						$data[$i]['build_eta'] = $bp->getLastRunDuration() - $diff;
+				}
+				$build_ports_queue_entries = $this->TinderboxDS->getBuildPortsQueueEntries( $build->getId() );
+				foreach( $build_ports_queue_entries as $build_ports_queue_entry ) {
+					if ( $build_ports_queue_entry->getStatus() == 'PROCESSING' )
+						$data[$i]['target_port'] = $build_ports_queue_entry->getPortDirectory();
 				}
 				$i++;
 	                }

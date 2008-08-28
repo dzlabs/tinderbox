@@ -4,6 +4,7 @@
 	<table>
 		<tr>
 			<th>Build</th>
+			<th>Target Port</th>
 			<th>Port</th>
 			<th>Duration</th>
 			<th>ETA</th>
@@ -11,6 +12,7 @@
 		<?foreach($data as $row) {?>
 			<tr>
 				<td><a href="index.php?action=list_buildports&amp;build=<?=$row['build_name']?>"><?=$row['build_name']?></a></td>
+				<td><?=$row['target_port']?></td>
 				<td><?=$row['port_current_version']?></td>
 				<td><?=time_difference_from_now($row['build_last_updated'])?></td>
 				<td><?=is_string($row['build_eta'])?$row['build_eta']:time_elapsed($row['build_eta'])?></td>
