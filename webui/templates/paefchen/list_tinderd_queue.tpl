@@ -43,7 +43,34 @@ include 'header.inc.tpl';
 		<th>&nbsp;</th>
 		<th>&nbsp;</th>
 	</tr>
-
+	<form method="post" action="index.php">
+	<input type="hidden" name="action" value="add_tinderd_queue" />
+	<input type="hidden" name="entry_id" value="<?=$row['entry_id']?>" />
+	<input type="hidden" name="filter_build_id" value="<?=$build_id?>" />
+	<tr>
+		<td>
+			<select name="new_build_id">
+				<?foreach($all_builds as $build) {?>
+					<option value="<?=$build['build_id']?>" <?if ($new_build_id == $build['build_id']) {?>selected<?}?> ><?=$build['build_name']?></option>
+				<?}?>
+			</select>
+		</td>
+		<td>
+			<select name="new_priority">
+				<?foreach($all_prio as $prio) {?>
+					<option value="<?=$prio?>" <?if ($new_priority == $prio) {?>selected<?}?> ><?=$prio?></option>
+				<?}?>
+			</select>
+		</td>
+		<td><input type="text" size="20" name="new_port_directory" value="<?=$new_port_directory?>" /></td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td align="center">
+			<input type="checkbox" name="new_email_on_completion" value="1" <?if($new_email_on_completion == 1 ) {?>checked="checked"<?}?> />
+		</td>
+		<td colspan="3"><input type="submit" name="add_tinderd_queue" value="add" /></td>
+	</tr>
+	</form>
 <?if(!$no_list){?>
 
 		<?foreach($entries as $row) {?>
@@ -103,33 +130,5 @@ include 'header.inc.tpl';
 			</form>
 		<?}?>
 <?}?>
-			<form method="post" action="index.php">
-			<input type="hidden" name="action" value="add_tinderd_queue" />
-			<input type="hidden" name="entry_id" value="<?=$row['entry_id']?>" />
-			<input type="hidden" name="filter_build_id" value="<?=$build_id?>" />
-			<tr>
-				<td>
-					<select name="new_build_id">
-						<?foreach($all_builds as $build) {?>
-							<option value="<?=$build['build_id']?>" <?if ($new_build_id == $build['build_id']) {?>selected<?}?> ><?=$build['build_name']?></option>
-						<?}?>
-					</select>
-				</td>
-				<td>
-					<select name="new_priority">
-						<?foreach($all_prio as $prio) {?>
-							<option value="<?=$prio?>" <?if ($new_priority == $prio) {?>selected<?}?> ><?=$prio?></option>
-						<?}?>
-					</select>
-				</td>
-				<td><input type="text" size="20" name="new_port_directory" value="<?=$new_port_directory?>" /></td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-				<td align="center">
-					<input type="checkbox" name="new_email_on_completion" value="1" <?if($new_email_on_completion == 1 ) {?>checked="checked"<?}?> />
-				</td>
-				<td colspan="3"><input type="submit" name="add_tinderd_queue" value="add" /></td>
-			</tr>
-			</form>
-	</table>
+</table>
 <? include('footer.inc.tpl'); ?>
