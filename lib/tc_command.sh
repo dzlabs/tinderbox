@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.101 2008/08/15 21:55:26 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.102 2008/09/02 12:15:26 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1743,7 +1743,7 @@ addPort () {
     cleanOptions=1
 
     # argument handling
-    while getopts ab:d:R arg >/dev/null 2>&1
+    while getopts ab:d:oOR arg >/dev/null 2>&1
     do
 	case "${arg}" in
 
