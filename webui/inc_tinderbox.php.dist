@@ -3,21 +3,27 @@
 # Configurable options
 $tinderbox_name	 = 'Example Tinderbox';
 $tinderbox_title = 'Example Tinderbox';
-$rootdir	 = '/space';
-$wwwrooturi	 = '/tb';
+$wwwrootdir	 = dirname( __FILE__ );
+$rootdir	 = realpath( $wwwrootdir . '/../..' );
+$protocol	 = isset( $_SERVER['HTTPS'] ) ? 'https' : 'http';
+$host		 = $_SERVER['SERVER_NAME'];
+$wwwrooturi	 = $protocol . '://' . $host;
+if ($_SERVER['SERVER_PORT'] != 80)
+	$wwwrooturi	.= ':' . $_SERVER['SERVER_PORT'];
+$wwwrooturi	.= dirname( $_SERVER['SCRIPT_NAME'] );
 # Comment out the next line, and uncomment the line after it to enable
 # the paefchen frontend template.
 $template_dir	 = 'default';
 #$template_dir	= 'paefchen';
 
 # These should probably be left alone
-$pkguri		 = '/packages';
+$pkguri		 = $wwwrooturi.'/packages';
 $pkgdir		 = $rootdir.'/packages';
-$loguri		 = '/logs';
+$loguri		 = $wwwrooturi.'/logs';
 $logdir		 = $rootdir.'/logs';
-$errorloguri	 = '/errors';
+$errorloguri	 = $wwwrooturi.'/errors';
 $errorlogdir	 = $rootdir.'/errors';
-$templatesdir	 = $rootdir.'/scripts/webui/templates/'.$template_dir;
+$templatesdir	 = $wwwrootdir.'/templates/'.$template_dir;
 $templatesuri	 = $wwwrooturi.'/templates/'.$template_dir;
 #$with_timer	 = 1;
 
