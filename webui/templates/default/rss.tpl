@@ -1,5 +1,4 @@
 <?='<'?>?xml version="1.0" encoding="ISO-8859-1"?>
-<!-- $Paefchen: FreeBSD/tinderbox/webui/templates/paefchen/rss.tpl,v 1.1 2008/01/05 12:25:17 as Exp $ -->
 
 <rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 	<channel>

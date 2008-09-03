@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.24 2008/08/15 01:07:58 marcus Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.25 2008/09/03 17:08:43 beat Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -37,6 +37,7 @@ require_once 'module/modulePortFailureReasons.php';
 require_once 'module/moduleSession.php';
 require_once 'module/moduleTinderd.php';
 require_once 'module/moduleUsers.php';
+require_once 'module/moduleRss.php';
 
 require_once $templatesdir.'/messages.inc';
 
@@ -48,6 +49,7 @@ $modulePortFailureReasons	= new modulePortFailureReasons();
 $moduleSession			= new moduleSession();
 $moduleTinderd			= new moduleTinderd();
 $moduleUsers			= new moduleUsers();
+$moduleRss			= new moduleRss();
 
 $moduleSession->start();
 if( isset($_POST['do_login']) ) {
@@ -140,6 +142,9 @@ switch( $action ) {
 					$display    = $modulePortFailureReasons->display_failure_reasons( $failure_reason_tag );
 					break;
 	case 'config':			$display    = $moduleConfig->display_config();
+					break;
+	case 'latest_buildports_rss':
+					$display    = $moduleRss->display_latest_buildports();
 					break;
 	case 'list_builds':
 	default:			$display    = $moduleBuilds->display_list_builds();

@@ -11,6 +11,7 @@ if (preg_match('@<!-- (\w+):(\w+);(\w+):(\d*);(\w+):(\d*) //-->@', $display_logi
 	<title><?=$tinderbox_name?><? if (! empty($header_title)) print " - ".$header_title; ?></title>
 	<link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+	<link rel="alternate" type="application/rss+xml" title="<?=$tinderbox_name?> (RSS)" href="index.php?action=latest_buildports_rss" />
 </head>
 <body>
 	<div id="header">

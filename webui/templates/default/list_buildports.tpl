@@ -1,9 +1,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_buildports.tpl,v 1.11 2008/05/17 15:15:47 marcus Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_buildports.tpl,v 1.12 2008/09/03 17:08:44 beat Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="<?=$tinderbox_name?> (RSS)" href="index.php?action=latest_buildports_rss" />
 </head>
 <body>
 <h1><?=$tinderbox_title?> - <?=$build_name?></h1>
