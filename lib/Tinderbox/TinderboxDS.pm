@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.88 2008/08/07 04:27:49 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.89 2008/09/04 21:57:08 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -362,8 +362,12 @@ sub getBuildPortsQueueByStatus {
 sub reorgBuildPortsQueue {
         my $self = shift;
 
+        my $enq_time = time - 25200;
+        my $enq_sql = strftime("%Y-%m-%d %H:%M:%S", localtime($enq_time));
+
         my $rc = $self->_doQuery(
-                "DELETE FROM build_ports_queue WHERE enqueue_date<=NOW()-25200 AND status != 'ENQUEUED'"
+                "DELETE FROM build_ports_queue WHERE enqueue_date<=? AND status != 'ENQUEUED'",
+                [$enq_sql]
         );
 
         return $rc;
