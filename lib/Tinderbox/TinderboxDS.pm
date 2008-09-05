@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.89 2008/09/04 21:57:08 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.90 2008/09/05 21:06:44 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -42,6 +42,7 @@ use Tinderbox::Hook;
 use DBI;
 use Carp;
 use Digest::MD5 qw(md5_hex);
+use POSIX qw(strftime);
 use vars qw(
     $DB_DRIVER
     $DB_HOST
