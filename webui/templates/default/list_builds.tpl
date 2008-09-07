@@ -12,7 +12,7 @@ $legend = array(
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_builds.tpl,v 1.11 2008/09/03 17:08:44 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_builds.tpl,v 1.12 2008/09/07 13:44:37 beat Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 <link rel="alternate" type="application/rss+xml" title="<?=$tinderbox_name?> (RSS)" href="index.php?action=latest_buildports_rss" />
@@ -51,7 +51,7 @@ $legend = array(
 				<td><?=$row['description']?></td>
 				<td align="center">
 					<?if ($row['results']['SUCCESS'] != '-') {?>
-						<a href="index.php?action=buildports_by_reason&build=<?=$row['name']?>&reason=SUCCESS">
+						<a href="index.php?action=buildports_by_reason&amp;build=<?=$row['name']?>&amp;reason=SUCCESS">
 					<?}?>
 					<span title="success"><?=$row['results']['SUCCESS']?></span>
 					<?if ($row['results']['SUCCESS'] != '-') {?>
@@ -60,16 +60,16 @@ $legend = array(
 				</td>
 				<td align="center">
 					<?if ($row['results']['UNKNOWN'] != '-') {?>
-						<a href="index.php?action=buildports_by_reason&build=<?=$row['name']?>&reason=UNKNOWN">
+						<a href="index.php?action=buildports_by_reason&amp;build=<?=$row['name']?>&amp;reason=UNKNOWN">
 					<?}?>
 					<span title="unknown"><?=$row['results']['UNKNOWN']?></span>
-					<?if ($row['results']['FAIL'] != '-') {?>
+					<?if ($row['results']['UNKNOWN'] != '-') {?>
 						</a>
 					<?}?>
 				</td>
 				<td align="center">
 					<?if ($row['results']['FAIL'] != '-') {?>
-						<a href="index.php?action=failed_buildports&build=<?=$row['name']?>">
+						<a href="index.php?action=failed_buildports&amp;build=<?=$row['name']?>">
 					<?}?>
 					<span title="fail"><?=$row['results']['FAIL']?></span>
 					<?if ($row['results']['FAIL'] != '-') {?>
@@ -78,19 +78,19 @@ $legend = array(
 				</td>
 				<td align="center">
 					<?if ($row['results']['DEPEND'] != '-') {?>
-						<a href="index.php?action=buildports_by_reason&build=<?=$row['name']?>&reason=DEPEND">
+						<a href="index.php?action=buildports_by_reason&amp;build=<?=$row['name']?>&amp;reason=DEPEND">
 					<?}?>
 					<span title="depend"><?=$row['results']['DEPEND']?></span>
-					<?if ($row['results']['FAIL'] != '-') {?>
+					<?if ($row['results']['DEPEND'] != '-') {?>
 						</a>
 					<?}?>
 				</td>
 				<td align="center">
 					<?if ($row['results']['LEFTOVERS'] != '-') {?>
-						<a href="index.php?action=buildports_by_reason&build=<?=$row['name']?>&reason=LEFTOVERS">
+						<a href="index.php?action=buildports_by_reason&amp;build=<?=$row['name']?>&amp;reason=LEFTOVERS">
 					<?}?>
 					<span title="leftovers"><?=$row['results']['LEFTOVERS']?></span>
-					<?if ($row['results']['FAIL'] != '-') {?>
+					<?if ($row['results']['LEFTOVERS'] != '-') {?>
 						</a>
 					<?}?>
 				</td>
