@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.9 2007/10/13 02:28:48 ade Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.10 2008/09/10 21:29:30 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -250,6 +250,39 @@ class moduleTinderd extends module {
 						$this->template_assign( 'new_priority', $priority );
 						$this->template_assign( 'new_port_directory', $port_directory );
 						$this->TinderboxDS->addError( build_ports_queue_not_allowed_to_add );
+					}
+				}
+			}
+		}
+		return;
+	}
+
+	function delete_tinderd_queue( $action, $build_id ) {
+
+		if( !$this->moduleUsers->is_logged_in() ) {
+			return $this->template_parse( 'please_login.tpl' );
+		} else {
+			if( !empty( $build_id ) ) {
+				$builds[0] = $this->TinderboxDS->getBuildById( $build_id );
+			} else {
+				$builds = $this->TinderboxDS->getAllBuilds();
+			}
+			foreach( $builds as $build ) {
+				$this->build_id = $build->getId();
+				if( is_object( $build ) ) {
+					$build_ports_queue_entries = $this->TinderboxDS->getBuildPortsQueueEntries( $this->build_id );
+					if( is_array( $build_ports_queue_entries ) && count( $build_ports_queue_entries ) > 0 ) {
+						foreach( $build_ports_queue_entries as $build_ports_queue_entry ) {
+							if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'delete' ) ) {
+								if ( $action == 'delete all built' ) {
+									if ( $build_ports_queue_entry->status != 'SUCCESS' ) {
+										break;
+									}
+								}
+								$queue_id = $build_ports_queue_entry->getBuildPortsQueueId();
+								$this->TinderboxDS->deleteBuildPortsQueueEntry( $queue_id );
+							}
+						}
 					}
 				}
 			}

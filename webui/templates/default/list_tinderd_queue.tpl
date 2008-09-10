@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.12 2008/08/28 19:48:03 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.13 2008/09/10 21:29:30 beat Exp $ //-->
 <title><?=$tinderbox_name?></title>
 <link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -143,7 +143,14 @@ Build
 <?}?>
 
 	</table>
-
+	<p>
+		<form method="post" action="index.php">
+			<input type="hidden" name="action" value="delete_tinderd_queue" />
+			<input type="hidden" name="filter_build_id" value="<?=$build_id?>" />
+			<input type="submit" name="delete_tinderd_queue" value="delete all built" />
+			<input type="submit" name="delete_tinderd_queue" value="delete all" />
+		</form>
+	</p>
 <p>
 <a href="index.php">Back to homepage</a>
 </p>

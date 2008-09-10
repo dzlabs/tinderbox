@@ -131,4 +131,12 @@ include 'header.inc.tpl';
 		<?}?>
 <?}?>
 </table>
+<p>
+	<form method="post" action="index.php">
+		<input type="hidden" name="action" value="delete_tinderd_queue" />
+		<input type="hidden" name="filter_build_id" value="<?=$build_id?>" />
+		<input type="submit" name="delete_tinderd_queue" value="delete all built" />
+		<input type="submit" name="delete_tinderd_queue" value="delete all" />
+	</form>
+</p>
 <? include('footer.inc.tpl'); ?>
