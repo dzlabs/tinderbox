@@ -20,7 +20,7 @@
 			<td colspan="2"><input type="submit" name="do_login" value="login" /></td>
 		</tr>
 	</table>
-	<p style="font-size:10px;"><b>Note:</b> The Tinderbox web interface requires cookies to be enable.</p>
+	<p style="font-size:10px;"><b>Note:</b> The Tinderbox web interface requires cookies to be enabled.</p>
 	</form>
 <?}else{?>
 	<table>
