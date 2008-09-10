@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.152 2008/09/10 14:49:59 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.153 2008/09/10 17:19:52 marcus Exp $
 #
 
 my $pb;
@@ -1631,8 +1631,12 @@ sub listBuildPortsQueue {
                 }
                 foreach my $buildport (@buildportsqueue) {
                         if ($buildport) {
+                                my $buildname = "N/A";
                                 my $build =
                                     $ds->getBuildById($buildport->getBuildId());
+                                if ($build) {
+                                        $buildname = $build->getName();
+                                }
 
                                 if (defined($build_filter)) {
                                         next
@@ -1643,7 +1647,7 @@ sub listBuildPortsQueue {
                                 if ($raw eq 1) {
                                         print $buildport->getId() . ":"
                                             . $buildport->getUserId() . ":"
-                                            . $build->getName() . ":"
+                                            . $buildname . ":"
                                             . $buildport->getPortDirectory()
                                             . ":"
                                             . $buildport->getEmailOnCompletion()
@@ -1652,7 +1656,7 @@ sub listBuildPortsQueue {
                                         printf(
                                                 "| %3d | %-25s | %-35s | %3d |\n",
                                                 $buildport->getId(),
-                                                $build->getName(),
+                                                $buildname,
                                                 $buildport->getPortDirectory(),
                                                 $buildport->getPriority()
                                         );
