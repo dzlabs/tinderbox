@@ -165,10 +165,6 @@ if [ $phase = 1 ]; then
 ./${L}/etc/gconf
 ./var/db/fontconfig
 EOF
-  # XXX: General consensus is that occasionally, a failed port will leave
-  #      a dirty build environment behind.  This mainly seems to affect
-  #      perl false-positive leftovers, so forcibly clean these out
-  /bin/rm -f /usr/bin/perl /usr/bin/perl5 >/dev/null 2>&1
 
   # Record a "pristine" mtree.
   mtree -X /tmp/mtree.preexclude -xcn -k uid,gid,mode -p / > /tmp/mtree.pristine

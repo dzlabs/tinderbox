@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.123 2008/08/04 23:18:09 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.124 2008/09/11 18:52:08 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -22,16 +22,20 @@ cleanup()
     umount ${chroot}/proc >/dev/null
 
     if [ $noclean -eq 0 ]; then
-	for dir in ${cleandirs}
-	do
-	    cleanDirs ${build} ${chroot}${dir}
-	done
-	rm -rf ${chroot}/tmp/*
+	if [ "${error}" = "0" ]; then
+	    for dir in ${cleandirs}
+	    do
+	        cleanDirs ${build} ${chroot}${dir}
+	    done
+	    rm -rf ${chroot}/tmp/*
 
-	chroot ${chroot} /sbin/ldconfig -R
-	if [ ${ARCH} = "i386" ]; then
-	    chroot ${chroot} /sbin/ldconfig -aout -R
-	fi
+	    chroot ${chroot} /sbin/ldconfig -R
+	    if [ ${ARCH} = "i386" ]; then
+	        chroot ${chroot} /sbin/ldconfig -aout -R
+	    fi
+        fi
+    else
+	${tc} makeBuild -b ${build}
     fi
 
     echo "$pkgname done at `date`"
