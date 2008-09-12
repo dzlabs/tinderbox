@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/module.php,v 1.4 2005/12/26 22:41:41 marcus Exp $
+# $MCom: portstools/tinderbox/webui/module/module.php,v 1.5 2008/09/12 16:37:32 as Exp $
 #
 
 require_once 'core/functions.php';
@@ -49,10 +49,9 @@ class module {
 		$this->template_assign( 'display_login',   $display_login   );
 		$this->template_assign( 'errors',          $this->TinderboxDS->getErrors() );
 
-		foreach( $this->TEMPLATE_VARS as $varname => $varcontent ) {
-			$varcontent = var_export( $varcontent, true );
-			eval( '$'.$varname.' = '.$varcontent.';' );
-		}
+		foreach( $this->TEMPLATE_VARS as $varname => $varcontent )
+			$$varname = $varcontent;
+
 		ob_start();
 		require $templatesdir.'/'.$template;
 		$parsed = ob_get_contents();
