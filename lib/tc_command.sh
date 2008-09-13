@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.102 2008/09/02 12:15:26 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.103 2008/09/13 07:31:21 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1978,7 +1978,7 @@ tbcleanup () {
 		pkgs_seen="${pkgs_seen} ${lbv}${package_suffix}"
 	    fi
 	    if [ ! -e ${path} ]; then
-		echo "Removing database entry for nonexistent port ${port}/${build}"
+		echo "Removing build port database entry for port with nonexistent package ${port}/${build}"
 		${tc} rmPort -d ${port} -b ${build} -f -c
 	    fi
 
@@ -1986,7 +1986,7 @@ tbcleanup () {
 	    path="${path}/ports/${port}/Makefile"
 
 	    if [ ! -e ${path} ]; then
-		echo "Removing database entry for nonexistent port ${build}/${port}"
+		echo "Removing build port database entry for nonexistent port ${build}/${port}"
 		${tc} rmPort -d ${port} -b ${build} -f -c
 	    fi
 	done
