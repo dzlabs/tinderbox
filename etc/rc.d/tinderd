@@ -1,13 +1,12 @@
 #!/bin/sh
 #
 # $FreeBSD$
-#   $MCom: portstools/tinderbox/etc/rc.d/tinderd,v 1.4 2007/06/17 19:39:19 ade Exp $
+#   $MCom: portstools/tinderbox/etc/rc.d/tinderd,v 1.5 2008/09/13 20:43:30 marcus Exp $
 #
 
 # PROVIDE: tinderd
-# REQUIRE: LOGIN abi
-# BEFORE:  securelevel
-# KEYWORD: FreeBSD shutdown
+# REQUIRE: LOGIN mysql postgresql
+# KEYWORD: shutdown
 
 # Add the following line to /etc/rc.conf to enable `tinderd':
 #
@@ -25,10 +24,10 @@ load_rc_config "$name"
 : ${tinderd_directory="/space/scripts"}
 : ${tinderd_flags=""}
 
-# path to your executable, might be libxec, bin, sbin, ...
+# path to your executable, might be libexec, bin, sbin, ...
 command="${tinderd_directory}/tinderd"
 
-# needed when your daemon is a perl script
+# needed when your daemon is a shell script
 command_interpreter="/bin/sh"
 
 # extra required arguments
