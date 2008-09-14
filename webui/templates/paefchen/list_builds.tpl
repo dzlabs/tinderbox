@@ -1,4 +1,4 @@
-<?
+<?php
 $topmenu = array(
 	"Current And Latest Builds" 	=> "index.php?action=latest_buildports",
 	"Failed builds in this build"	=> "index.php?action=failed_buildports",
@@ -18,7 +18,7 @@ $legend = array(
 include 'header.inc.tpl';
 ?>
 <!-- $Paefchen: FreeBSD/tinderbox/webui/templates/paefchen/list_builds.tpl,v 1.2 2008/01/07 03:53:59 as Exp $ //-->
-<?if(!$no_list){?>
+<?php if(!$no_list){?>
 	<table>
 		<tr>
 			<th style="width: 20px">&nbsp;</th>
@@ -34,78 +34,78 @@ include 'header.inc.tpl';
 			<th>Build Packages</th>
 		</tr>
 
-		<?foreach($data as $row) {?>
+		<?php foreach($data as $row) {?>
 			<tr>
-				<td class="<?=$row['status_field_class']?>">&nbsp;</td>
-				<td><a href="index.php?action=list_buildports&amp;build=<?=$row['name']?>"><?=$row['name']?></a></td>
-				<td><?=$row['description']?></td>
+				<td class="<?php echo $row['status_field_class']?>">&nbsp;</td>
+				<td><a href="index.php?action=list_buildports&amp;build=<?php echo $row['name']?>"><?php echo $row['name']?></a></td>
+				<td><?php echo $row['description']?></td>
 				<td align="center">
-					<?if ($row['results']['SUCCESS'] != '-') {?>
-						<a href="index.php?action=buildports_by_reason&amp;build=<?=$row['name']?>&amp;reason=SUCCESS">
-					<?}?>
-					<span title="success"><?=$row['results']['SUCCESS']?></span>
-					<?if ($row['results']['SUCCESS'] != '-') {?>
+					<php ?if ($row['results']['SUCCESS'] != '-') {?>
+						<a href="index.php?action=buildports_by_reason&amp;build=<?php echo $row['name']?>&amp;reason=SUCCESS">
+					<?php }?>
+					<span title="success"><?php echo $row['results']['SUCCESS']?></span>
+					<?php if ($row['results']['SUCCESS'] != '-') {?>
 						</a>
-					<?}?>
+					<?php }?>
 				</td>
 				<td align="center">
-					<?if ($row['results']['UNKNOWN'] != '-') {?>
-						<a href="index.php?action=buildports_by_reason&amp;build=<?=$row['name']?>&amp;reason=UNKNOWN">
-					<?}?>
-					<span title="unknown"><?=$row['results']['UNKNOWN']?></span>
-					<?if ($row['results']['UNKNOWN'] != '-') {?>
+					<?php if ($row['results']['UNKNOWN'] != '-') {?>
+						<a href="index.php?action=buildports_by_reason&amp;build=<?php echo $row['name']?>&amp;reason=UNKNOWN">
+					<?php }?>
+					<span title="unknown"><?php echo $row['results']['UNKNOWN']?></span>
+					<?php if ($row['results']['UNKNOWN'] != '-') {?>
 						</a>
-					<?}?>
+					<?php }?>
 				</td>
 				<td align="center">
-					<?if ($row['results']['FAIL'] != '-') {?>
-						<a href="index.php?action=failed_buildports&amp;build=<?=$row['name']?>">
-					<?}?>
-					<span title="fail"><?=$row['results']['FAIL']?></span>
-					<?if ($row['results']['FAIL'] != '-') {?>
+					<?php if ($row['results']['FAIL'] != '-') {?>
+						<a href="index.php?action=failed_buildports&amp;build=<?php echo $row['name']?>">
+					<?php }?>
+					<span title="fail"><?php echo $row['results']['FAIL']?></span>
+					<?php if ($row['results']['FAIL'] != '-') {?>
 						</a>
-					<?}?>
+					<?php }?>
 				</td>
 				<td align="center">
-					<?if ($row['results']['DEPEND'] != '-') {?>
-						<a href="index.php?action=buildports_by_reason&amp;build=<?=$row['name']?>&amp;reason=DEPEND">
-					<?}?>
-					<span title="depend"><?=$row['results']['DEPEND']?></span>
-					<?if ($row['results']['DEPEND'] != '-') {?>
+					<?php if ($row['results']['DEPEND'] != '-') {?>
+						<a href="index.php?action=buildports_by_reason&amp;build=<?php echo $row['name']?>&amp;reason=DEPEND">
+					<?php }?>
+					<span title="depend"><?php echo $row['results']['DEPEND']?></span>
+					<?php if ($row['results']['DEPEND'] != '-') {?>
 						</a>
-					<?}?>
+					<?php }?>
 				</td>
 				<td align="center">
-					<?if ($row['results']['LEFTOVERS'] != '-') {?>
-						<a href="index.php?action=buildports_by_reason&amp;build=<?=$row['name']?>&amp;reason=LEFTOVERS">
-					<?}?>
-					<span title="leftovers"><?=$row['results']['LEFTOVERS']?></span>
-					<?if ($row['results']['LEFTOVERS'] != '-') {?>
+					<?php if ($row['results']['LEFTOVERS'] != '-') {?>
+						<a href="index.php?action=buildports_by_reason&amp;build=<?php echo $row['name']?>&amp;reason=LEFTOVERS">
+					<?php }?>
+					<span title="leftovers"><?php echo $row['results']['LEFTOVERS']?></span>
+					<?php if ($row['results']['LEFTOVERS'] != '-') {?>
 						</a>
-					<?}?>
+					<?php }?>
 				</td>
-				<td align="center"><span title="remake"><?=$row['results']['REMAKE']?></span></td>
+				<td align="center"><span title="remake"><?php echo $row['results']['REMAKE']?></span></td>
 				<td align="center">
-					<?if ($row['results']['TOTAL'] != '-') {?>
-						<a href="index.php?action=list_buildports&amp;build=<?=$row['name']?>">
-					<?}?>
-					<span title="total"><?=$row['results']['TOTAL']?></span>
-					<?if ($row['results']['TOTAL'] != '-') {?>
+					<?php if ($row['results']['TOTAL'] != '-') {?>
+						<a href="index.php?action=list_buildports&amp;build=<?php echo $row['name']?>">
+					<?php }?>
+					<span title="total"><?php echo $row['results']['TOTAL']?></span>
+					<?php if ($row['results']['TOTAL'] != '-') {?>
 						</a>
-					<?}?>
+					<?php }?>
 				</td>
-				<?if($row['packagedir']){?>
-					<td><a href="<?=$row['packagedir']?>">Package Directory</a></td>
-				<?}else{?>
+				<?php if($row['packagedir']){?>
+					<td><a href="<?php echo $row['packagedir']?>">Package Directory</a></td>
+				<?php }else{?>
 					<td><i>No packages for this build</i></td>
-				<?}?>
+				<?php }?>
 			</tr>
-		<?}?>
+		<?php }?>
 
 	</table>
-<?}else{?>
+<?php }else{?>
 	<p>There are no builds configured.</p>
-<?}?>
+<?php }?>
 <div class="subcontent">
 	<form method="get" action="index.php">
 	<fieldset>
@@ -114,15 +114,15 @@ include 'header.inc.tpl';
 			<input type="hidden" name="action" value="failed_buildports" />
 			<select name="maintainer">
 				<option></option>
-<?foreach($maintainers as $maintainer) {?>
-				<option><?=$maintainer?></option>
-<?}?>
+<?php foreach($maintainers as $maintainer) {?>
+				<option><?php echo $maintainer?></option>
+<?php }?>
 			</select>
 			<input type="submit" name="Go" value="Go" />
 	</fieldset>
 	</form>
 </div>
-<?
+<?php
 $footer_legend = array(
 	'build_portbuild'	=> 'Building',
 	'build_prepare'		=> 'Prepare'

@@ -1,4 +1,4 @@
-<?
+<?php
 $topmenu = array('back' => 'javascript:history.back()');
 $header_title = 'Port Build Failure Reasons';
 include 'header.inc.tpl';
@@ -10,15 +10,15 @@ include 'header.inc.tpl';
 		<th>Description</th>
 		<th>Type</th>
 	</tr>
-<?foreach($port_fail_reasons as $reason) {?>
+<?php foreach($port_fail_reasons as $reason) {?>
 	<tr>
-		<td valign="top"><a id="<?=htmlspecialchars($reason['tag'])?>" href="javascript:history.back()"><?=htmlspecialchars($reason['tag'])?></a></td>
-		<td style="white-space: normal;"><?=$reason['descr']?></td>
-		<td valign="top" class="<?="fail_reason_".$reason['type']?>"><?=$reason['type']?></td>
+		<td valign="top"><a id="<?php echo htmlspecialchars($reason['tag'])?>" href="javascript:history.back()"><?php echo htmlspecialchars($reason['tag'])?></a></td>
+		<td style="white-space: normal;"><?php echo $reason['descr']?></td>
+		<td valign="top" class="<?php echo "fail_reason_".$reason['type']?>"><?php echo $reason['type']?></td>
 	</tr>
-<?}?>
+<?php }?>
 </table>
-<?
+<?php
 $footer_legend = array(
 	'port_dud'		=> 'Dud', 
 	'port_depend'	=> 'Depend',

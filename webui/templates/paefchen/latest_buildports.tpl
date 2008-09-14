@@ -1,4 +1,4 @@
-<?
+<?php
 $header_title = "Current and Latest Builds";
 if ($build_name)
 	$header_title .= " in $build_name";
@@ -17,8 +17,8 @@ include 'header.inc.tpl'
 	setTimeout("reloadpage()", 300000)
 //-->
 </script>
-<?=$current_builds?>
-<?if(!$no_list){?>
+<?php echo $current_builds?>
+<?php if(!$no_list){?>
 	<h2 id="latest">Latest</h2>
 	<table>
 		<tr>
@@ -33,35 +33,35 @@ include 'header.inc.tpl'
 			<th>Duration</th>
 		</tr>
 
-		<?foreach($data as $row) {?>
+		<?php foreach($data as $row) {?>
 			<tr>
-				<td><a href="index.php?action=list_buildports&amp;build=<?=$row['build_name']?>"><?=$row['build_name']?></a></td>
-				<td><a href="index.php?action=describe_port&amp;id=<?=$row['port_id']?>"><?=$row['port_directory']?></a></td>
-				<td><?=$row['port_last_built_version']?></td>
-				<td class="<?=$row['status_field_class']?>"><?=$row['status_field_letter']?></td>
-				<?$reason=$row['port_last_fail_reason']?>
-				<td class="<?="fail_reason_".$port_fail_reasons[$reason]['type']?>">
-				<?$href=($port_fail_reasons[$reason]['link']) ? "index.php?action=display_failure_reasons&amp;failure_reason_tag=$reason#$reason" : "#"?>
-				<a href="<?=$href?>" class="<?="fail_reason_".$port_fail_reasons[$reason]['type']?>" title="<?=$port_fail_reasons[$reason]['descr']?>"><?=$reason?></a>
+				<td><a href="index.php?action=list_buildports&amp;build=<?php echo $row['build_name']?>"><?php echo $row['build_name']?></a></td>
+				<td><a href="index.php?action=describe_port&amp;id=<?php echo $row['port_id']?>"><?php echo $row['port_directory']?></a></td>
+				<td><?php echo $row['port_last_built_version']?></td>
+				<td class="<?php echo $row['status_field_class']?>"><?php echo $row['status_field_letter']?></td>
+				<?php $reason=$row['port_last_fail_reason']?>
+				<td class="<?php echo "fail_reason_".$port_fail_reasons[$reason]['type']?>">
+				<?php $href=($port_fail_reasons[$reason]['link']) ? "index.php?action=display_failure_reasons&amp;failure_reason_tag=$reason#$reason" : "#"?>
+				<a href="<?php echo $href?>" class="<?php echo "fail_reason_".$port_fail_reasons[$reason]['type']?>" title="<?php echo $port_fail_reasons[$reason]['descr']?>"><?php echo $reason?></a>
 				</td>
 				<td>
-					<?if($row['port_link_logfile']){?>
-						<a href="<?=$row['port_link_logfile']?>">log</a>
-					<?}?>
-					<?if($row['port_link_package']){?>
-						<a href="<?=$row['port_link_package']?>">package</a>
-					<?}?>
+					<?php if($row['port_link_logfile']){?>
+						<a href="<?php echo $row['port_link_logfile']?>">log</a>
+					<?php }?>
+					<?php if($row['port_link_package']){?>
+						<a href="<?php echo $row['port_link_package']?>">package</a>
+					<?php }?>
 				</td>
-				<td><?=$row['port_last_built']?></td>
-				<td><?=$row['port_last_successful_built']?></td>
-				<td><?=time_elapsed($row['port_last_run_duration'])?></td>
+				<td><?php echo $row['port_last_built']?></td>
+				<td><?php echo $row['port_last_successful_built']?></td>
+				<td><?php echo time_elapsed($row['port_last_run_duration'])?></td>
 			</tr>
-		<?}?>
+		<?php }?>
 	</table>
-<?}else{?>
+<?php }else{?>
 	<p>No ports are being built.</p>
-<?}?>
-<?
+<?php }?>
+<?php
 $footer_legend = array(
 	'port_success'	=> 'Success',
 	'port_default'	=> 'Default',

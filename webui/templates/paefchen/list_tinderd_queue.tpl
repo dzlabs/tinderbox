@@ -1,4 +1,4 @@
-<?
+<?php
 $header_title = 'Tinderd Administration';
 include 'header.inc.tpl';
 ?>
@@ -12,9 +12,9 @@ include 'header.inc.tpl';
 			<td>
 				<select name="filter_build_id">
 					<option></option>
-<?foreach($all_builds as $build) {?>
-					<option value="<?=$build['build_id']?>" <?if ($build_id == $build['build_id']) {?>selected="selected"<?}?> ><?=$build['build_name']?></option>
-<?}?>
+<?php foreach($all_builds as $build) {?>
+					<option value="<?php echo $build['build_id']?>" <?php if ($build_id == $build['build_id']) {?>selected="selected"<?php }?> ><?php echo $build['build_name']?></option>
+<?php }?>
 				</select>
 				<input type="submit" name="display" value="display" /> 
 			</td>
@@ -23,13 +23,13 @@ include 'header.inc.tpl';
 	</form>
 </div>
 
-<?if($errors){?>
+<?php if($errors){?>
 	<p style="color:#FF0000">
-	<?foreach($errors as $error){?>
-		<?=$error?><br />
-	<?}?>
+	<?php foreach($errors as $error){?>
+		<?php echo $error?><br />
+	<?php }?>
 	</p>
-<?}?>
+<?php }?>
 
 <table>
 	<tr>
@@ -45,98 +45,98 @@ include 'header.inc.tpl';
 	</tr>
 	<form method="post" action="index.php">
 	<input type="hidden" name="action" value="add_tinderd_queue" />
-	<input type="hidden" name="entry_id" value="<?=$row['entry_id']?>" />
-	<input type="hidden" name="filter_build_id" value="<?=$build_id?>" />
+	<input type="hidden" name="entry_id" value="<?php echo $row['entry_id']?>" />
+	<input type="hidden" name="filter_build_id" value="<?php echo $build_id?>" />
 	<tr>
 		<td>
 			<select name="new_build_id">
-				<?foreach($all_builds as $build) {?>
-					<option value="<?=$build['build_id']?>" <?if ($new_build_id == $build['build_id']) {?>selected<?}?> ><?=$build['build_name']?></option>
-				<?}?>
+				<?php foreach($all_builds as $build) {?>
+					<option value="<?php echo $build['build_id']?>" <?php if ($new_build_id == $build['build_id']) {?>selected<?php }?> ><?php echo $build['build_name']?></option>
+				<?php }?>
 			</select>
 		</td>
 		<td>
 			<select name="new_priority">
-				<?foreach($all_prio as $prio) {?>
-					<option value="<?=$prio?>" <?if ($new_priority == $prio) {?>selected<?}?> ><?=$prio?></option>
-				<?}?>
+				<?php foreach($all_prio as $prio) {?>
+					<option value="<?php echo $prio?>" <?php if ($new_priority == $prio) {?>selected<?php }?> ><?php echo $prio?></option>
+				<?php }?>
 			</select>
 		</td>
-		<td><input type="text" size="20" name="new_port_directory" value="<?=$new_port_directory?>" /></td>
+		<td><input type="text" size="20" name="new_port_directory" value="<?php echo $new_port_directory?>" /></td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td align="center">
-			<input type="checkbox" name="new_email_on_completion" value="1" <?if($new_email_on_completion == 1 ) {?>checked="checked"<?}?> />
+			<input type="checkbox" name="new_email_on_completion" value="1" <?php if($new_email_on_completion == 1 ) {?>checked="checked"<?php }?> />
 		</td>
 		<td colspan="3"><input type="submit" name="add_tinderd_queue" value="add" /></td>
 	</tr>
 	</form>
-<?if(!$no_list){?>
+<?php if(!$no_list){?>
 
-		<?foreach($entries as $row) {?>
+		<?php foreach($entries as $row) {?>
 			<form method="post" action="index.php">
 			<input type="hidden" name="action" value="change_tinderd_queue" />
-			<input type="hidden" name="entry_id" value="<?=$row['entry_id']?>" />
-			<input type="hidden" name="filter_build_id" value="<?=$build_id?>" />
+			<input type="hidden" name="entry_id" value="<?php echo $row['entry_id']?>" />
+			<input type="hidden" name="filter_build_id" value="<?php echo $build_id?>" />
 			<tr>
 				<td>
-					<?if($row['modify'] == 1){?>
+					<?php if($row['modify'] == 1){?>
 						<select name="build_id">
-							<?foreach($all_builds as $build) {?>
-								<option value="<?=$build['build_id']?>" <?if ($row['build'] == $build['build_name']) {?>selected<?}?> ><?=$build['build_name']?></option>
-							<?}?>
+							<?php foreach($all_builds as $build) {?>
+								<option value="<?php echo $build['build_id']?>" <?php if ($row['build'] == $build['build_name']) {?>selected<?php }?> ><?php echo $build['build_name']?></option>
+							<?php }?>
 						</select>
-					<?}else{?>
-						<?=$row['build']?>
-					<?}?>
+					<?php }else{?>
+						<?php echo $row['build']?>
+					<?php }?>
 				</td>
 				<td>
-					<?if($row['modify'] == 1){?>
+					<?php if($row['modify'] == 1){?>
 						<select name="priority">
-							<?foreach($row['all_prio'] as $prio) {?>
-								<option value="<?=$prio?>" <?if ($row['priority'] == $prio) {?>selected<?}?> ><?=$prio?></option>
-							<?}?>
+							<?php foreach($row['all_prio'] as $prio) {?>
+								<option value="<?php echo $prio?>" <?php if ($row['priority'] == $prio) {?>selected<?php }?> ><?php echo $prio?></option>
+							<?php }?>
 						</select>
-					<?}else{?>
-						<?=$row['priority']?>
-					<?}?>
+					<?php }else{?>
+						<?php echo $row['priority']?>
+					<?php }?>
 				</td>
-				<td><?=$row['directory']?></td>
-				<td><?=$row['user']?></td>
-				<td class="<?=$row['status_field_class']?>">&nbsp;</td>
+				<td><?php echo $row['directory']?></td>
+				<td><?php echo $row['user']?></td>
+				<td class="<?php echo $row['status_field_class']?>">&nbsp;</td>
 				<td align="center">
-					<?if($row['modify'] == 1){?>
-						<input type="checkbox" name="email_on_completion" value="1" <?if($row['email_on_completion'] == 1 ) {?>checked="checked"<?}?> />
-					<?}else{?>
-						<?if($row['email_on_completion'] == 1 ) {?>X"<?}?>
-					<?}?>
+					<?php if($row['modify'] == 1){?>
+						<input type="checkbox" name="email_on_completion" value="1" <?php if($row['email_on_completion'] == 1 ) {?>checked="checked"<?php }?> />
+					<?php }else{?>
+						<?php if($row['email_on_completion'] == 1 ) {?>X"<?php }?>
+					<?php }?>
 				</td>
 				<td>
-					<?if($row['modify'] == 1){?>
+					<?php if($row['modify'] == 1){?>
 						<input type="submit" name="change_tinderd_queue" value="save" />
-					<?}?>
+					<?php }?>
 				</td>
 				<td>
-					<?if($row['delete'] == 1){?>
+					<?php if($row['delete'] == 1){?>
 						<input type="submit" name="change_tinderd_queue" value="delete" />
-					<?}?>
+					<?php }?>
 				</td>
 				<td>
-					<?if($row['modify'] == 1){?>
+					<?php if($row['modify'] == 1){?>
 						<input type="submit" name="change_tinderd_queue" value="reset status" />
-					<?}?>
+					<?php }?>
 				</td>
 			</tr>
 			</form>
-		<?}?>
-<?}?>
+		<?php }?>
+<?php }?>
 </table>
 <p>
 	<form method="post" action="index.php">
 		<input type="hidden" name="action" value="delete_tinderd_queue" />
-		<input type="hidden" name="filter_build_id" value="<?=$build_id?>" />
+		<input type="hidden" name="filter_build_id" value="<?php echo $build_id?>" />
 		<input type="submit" name="delete_tinderd_queue" value="delete all built" />
 		<input type="submit" name="delete_tinderd_queue" value="delete all" />
 	</form>
 </p>
-<? include('footer.inc.tpl'); ?>
+<?php include('footer.inc.tpl'); ?>

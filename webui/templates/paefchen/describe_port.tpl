@@ -1,27 +1,27 @@
-<?
+<?php
 $topmenu = array();
 $header_title = $port_name;
 include 'header.inc.tpl';
 ?>
 <!-- $Paefchen: FreeBSD/tinderbox/webui/templates/paefchen/describe_port.tpl,v 1.1 2008/01/05 12:25:17 as Exp $ //-->
-<?if(!$no_list){?>
+<?php if(!$no_list){?>
 <div class="description">
 	<table>
 		<tr>
 			<th>Directory</th>
-			<td><?=$port_dir?> (
-			<?for($i=0;$i<count($ports_trees_links);$i++) {?>
-				<a href="<?=$ports_trees_links[$i]['cvsweb']?>/<?=$port_dir?><?=$ports_trees_links[$i]['cvsweb_querystr']?>"><?=$ports_trees_links[$i]['name']?></a>
-			<?}?>
+			<td><?php echo $port_dir?> (
+			<?php for($i=0;$i<count($ports_trees_links);$i++) {?>
+				<a href="<?php echo $ports_trees_links[$i]['cvsweb']?>/<?php echo $port_dir?><?php echo $ports_trees_links[$i]['cvsweb_querystr']?>"><?php echo $ports_trees_links[$i]['name']?></a>
+			<?php }?>
 			)</td>
 		</tr>
 		<tr>
 			<th>Comment</th>
-			<td><?=$port_comment?></td>
+			<td><?php echo $port_comment?></td>
 		</tr>
 		<tr>
 			<th>Maintainer</th>
-			<td><a href="mailto:<?=$port_maintainer?>"><?=$port_maintainer?></a></td>
+			<td><a href="mailto:<?php echo $port_maintainer?>"><?php echo $port_maintainer?></a></td>
 		</tr>
 	</table>
 </div>
@@ -35,28 +35,28 @@ include 'header.inc.tpl';
 			<th>Last Successful Build</th>
 			<th>Duration</th>
 		</tr>
-		<?foreach($data as $row) {?>
+		<?php foreach($data as $row) {?>
 			<tr>
-				<td><a href="index.php?action=list_buildports&amp;build=<?=$row['build_name']?>"><?=$row['build_name']?></a></td>
-				<td><?=$row['port_last_built_version']?></td>
-				<td class="<?=$row['status_field_class']?>"><?=$row['status_field_letter']?></td>
+				<td><a href="index.php?action=list_buildports&amp;build=<?php echo $row['build_name']?>"><?php echo $row['build_name']?></a></td>
+				<td><?php echo $row['port_last_built_version']?></td>
+				<td class="<?php echo $row['status_field_class']?>"><?php echo $row['status_field_letter']?></td>
 				<td>
-					<?if($row['port_link_logfile']){?>
-						<a href="<?=$row['port_link_logfile']?>">log</a>
-					<?}?>
-					<?if($row['port_link_package']){?>
-						<a href="<?=$row['port_link_package']?>">package</a>
-					<?}?>
+					<?php if($row['port_link_logfile']){?>
+						<a href="<?php echo $row['port_link_logfile']?>">log</a>
+					<?php }?>
+					<?php if($row['port_link_package']){?>
+						<a href="<?php echo $row['port_link_package']?>">package</a>
+					<?php }?>
 				</td>
-				<td><?=$row['port_last_built']?></td>
-				<td><?=$row['port_last_successful_built']?></td>
-				<td><?=time_elapsed($row['port_last_run_duration'])?></td>
+				<td><?php echo $row['port_last_built']?></td>
+				<td><?php echo $row['port_last_successful_built']?></td>
+				<td><?php echo time_elapsed($row['port_last_run_duration'])?></td>
 			</tr>
-		<?}?>
+		<?php }?>
 	</table>
-<?}else{?>
+<?php }else{?>
 	<p>Invalid port ID.</p>
-<? }
+<?php  }
 $footer_legend = array(
 	'port_success'	=> 'Success',
 	'port_default'	=> 'Default',

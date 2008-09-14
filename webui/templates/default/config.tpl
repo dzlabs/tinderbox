@@ -1,21 +1,21 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/config.tpl,v 1.5 2007/10/13 02:28:48 ade Exp $ //-->
-<title><?=$tinderbox_name?></title>
-<link href="<?=$templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
+<!-- $MCom: portstools/tinderbox/webui/templates/default/config.tpl,v 1.6 2008/09/14 16:22:14 marcus Exp $ //-->
+<title><?php echo $tinderbox_name?></title>
+<link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-<h1><?=$tinderbox_title?> Config</h1>
-<?if($errors){?>
+<h1><?php echo $tinderbox_title?> Config</h1>
+<?php if($errors){?>
 	<p style="color:#FF0000">
-	<?foreach($errors as $error){?>
-		<?=$error?><br />
-	<?}?>
+	<?php foreach($errors as $error){?>
+		<?php echo $error?><br />
+	<?php }?>
 	</p>
-<?} else {?>
+<?php } else {?>
 <h2>configured builds:</h2>
-<?if(!$no_build_list){?>
+<?php if(!$no_build_list){?>
 	<table>
 		<tr>
 			<th>Name</th>
@@ -24,23 +24,23 @@
 			<th>Ports Tree Name</th>
 		</tr>
 
-		<?foreach($build_data as $row) {?>
+		<?php foreach($build_data as $row) {?>
 			<tr>
-				<td><?=$row['build_name']?></td>
-				<td><?=$row['build_description']?></td>
-				<td><?=$row['jail_name']?></td>
-				<td><?=$row['ports_tree_name']?></td>
+				<td><?php echo $row['build_name']?></td>
+				<td><?php echo $row['build_description']?></td>
+				<td><?php echo $row['jail_name']?></td>
+				<td><?php echo $row['ports_tree_name']?></td>
 			</tr>
-		<?}?>
+		<?php }?>
 
 	</table>
-<?}else{?>
+<?php }else{?>
 	<p>There are no builds configured.</p>
-<?}?>
+<?php }?>
 
 
 <h2>configured jails:</h2>
-<?if(!$no_jail_list){?>
+<?php if(!$no_jail_list){?>
 	<table>
 		<tr>
 			<th>Name</th>
@@ -52,26 +52,26 @@
 			<th>Src Mount</th>
 		</tr>
 
-		<?foreach($jail_data as $row) {?>
+		<?php foreach($jail_data as $row) {?>
 			<tr>
-				<td><?=$row['jail_name']?></td>
-				<td><?=$row['jail_arch']?></td>
-				<td><?=$row['jail_description']?></td>
-				<td><?=$row['jail_last_built']?></td>
-				<td><?=$row['jail_tag']?></td>
-				<td><?=$row['jail_update_cmd']?></td>
-				<td><?=$row['jail_src_mount']?></td>
+				<td><?php echo $row['jail_name']?></td>
+				<td><?php echo $row['jail_arch']?></td>
+				<td><?php echo $row['jail_description']?></td>
+				<td><?php echo $row['jail_last_built']?></td>
+				<td><?php echo $row['jail_tag']?></td>
+				<td><?php echo $row['jail_update_cmd']?></td>
+				<td><?php echo $row['jail_src_mount']?></td>
 			</tr>
-		<?}?>
+		<?php }?>
 
 	</table>
-<?}else{?>
+<?php }else{?>
 	<p>There are no jails configured.</p>
-<?}?>
+<?php }?>
 
 
 <h2>configured ports trees:</h2>
-<?if(!$no_ports_tree_list){?>
+<?php if(!$no_ports_tree_list){?>
 	<table>
 		<tr>
 			<th>Name</th>
@@ -82,46 +82,46 @@
 			<th>Ports Mount</th>
 		</tr>
 
-		<?foreach($ports_tree_data as $row) {?>
+		<?php foreach($ports_tree_data as $row) {?>
 			<tr>
-				<td><?=$row['ports_tree_name']?></td>
-				<td><?=$row['ports_tree_description']?></td>
-				<td><?=$row['ports_tree_last_built']?></td>
-				<td><?=$row['ports_tree_update_cmd']?></td>
-				<td><?=$row['ports_tree_cvsweb_url']?></td>
-				<td><?=$row['ports_tree_ports_mount']?></td>
+				<td><?php echo $row['ports_tree_name']?></td>
+				<td><?php echo $row['ports_tree_description']?></td>
+				<td><?php echo $row['ports_tree_last_built']?></td>
+				<td><?php echo $row['ports_tree_update_cmd']?></td>
+				<td><?php echo $row['ports_tree_cvsweb_url']?></td>
+				<td><?php echo $row['ports_tree_ports_mount']?></td>
 			</tr>
-		<?}?>
+		<?php }?>
 
 	</table>
-<?}else{?>
+<?php }else{?>
 	<p>There are no ports trees configured.</p>
-<?}?>
+<?php }?>
 
 <h2>further configurations:</h2>
-<?if(!$no_config_option_list){?>
+<?php if(!$no_config_option_list){?>
 	<table>
 		<tr>
 			<th>Name</th>
 			<th>Value</th>
 		</tr>
 
-		<?foreach($config_option_data as $row) {?>
+		<?php foreach($config_option_data as $row) {?>
 			<tr>
-				<td><?=$row['config_option_name']?></td>
-				<td><?=$row['config_option_value']?></td>
+				<td><?php echo $row['config_option_name']?></td>
+				<td><?php echo $row['config_option_value']?></td>
 			</tr>
-		<?}?>
+		<?php }?>
 
 	</table>
-<?}else{?>
+<?php }else{?>
 	<p>There are no further configurations.</p>
-<?}?>
+<?php }?>
 
 
 
-<?}?>
+<?php }?>
 <p><a href="index.php">Back to homepage</a></p>
-<?=$display_login?>
+<?php echo $display_login?>
 </body>
 </html>
