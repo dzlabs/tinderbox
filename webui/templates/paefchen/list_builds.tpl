@@ -40,7 +40,7 @@ include 'header.inc.tpl';
 				<td><a href="index.php?action=list_buildports&amp;build=<?php echo $row['name']?>"><?php echo $row['name']?></a></td>
 				<td><?php echo $row['description']?></td>
 				<td align="center">
-					<php ?if ($row['results']['SUCCESS'] != '-') {?>
+					<?php if ($row['results']['SUCCESS'] != '-') {?>
 						<a href="index.php?action=buildports_by_reason&amp;build=<?php echo $row['name']?>&amp;reason=SUCCESS">
 					<?php }?>
 					<span title="success"><?php echo $row['results']['SUCCESS']?></span>
