@@ -89,6 +89,7 @@ include 'header.inc.tpl';
 		<td>
 		<?php if($row['port_link_logfile']){?>
 			<a href="<?php echo $row['port_link_logfile']?>">log</a>
+			<a href="index.php?action=display_markup_log&amp;build=<?php echo $row['build_name']?>&amp;id=<?php echo $row['port_id']?>">markup</a>
 		<?php }?>
 		<?php if($row['port_link_package']){?>
 			<a href="<?php echo $row['port_link_package']?>">package</a>

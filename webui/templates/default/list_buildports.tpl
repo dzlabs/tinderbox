@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_buildports.tpl,v 1.13 2008/09/14 16:22:14 marcus Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_buildports.tpl,v 1.14 2008/09/15 16:33:14 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 <link rel="alternate" type="application/rss+xml" title="<?php echo $tinderbox_name?> (RSS)" href="index.php?action=latest_buildports_rss" />
@@ -77,6 +77,7 @@
 				<td>
 					<?php if($row['port_link_logfile']){?>
 						<a href="<?php echo $row['port_link_logfile']?>">log</a>
+						<a href="index.php?action=display_markup_log&amp;build=<?php echo $row['build_name']?>&amp;id=<?php echo $row['port_id']?>">markup</a>
 					<?php }?>
 					<?php if($row['port_link_package']){?>
 						<a href="<?php echo $row['port_link_package']?>">package</a>

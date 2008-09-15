@@ -1,7 +1,10 @@
-<!-- $MCom: portstools/tinderbox/webui/templates/default/tinderstyle.css,v 1.10 2007/06/17 00:05:47 ade Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/tinderstyle.css,v 1.11 2008/09/15 16:33:14 beat Exp $ //-->
 
 body { background-color: white }
 table { border: 2px solid black; border-collapse: collapse }
+
+table.pattern { background-color: #FFF; border-style: none; }
+table.pattern td { border-width: 0px; }
 
 a { color: darkblue; }
 a:visited { color: darkblue; }

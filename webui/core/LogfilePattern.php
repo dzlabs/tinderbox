@@ -1,6 +1,7 @@
-#!/bin/sh
-#
-# Copyright (c) 2008 Ade Lovett <ade@FreeBSD.org>
+<?php
+#-
+# Copyright (c) 2004-2005 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2008 Beat Gätzi <beat@chruetertee.ch>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,30 +25,43 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/sql/genschema,v 1.3 2008/09/15 16:33:13 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/LogfilePattern.php,v 1.1 2008/09/15 16:33:13 beat Exp $
 #
-# Create a full-blown schema from a series of files, reducing duplication
-#
-# Usage:	genschema mysql|pgsql
 
-#---------------------------------------------------------------------------
-# Argument handling
-#
-if [ $# -ne 1 ]; then
-    echo "usage: genschema mysql|pgsql"
-    exit 1
-fi
+require_once 'TinderObject.php';
 
-case $1 in
-"mysql"|"pgsql")	dbtype=$1;;
-*)			echo "genschema: unknown database type: $1"
-			exit 1;;
-esac
+class LogfilePattern extends TinderObject {
 
-#---------------------------------------------------------------------------
-# Kick out the generated schema
-#
-cat schema.${dbtype}.pre \
-    values.config values.hooks values.lp values.pfr \
-    values.pfp schema.${dbtype}.post
-exit 0
+	function LogfilePattern( $argv = array() ) {
+		$object_hash = array(
+			'logfile_pattern_id' => '',
+			'logfile_pattern_tag' => '',
+			'logfile_pattern_severity' => '',
+			'logfile_pattern_expr' => '',
+			'logfile_pattern_color' => ''
+		);
+
+		$this->TinderObject( $object_hash, $argv );
+	}
+
+	function getId() {
+		return $this->logfile_pattern_id;
+	}
+
+	function getTag() {
+		return $this->logfile_pattern_tag;
+	}
+
+	function getSeverity() {
+		return $this->logfile_pattern_severity;
+	}
+
+	function getExpr() {
+		return $this->logfile_pattern_expr;
+	}
+
+	function getColor() {
+		return $this->logfile_pattern_color;
+	}
+}
+?>

@@ -144,3 +144,12 @@ CREATE TABLE hooks (
 	hook_cmd varchar(255),
 	hook_description TEXT
 );
+
+DROP TABLE IF EXISTS logfile_patterns;
+CREATE TABLE logfile_patterns (
+	logfile_pattern_id int(11) NOT NULL PRIMARY KEY,
+	logfile_pattern_tag VARCHAR(30) NOT NULL,
+	logfile_pattern_severity ENUM('error','warning','information') DEFAULT 'information',
+	logfile_pattern_expr TEXT,
+	logfile_pattern_color VARCHAR(20) NOT NULL
+);

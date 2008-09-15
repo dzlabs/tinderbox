@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.36 2007/10/13 02:28:47 ade Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.37 2008/09/15 16:33:13 beat Exp $
 #
 
     require_once 'DB.php';
@@ -32,8 +32,10 @@
     require_once 'BuildPortsQueue.php';
     require_once 'Config.php';
     require_once 'Jail.php';
+    require_once 'LogfilePattern.php';
     require_once 'Port.php';
     require_once 'PortsTree.php';
+    require_once 'PortFailPattern.php';
     require_once 'PortFailReason.php';
     require_once 'User.php';
     require_once 'inc_ds.php';
@@ -42,10 +44,12 @@
     $objectMap = array(
         "Build" => "builds",
 	"BuildPortsQueue" => "build_ports_queue",
+	"LogfilePattern" => "logfile_patterns",
         "Config" => "config",
         "Jail"  => "jails",
         "Port"  => "ports",
         "PortsTree" => "ports_trees",
+	"PortFailPattern" => "port_fail_patterns",
         "PortFailReason" => "port_fail_reasons",
         "User"  => "users",
     );
@@ -687,6 +691,10 @@
             return $this->getObjects("Build", $params);
         }
 
+	function getLogfilePatterns($params = array()) {
+		return $this->getObjects("LogfilePattern", $params);
+	}
+
 	function getPorts($params = array()) {
 	    return $this->getObjects("Port", $params);
 	}
@@ -694,6 +702,10 @@
         function getJails($params = array()) {
             return $this->getObjects("Jail", $params);
         }
+
+	function getPortFailPatterns($params = array()) {
+		return $this->getObjects("PortFailPattern", $params);
+	}
 
         function getPortFailReasons($params = array()) {
             return $this->getObjects("PortFailReason", $params);
@@ -719,11 +731,23 @@
             return $builds;
         }
 
+	function getAllLogfilePatterns() {
+		$patterns = $this->getLogfilePatterns();
+
+		return $patterns;
+	}
+
         function getAllJails() {
             $jails = $this->getJails();
 
             return $jails;
         }
+
+	function getAllPortFailPatterns() {
+		$results = $this->getPortFailPatterns();
+
+		return $results;
+	}
 
         function getAllPortFailReasons() {
             $results = $this->getPortFailReasons();

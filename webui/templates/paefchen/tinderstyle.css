@@ -236,6 +236,15 @@ label {
 	text-align			: left;
 }
 
+table.pattern {
+	background-color	: #FFF;
+	border-style		: none;
+}
+
+table.pattern td {
+	border-width		: 0px;
+}
+
 td.port_success {
 	background-color	: #E8FFE8;
 }

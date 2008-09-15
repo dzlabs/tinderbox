@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.12 2008/01/25 20:12:50 marcus Exp $
+# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.13 2008/09/15 16:33:14 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -81,6 +81,7 @@ class modulePorts extends module {
 
 	function get_list_data( $build_name, $ports ) {
 		global $loguri;
+		global $logdir;
 		global $errorloguri;
 		global $pkguri;
 
@@ -103,6 +104,7 @@ class modulePorts extends module {
 			$port_id = $port->getId();
 			$port_last_built_version = $port->getLastBuiltVersion();
 			$port_logfilename = $port->getLogfileName();
+			$port_logfile_path = $logdir . '/' . $build_name . '/' . $port_logfilename;
 			$port_link_logfile = $loguri . '/' . $build_name . '/' . $port_logfilename;
 			$port_link_package = $pkguri . '/' . $build_name . '/All/' . $port_last_built_version . $package_suffix;
 			$port_last_run_duration = $port->getLastRunDuration();
@@ -153,6 +155,7 @@ class modulePorts extends module {
 						'port_directory'             => $port->getDirectory(),
 						'port_maintainer'            => prettyEmail( $port->getMaintainer() ).' ',
 						'port_id'                    => $port_id,
+						'port_logfile_path'          => $port_logfile_path,
 						'port_last_built_version'    => $port_last_built_version,
 						'port_last_built'            => prettyDatetime( $port->getLastBuilt() ),
 						'port_last_successful_built' => prettyDatetime( $port->getLastSuccessfulBuilt() ),

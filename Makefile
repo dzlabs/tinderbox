@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.58 2008/08/27 01:47:58 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.59 2008/09/15 16:33:13 beat Exp $
 
 VERSION=	3.0.0
 
@@ -7,7 +7,7 @@ LIBDATA=	buildscript db-mysql.sh db-pgsql.sh enterbuild makemake \
 		pnohang.c portbuild tc_command.pl tc_command.sh \
 		tinderlib.pl tinderlib.sh tinderbox.env
 SQLDATA=	genschema schema.mysql.post schema.mysql.pre \
-		schema.pgsql.post schema.pgsql.pre values.config \
+		schema.pgsql.post schema.pgsql.pre values.lp values.config \
 		values.hooks values.pfp values.pfr
 PERLMODDATA=	Build.pm BuildPortsQueue.pm Config.pm Hook.pm Jail.pm \
 		MakeCache.pm Port.pm PortFailPattern.pm PortFailReason.pm \
@@ -19,23 +19,24 @@ MIGDATA=	build_ports.map build_ports_queue.map builds.map config.map \
 MAN1DATA=	tc-configCcache.1 tc-configDistfile.1 tc-configGet.1 \
 		tc-configJail.1 tc-configTinderd.1 tc-init.1
 WEBUIDATA=	inc_ds.php.dist inc_tinderbox.php.dist index.php
-WEBUICDATA=	Build.php BuildPortsQueue.php Config.php Jail.php Port.php \
-		PortFailReason.php PortsTree.php TinderObject.php \
-		TinderboxDS.php User.php functions.php
+WEBUICDATA=	Build.php BuildPortsQueue.php LogfilePatterns.php Config.php \
+		Jail.php Port.php PortFailPattern.php PortFailReason.php \
+		PortsTree.php TinderObject.php TinderboxDS.php User.php \
+		functions.php
 WEBUIMDATA=	module.php moduleBuildPorts.php moduleBuilds.php \
-		moduleConfig.php modulePortFailureReasons.php \
+		moduleConfig.php moduleLogs.php modulePortFailureReasons.php \
 		modulePorts.php moduleSession.php moduleTinderd.php \
 		moduleUsers.php
 WEBUITDDATA=	config.tpl current_buildports.tpl describe_port.tpl \
-		display_login.tpl failed_buildports.tpl latest_buildports.tpl \
-		list_buildports.tpl list_builds.tpl list_failure_reasons.tpl \
-		list_tinderd_queue.tpl messages.inc please_login.tpl \
-		tinderstyle.css user_admin.tpl user_permissions.tpl \
-		user_properties.tpl
+		display_login.tpl display_markup_log.tpl failed_buildports.tpl \
+		latest_buildports.tpl list_buildports.tpl list_builds.tpl \
+		list_failure_reasons.tpl list_tinderd_queue.tpl messages.inc \
+		please_login.tpl tinderstyle.css user_admin.tpl \
+		user_permissions.tpl user_properties.tpl
 WEBUITpaefchenDATA=config.tpl current_buildports.tpl describe_port.tpl \
-		  display_login.tpl failed_buildports.tpl footer.inc.tpl \
-		  header.inc.tpl latest_buildports.tpl list_buildports.tpl \
-		  list_builds.tpl list_failure_reasons.tpl \
+		  display_login.tpl display_markup_log.tpl failed_buildports.tpl \
+		  footer.inc.tpl header.inc.tpl latest_buildports.tpl \
+		  list_buildports.tpl list_builds.tpl list_failure_reasons.tpl \
 		  list_tinderd_queue.tpl messages.inc please_login.tpl \
 		  rss.tpl tinderstyle.css user_admin.tpl user_permissions.tpl \
 		  user_properties.tpl

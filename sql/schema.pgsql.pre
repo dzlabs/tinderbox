@@ -141,3 +141,12 @@ CREATE TABLE hooks (
 	hook_cmd VARCHAR(255),
 	hook_description TEXT
 );
+
+-- DROP TABLE logfile_patterns CASCADE;
+CREATE TABLE logfile_patterns (
+	logfile_pattern_id INTEGER PRIMARY KEY,
+	logfile_pattern_tag VARCHAR(30) NOT NULL,
+	logfile_pattern_severity VARCHAR(12) CHECK (logfile_pattern_severity IN ('error','warning','information')) DEFAULT 'information',
+	logfile_pattern_expr TEXT,
+	logfile_pattern_color VARCHAR(20) NOT NULL
+);
