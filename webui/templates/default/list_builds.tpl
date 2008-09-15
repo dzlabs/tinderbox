@@ -12,7 +12,7 @@ $legend = array(
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_builds.tpl,v 1.13 2008/09/14 16:22:14 marcus Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_builds.tpl,v 1.14 2008/09/15 12:41:18 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 <link rel="alternate" type="application/rss+xml" title="<?php echo $tinderbox_name?> (RSS)" href="index.php?action=latest_buildports_rss" />
@@ -51,7 +51,7 @@ $legend = array(
 				<td><?php echo $row['description']?></td>
 				<td align="center">
 					<?php if ($row['results']['SUCCESS'] != '-') {?>
-						<a href="index.php?action=buildports_by_reason&amp;build=<?=$row['name']?>&amp;reason=SUCCESS">
+						<a href="index.php?action=buildports_by_reason&amp;build=<?php echo $row['name']?>&amp;reason=SUCCESS">
 					<?php }?>
 					<span title="success"><?php echo $row['results']['SUCCESS']?></span>
 					<?php if ($row['results']['SUCCESS'] != '-') {?>
@@ -60,7 +60,7 @@ $legend = array(
 				</td>
 				<td align="center">
 					<?php if ($row['results']['UNKNOWN'] != '-') {?>
-						<a href="index.php?action=buildports_by_reason&amp;build=<?=$row['name']?>&amp;reason=UNKNOWN">
+						<a href="index.php?action=buildports_by_reason&amp;build=<?php echo $row['name']?>&amp;reason=UNKNOWN">
 					<?php }?>
 					<span title="unknown"><?php echo $row['results']['UNKNOWN']?></span>
 					<?php if ($row['results']['UNKNOWN'] != '-') {?>
@@ -114,7 +114,7 @@ $legend = array(
 	</table>
 <?php }else{?>
 	<p>There are no builds configured.</p>
-<?}php ?>
+<?php }?>
 
 <form method="get" action="index.php">
 <p>
