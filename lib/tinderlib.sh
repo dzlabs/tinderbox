@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.55 2008/08/10 20:18:45 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.56 2008/09/15 23:37:33 marcus Exp $
 #
 
 tinderLocJail () {
@@ -112,7 +112,8 @@ cleanDirs () {
 	    rm -rf ${dir} >/dev/null 2>&1
 	    if [ $? != 0 ]; then
 		echo "*** FAILED (rm ${dir})"
-		exit 1
+		# This may fail if the directory is a mount point.
+		#exit 1
 	    fi
 	fi
 
