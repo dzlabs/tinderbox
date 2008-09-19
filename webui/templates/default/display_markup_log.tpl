@@ -1,14 +1,14 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-	<!-- $MCom: portstools/tinderbox/webui/templates/default/display_markup_log.tpl,v 1.2 2008/09/19 13:10:55 as Exp $ //-->
+	<!-- $MCom: portstools/tinderbox/webui/templates/default/display_markup_log.tpl,v 1.3 2008/09/19 15:07:38 as Exp $ //-->
 	<title><?php echo $tinderbox_name?></title>
 	<link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 	<script type="text/javascript" src="<?php echo $templatesuri?>/tinderstyle.js"></script>
 </head>
 <body>
-	<h1><?php echo $directory?> log</h1>
-	<p><a href="<?php echo $link_logfile ?>">raw log</a></p>
+	<h1><?php echo $data['port_directory']?> log</h1>
+	<p><a href="<?php echo $data['port_link_logfile']?>">raw log</a></p>
 
 <?php foreach ($stats as $severity => $tags) { ?>
 	<div>

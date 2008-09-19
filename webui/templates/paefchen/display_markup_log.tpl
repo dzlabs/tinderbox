@@ -1,8 +1,8 @@
 <?php
 $header_title = "$directory log";
 $topmenu = array(
-	$directory	=> "index.php?action=describe_port&amp;id=$id",
-	'raw log'	=> $link_logfile
+	$data['port_directory']	=> "index.php?action=describe_port&amp;id=$id",
+	'raw log'				=> $data['port_link_logfile']
 );
 include 'header.inc.tpl';
 ?>

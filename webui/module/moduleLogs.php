@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.2 2008/09/19 13:10:55 as Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.3 2008/09/19 15:07:38 as Exp $
 #
 
 require_once 'module/module.php';
@@ -51,7 +51,7 @@ class moduleLogs extends module {
 			}
 		}
 
-		$data  = $this->modulePorts->get_list_data( $build_id, $ports );
+		list($data) = $this->modulePorts->get_list_data( $build_id, array($build_port) );
 
 		$paterns = array();
 
@@ -77,26 +77,15 @@ class moduleLogs extends module {
 			}
 		}
 
-		foreach ( $data as $port_data ) {
-			if ( !empty ( $port_data['port_link_logfile'] ) ) {
-				$directory = $port_data['port_directory'];
-				$link_logfile = $port_data['port_link_logfile'];
-				$file_name = $port_data['port_logfile_path'];
-				break;
-			}
-		}
-
-		if ( !( is_file( $file_name ) ) ) {
+		if ( !( is_file( $data['port_logfile_path'] ) ) ) {
 			die( 'File cannot be opened for reading.' );
 		}
 
-		$file_name  = realpath( $file_name );
+		$file_name = realpath( $data['port_logfile_path'] );
 
 		if ( strpos( $file_name, $logdir ) !== 0 ) {
 			die( 'So long, and thanks for all the fish' );
 		}
-
-		$lines = file( $file_name );
 
 		$lines = array();
 		$stats = array();
@@ -145,8 +134,7 @@ class moduleLogs extends module {
 		$this->template_assign( 'displaystats', $displaystats );
 		$this->template_assign( 'build', $build_id );
 		$this->template_assign( 'id', $id );
-		$this->template_assign( 'directory', $directory);
-		$this->template_assign( 'link_logfile', $link_logfile);
+		$this->template_assign( 'data', $data );
 
 		$elapsed_time = '';
 		if ( isset( $with_timer ) && $with_timer == 1)
