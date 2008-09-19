@@ -11,6 +11,7 @@ pb=${pb%%/scripts}
 TINDERBUILD_ARGS="$*"
 eval $(${pb}/scripts/tc configTinderd)
 TINDERD_SLEEPTIME=${TINDERD_SLEEPTIME:=120}
+TINDERD_LOGFILE=${TINDERD_LOGFILE:="/dev/null"}
 
 main_loop () {
 
@@ -31,12 +32,15 @@ main_loop () {
 			-i "${ID}" -s PROCESSING
 	    ${pb}/scripts/tc addPort -b "${BUILD}" -d "${PORT}"
 
+	    tinderdEcho "INFO: Starting tinderbuild; output will be sent to ${TINDERD_LOGFILE}"
+	    echo "===Tinderd build of ${PORT} on ${BUILD} starting at $(date)===" >> ${TINDERD_LOGFILE}
 	    if ${pb}/scripts/tc tinderbuild -b "${BUILD}" ${TINDERBUILD_ARGS} \
-			 "${PORT}" >/dev/null ; then
+			 "${PORT}" >>${TINDERD_LOGFILE} 2>&1 ; then
 		status="SUCCESS"
 	    else
 		status="FAIL"
 	    fi
+	    echo "===Tinderd build of ${PORT} on ${BUILD} ending at $(date)===" >> ${TINDERD_LOGFILE}
 	    ${pb}/scripts/tc updateBuildPortsQueueEntryStatus \
 			-i "${ID}" -s ${status}
 

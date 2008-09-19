@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.153 2008/09/10 17:19:52 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.154 2008/09/19 17:31:11 marcus Exp $
 #
 
 my $pb;
@@ -122,8 +122,8 @@ my $ds = new Tinderbox::TinderboxDS();
                 func => \&configTinderd,
                 help =>
                     "Configure Tinderbox tinder daemon (tinderd) parameters",
-                usage  => "[-t <sleep time>]",
-                optstr => 't:',
+                usage  => "[-t <sleep time>] [-l <log file>]",
+                optstr => 't:l:',
         },
         "listJails" => {
                 func  => \&listJails,
@@ -859,6 +859,7 @@ sub configDistfile {
 sub configTinderd {
         my @config = ();
         my $sleeptime;
+	my $logfile;
 
         if (scalar(keys %{$opts}) == 0) {
                 configGet("tinderd");
@@ -868,10 +869,18 @@ sub configTinderd {
         $sleeptime = new Tinderbox::Config();
         $sleeptime->setOptionName("sleeptime");
 
+	$logfile = new Tinderbox::Config();
+	$logfile->setOptionName("logfile");
+
         if ($opts->{'t'}) {
                 $sleeptime->setOptionValue($opts->{'t'});
                 push @config, $sleeptime;
         }
+
+	if ($opts->{'l'}) {
+		$logfile->setOptionValue($opts->{'l'});
+		push @config, $logfile;
+	}
 
         $ds->updateConfig("tinderd", @config)
             or cleanup($ds, 1,
