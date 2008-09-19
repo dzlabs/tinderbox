@@ -12,6 +12,7 @@ if (preg_match('@<!-- (\w+):(\w+);(\w+):(\d*);(\w+):(\d*) //-->@', $display_logi
 	<link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
 	<link rel="alternate" type="application/rss+xml" title="<?php echo $tinderbox_name?> (RSS)" href="index.php?action=latest_buildports_rss" />
+	<script type="text/javascript" src="<?php echo $templatesuri?>/tinderstyle.js"></script>
 </head>
 <body>
 	<div id="header">

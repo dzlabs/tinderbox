@@ -1,156 +1,61 @@
 <?php
+$header_title = "$directory log";
+$topmenu = array(
+	$directory	=> "index.php?action=describe_port&amp;id=$id",
+	'raw log'	=> $link_logfile
+);
 include 'header.inc.tpl';
 ?>
-<form action="index.php">
-	<p>
-		<input type="hidden" name="action" value="display_markup_log" />
-		<input type="hidden" name="build" value="<?php echo $build?>" />
-		<input type="hidden" name="id" value="<?php echo $id?>" />
-	</p>
-	<table class="pattern">
+
+<?php foreach ($stats as $severity => $tags) { ?>
+	<label>
+		<input type="checkbox" id="<?php echo $severity?>"<?php if ($displaystats[$severity]) echo ' checked="checked"'?> />
+		<span class="<?php echo $severity?>"> <?php echo $severity?>s (<?php echo $counts[$severity]?>)</span>
+	</label>
+	<table class="log" id="<?php echo $severity?>_table"<?php if (! $displaystats[$severity]) echo ' style="display:none"'?>>
+	<?php foreach ($tags as $tag => $lnrs) { ?>
 		<tr>
-			<td style="vertical-align:top">
-				<table class="pattern">
-					<tr>
-						<td>
-							<input type="checkbox" name="show_error" value="yes" onclick="this.form.submit()" <?php if($show_error=='yes'){?>checked<?php }?> />
-						</td>
-						<td style="color: red">
-							Errors
-						</td>
-						<td>
-							(<?php echo $counter['error']?>)
-						</td>
-					</tr>
-					<?php foreach($patterns as $pattern){?>
-						<?php if($pattern['counter']!=0&&$pattern['severity']=='error'){?>
-							<tr>
-								<td>
-									<?php if($pattern['show']=='yes'){?>
-										<input type="checkbox" name="pattern_id[]" value="<?php echo $pattern['id']?>" onclick="this.form.submit()" checked />
-									<?php }else{?>
-										<input type="checkbox" name="pattern_id[]" value="<?php echo $pattern['id']?>" onclick="this.form.submit()" />
-									<?php }?>
-								</td>
-								<td>
-									<?php echo $pattern['tag']?>
-								</td>
-								<td>
-									<?php echo $pattern['counter']?>
-								</td>
-							</tr>
-						<?php }?>
-					<?php }?>
-				</table>
-			</td>
-			<td style="vertical-align:top">
-				<table class="pattern">
-					<tr>
-						<td>
-							<input type="checkbox" name="show_warning" value="yes" onclick="this.form.submit()" <?php if($show_warning=='yes'){?>checked<?php }?> />
-						</td>
-						<td style="color: orange">
-							Warnings
-						</td>
-						<td>
-							(<?php echo $counter['warning']?>)
-						</td>
-					</tr>
-					<?php foreach($patterns as $pattern){?>
-						<?php if($pattern['counter']!=0&&$pattern['severity']=='warning'){?>
-							<tr>
-								<td>
-									<?php if($pattern['show']=='yes'){?>
-										<input type="checkbox" name="pattern_id[]" value="<?php echo $pattern['id']?>" onclick="this.form.submit()" checked />
-									<?php }else{?>
-										<input type="checkbox" name="pattern_id[]" value="<?php echo $pattern['id']?>" onclick="this.form.submit()" />
-									<?php }?>
-								</td>
-								<td>
-									<?php echo $pattern['tag']?>
-								</td>
-								<td>
-									<?php echo $pattern['counter']?>
-								</td>
-							</tr>
-						<?php }?>
-					<?php }?>
-				</table>
-			</td>
-			<td style="vertical-align:top">
-				<table class="pattern">
-					<tr>
-						<td>
-							<input type="checkbox" name="show_information" value="yes" onclick="this.form.submit()" <?php if($show_information=='yes'){?>checked<?php }?> />
-						</td>
-						<td style="color: blue">
-							Information
-						</td>
-						<td>
-							(<?php echo $counter['information']?>)
-						</td>
-					</tr>
-					<?php foreach($patterns as $pattern){?>
-						<?php if($pattern['counter']!=0&&$pattern['severity']=='information'){?>
-							<tr>
-								<td>
-									<?php if($pattern['show']=='yes'){?>
-										<input type="checkbox" name="pattern_id[]" value="<?php echo $pattern['id']?>" onclick="this.form.submit()" checked />
-									<?php }else{?>
-										<input type="checkbox" name="pattern_id[]" value="<?php echo $pattern['id']?>" onclick="this.form.submit()" />
-									<?php }?>
-								</td>
-								<td>
-									<?php echo $pattern['tag']?>
-								</td>
-								<td>
-									<?php echo $pattern['counter']?>
-								</td>
-							</tr>
-						<?php }?>
-					<?php }?>
-				<tr><td>&nbsp;</td></tr>
-				</table>
-			</td>
+			<th colspan="2" class="line"><?php echo $tag?> (<?php echo count($lnrs)?>)</th>
 		</tr>
-	</table>
-	<hr />
-	<table class="pattern">
+		<?php foreach ($lnrs as $lnr) { ?>
 		<tr>
-			<td>
-				<input type="checkbox" name="show_line_number" value="yes" onclick="this.form.submit()" <?php if($show_line_number=='yes'){?>checked<?php }?> />
-			</td>
-			<td>
-				Show line numbers
-			</td>
+			<td class="num"><a href="#<?php echo $lnr?>"><?php echo $lnr?></a></td>
+			<td class="line"><a href="#<?php echo $lnr?>" style="color: <?php echo $colors[$lnr]?>"><?php echo $lines[$lnr]?></a></td>
 		</tr>
+		<?php } ?>
+	<?php } ?>
 	</table>
-</form>
-<hr />
-<table>
-	<tr>
-		<?php if($show_line_number=='yes'){?>
-			<th>Nr</th>
-		<?php }?>
-		<th>Line</th>
+<?php } ?>
+
+<div>
+	<label><input type="checkbox" id="linenumber"<?php if ($displaystats['linenumber']) echo ' checked="checked"'?> /> show line numbers</label>
+</div>
+
+<table class="log" id="log_table">
+	<tr id="l0">
+		<th class="num"<?php if (! $displaystats['linenumber']) echo ' style="display:none"'?>>Nr</th>
+		<th class="line">Line</th>
 	</tr>
-	<?php for($i=0;$i<sizeof($result);$i++){?>
-	<tr>
-		<?php if($show_line_number=='yes'){?>
-		<td>
-			<a href="#<?php echo ($i+1)?>">
-				<?php echo ($i+1)?>
-			</a>
-		</td>
-		<?php }?>
-		<td style="font-family: monospace; white-space: normal; empty-cells: show; <?php if($result[$i]['color']!='None'){?>color:<?php echo $result[$i]['color']?><?php }?>">
-			<a name="<?php echo ($i+1)?>">
-				<?php echo $result[$i]['line']?>
-			</a>
-		</td>
+<?php foreach ($lines as $lnr => $line){?>
+	<tr id="l<?php echo $lnr?>">
+		<td class="num"<?php if (! $displaystats['linenumber']) echo ' style="display:none"'?>><a href="#<?php echo $lnr?>"><?php echo $lnr?></a></td>
+		<td class="line" style="color:<?php echo $colors[$lnr]?>"><a name="<?php echo $lnr?>"></a><?php echo $line?></td>
 	</tr>
-	<?php }?>
-</table>
-<?php
+<?php }?>
+</table> 
+
+<script type= "text/javascript">
+	/* <![CDATA[ */
+	var log_colorlines = {error: {}, warning: {}, information: {}};
+<?php foreach ($stats as $severity => $tags) {
+	foreach ($tags as $tag => $lnrs) {
+		foreach ($lnrs as $lnr) { ?>
+	log_colorlines["<?php echo $severity?>"][<?php echo $lnr?>] = "<?php echo $colors[$lnr]?>";
+<?php }}} ?>
+	window.onload = log_ini;
+	/* ]]> */
+</script>
+
+<?php 
 include 'footer.inc.tpl'; 
 ?>

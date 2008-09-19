@@ -311,6 +311,35 @@ td.fail_reason_TRANSIENT {
 	background-color	: yellow;
 }
 
+table.log td {
+	font-family			: monospace;
+	white-space			: pre-wrap;
+	empty-cells			: show;
+}
+table.log th.num,
+table.log td.num {
+	text-align			: right;
+	vertical-align		: top;
+}
+table.log td a {
+	text-decoration		: none;
+}
+table.log th.line {
+	text-align			: left;
+}
+table.log td.line {
+	background-color	: #F7F7F7;
+}
+.error {
+	color				: red;
+}
+.warning {
+	color				: orange;
+}
+.information {
+	color				: blue;
+}
+
 /* XXX */
 body > p {
 	display				: none;	

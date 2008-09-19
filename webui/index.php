@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.27 2008/09/15 16:33:13 beat Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.28 2008/09/19 13:10:55 as Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -158,12 +158,7 @@ switch( $action ) {
 					if ( !isset( $_REQUEST['build'] ) || !isset( $_REQUEST['id'] ) ) {
 						die( 'Build or port id missing.' );
 					}
-					$pattern_id        = $_REQUEST['pattern_id'];
-					$show_line_number  = $_REQUEST['show_line_number'];
-					$show_error        = $_REQUEST['show_error'];
-					$show_warning      = $_REQUEST['show_warning'];
-					$show_information  = $_REQUEST['show_information'];
-					$display	= $moduleLogs->markup_log( $build, $id, $pattern_id, $show_line_number, $show_error, $show_warning, $show_information, $show_patterns );
+					$display	= $moduleLogs->markup_log( $build, $id);
 					break;
 	case 'list_builds':
 	default:			$display    = $moduleBuilds->display_list_builds();

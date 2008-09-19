@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.1 2008/09/15 16:33:14 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.2 2008/09/19 13:10:55 as Exp $
 #
 
 require_once 'module/module.php';
@@ -37,7 +37,7 @@ class moduleLogs extends module {
 		$this->modulePorts = new modulePorts();
 	}
 
-	function markup_log( $build_id, $id, $pattern_ids, $show_line_number, $show_error, $show_warning, $show_information ) {
+	function markup_log( $build_id, $id ) {
 		global $rootdir, $logdir;
 		global $with_timer, $starttimer;
 
@@ -53,6 +53,8 @@ class moduleLogs extends module {
 
 		$data  = $this->modulePorts->get_list_data( $build_id, $ports );
 
+		$paterns = array();
+
 		if ( $build_port->getLastStatus() == 'FAIL' ) {
 			foreach ( $this->TinderboxDS->getAllPortFailPatterns() as $pattern ) {
 				if ( $pattern->getExpr() != '.*' ) {
@@ -62,14 +64,6 @@ class moduleLogs extends module {
 					$patterns[$pattern->getId()]['expr']     = '/' . addcslashes( $pattern->getExpr(), '/' ) . '/';
 					$patterns[$pattern->getId()]['color']    = 'red';
 					$patterns[$pattern->getId()]['counter']  = 0;
-					if ( !empty ( $pattern_ids ) ) {
-						foreach ( $pattern_ids as $pattern_id ) {
-							if ( $pattern_id == $pattern->getId() ) {
-								$patterns[$pattern->getId()]['show'] = 'yes';
-								break;
-							}
-						}
-					}
 				}
 			}
 		} else {
@@ -80,31 +74,13 @@ class moduleLogs extends module {
 				$patterns[$pattern->getId()]['expr']     = $pattern->getExpr();
 				$patterns[$pattern->getId()]['color']    = $pattern->getColor();
 				$patterns[$pattern->getId()]['counter']  = 0;
-				if ( !empty ( $pattern_ids ) ) {
-					foreach ( $pattern_ids as $pattern_id ) {
-						if ( $pattern_id == $pattern->getId() ) {
-							$patterns[$pattern->getId()]['show'] = 'yes';
-							break;
-						}
-					}
-				}
 			}
-		}
-
-		if ( $show_error == 'yes' ) {
-			array_walk( $patterns, create_function( '&$pattern', 'if ( $pattern["severity"] == "error") { $pattern["show"] = "yes"; }' ) );
-		}
-
-		if ( $show_warning == 'yes' ) {
-			array_walk( $patterns, create_function( '&$pattern', 'if ( $pattern["severity"] == "warning") { $pattern["show"] = "yes"; }' ) );
-		}
-
-		if ( $show_information == 'yes' ) {
-			array_walk( $patterns, create_function( '&$pattern', 'if ( $pattern["severity"] == "information") { $pattern["show"] = "yes"; }' ) );
 		}
 
 		foreach ( $data as $port_data ) {
 			if ( !empty ( $port_data['port_link_logfile'] ) ) {
+				$directory = $port_data['port_directory'];
+				$link_logfile = $port_data['port_link_logfile'];
 				$file_name = $port_data['port_logfile_path'];
 				break;
 			}
@@ -122,52 +98,62 @@ class moduleLogs extends module {
 
 		$lines = file( $file_name );
 
-		$counter['error']       = 0;
-		$counter['warning']     = 0;
-		$counter['information'] = 0;
+		$lines = array();
+		$stats = array();
+		$colors = array();
+		$counts = array();
+		$displaystats = array();
 
-		for( $i = 0; $i < sizeof( $lines ); $i++ ) {
+		$fh = fopen($file_name, 'r');
 
-			$j = 0;
+		for ($lnr = 1; ! feof($fh); $lnr++) {
+			$line = fgets($fh);
 
-			$lines[$i] = chop( $lines[$i] );
-			$lines[$i] = htmlentities( $lines[$i] );
+			$lines[$lnr] = htmlentities(rtrim($line));
+			$colors[$lnr] = '';
 
-			foreach ( $patterns as $pattern ) {
-				if ( empty( $lines[$i] ) ) {
-					$lines[$i] = '&nbsp;';	
+			foreach ($patterns as $pattern) {
+				if (! preg_match($pattern['expr'], $line))
+					continue;
+
+				$colors[$lnr] = $pattern['color'];
+
+				if (! isset($stats[$pattern['severity']])) {
+					$stats[$pattern['severity']] = array();
+					$counts[$pattern['severity']] = 0;
+					$displaystats[$pattern['severity']] = true;
+					if (isset($_COOKIE[$pattern['severity']]) && $_COOKIE[$pattern['severity']] == '0')
+						$displaystats[$pattern['severity']] = false;
 				}
-				else {
-					if ( preg_match( $pattern['expr'] , $lines[$i] ) ) {
-						$result[$i]['severity'] = $pattern['severity'];
-						$result[$i]['line']     = $lines[$i];
-						if ( $pattern['show'] == 'yes' ) {
-							$result[$i]['color']    = $pattern['color'];
-						}
-						$patterns[$pattern['id']]['counter']++;
-						$counter[$pattern['severity']]++;
-						$j = 1;
-						break;
-					}
-				}
-			}
-			if ( $j == 0 ) {
-				$result[$i]['color'] = 'None';
-				$result[$i]['line']  = $lines[$i];
+
+				if (! isset($stats[$pattern['severity']][$pattern['tag']]))
+					$stats[$pattern['severity']][$pattern['tag']] = array();
+
+				$stats[$pattern['severity']][$pattern['tag']][] = $lnr;
+				$counts[$pattern['severity']]++;
 			}
 		}
 
-		$this->template_assign( 'counter', $counter );
-		$this->template_assign( 'show_line_number', $show_line_number );
-		$this->template_assign( 'result', $result );
+		$displaystats['linenumber'] = true;
+		if (isset($_COOKIE['linenumber']) && $_COOKIE['linenumber'] == '0')
+			$displaystats['linenumber'] = false;
+
+		$this->template_assign( 'lines', $lines );
+		$this->template_assign( 'stats', $stats );
+		$this->template_assign( 'colors', $colors );
+		$this->template_assign( 'counts', $counts );
+		$this->template_assign( 'displaystats', $displaystats );
 		$this->template_assign( 'build', $build_id );
 		$this->template_assign( 'id', $id );
-		$this->template_assign( 'patterns', $patterns );
+		$this->template_assign( 'directory', $directory);
+		$this->template_assign( 'link_logfile', $link_logfile);
+
 		$elapsed_time = '';
-		if ( isset( $with_timer ) && $with_timer == 1) {
+		if ( isset( $with_timer ) && $with_timer == 1)
 			$elapsed_time = get_ui_elapsed_time( $starttimer );
-		}
+
 		$this->template_assign( 'ui_elapsed_time', $elapsed_time );
+
 		return $this->template_parse( 'display_markup_log.tpl' );
 	}
 }
