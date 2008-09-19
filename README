@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.78 2008/08/27 18:18:17 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.79 2008/09/19 17:15:11 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -589,9 +589,11 @@ the output of ps(1).
 
 You can start tinderd (it will stay in foreground by default).
 If you want to run tinderd automatically when the system boots, copy the
-include ${pb}/etc/rc.d/tinderd.sh script to /usr/local/etc/rc.d.  Be sure
+include ${pb}/etc/rc.d/tinderd script to /usr/local/etc/rc.d.  Be sure
 to check out the various rc.conf variables documented in this script before
-using it.
+using it.  NOTE: the script used to be called tinderd.sh.  If you have
+a /usr/local/etc/rc.d/tinderd.sh script, delete it, then copy the new
+tinderd script to the rc.d directory.
 
 Now use:
 
