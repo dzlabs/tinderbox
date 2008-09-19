@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # $FreeBSD$
-#   $MCom: portstools/tinderbox/etc/rc.d/tinderd,v 1.6 2008/09/19 17:03:41 marcus Exp $
+#   $MCom: portstools/tinderbox/etc/rc.d/tinderd,v 1.7 2008/09/19 17:06:38 marcus Exp $
 #
 
 # PROVIDE: tinderd
@@ -13,16 +13,17 @@
 #tinderd_enable="YES"
 #
 
-. "/etc/rc.subr"
+. /etc/rc.subr
 
 name="tinderd"
 rcvar=`set_rcvar`
 
 # read settings, set default values
-load_rc_config "$name"
+load_rc_config "${name}"
 : ${tinderd_enable="NO"}
 : ${tinderd_directory="/space/scripts"}
 : ${tinderd_flags=""}
+: ${tinderd_debug="NO"}
 
 # path to your executable, might be libexec, bin, sbin, ...
 command="${tinderd_directory}/tinderd"
@@ -31,6 +32,11 @@ command="${tinderd_directory}/tinderd"
 command_interpreter="/bin/sh"
 
 # extra required arguments
-command_args=">/dev/null &"
+if checkyesno tinderd_debug
+then
+    command_args=" &"
+else
+    command_args=">/dev/null &"
+fi
 
 run_rc_command "$1"
