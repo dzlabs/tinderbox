@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.105 2008/09/18 21:58:34 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.106 2008/09/19 17:08:43 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -325,7 +325,7 @@ Upgrade () {
     # Cleanup files that are no longer needed.
     echo ""
     tinderEcho "INFO: Cleaning up stale files..."
-    REMOVE_FILES="buildscript create enterbuild makemake mkbuild mkjail pnohang.c portbuild rawenv rawenv.dist tbkill.sh tinderbuild tinderbox-mysql.schema tinderbox-pgsql.schema setup.sh upgrade.sh lib/Build.pm lib/BuildPortsQueue.pm lib/Hook.pm lib/Host.pm lib/Jail.pm lib/MakeCache.pm lib/Port.pm lib/PortFailPattern.pm lib/PortFailReason.pm lib/PortsTree.pm lib/TBConfig.pm lib/TinderObject.pm lib/TinderboxDS.pm lib/User.pm lib/tinderbox_shlib.sh lib/setup-mysql.sh lib/setup-pgsql.sh lib/setup_shlib.sh upgrade/mig_mysql_tinderbox-1.X_to_2.0.0.sql upgrade/mig_mysql_tinderbox-2.0.0_to_2.1.0.sql upgrade/mig_mysql_tinderbox-2.1.0_to_2.1.1.sql upgrade/mig_mysql_tinderbox-2.1.1_to_2.2.0.sql upgrade/mig_mysql_tinderbox-2.2.0_to_2.3.0.sql upgrade/mig_mysql_tinderbox-2.3.0_to_2.3.1.sql upgrade/mig_mysql_tinderbox-2.3.1_to_2.3.2.sql upgrade/mig_mysql_tinderbox-2.3.2_to_2.3.3.sql upgrade/mig_mysql_tinderbox-2.3.3_to_2.4.0.sql upgrade/mig_pgsql_tinderbox-2.1.1_to_2.2.0.sql upgrade/mig_pgsql_tinderbox-2.2.0_to_2.3.0.sql upgrade/mig_pgsql_tinderbox-2.3.0_to_2.3.1.sql upgrade/mig_pgsql_tinderbox-2.3.1_to_2.3.2.sql upgrade/mig_pgsql_tinderbox-2.3.2_to_2.3.3.sql upgrade/mig_pgsql_tinderbox-2.3.3_to_2.4.0.sql upgrade/mig_shlib.sh"
+    REMOVE_FILES="buildscript create enterbuild makemake mkbuild mkjail pnohang.c portbuild rawenv rawenv.dist tbkill.sh tinderbuild tinderbox-mysql.schema tinderbox-pgsql.schema setup.sh upgrade.sh lib/Build.pm lib/BuildPortsQueue.pm lib/Hook.pm lib/Host.pm lib/Jail.pm lib/MakeCache.pm lib/Port.pm lib/PortFailPattern.pm lib/PortFailReason.pm lib/PortsTree.pm lib/TBConfig.pm lib/TinderObject.pm lib/TinderboxDS.pm lib/User.pm lib/tinderbox_shlib.sh lib/setup-mysql.sh lib/setup-pgsql.sh lib/setup_shlib.sh upgrade/mig_mysql_tinderbox-1.X_to_2.0.0.sql upgrade/mig_mysql_tinderbox-2.0.0_to_2.1.0.sql upgrade/mig_mysql_tinderbox-2.1.0_to_2.1.1.sql upgrade/mig_mysql_tinderbox-2.1.1_to_2.2.0.sql upgrade/mig_mysql_tinderbox-2.2.0_to_2.3.0.sql upgrade/mig_mysql_tinderbox-2.3.0_to_2.3.1.sql upgrade/mig_mysql_tinderbox-2.3.1_to_2.3.2.sql upgrade/mig_mysql_tinderbox-2.3.2_to_2.3.3.sql upgrade/mig_mysql_tinderbox-2.3.3_to_2.4.0.sql upgrade/mig_pgsql_tinderbox-2.1.1_to_2.2.0.sql upgrade/mig_pgsql_tinderbox-2.2.0_to_2.3.0.sql upgrade/mig_pgsql_tinderbox-2.3.0_to_2.3.1.sql upgrade/mig_pgsql_tinderbox-2.3.1_to_2.3.2.sql upgrade/mig_pgsql_tinderbox-2.3.2_to_2.3.3.sql upgrade/mig_pgsql_tinderbox-2.3.3_to_2.4.0.sql upgrade/mig_shlib.sh etc/rc.d/tinderd.sh"
     for f in ${REMOVE_FILES}; do
         rm -f "${pb}/scripts/${f}"
     done
