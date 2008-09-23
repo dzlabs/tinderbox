@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.10 2008/09/10 21:29:30 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.11 2008/09/23 22:19:34 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -276,7 +276,7 @@ class moduleTinderd extends module {
 							if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'delete' ) ) {
 								if ( $action == 'delete all built' ) {
 									if ( $build_ports_queue_entry->status != 'SUCCESS' ) {
-										break;
+										continue;
 									}
 								}
 								$queue_id = $build_ports_queue_entry->getBuildPortsQueueId();
