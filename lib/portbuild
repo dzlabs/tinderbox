@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.124 2008/09/11 18:52:08 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.125 2008/09/29 15:39:35 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -33,9 +33,9 @@ cleanup()
 	    if [ ${ARCH} = "i386" ]; then
 	        chroot ${chroot} /sbin/ldconfig -aout -R
 	    fi
-        fi
-    else
-	${tc} makeBuild -b ${build}
+	else
+	    ${tc} makeBuild -b ${build}
+	fi
     fi
 
     echo "$pkgname done at `date`"
