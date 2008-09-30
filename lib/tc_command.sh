@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.106 2008/09/19 17:08:43 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.107 2008/09/30 05:08:07 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1169,6 +1169,35 @@ makeBuild () {
     cp -f /etc/resolv.conf ${BUILD_DIR}/etc
 
     return 0
+}
+
+resetBuild () {
+    # set up defaults
+    build=""
+
+    # argument handling
+    while getopts b: arg >/dev/null 2>&1
+    do
+	case "${arg}" in
+
+	b)	build="${OPTARG}";;
+	?)	exit 1;;
+
+	esac
+    done
+
+    # argument validation
+    if [ -z "${build}" ]; then
+	echo "resetBuild: no buildname specified"
+	exit 1
+    fi
+
+    if ! tcExists Builds ${build}; then
+	echo "resetBuild: build \"${build}\" doesn't exist"
+	exit 1
+    fi
+
+    tinderbuild_setup
 }
 
 createBuild () {
