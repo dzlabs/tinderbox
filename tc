@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.85 2008/09/30 05:08:07 marcus Exp $
+# $MCom: portstools/tinderbox/tc,v 1.86 2008/10/13 04:28:37 marcus Exp $
 
 # Make sure we're root.  Things aren't going to work so well if not.
 if [ `id -u` != 0 ]; then
@@ -79,6 +79,7 @@ makeJail|\
 resetBuild|\
 tinderbuild|\
 addPort|\
+rescanPorts|\
 enterBuild|\
 tbcleanup|\
 tbkill|\
