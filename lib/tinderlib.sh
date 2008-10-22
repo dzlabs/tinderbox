@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.58 2008/10/22 05:38:02 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.59 2008/10/22 17:25:36 marcus Exp $
 #
 
 tinderLocJail () {
@@ -609,7 +609,7 @@ loadSchema () {
     if [ ! -f ${schema_file} ]; then
 	tinderEcho "ERROR: Schema file ${schema_file} does not exist."
 	return 1
-    f6
+    fi
 
     eval ${DB_PROMPT}
     eval ${DB_SCHEMA_LOAD}
