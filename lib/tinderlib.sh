@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.56 2008/09/15 23:37:33 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.57 2008/10/22 01:10:24 marcus Exp $
 #
 
 tinderLocJail () {
@@ -767,48 +767,6 @@ createDb () {
     tinderEcho "DONE."
     echo ""
 
-    tinderEcho "INFO: Checking to see if database ${db_name} already exists on ${db_host} ..."
-    eval ${DB_PROMPT}
-    eval ${DB_CHECK} >/dev/null 2>&1
-    if [ $? = 0 ]; then
-	tinderEcho "WARN: A database with the name ${db_name} already exists on ${db_host}.  Do you want to use this database for Tinderbox (note: if you type 'n', database creation will abort)?"
-	read -p "(y/N) " i
-	case "${i}" in
-	    [Yy]|[Yy][Ee][Ss])
-	        # continue
-		;;
-	    *)
-	        tinderEcho "INFO: Database creation aborted by user."
-		return 1
-		;;
-	esac
-    else
-	tinderEcho "INFO: Database ${db_name} does not exist.  Creating ${db_name} on ${db_host} ..."
-	eval ${DB_PROMPT}
-	eval ${DB_CREATE}
-	if [ $? != 0 ]; then
-	    return $?
-	fi
-    fi
-
-    tinderEcho "INFO: Loading Tinderbox schema into ${db_name} ..."
-    schema=$(tinderLoc scripts sql/tinderbox-${db_driver}.schema)
-    schema_dir=$(tinderLoc scripts sql)
-    ( cd ${schema_dir} && ./genschema ${db_driver} > ${schema} )
-    if [ ! -f ${schema} ]; then
-	tinderEcho "ERROR: Schema file ${schema} does not exist."
-	return 1
-    fi
-
-    loadSchema ${schema} ${db_driver} ${db_admin} ${db_host} ${db_name}
-    rc=$?
-    rm -f ${schema}
-
-    if [ ${rc} != 0 ]; then
-	tinderEcho "ERROR: Database schema load failed!  Consult the output above for more information."
-	return 1
-    fi
-
     finished=0
     while [ ${finished} != 1 ]; do
 	read -p "Enter the desired username for the Tinderbox database : " db_user
@@ -844,6 +802,60 @@ createDb () {
 		;;
 	esac
     done
+
+
+    tinderEcho "INFO: Checking to see if database ${db_name} already exists on ${db_host} ..."
+    eval ${DB_PROMPT}
+    eval ${DB_CHECK} >/dev/null 2>&1
+    if [ $? = 0 ]; then
+	tinderEcho "WARN: A database with the name ${db_name} already exists on ${db_host}.  Do you want to use this database for Tinderbox (note: if you type 'n', database creation will abort)?"
+	read -p "(y/N) " i
+	case "${i}" in
+	    [Yy]|[Yy][Ee][Ss])
+	        # continue
+		;;
+	    *)
+	        tinderEcho "INFO: Database creation aborted by user."
+		return 1
+		;;
+	esac
+    else
+	tinderEcho "INFO: Database ${db_name} does not exist.  Creating ${db_name} on ${db_host} ..."
+        tinderEcho "INFO: Creating user ${db_user} on host ${db_host} (if required) ..."
+        eval ${DB_USER_PROMPT}
+        eval ${DB_CREATE_USER}
+        if [ $? != 0 ]; then
+            tinderEcho "ERROR: User creation failed!  Consult the output above for more information."
+	    return $?
+        fi
+
+        tinderEcho "DONE."
+        echo ""
+
+	eval ${DB_PROMPT}
+	eval ${DB_CREATE}
+	if [ $? != 0 ]; then
+	    return $?
+	fi
+    fi
+
+    tinderEcho "INFO: Loading Tinderbox schema into ${db_name} ..."
+    schema=$(tinderLoc scripts sql/tinderbox-${db_driver}.schema)
+    schema_dir=$(tinderLoc scripts sql)
+    ( cd ${schema_dir} && ./genschema ${db_driver} > ${schema} )
+    if [ ! -f ${schema} ]; then
+	tinderEcho "ERROR: Schema file ${schema} does not exist."
+	return 1
+    fi
+
+    loadSchema ${schema} ${db_driver} ${db_admin} ${db_host} ${db_name}
+    rc=$?
+    rm -f ${schema}
+
+    if [ ${rc} != 0 ]; then
+	tinderEcho "ERROR: Database schema load failed!  Consult the output above for more information."
+	return 1
+    fi
 
     grant_host=""
     if [ ${db_host} = "localhost" ]; then

@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/db-mysql.sh,v 1.3 2008/08/27 01:59:17 marcus Exp $
+# $MCom: portstools/tinderbox/lib/db-mysql.sh,v 1.4 2008/10/22 01:10:24 marcus Exp $
 #
 export DB_MAN_PREREQS="databases/p5-DBD-mysql[45][01] databases/mysql[45][01]-client"
 export DB_OPT_PREREQS="databases/php5-mysql"
@@ -37,6 +37,8 @@ if [ -n "${db_admin_pass}" ]; then
     export DB_CREATE='/usr/local/bin/mysqladmin -u${db_admin} --password="${db_admin_pass}" -h ${db_host} create ${db_name}'
     export DB_GRANT='/usr/local/bin/mysql -u${db_admin} --password="${db_admin_pass}" -h ${db_host} -e "GRANT SELECT, INSERT, UPDATE, DELETE ON ${db_name}.* TO '"'"'${db_user}'"'"'@'"'"'${grant_host}'"'"' IDENTIFIED BY '"'"'${db_pass}'"'"' ; FLUSH PRIVILEGES" mysql'
     export DB_QUERY='/usr/local/bin/mysql --batch --skip-column-names -u${db_admin} --password="${db_admin_pass}" -h ${db_host} -e "${query}" ${db_name}'
+    export DB_USER_PROMPT='true'
+    export DB_CREATE_USER='true'
 else
     export DB_PROMPT='echo "The next prompt will be for ${db_admin}'"'"'s password to the ${db_name} database." | /usr/bin/fmt 75 79'
     export DB_SCHEMA_LOAD='/usr/local/bin/mysql -u${db_admin} -p -h ${db_host} ${db_name} < "${schema_file}"'
@@ -46,4 +48,6 @@ else
     export DB_CREATE='/usr/local/bin/mysqladmin -u${db_admin} -p -h ${db_host} create ${db_name}'
     export DB_GRANT='/usr/local/bin/mysql -u${db_admin} -p -h ${db_host} -e "GRANT SELECT, INSERT, UPDATE, DELETE ON ${db_name}.* TO '"'"'${db_user}'"'"'@'"'"'${grant_host}'"'"' IDENTIFIED BY '"'"'${db_pass}'"'"' ; FLUSH PRIVILEGES" mysql'
     export DB_QUERY='/usr/local/bin/mysql --batch --skip-column-names -u${db_admin} -p -h ${db_host} -e "${query}" ${db_name}'
+    export DB_USER_PROMPT='true'
+    export DB_CREATE_USER='true'
 fi
