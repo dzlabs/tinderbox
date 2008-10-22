@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.108 2008/10/13 04:28:38 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.109 2008/10/22 05:38:02 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -402,7 +402,7 @@ Upgrade () {
             if ! createDb ${db_driver} ${db_admin} ${db_host} ${db_name} 0; then
     	        tinderExit "ERROR: Error creating the new database!  Consult the output above for more information.  Once the problem is corrected, run \"${tc} Upgrade -backup ${bkup_file}\" to resume migration." $?
             fi
-            if ! loadSchema ${bkup_file} ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
+            if ! loadSchema ${bkup_file} ${db_driver} ${db_admin} ${db_admin} ${db_host} ${db_name} ; then
     	        tinderExit "ERROR: Database restoration failed!  Consult the output above for more information.  Once the problem is corrected, run \"${tc} Upgrade -backup ${bkup_file}\" to resume migration." $?
             fi
             rm -f ${bkup_file}
