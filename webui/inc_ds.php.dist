@@ -1,6 +1,7 @@
 <?php
 
 $DB_DRIVER = 'mysql';
+#$DB_DRIVER = 'pgsql';
 $DB_HOST = 'mysql.example.com';
 $DB_NAME = 'tinderbox';
 $DB_USER = 'tinder';
