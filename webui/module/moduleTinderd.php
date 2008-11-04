@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.11 2008/09/23 22:19:34 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.12 2008/11/04 20:21:56 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -187,37 +187,39 @@ class moduleTinderd extends module {
 			return $this->template_parse( 'please_login.tpl' );
 		} else {
 			$build_ports_queue_entry = $this->TinderboxDS->getBuildPortsQueueEntryById( $entry_id );
-			$this->build_id = $build_ports_queue_entry->getBuildId();
-			if( $action == 'delete' ) {
-				if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'delete' ) ) {
-					$this->TinderboxDS->deleteBuildPortsQueueEntry( $entry_id );
-				} else {
-					$this->TinderboxDS->addError( build_ports_queue_not_allowed_to_delete );
-				}
-			} elseif( $action == 'reset status' ) {
-				if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'modify' ) ) {
-					$build_ports_queue_entry->resetStatus();
-					$this->TinderboxDS->updateBuildPortsQueueEntry( $build_ports_queue_entry );
-				} else {
-					$this->TinderboxDS->addError( build_ports_queue_not_allowed_to_modify );
-				}
-			} elseif(  $action == 'save' ) {
-				if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'modify' ) ) {
-					$this->build_id = $build_id;
+			if ( !empty ( $build_ports_queue_entry ) ) {
+				$this->build_id = $build_ports_queue_entry->getBuildId();
+				if( $action == 'delete' ) {
+					if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'delete' ) ) {
+						$this->TinderboxDS->deleteBuildPortsQueueEntry( $entry_id );
+					} else {
+						$this->TinderboxDS->addError( build_ports_queue_not_allowed_to_delete );
+					}
+				} elseif( $action == 'reset status' ) {
 					if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'modify' ) ) {
-						if( $build_ports_queue_entry->getPriority() != $priority && $priority < 5 && !$this->checkQueueEntryAccess( $build_ports_queue_entry, 'priolower5' ) ) {
-							$this->TinderboxDS->addError( build_ports_queue_priority_to_low );
+						$build_ports_queue_entry->resetStatus();
+						$this->TinderboxDS->updateBuildPortsQueueEntry( $build_ports_queue_entry );
+					} else {
+						$this->TinderboxDS->addError( build_ports_queue_not_allowed_to_modify );
+					}
+				} elseif(  $action == 'save' ) {
+					if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'modify' ) ) {
+						$this->build_id = $build_id;
+						if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'modify' ) ) {
+							if( $build_ports_queue_entry->getPriority() != $priority && $priority < 5 && !$this->checkQueueEntryAccess( $build_ports_queue_entry, 'priolower5' ) ) {
+								$this->TinderboxDS->addError( build_ports_queue_priority_to_low );
+							} else {
+								$build_ports_queue_entry->setBuildId( $build_id );
+								$build_ports_queue_entry->setPriority( $priority );
+								$build_ports_queue_entry->setEmailOnCompletion( $email_on_completion );
+								$this->TinderboxDS->updateBuildPortsQueueEntry( $build_ports_queue_entry );;
+							}
 						} else {
-							$build_ports_queue_entry->setBuildId( $build_id );
-							$build_ports_queue_entry->setPriority( $priority );
-							$build_ports_queue_entry->setEmailOnCompletion( $email_on_completion );
-							$this->TinderboxDS->updateBuildPortsQueueEntry( $build_ports_queue_entry );;
+							$this->TinderboxDS->addError( build_ports_queue_not_allowed_to_modify );
 						}
 					} else {
 						$this->TinderboxDS->addError( build_ports_queue_not_allowed_to_modify );
 					}
-				} else {
-					$this->TinderboxDS->addError( build_ports_queue_not_allowed_to_modify );
 				}
 			}
 		}
