@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.110 2008/10/22 05:39:40 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.111 2008/11/10 07:02:40 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -415,7 +415,7 @@ Upgrade () {
 	        MIG_VERSION_TO=${2}
 
 	        if [ ${MIG_VERSION_FROM} = ${dsversion} ] ; then
-		    migDb ${do_load} ${db_driver} ${db_admin} ${db_host} ${db_name}
+		    migDb ${do_load} ${db_driver} ${db_admin} ${db_admin} ${db_host} ${db_name}
 		    case $? in
 		        2)
 		            tinderExit "ERROR: Database migration failed!  Consult the output above for more information." 2
