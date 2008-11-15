@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.111 2008/11/10 07:02:40 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.112 2008/11/15 18:11:47 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1176,13 +1176,16 @@ makeBuild () {
 resetBuild () {
     # set up defaults
     build=""
+    nullfs=""
+    cleandistfiles="0"
 
     # argument handling
-    while getopts b: arg >/dev/null 2>&1
+    while getopts b:n arg >/dev/null 2>&1
     do
 	case "${arg}" in
 
 	b)	build="${OPTARG}";;
+	n)	nullfs="-n";;
 	?)	exit 1;;
 
 	esac
@@ -1198,6 +1201,16 @@ resetBuild () {
 	echo "resetBuild: build \"${build}\" doesn't exist"
 	exit 1
     fi
+
+    tc=$(tinderLoc scripts tc)
+
+    jail=$(${tc} getJailForBuild -b ${build})
+    portstree=$(${tc} getPortsTreeForBuild -b ${build})
+
+    requestMount -t jail -j ${jail}
+    cleanenv
+    buildenv ${jail} ${portstree} ${build}
+    cleanupMounts -t jail -j ${jail}
 
     tinderbuild_setup
 }

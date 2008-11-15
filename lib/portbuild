@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.126 2008/09/30 05:08:07 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.127 2008/11/15 18:11:47 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -17,6 +17,7 @@ cleanup()
     cleandirs=$4
     pkgname=$5
     build=$6
+    nullfs=$7
 
     umount ${chroot}/compat/linux/proc >/dev/null
     umount ${chroot}/proc >/dev/null
@@ -34,7 +35,7 @@ cleanup()
 	        chroot ${chroot} /sbin/ldconfig -aout -R
 	    fi
 	else
-	    ${tc} resetBuild -b ${build}
+	    ${tc} resetBuild -b ${build} ${nullfs}
 	fi
     fi
 
@@ -274,7 +275,7 @@ mkdir -p ${chroot}/tmp/depends ${chroot}/tmp/distfiles ${chroot}/tmp/packages
 echo "building ${pkgname} in directory ${chroot}" | \
     tee ${chroot}/tmp/${pkgname}.log
 
-trap  "cleanup ${chroot} ${noclean} ${error} \"${cleandirs}\" ${pkgname} ${build}" 1 2 3 9 10 11 15
+trap  "cleanup ${chroot} ${noclean} ${error} \"${cleandirs}\" ${pkgname} ${build} ${nullfs}" 1 2 3 9 10 11 15
 
 # Don't build in a world-writable standard directory because some ports
 # hardcode this path and try to load things from it at runtime, which is
@@ -438,5 +439,5 @@ else
     execute_hook "postPortBuild" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} STATUS=FAIL PORTDIR=${portdir} PB=${pb} ${reasonenv} TOTAL_SIZE=${total_size}"
 fi
 
-cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${build}
+cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${build} ${nullfs}
 exit ${error}

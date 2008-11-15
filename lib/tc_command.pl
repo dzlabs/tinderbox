@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.156 2008/10/13 04:28:37 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.157 2008/11/15 18:11:47 marcus Exp $
 #
 
 my $pb;
@@ -577,8 +577,8 @@ my $ds = new Tinderbox::TinderboxDS();
 
         "resetBuild" => {
                 help   => "Cleanup and reset a Build environment",
-                usage  => "-b <buildname>",
-                optstr => 'b:',
+                usage  => "-b <buildname> [-n]",
+                optstr => 'b:n',
         },
 
         "tinderbuild" => {
