@@ -32,7 +32,7 @@ main_loop () {
 			-i "${ID}" -s PROCESSING
 	    ${pb}/scripts/tc addPort -b "${BUILD}" -d "${PORT}"
 
-	    tinderdEcho "INFO: Starting tinderbuild; output will be sent to ${TINDERD_LOGFILE}"
+	    tinderEcho "INFO: Starting tinderbuild; output will be sent to ${TINDERD_LOGFILE}"
 	    echo "===Tinderd build of ${PORT} on ${BUILD} starting at $(date)===" >> ${TINDERD_LOGFILE}
 	    if ${pb}/scripts/tc tinderbuild -b "${BUILD}" ${TINDERBUILD_ARGS} \
 			 "${PORT}" >>${TINDERD_LOGFILE} 2>&1 ; then
