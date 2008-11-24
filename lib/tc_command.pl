@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.157 2008/11/15 18:11:47 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.158 2008/11/24 18:15:51 beat Exp $
 #
 
 my $pb;
@@ -210,8 +210,8 @@ my $ds = new Tinderbox::TinderboxDS();
         "addBuildPortsQueueEntry" => {
                 func   => \&addBuildPortsQueueEntry,
                 help   => "Adds a Port to the Ports to Build Queue",
-                usage  => "-b <build name> -d <port directory> [-p <priority>]",
-                optstr => 'b:d:p:',
+                usage  => "-b <build name> -d <port directory> [-p <priority>] [-u <username>]",
+                optstr => 'b:d:p:u:',
         },
         "addPortFailPattern" => {
                 func => \&addPortFailPattern,
@@ -1431,6 +1431,7 @@ sub addPortToOneBuild {
 
 sub addBuildPortsQueueEntry {
         my $admin;
+        my $user;
         my $user_id;
 
         if (!$opts->{'b'} || !$opts->{'d'}) {
@@ -1445,10 +1446,19 @@ sub addBuildPortsQueueEntry {
 
         my $build = $ds->getBuildByName($opts->{'b'});
 
-        if ($admin = $ds->getWwwAdmin()) {
-                $user_id = $admin->getId();
+        if ($opts->{'u'}) {
+                if ($ds->isValidUser($opts->{'u'})) {
+                        $user = $ds->getUserByName($opts->{'u'});
+                        $user_id = $user->getId();
+                } else {
+                        $user_id = 0;
+                }
         } else {
-                $user_id = 0;
+                if ($admin = $ds->getWwwAdmin()) {
+                        $user_id = $admin->getId();
+                } else {
+                        $user_id = 0;
+                }
         }
 
         $ds->addBuildPortsQueueEntry($build, $opts->{'d'}, $priority, $user_id);
