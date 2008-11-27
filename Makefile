@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.61 2008/11/02 16:21:02 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.62 2008/11/27 18:15:33 marcus Exp $
 
 VERSION=	3.0.0
 
@@ -103,5 +103,6 @@ release:
 	cp ${.CURDIR}/man/man${ms}/${mf} ${.CURDIR}/tinderbox-${VERSION}/man/man${ms}
 .endfor
 .endfor
+	echo "Tinderbox version ${VERSION}" > tinderbox-${VERSION}/.version
 	cd ${.CURDIR} && \
 		tar cvzf tinderbox-${VERSION}.tar.gz tinderbox-${VERSION}

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.112 2008/11/15 18:11:47 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.113 2008/11/27 18:15:33 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -2103,3 +2103,16 @@ tbkill () {
 
     kill -${sig} ${pbpid} ${makechild} ${makepid} ${tbpid}
 }
+
+#---------------------------------------------------------------------------
+# display the Tinderbox version
+#---------------------------------------------------------------------------
+tbversion () {
+    version=$(tinderLoc scripts .version)
+    if [ -f "${version}" ]; then
+	cat ${version}
+    else
+	echo "tbversion: no version info found"
+    fi
+}
+

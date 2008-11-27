@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/tc,v 1.86 2008/10/13 04:28:37 marcus Exp $
+# $MCom: portstools/tinderbox/tc,v 1.87 2008/11/27 18:15:33 marcus Exp $
 
 # Make sure we're root.  Things aren't going to work so well if not.
 if [ `id -u` != 0 ]; then
@@ -83,6 +83,7 @@ rescanPorts|\
 enterBuild|\
 tbcleanup|\
 tbkill|\
+tbversion|\
 updatePortsTree)
 		${command} ${1+"$@"} || \
 		    perl ${pb}/scripts/lib/tc_command.pl ${command} ${1+"$@"}
