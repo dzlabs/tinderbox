@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.159 2008/11/27 18:15:33 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.160 2008/11/28 22:13:51 marcus Exp $
 #
 
 my $pb;
@@ -208,9 +208,10 @@ my $ds = new Tinderbox::TinderboxDS();
                 optstr => 'ab:oOR',
         },
         "addBuildPortsQueueEntry" => {
-                func   => \&addBuildPortsQueueEntry,
-                help   => "Adds a Port to the Ports to Build Queue",
-                usage  => "-b <build name> -d <port directory> [-p <priority>] [-u <username>]",
+                func => \&addBuildPortsQueueEntry,
+                help => "Adds a Port to the Ports to Build Queue",
+                usage =>
+                    "-b <build name> -d <port directory> [-p <priority>] [-u <username>]",
                 optstr => 'b:d:p:u:',
         },
         "addPortFailPattern" => {
@@ -1453,7 +1454,7 @@ sub addBuildPortsQueueEntry {
 
         if ($opts->{'u'}) {
                 if ($ds->isValidUser($opts->{'u'})) {
-                        $user = $ds->getUserByName($opts->{'u'});
+                        $user    = $ds->getUserByName($opts->{'u'});
                         $user_id = $user->getId();
                 } else {
                         $user_id = 0;
@@ -1700,10 +1701,6 @@ sub listBuildPortsQueue {
                               "Failed to list BuildPortsQueue: "
                             . $ds->getError()
                             . "\n");
-        } else {
-                cleanup($ds, 1,
-                        "There are no more queued ports for this host in the datastore.\n"
-                );
         }
 }
 
