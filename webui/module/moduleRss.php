@@ -45,7 +45,7 @@ class moduleRss extends module {
 			$build = $this->TinderboxDS->getBuildById( $port->getBuildId() );
 			$jail = $this->TinderboxDS->getJailById( $build->getJailId() );
 
-			list( $data ) = $this->modulePorts->get_list_data( '', array($port) );
+			list( $data ) = $this->modulePorts->get_list_data( '', array( $port ) );
 			$data['port_last_status'] = $port->getLastStatus();
 			$data['jail_name'] = $jail->getName();
 
@@ -54,7 +54,7 @@ class moduleRss extends module {
 
 		$this->template_assign( 'data', $ports );
 		$this->template_assign( 'wwwrooturi', $wwwrooturi );
-		$this->template_assign( 'lastBuildDate', date('r') );
+		$this->template_assign( 'lastBuildDate', date( 'r' ) );
 
 		return $this->template_parse( 'rss.tpl' );
 	}

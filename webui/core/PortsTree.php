@@ -24,69 +24,69 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/PortsTree.php,v 1.5 2005/11/15 19:42:56 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/PortsTree.php,v 1.6 2008/12/01 09:34:03 beat Exp $
 #
 
-    require_once 'TinderObject.php';
+require_once 'TinderObject.php';
 
-    class PortsTree extends TinderObject {
+class PortsTree extends TinderObject {
 
-	function PortsTree($argv = array()) {
-	    $object_hash = array(
-		'ports_tree_id' => '',
-		'ports_tree_name' => '',
+	function PortsTree( $argv = array() ) {
+		$object_hash = array(
+		'ports_tree_id'          => '',
+		'ports_tree_name'        => '',
 		'ports_tree_description' => '',
-		'ports_tree_last_built' => '',
-		'ports_tree_update_cmd' => '',
-                'ports_tree_cvsweb_url' => '',
-                'ports_tree_ports_mount' => ''
-	    );
+		'ports_tree_last_built'  => '',
+		'ports_tree_update_cmd'  => '',
+		'ports_tree_cvsweb_url'  => '',
+		'ports_tree_ports_mount' => ''
+		);
 
-	    $this->TinderObject($object_hash, $argv);
+		$this->TinderObject( $object_hash, $argv );
 	}
 
 	function getId() {
-	    return $this->ports_tree_id;
+		return $this->ports_tree_id;
 	}
 
 	function getName() {
-	    return $this->ports_tree_name;
+		return $this->ports_tree_name;
 	}
 
 	function getDescription() {
-	    return $this->ports_tree_description;
+		return $this->ports_tree_description;
 	}
 
 	function getLastBuilt() {
-	    return $this->ports_tree_last_built;
+		return $this->ports_tree_last_built;
 	}
 
 	function getUpdateCmd() {
-	    return $this->ports_tree_update_cmd;
+		return $this->ports_tree_update_cmd;
 	}
 
-        function getCVSwebURL() {
-            return $this->ports_tree_cvsweb_url;
-        }
-
-        function getPortsMount() {
-            return $this->ports_tree_ports_mount;
-        }
-
-	function setName($name) {
-	    $this->ports_tree_name = $name;
+	function getCVSwebURL() {
+		return $this->ports_tree_cvsweb_url;
 	}
 
-	function setDescription($descr) {
-	    $this->ports_tree_description = $descr;
+	function getPortsMount() {
+		return $this->ports_tree_ports_mount;
 	}
 
-	function setLastBuilt($time) {
-	    $this->ports_tree_last_built = $time;
+	function setName( $name ) {
+		$this->ports_tree_name = $name;
 	}
 
-	function setUpdateCmd($cmd) {
-	    $this->ports_tree_update_cmd = $cmd;
+	function setDescription( $descr ) {
+		$this->ports_tree_description = $descr;
 	}
-    }
+
+	function setLastBuilt( $time ) {
+		$this->ports_tree_last_built = $time;
+	}
+
+	function setUpdateCmd( $cmd ) {
+		$this->ports_tree_update_cmd = $cmd;
+	}
+}
 ?>

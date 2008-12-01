@@ -25,7 +25,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/LogfilePattern.php,v 1.1 2008/09/15 16:33:13 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/LogfilePattern.php,v 1.2 2008/12/01 09:34:03 beat Exp $
 #
 
 require_once 'TinderObject.php';
@@ -34,11 +34,11 @@ class LogfilePattern extends TinderObject {
 
 	function LogfilePattern( $argv = array() ) {
 		$object_hash = array(
-			'logfile_pattern_id' => '',
-			'logfile_pattern_tag' => '',
+			'logfile_pattern_id'       => '',
+			'logfile_pattern_tag'      => '',
 			'logfile_pattern_severity' => '',
-			'logfile_pattern_expr' => '',
-			'logfile_pattern_color' => ''
+			'logfile_pattern_expr'     => '',
+			'logfile_pattern_color'    => ''
 		);
 
 		$this->TinderObject( $object_hash, $argv );

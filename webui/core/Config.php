@@ -24,29 +24,29 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/Config.php,v 1.2 2007/10/13 02:28:47 ade Exp $
+# $MCom: portstools/tinderbox/webui/core/Config.php,v 1.3 2008/12/01 09:34:03 beat Exp $
 #
 
-    require_once 'TinderObject.php';
+require_once 'TinderObject.php';
 
-    class Config extends TinderObject {
+class Config extends TinderObject {
 
-	function Config($argv = array()) {
-	    $object_hash = array(
-                'config_option_name' => '',
+	function Config( $argv = array() ) {
+		$object_hash = array(
+		'config_option_name'  => '',
 		'config_option_value' => ''
-	    );
+		);
 
-	    $this->TinderObject($object_hash, $argv);
+		$this->TinderObject( $object_hash, $argv );
 	}
 
 	function getName() {
-	    return $this->config_option_name;
+		return $this->config_option_name;
 	}
 
 	function getValue() {
-	    return $this->config_option_value;
+		return $this->config_option_value;
 	}
 
-    }
+}
 ?>

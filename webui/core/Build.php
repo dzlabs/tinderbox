@@ -24,92 +24,92 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/Build.php,v 1.5 2008/08/04 23:18:10 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/Build.php,v 1.6 2008/12/01 09:34:03 beat Exp $
 #
 
-    require_once 'TinderObject.php';
+require_once 'TinderObject.php';
 
-    class Build extends TinderObject {
+class Build extends TinderObject {
 
-	function Build($argv = array()) {
-	    $object_hash = array(
-		'build_id' => '',
-		'build_name' => '',
-		'jail_id' => '',
-		'ports_tree_id' => '',
-		'build_description' => '',
-		'build_status' => '',
+	function Build( $argv = array() ) {
+		$object_hash = array(
+		'build_id'           => '',
+		'build_name'         => '',
+		'jail_id'            => '',
+		'ports_tree_id'      => '',
+		'build_description'  => '',
+		'build_status'       => '',
 		'build_current_port' => '',
 		'build_last_updated' => '',
 		'build_remake_count' => ''
-	    );
+		);
 
-	    $this->TinderObject($object_hash, $argv);
+		$this->TinderObject( $object_hash, $argv );
 	}
 
 	function getId() {
-	    return $this->build_id;
+		return $this->build_id;
 	}
 
 	function getName() {
-	    return $this->build_name;
+		return $this->build_name;
 	}
 
 	function getJailId() {
-	    return $this->jail_id;
+		return $this->jail_id;
 	}
 
 	function getPortsTreeId() {
-	    return $this->ports_tree_id;
+		return $this->ports_tree_id;
 	}
 
 	function getDescription() {
-	    return $this->build_description;
+		return $this->build_description;
 	}
 
 	function getBuildStatus() {
-	    return $this->build_status;
+		return $this->build_status;
 	}
 
 	function getBuildCurrentPort() {
-	    return $this->build_current_port;
+		return $this->build_current_port;
 	}
 
 	function getBuildLastUpdated() {
-	    return $this->build_last_updated;
+		return $this->build_last_updated;
 	}
 
 	function getBuildRemakeCount() {
-	    return $this->build_remake_count;
+		return $this->build_remake_count;
 	}
 
-	function setName($name) {
-	    $this->build_name = $name;
+	function setName( $name ) {
+		$this->build_name = $name;
 	}
 
-	function setJailId($id) {
-	    $this->jail_id = $id;
+	function setJailId( $id ) {
+		$this->jail_id = $id;
 	}
 
-	function setPortsTreeId($id) {
-	    $this->ports_tree_id = $id;
+	function setPortsTreeId( $id ) {
+		$this->ports_tree_id = $id;
 	}
 
-	function setDescription($descr) {
-	    $this->build_description = $descr;
+	function setDescription( $descr ) {
+		$this->build_description = $descr;
 	}
 
-	function setBuildStatus($status) {
-	    $this->build_status = $status;
+	function setBuildStatus( $status ) {
+		$this->build_status = $status;
 	}
 
-	function setBuildCurrentPort($port) {
-	    $this->build_current_port = $port;
+	function setBuildCurrentPort( $port ) {
+		$this->build_current_port = $port;
 	}
 
-	function setBuildRemakeCount($cnt) {
-	    $this->build_remake_count = $cnt;
+	function setBuildRemakeCount( $cnt ) {
+		$this->build_remake_count = $cnt;
 	}
 
-    }
+}
 ?>

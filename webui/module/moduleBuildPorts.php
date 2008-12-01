@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.19 2008/11/16 17:50:33 marcus Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.20 2008/12/01 09:34:05 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -53,14 +53,14 @@ class moduleBuildPorts extends module {
 		}
 
 		foreach( $this->TinderboxDS->getAllPortFailReasons() as $reason ) {
-			$port_fail_reasons[$reason->getTag()]['tag']   = htmlentities($reason->getTag());
+			$port_fail_reasons[$reason->getTag()]['tag']   = htmlentities( $reason->getTag() );
 			$port_fail_reasons[$reason->getTag()]['descr'] = $reason->getDescr();
 			$port_fail_reasons[$reason->getTag()]['type']  = $reason->getType();
 			$port_fail_reasons[$reason->getTag()]['link']  = true;
 		}
 
 		foreach ( $ports as $port ) {
-			if ( $port->getLastFailedDep() != "" ) {
+			if ( $port->getLastFailedDep() != '' ) {
 				$depreason = $port->getLastFailedDep();
 				$port_fail_reasons[$depreason]['tag']   = htmlentities( $depreason );
 				$port_fail_reasons[$depreason]['descr'] = htmlentities( "Port was not built since dependency $depreason failed." );
@@ -71,9 +71,9 @@ class moduleBuildPorts extends module {
 		}
 
 		$qs = array();
-		$qkvs = explode('&', $_SERVER['QUERY_STRING']);
-		foreach ($qkvs as $qkv) {
-			$kv = explode('=', $qkv);
+		$qkvs = explode( '&', $_SERVER['QUERY_STRING'] );
+		foreach ( $qkvs as $qkv ) {
+			$kv = explode( '=', $qkv );
 			$qs[$kv[0]] = $kv[1];
 		}
 
@@ -88,11 +88,11 @@ class moduleBuildPorts extends module {
 		$this->template_assign( 'ports_tree_lastbuilt',   prettyDatetime( $ports_tree->getLastBuilt() ) );
 		$this->template_assign( 'local_time',             prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
 		$elapsed_time = '';
-		if (isset($with_timer) && $with_timer == 1) {
-			$elapsed_time = get_ui_elapsed_time($starttimer);
+		if ( isset( $with_timer ) && $with_timer == 1 ) {
+			$elapsed_time = get_ui_elapsed_time( $starttimer );
 		}
-		$this->template_assign( 'ui_elapsed_time',           $elapsed_time);
-		$this->template_assign( 'querystring',            $qs);
+		$this->template_assign( 'ui_elapsed_time',        $elapsed_time );
+		$this->template_assign( 'querystring',            $qs );
 
 		return $this->template_parse( 'list_buildports.tpl' );
 	}
@@ -107,11 +107,11 @@ class moduleBuildPorts extends module {
 			$build_id = false;
 		}
 
-		if ($wanted_reason) {
+		if ( $wanted_reason ) {
 			$ports = $this->TinderboxDS->getPortsByStatus( $build_id, NULL, $wanted_reason, '' );
 		}
 		else {
-			if ($all) {
+			if ( $all ) {
 				$ports = $this->TinderboxDS->getPortsByStatus( $build_id, $maintainer, '', 'SUCCESS' );
 			} else {
 				$ports = $this->TinderboxDS->getPortsByStatus( $build_id, $maintainer, 'FAIL', '' );
@@ -126,7 +126,7 @@ class moduleBuildPorts extends module {
 		}
 
 		foreach( $this->TinderboxDS->getAllPortFailReasons() as $reason ) {
-			$port_fail_reasons[$reason->getTag()]['tag']   = htmlentities($reason->getTag());
+			$port_fail_reasons[$reason->getTag()]['tag']   = htmlentities( $reason->getTag() );
 			$port_fail_reasons[$reason->getTag()]['descr'] = $reason->getDescr();
 			$port_fail_reasons[$reason->getTag()]['type']  = $reason->getType();
 			$port_fail_reasons[$reason->getTag()]['link']  = true;
@@ -147,10 +147,10 @@ class moduleBuildPorts extends module {
 		$this->template_assign( 'maintainer', $maintainer );
 		$this->template_assign( 'local_time', prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
 		$elapsed_time = '';
-		if (isset($with_timer) && $with_timer == 1) {
-			$elapsed_time = get_ui_elapsed_time($starttimer);
+		if ( isset( $with_timer ) && $with_timer == 1 ) {
+			$elapsed_time = get_ui_elapsed_time( $starttimer );
 		}
-		$this->template_assign( 'ui_elapsed_time',           $elapsed_time);
+		$this->template_assign( 'ui_elapsed_time',           $elapsed_time );
 		$this->template_assign( 'reason',                    $wanted_reason );
 
 		return $this->template_parse( 'failed_buildports.tpl' );
@@ -178,7 +178,7 @@ class moduleBuildPorts extends module {
 		}
 
 		foreach( $this->TinderboxDS->getAllPortFailReasons() as $reason ) {
-			$port_fail_reasons[$reason->getTag()]['tag']   = htmlentities($reason->getTag());
+			$port_fail_reasons[$reason->getTag()]['tag']   = htmlentities( $reason->getTag() );
 			$port_fail_reasons[$reason->getTag()]['descr'] = $reason->getDescr();
 			$port_fail_reasons[$reason->getTag()]['type']  = $reason->getType();
 			$port_fail_reasons[$reason->getTag()]['link']  = true;
@@ -199,30 +199,30 @@ class moduleBuildPorts extends module {
 		$this->template_assign( 'build_name',             $build_name );
 		$this->template_assign( 'local_time',             prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
 		$elapsed_time = '';
-		if (isset($with_timer) && $with_timer == 1) {
-			$elapsed_time = get_ui_elapsed_time($starttimer);
+		if ( isset( $with_timer ) && $with_timer == 1 ) {
+			$elapsed_time = get_ui_elapsed_time( $starttimer );
 		}
-		$this->template_assign( 'ui_elapsed_time',           $elapsed_time);
+		$this->template_assign( 'ui_elapsed_time',           $elapsed_time );
 
 		return $this->template_parse( 'latest_buildports.tpl' );
 	}
 
 	function display_current_buildports( $showbuild ) {
-	        $activeBuilds = array();
+		$activeBuilds = array();
 		$builds = $this->TinderboxDS->getBuilds();
-	        if( $builds ) {
-	                foreach( $builds as $build ) {
-	                        if( empty( $showbuild ) || $build->getName() == $showbuild ) {
-	                                if( $build->getBuildStatus() == 'PORTBUILD' ) {
-	                                        $activeBuilds[] = $build;
-	                                }
-	                        }
-	                }
-	        }
+		if( $builds ) {
+			foreach( $builds as $build ) {
+				if( empty( $showbuild ) || $build->getName() == $showbuild ) {
+					if( $build->getBuildStatus() == 'PORTBUILD' ) {
+						$activeBuilds[] = $build;
+					}
+				}
+			}
+		}
 
-	        if( sizeof( $activeBuilds ) > 0 ) {
+		if( sizeof( $activeBuilds ) > 0 ) {
 			$i = 0;
-	                foreach( $activeBuilds as $build ) {
+			foreach( $activeBuilds as $build ) {
 				if( $build->getBuildCurrentPort() )
 					$data[$i]['port_current_version'] = $build->getBuildCurrentPort();
 				else
@@ -231,15 +231,15 @@ class moduleBuildPorts extends module {
 				$data[$i]['build_name'] = $build->getName();
 				$data[$i]['build_last_updated'] = $build->getBuildLastUpdated();
 				$data[$i]['build_eta'] = 'N/A';
-				$currport = $this->TinderboxDS->getCurrentPortForBuild($build->getId());
-				if (!is_null($currport)) {
-					$bp = $this->TinderboxDS->getBuildPorts($currport->getId(), $build->getId());
-					$as = explode(" ", $build->getBuildLastUpdated());
-					$ymd = explode("-", $as[0]);
-					$hms = explode(":", $as[1]);
-					$then = mktime($hms[0], $hms[1], $hms[2], $ymd[1], $ymd[2], $ymd[0]);
+				$currport = $this->TinderboxDS->getCurrentPortForBuild( $build->getId() );
+				if ( !is_null( $currport ) ) {
+					$bp = $this->TinderboxDS->getBuildPorts( $currport->getId(), $build->getId() );
+					$as = explode( ' ', $build->getBuildLastUpdated() );
+					$ymd = explode( '-', $as[0] );
+					$hms = explode( ':', $as[1] );
+					$then = mktime( $hms[0], $hms[1], $hms[2], $ymd[1], $ymd[2], $ymd[0] );
 					$diff = time() - $then;
-					if ($bp->getLastRunDuration() - $diff >= 0)
+					if ( $bp->getLastRunDuration() - $diff >= 0 )
 						$data[$i]['build_eta'] = $bp->getLastRunDuration() - $diff;
 				}
 				$build_ports_queue_entries = $this->TinderboxDS->getBuildPortsQueueEntries( $build->getId() );
@@ -251,12 +251,12 @@ class moduleBuildPorts extends module {
 					$data[$i]['target_port'] = 'n/a';
 				}
 				$i++;
-	                }
+			}
 			$this->template_assign( 'data', $data );
 			$this->template_assign( 'no_list', false );
 		} else {
 			$this->template_assign( 'no_list', true );
-	        }
+		}
 
 		$this->template_assign( 'build_name', $showbuild );
 

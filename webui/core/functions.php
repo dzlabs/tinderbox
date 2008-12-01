@@ -24,63 +24,63 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/functions.php,v 1.6 2008/01/25 20:12:50 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/functions.php,v 1.7 2008/12/01 09:34:03 beat Exp $
 #
 
-function prettyEmail($input) {
-	return eregi_replace("@FreeBSD.org", "", $input);
+function prettyEmail( $input ) {
+	return eregi_replace( '@FreeBSD.org', '', $input );
 }
 
-function prettyDatetime($input) {
-	if (ereg("[0-9]{14}", $input)) {
+function prettyDatetime( $input ) {
+	if ( ereg( '[0-9]{14}', $input ) ) {
 		/* timstamp */
-		return substr($input,0,4)."-".substr($input,4,2)."-".substr($input,6,2)." ".substr($input,8,2).":".substr($input,10,2).":".substr($input,12,2);
-	} elseif (ereg("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}", $input)) {
+		return substr( $input, 0, 4) . '-' . substr( $input , 4 , 2 ) . '-' . substr ( $input , 6 , 2 ) . ' ' . substr( $input , 8 , 2 ) . ':' . substr( $input, 10, 2 ) . ':' . substr( $input, 12, 2 );
+	} elseif ( ereg( "[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}", $input ) ) {
 		/* datetime */
-		if ($input == "0000-00-00 00:00:00" ||
-		    $input == "0000-00-00 00:00:00.000000") {
-			    return "";
+		if ( $input == '0000-00-00 00:00:00' ||
+			$input == '0000-00-00 00:00:00.000000') {
+				return '';
 		} else {
-			return substr($input,0,19);
+			return substr( $input, 0, 19 );
 		}
 	} else {
 		return $input;
 	}
 }
 
-function cryptPassword($password) {
-	return md5($password);
+function cryptPassword( $password ) {
+	return md5( $password );
 }
 
-function build_query_string($url, $qs, $key, $value) {
+function build_query_string( $url, $qs, $key, $value ) {
 	$qs[$key] = $value;
 	$tmp = array();
-	foreach ($qs as $k => $v) {
-		array_push($tmp, $k . '=' . $v);
+	foreach ( $qs as $k => $v ) {
+		array_push( $tmp, $k . '=' . $v );
 	}
-	return $url . '?' . implode('&amp;', $tmp);
+	return $url . '?' . implode( '&amp;', $tmp );
 }
 
-function time_difference_from_now($then) {
-	$then = strtotime(prettyDatetime($then));
+function time_difference_from_now( $then ) {
+	$then = strtotime( prettyDatetime( $then ) );
 	$diff = time() - $then;
-	return time_elapsed($diff);
+	return time_elapsed( $diff );
 }
 
-function time_elapsed($c) {
-	if ($c===0 || $c < 0 || $c=="")
-		return "-";
-	if ($c>=3600)
-		return sprintf("%0d:%02d:%02d",
-			floor($c/3600),floor(($c%3600)/60),floor($c%60));
-	return sprintf("%02d:%02d",
-		floor(($c%3600)/60),floor($c%60));
+function time_elapsed( $c ) {
+	if ( $c === 0 || $c < 0 || $c == '' )
+		return '-';
+	if ( $c >= 3600 )
+		return sprintf( "%0d:%02d:%02d",
+			floor( $c/3600 ),floor( ( $c%3600 ) / 60 ), floor( $c%60 ) );
+	return sprintf( "%02d:%02d",
+		floor( ( $c%3600 ) / 60 ),floor( $c%60 ) );
 }
 
-function get_ui_elapsed_time($starttimer) {
+function get_ui_elapsed_time( $starttimer ) {
 	$endtimer = explode( ' ', microtime() );
-        $timer = ( $endtimer[1]-$starttimer[1] )+( $endtimer[0]-$starttimer[0] );
-        return sprintf( 'Elapsed: %03.6f sec.', $timer );
+	$timer = ( $endtimer[1]-$starttimer[1] )+( $endtimer[0]-$starttimer[0] );
+	return sprintf( 'Elapsed: %03.6f sec.', $timer );
 }
 
 ?>

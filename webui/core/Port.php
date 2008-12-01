@@ -24,110 +24,109 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/Port.php,v 1.5 2007/06/09 22:09:12 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/Port.php,v 1.6 2008/12/01 09:34:03 beat Exp $
 #
 
-    require_once 'TinderObject.php';
+require_once 'TinderObject.php';
 
-    class Port extends TinderObject {
+class Port extends TinderObject {
 
-	function Port($argv = array()) {
-	    $object_hash = array(
-                'build_id' => '',
-		'port_id' => '',
-		'port_name' => '',
-		'port_directory' => '',
-		'port_comment' => '',
-		'port_maintainer' => '',
-		'currently_building' => '',
-		'last_built' => '',
-		'last_status' => '',
-		'last_successful_built' => '',
-		'last_built_version' => '',
+	function Port( $argv = array() ) {
+		$object_hash = array(
+		'build_id'               => '',
+		'port_id'                => '',
+		'port_name'              => '',
+		'port_directory'         => '',
+		'port_comment'           => '',
+		'port_maintainer'        => '',
+		'currently_building'     => '',
+		'last_built'             => '',
+		'last_status'            => '',
+		'last_successful_built'  => '',
+		'last_built_version'     => '',
 		'last_failed_dependency' => '',
-		'last_run_duration' => '',
-		'last_fail_reason' => ''
-	    );
+		'last_run_duration'      => '',
+		'last_fail_reason'       => ''
+		);
 
-	    $this->TinderObject($object_hash, $argv);
+		$this->TinderObject( $object_hash, $argv );
 	}
 
-        function getBuildId() {
-            return $this->build_id;
-        }
+	function getBuildId() {
+		return $this->build_id;
+	}
 
 	function getId() {
-	    return $this->port_id;
+		return $this->port_id;
 	}
 
 	function getName() {
-	    return $this->port_name;
+		return $this->port_name;
 	}
 
 	function getDirectory() {
-	    return $this->port_directory;
+		return $this->port_directory;
 	}
 
 	function getComment() {
-	    return $this->port_comment;
+		return $this->port_comment;
 	}
 
 	function getMaintainer() {
-	    return $this->port_maintainer;
+		return $this->port_maintainer;
 	}
 
 	function getCurrentlyBuilding() {
-	    return $this->_truth_array[$this->currently_building];
+		return $this->_truth_array[$this->currently_building];
 	}
 
 	function getLastBuilt() {
-	    return $this->last_built;
+		return $this->last_built;
 	}
 
 	function getLastStatus() {
-	    return $this->last_status;
+		return $this->last_status;
 	}
 
 	function getLastSuccessfulBuilt() {
-	    return $this->last_successful_built;
+		return $this->last_successful_built;
 	}
 
 	function getLastBuiltVersion() {
-	    return $this->last_built_version;
+		return $this->last_built_version;
 	}
 
 	function getLastFailReason() {
-	    return $this->last_fail_reason;
+		return $this->last_fail_reason;
 	}
 
 	function getLastFailedDep() {
-	    return $this->last_failed_dependency;
+		return $this->last_failed_dependency;
 	}
 
 	function getLastRunDuration() {
-	    return $this->last_run_duration;
+		return $this->last_run_duration;
 	}
 
 	function getLogfileName() {
-	    return $this->getLastBuiltVersion() . ".log";
+		return $this->getLastBuiltVersion() . '.log';
 	}
 
-	function setName($name) {
-	    $this->port_name = $name;
+	function setName( $name ) {
+		$this->port_name = $name;
 	}
 
-	function setDirectory($dir) {
-	    $this->port_directory = $dir;
+	function setDirectory( $dir ) {
+		$this->port_directory = $dir;
 	}
 
-	function setComment($comment) {
-	    $this->port_comment = $comment;
+	function setComment( $comment ) {
+		$this->port_comment = $comment;
 	}
 
-	function setMaintainer($maintainer) {
-	    $this->port_maintainer = $maintainer;
+	function setMaintainer( $maintainer ) {
+		$this->port_maintainer = $maintainer;
 	}
 
-
-    }
+}
 ?>

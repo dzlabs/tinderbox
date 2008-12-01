@@ -24,82 +24,82 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/Jail.php,v 1.5 2005/12/17 23:36:14 ade Exp $
+# $MCom: portstools/tinderbox/webui/core/Jail.php,v 1.6 2008/12/01 09:34:03 beat Exp $
 #
 
-    require_once 'TinderObject.php';
+require_once 'TinderObject.php';
 
-    class Jail extends TinderObject {
+class Jail extends TinderObject {
 
-	function Jail($argv = array()) {
-	    $object_hash = array(
-		'jail_id' => '',
-		'jail_name' => '',
-		'jail_arch' => '',
-		'jail_tag' => '',
-		'jail_last_built' => '',
-		'jail_update_cmd' => '',
+	function Jail( $argv = array() ) {
+		$object_hash = array(
+		'jail_id'          => '',
+		'jail_name'        => '',
+		'jail_arch'        => '',
+		'jail_tag'         => '',
+		'jail_last_built'  => '',
+		'jail_update_cmd'  => '',
 		'jail_description' => '',
-		'jail_src_mount' => ''
-	    );
+		'jail_src_mount'   => ''
+		);
 
-	    $this->TinderObject($object_hash, $argv);
+		$this->TinderObject( $object_hash, $argv );
 	}
 
 	function getId() {
-	    return $this->jail_id;
+		return $this->jail_id;
 	}
 
 	function getName() {
-	    return $this->jail_name;
+		return $this->jail_name;
 	}
 
 	function getArch() {
-	    return $this->jail_arch;
+		return $this->jail_arch;
 	}
 
 	function getTag() {
-	    return $this->jail_tag;
+		return $this->jail_tag;
 	}
 
 	function getLastBuilt() {
-	    return $this->jail_last_built;
+		return $this->jail_last_built;
 	}
 
 	function getUpdateCmd() {
-	    return $this->jail_update_cmd;
+		return $this->jail_update_cmd;
 	}
 
 	function getDescription() {
-	    return $this->jail_description;
+		return $this->jail_description;
 	}
 
 	function getSrcMount() {
-	    return $this->jail_src_mount;
+		return $this->jail_src_mount;
 	}
 
-	function setName($name) {
-	    $this->jail_name = $name;
+	function setName( $name ) {
+		$this->jail_name = $name;
 	}
 
-	function setArch($tag) {
-	    $this->jail_arch = $tag;
+	function setArch( $tag ) {
+		$this->jail_arch = $tag;
 	}
 
-	function setTag($tag) {
-	    $this->jail_tag = $tag;
+	function setTag( $tag ) {
+		$this->jail_tag = $tag;
 	}
 
-	function setLastBuilt($time) {
-	    $this->jail_last_built = $time;
+	function setLastBuilt( $time ) {
+		$this->jail_last_built = $time;
 	}
 
-	function setUpdateCmd($cmd) {
-	    $this->jail_update_cmd = $cmd;
+	function setUpdateCmd( $cmd ) {
+		$this->jail_update_cmd = $cmd;
 	}
 
-	function setDescription($descr) {
-	    $this->jail_description = $descr;
+	function setDescription( $descr ) {
+		$this->jail_description = $descr;
 	}
-    }
+}
 ?>

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.29 2008/09/23 22:41:26 beat Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.30 2008/12/01 09:34:02 beat Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -54,9 +54,9 @@ $moduleUsers			= new moduleUsers();
 $moduleRss			= new moduleRss();
 
 $moduleSession->start();
-if( isset($_POST['do_login']) ) {
+if ( isset( $_POST['do_login'] ) ) {
 	$moduleUsers->do_login( $_POST['User_Name'], $_POST['User_Password'] );
-} elseif( isset($_POST['do_logout']) || ( $moduleUsers->is_logged_in() && !$moduleUsers->get_www_enabled() ) ) {
+} elseif ( isset( $_POST['do_logout'] ) || ( $moduleUsers->is_logged_in() && !$moduleUsers->get_www_enabled() ) ) {
 	$moduleUsers->do_logout();
 	header( 'Location: index.php' );
 }
@@ -87,7 +87,7 @@ switch( $action ) {
 					break;
 	case 'list_buildports':		$build      = $_REQUEST['build'];
 					$sort       = '';
-					if (isset($_REQUEST['sort'])) {
+					if ( isset( $_REQUEST['sort'] ) ) {
 						$sort = $_REQUEST['sort'];
 					}
 					$display    = $moduleBuildPorts->display_list_buildports( $build, $sort );
@@ -160,7 +160,7 @@ switch( $action ) {
 					if ( !isset( $_REQUEST['build'] ) || !isset( $_REQUEST['id'] ) ) {
 						die( 'Build or port id missing.' );
 					}
-					$display	= $moduleLogs->markup_log( $build, $id);
+					$display	= $moduleLogs->markup_log( $build, $id );
 					break;
 	case 'list_builds':
 	default:			$display    = $moduleBuilds->display_list_builds();

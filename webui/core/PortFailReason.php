@@ -24,33 +24,33 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/PortFailReason.php,v 1.1 2005/10/21 22:40:14 oliver Exp $
+# $MCom: portstools/tinderbox/webui/core/PortFailReason.php,v 1.2 2008/12/01 09:34:03 beat Exp $
 #
 
-    require_once 'TinderObject.php';
+require_once 'TinderObject.php';
 
-    class PortFailReason extends TinderObject {
+class PortFailReason extends TinderObject {
 
-	function PortFailReason($argv = array()) {
-	    $object_hash = array(
-                'port_fail_reason_tag' => '',
+	function PortFailReason( $argv = array() ) {
+		$object_hash = array(
+		'port_fail_reason_tag'   => '',
 		'port_fail_reason_descr' => '',
-		'port_fail_reason_type' => ''
-	    );
+		'port_fail_reason_type'  => ''
+		);
 
-	    $this->TinderObject($object_hash, $argv);
+		$this->TinderObject( $object_hash, $argv );
 	}
 
-        function getTag() {
-            return $this->port_fail_reason_tag;
-        }
+	function getTag() {
+		return $this->port_fail_reason_tag;
+	}
 
 	function getDescr() {
-	    return $this->port_fail_reason_descr;
+		return $this->port_fail_reason_descr;
 	}
 
 	function getType() {
-	    return $this->port_fail_reason_type;
+		return $this->port_fail_reason_type;
 	}
-    }
+}
 ?>

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.12 2008/11/04 20:21:56 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.13 2008/12/01 09:34:06 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -55,20 +55,20 @@ class moduleTinderd extends module {
 						}
 						break;
 			case 'modify':		if( $entry->getUserId() == $this->moduleUsers->get_id() &&
-					            $this->moduleUsers->checkPermModifyOwnQueue( 'builds', $this->build_id ) ) {
+								$this->moduleUsers->checkPermModifyOwnQueue( 'builds', $this->build_id ) ) {
 							return true;
 						} elseif( $entry->getUserId() != $this->moduleUsers->get_id() &&
-						          $this->moduleUsers->checkPermModifyOtherQueue( 'builds', $this->build_id ) ) {
+								  $this->moduleUsers->checkPermModifyOtherQueue( 'builds', $this->build_id ) ) {
 							return true;
 						} else {
 							return false;
 						}
 						break;
 			case 'delete':		if( $entry->getUserId() == $this->moduleUsers->get_id() &&
-						    $this->moduleUsers->checkPermDeleteOwnQueue( 'builds', $this->build_id ) ) {
+									$this->moduleUsers->checkPermDeleteOwnQueue( 'builds', $this->build_id ) ) {
 							return true;
 						} elseif( $entry->getUserId() != $this->moduleUsers->get_id() &&
-						          $this->moduleUsers->checkPermDeleteOtherQueue( 'builds', $this->build_id ) ) {
+								  $this->moduleUsers->checkPermDeleteOtherQueue( 'builds', $this->build_id ) ) {
 							return true;
 						} else {
 							return false;
@@ -146,13 +146,13 @@ class moduleTinderd extends module {
 											break;
 									}
 									$entries[$i] = array( 'entry_id'  => $build_ports_queue_entry->getBuildPortsQueueId(),
-									                      'directory' => $build_ports_queue_entry->getPortDirectory(),
-									                      'priority'  => $build_ports_queue_entry->getPriority(),
-									                      'build'     => $build_ports_queue_entry->getBuildName(),
-									                      'user'      => $build_ports_queue_entry->getUserName(),
-											      'all_prio'  => $this->create_prio_array( $build_ports_queue_entry ),
-											      'email_on_completion' => $build_ports_queue_entry->getEmailOnCompletion(),
-											      'status_field_class'  => $status_field_class);
+														  'directory' => $build_ports_queue_entry->getPortDirectory(),
+														  'priority'  => $build_ports_queue_entry->getPriority(),
+														  'build'     => $build_ports_queue_entry->getBuildName(),
+														  'user'      => $build_ports_queue_entry->getUserName(),
+														  'all_prio'  => $this->create_prio_array( $build_ports_queue_entry ),
+														  'email_on_completion' => $build_ports_queue_entry->getEmailOnCompletion(),
+														  'status_field_class'  => $status_field_class );
 
 								}
 								if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'modify' ) ) {
@@ -167,7 +167,7 @@ class moduleTinderd extends module {
 					}
 				}
 
-			if( !empty($entries) && is_array( $entries ) && count( $entries ) > 0 ) {
+			if( !empty( $entries ) && is_array( $entries ) && count( $entries ) > 0 ) {
 				$this->template_assign( 'entries', $entries );
 				$this->template_assign( 'no_list', false );
 			} else {

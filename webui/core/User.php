@@ -24,59 +24,59 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/User.php,v 1.4 2005/10/10 23:30:16 ade Exp $
+# $MCom: portstools/tinderbox/webui/core/User.php,v 1.5 2008/12/01 09:34:03 beat Exp $
 #
 
-    require_once 'TinderObject.php';
+require_once 'TinderObject.php';
 
-    class User extends TinderObject {
+class User extends TinderObject {
 
-	function User($argv = array()) {
-	    $object_hash = array(
-                'user_id' => '',
-		'user_name' => '',
-		'user_email' => '',
-		'user_password' => '',
+	function User( $argv = array() ) {
+		$object_hash = array(
+		'user_id'          => '',
+		'user_name'        => '',
+		'user_email'       => '',
+		'user_password'    => '',
 		'user_www_enabled' => ''
-	    );
+		);
 
-	    $this->TinderObject($object_hash, $argv);
+		$this->TinderObject( $object_hash, $argv );
 	}
 
 	function getId() {
-	    return $this->user_id;
+		return $this->user_id;
 	}
 
 	function getName() {
-	    return $this->user_name;
+		return $this->user_name;
 	}
 
 	function getEmail() {
-	    return $this->user_email;
+		return $this->user_email;
 	}
 
 	function getPassword() {
-	    return $this->user_password;
+		return $this->user_password;
 	}
 
 	function getWwwEnabled() {
-	    return $this->_truth_array[$this->user_www_enabled];
+		return $this->_truth_array[$this->user_www_enabled];
 	}
 
-	function setName($name) {
-	    return $this->user_name = $name;
+	function setName( $name ) {
+		return $this->user_name = $name;
 	}
 
-	function setEmail($email) {
-	    return $this->user_email = $email;
+	function setEmail( $email ) {
+		return $this->user_email = $email;
 	}
 
-	function setPassword($password) {
-	    return $this->user_password = $password;
+	function setPassword( $password ) {
+		return $this->user_password = $password;
 	}
 
-	function setWwwEnabled($www_enabled) {
-	    return $this->user_www_enabled = $www_enabled;
+	function setWwwEnabled( $www_enabled ) {
+		return $this->user_www_enabled = $www_enabled;
 	}
-    }
+}
 ?>

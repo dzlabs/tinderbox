@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuilds.php,v 1.9 2008/08/09 17:19:37 marcus Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuilds.php,v 1.10 2008/12/01 09:34:05 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -70,27 +70,27 @@ class moduleBuilds extends module {
 			$stats       = $this->TinderboxDS->getBuildStatsWithStatus( $build->getId() );
 
 			$results = array(
-				"UNKNOWN"    => 0,
-				"FAIL"       => 0,
-				"LEFTOVERS"  => 0,
-				"DEPEND"     => 0,
-				"SUCCESS"    => 0,
-				"REMAKE"     => 0,
-				"TOTAL"      => 0,
+				'UNKNOWN'    => 0,
+				'FAIL'       => 0,
+				'LEFTOVERS'  => 0,
+				'DEPEND'     => 0,
+				'SUCCESS'    => 0,
+				'REMAKE'     => 0,
+				'TOTAL'      => 0,
 			);
-			foreach ($stats as $stat) {
+			foreach ( $stats as $stat ) {
 				$results[$stat['last_status']] = $stat['c'];
 			}
-			$results["REMAKE"] = $remake;
+			$results['REMAKE'] = $remake;
 			$total = 0;
-			foreach ($results as $k => $v) {
+			foreach ( $results as $k => $v ) {
 				if ( $k != 'REMAKE' ) {
 					$total += $v;
 				}
-				if ($v == 0) $results[$k] = "-";
+				if ( $v == 0 ) $results[$k] = '-';
 			}
 
-			$results["TOTAL"] = $total;
+			$results['TOTAL'] = $total;
 			switch( $status ) {
 				case 'PORTBUILD':
 					$status_field_class = 'build_portbuild';

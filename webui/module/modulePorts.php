@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.13 2008/09/15 16:33:14 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.14 2008/12/01 09:34:06 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -70,11 +70,11 @@ class modulePorts extends module {
 		$this->template_assign( 'port_name',         $ports[0]->getName() );
 		$this->template_assign( 'ports_trees_links', $ports_trees_links );
 		$this->template_assign( 'local_time',        prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
-                $elapsed_time = '';
-                if (isset($with_timer) && $with_timer == 1) {
-                	$elapsed_time = get_ui_elapsed_time($starttimer);
+		$elapsed_time = '';
+		if ( isset( $with_timer ) && $with_timer == 1 ) {
+			$elapsed_time = get_ui_elapsed_time( $starttimer );
 		}
-		$this->template_assign( 'ui_elapsed_time',      $elapsed_time);
+		$this->template_assign( 'ui_elapsed_time',      $elapsed_time );
 
 		return $this->template_parse( 'describe_port.tpl' );
 	}

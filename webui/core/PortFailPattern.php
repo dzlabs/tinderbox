@@ -25,7 +25,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/PortFailPattern.php,v 1.1 2008/09/15 16:33:13 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/PortFailPattern.php,v 1.2 2008/12/01 09:34:03 beat Exp $
 #
 
 require_once 'TinderObject.php';
@@ -34,8 +34,8 @@ class PortFailPattern extends TinderObject {
 
 	function PortFailPattern( $argv = array() ) {
 		$object_hash = array(
-			'port_fail_pattern_id' => '',
-			'port_fail_pattern_expr' => '',
+			'port_fail_pattern_id'     => '',
+			'port_fail_pattern_expr'   => '',
 			'port_fail_pattern_reason' => '',
 			'port_fail_pattern_parent' => ''
 		);

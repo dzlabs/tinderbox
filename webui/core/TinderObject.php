@@ -24,37 +24,38 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderObject.php,v 1.5 2006/01/31 20:31:05 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderObject.php,v 1.6 2008/12/01 09:34:03 beat Exp $
 #
 
-    class TinderObject {
+class TinderObject {
+
 	var $_object_hash = array();
 	var $_truth_array = array(
-		"t" => "1",
-		"f" => "0",
-		"0" => "0",
-		"1" => "1",
+		't' => '1',
+		'f' => '0',
+		'0' => '0',
+		'1' => '1',
 	);
 
-	function TinderObject($object_hash, $attrs = array()) {
-	    $this->_object_hash = $object_hash;
+	function TinderObject( $object_hash, $attrs = array() ) {
+		$this->_object_hash = $object_hash;
 
-	    foreach ($attrs as $key => $value) {
-		if (isset($this->_object_hash[$key])) {
-		    $this->$key = $value;
+		foreach ( $attrs as $key => $value ) {
+			if ( isset( $this->_object_hash[$key] ) ) {
+				$this->$key = $value;
+			}
 		}
-	    }
 	}
 
 	function toHashRef() {
-	    $hashref = array();
+		$hashref = array();
 
-	    foreach ($this->_object_hash as $key => $value) {
-		$hashref[$key] = $value;
-	    }
+		foreach ( $this->_object_hash as $key => $value ) {
+			$hashref[$key] = $value;
+		}
 
-	    return $hashref;
+		return $hashref;
 	}
 
-    }
+}
 ?>

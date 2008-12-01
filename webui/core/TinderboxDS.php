@@ -24,716 +24,726 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.38 2008/11/16 17:52:46 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.39 2008/12/01 09:34:03 beat Exp $
 #
 
-    require_once 'DB.php';
-    require_once 'Build.php';
-    require_once 'BuildPortsQueue.php';
-    require_once 'Config.php';
-    require_once 'Jail.php';
-    require_once 'LogfilePattern.php';
-    require_once 'Port.php';
-    require_once 'PortsTree.php';
-    require_once 'PortFailPattern.php';
-    require_once 'PortFailReason.php';
-    require_once 'User.php';
-    require_once 'inc_ds.php';
-    require_once 'inc_tinderbox.php';
+require_once 'DB.php';
+require_once 'Build.php';
+require_once 'BuildPortsQueue.php';
+require_once 'Config.php';
+require_once 'Jail.php';
+require_once 'LogfilePattern.php';
+require_once 'Port.php';
+require_once 'PortsTree.php';
+require_once 'PortFailPattern.php';
+require_once 'PortFailReason.php';
+require_once 'User.php';
+require_once 'inc_ds.php';
+require_once 'inc_tinderbox.php';
 
-    $objectMap = array(
-        "Build" => "builds",
-	"BuildPortsQueue" => "build_ports_queue",
-	"LogfilePattern" => "logfile_patterns",
-        "Config" => "config",
-        "Jail"  => "jails",
-        "Port"  => "ports",
-        "PortsTree" => "ports_trees",
-	"PortFailPattern" => "port_fail_patterns",
-        "PortFailReason" => "port_fail_reasons",
-        "User"  => "users",
-    );
+$objectMap = array(
+	'Build'           => 'builds',
+	'BuildPortsQueue' => 'build_ports_queue',
+	'LogfilePattern'  => 'logfile_patterns',
+	'Config'          => 'config',
+	'Jail'            => 'jails',
+	'Port'            => 'ports',
+	'PortsTree'       => 'ports_trees',
+	'PortFailPattern' => 'port_fail_patterns',
+	'PortFailReason'  => 'port_fail_reasons',
+	'User'            => 'users',
+	);
 
-    class TinderboxDS {
-        var $db;
-        var $error;
-        var $packageSuffixCache; /* in use by getPackageSuffix() */
+class TinderboxDS {
+	var $db;
+	var $error;
+	var $packageSuffixCache; /* in use by getPackageSuffix() */
 
-        function TinderboxDS() {
-            global $DB_HOST, $DB_DRIVER, $DB_NAME, $DB_USER, $DB_PASS;
+	function TinderboxDS() {
+		global $DB_HOST, $DB_DRIVER, $DB_NAME, $DB_USER, $DB_PASS;
 
-            # XXX: backwards compatibility
-            if ($DB_DRIVER == "")
-                $DB_DRIVER = "mysql";
+		# XXX: backwards compatibility
+		if ( $DB_DRIVER == '' )
+			$DB_DRIVER = 'mysql';
 
-            $dsn = "$DB_DRIVER://$DB_USER:$DB_PASS@$DB_HOST/$DB_NAME";
+		$dsn = "$DB_DRIVER://$DB_USER:$DB_PASS@$DB_HOST/$DB_NAME";
 
-            $this->db = DB::connect($dsn);
+		$this->db = DB::connect( $dsn );
 
-            if (DB::isError($this->db)) {
-                die ("Tinderbox DS: Unable to initialize datastore: " . $this->db->getMessage() . "\n");
-            }
-
-            $this->db->setFetchMode(DB_FETCHMODE_ASSOC);
-            $this->db->setOption('persistent', true);
-        }
-
-        function start_transaction() {
-                $this->db->autoCommit( false );
-        }
-
-        function commit_transaction() {
-                $this->db->commit();
-                $this->db->autoCommit( true );
-        }
-
-        function rollback_transaction() {
-                $this->db->rollback();
-                $this->db->autoCommit( true );
-        }
-
-        function getAllMaintainers() {
-            $query = "SELECT DISTINCT LOWER(port_maintainer) AS port_maintainer FROM ports where port_maintainer IS NOT NULL ORDER BY LOWER(port_maintainer)";
-            $rc = $this->_doQueryHashRef($query, $results, array());
-
-            if (!$rc) {
-                return array();
-            }
-
-            foreach($results as $result)
-                $data[]=$result['port_maintainer'];
-
-            return $data;
-        }
-
-        function getAllPortsByPortID($portid) {
-            $query = "SELECT p.*,
-                             bp.build_id,
-                             bp.last_built,
-                             bp.last_status,
-                             bp.last_successful_built,
-			     bp.last_failed_dependency,
-			     bp.last_run_duration,
-                             bp.last_built_version,
-                        CASE bp.last_fail_reason
-                           WHEN '__nofail__' THEN ''
-                           ELSE bp.last_fail_reason
-                        END
-		          AS last_fail_reason
-                        FROM ports p,
-                             build_ports bp
-                       WHERE p.port_id = bp.port_id
-                         AND bp.port_id=$portid";
-
-            $rc = $this->_doQueryHashRef($query, $results, array());
-
-            if (!$rc) {
-                return null;
-            }
-
-            $ports = $this->_newFromArray("Port", $results);
-
-            return $ports;
-        }
-
-
-        function addUser($user) {
-            $query = "INSERT INTO users
-                         (user_name,user_email,user_password,user_www_enabled)
-                      VALUES
-                         (?,?,?,?)";
-
-            $rc = $this->_doQuery($query, array($user->getName(),$user->getEmail(),$user->getPassword(),$user->getWwwEnabled()),$res);
-
-            if (!$rc) {
-                return false;
-            }
-
-            return true;
-        }
-
-        function deleteUser($user) {
-            if( !$user->getId() || $this->deleteUserPermissions($user,'') ) {
-		if ($user->getId()) {
-			$this->deleteBuildPortsQueueByUserId($user);
+		if ( DB::isError( $this->db ) ) {
+			die ( "Tinderbox DS: Unable to initialize datastore: " . $this->db->getMessage() . "\n" );
 		}
-                $query = "DELETE FROM users
-                                WHERE user_name=?";
 
-                $rc = $this->_doQuery($query, array($user->getName()),$res);
-
-                if (!$rc) {
-                     return false;
-                }
-
-                return true;
-            }
-            return false;
-        }
-
-        function updateUser($user) {
-            $query = "UPDATE users
-                         SET user_name=?,user_email=?,user_password=?,user_www_enabled=?
-                       WHERE user_id=?";
-
-            $rc = $this->_doQuery($query, array($user->getName(),$user->getEmail(),$user->getPassword(),$user->getWwwEnabled(),$user->getId()),$res);
-
-            if (!$rc) {
-                return false;
-            }
-
-            return true;
-        }
-
-        function getUserByLogin($username,$password) {
-            $hashPass = md5($password);
-            $query = "SELECT user_id,user_name,user_email,user_password,user_www_enabled FROM users WHERE user_name=? AND user_password=?";
-            $rc = $this->_doQueryHashRef($query, $results, array($username,$hashPass));
-
-            if (!$rc) {
-                return null;
-            }
-
-            $user = $this->_newFromArray("User", $results);
-
-            return $user[0];
-        }
-
-        function getUserPermissions($user_id,$object_type,$object_id) {
-
-            $query = "
-                SELECT
-                CASE user_permission
-                   WHEN 1 THEN 'IS_WWW_ADMIN'
-		   WHEN 2 THEN 'PERM_ADD_QUEUE'
-		   WHEN 3 THEN 'PERM_MODIFY_OWN_QUEUE'
-		   WHEN 4 THEN 'PERM_DELETE_OWN_QUEUE'
-		   WHEN 5 THEN 'PERM_PRIO_LOWER_5'
-		   WHEN 6 THEN 'PERM_MODIFY_OTHER_QUEUE'
-		   WHEN 7 THEN 'PERM_DELETE_OTHER_QUEUE'
-                   ELSE 'PERM_UNKNOWN'
-                END
-                   AS user_permission
-                 FROM user_permissions
-                WHERE user_id=?
-                  AND user_permission_object_type=?
-                  AND user_permission_object_id=?";
-
-            $rc = $this->_doQueryHashRef($query, $results, array($user_id,$object_type,$object_id));
-
-            if (!$rc) {
-                return null;
-            }
-
-            return $results;
-        }
-
-        function deleteUserPermissions($user, $object_type) {
-
-            $query = "
-                DELETE FROM user_permissions
-                      WHERE user_id=?";
-
-            if( $object_type )
-                $query .= " AND user_permission_object_type='$object_type'";
-
-            $rc = $this->_doQuery($query, array($user->getId()), $res);
-
-            if (!$rc) {
-                return false;
-            }
-
-            return true;
-        }
-
-        function addUserPermission($user_id,$object_type,$object_id,$permission) {
-
-            switch( $permission ) {
-//              case 'IS_WWW_ADMIN':             $permission = 1; break;   /* only configureable via shell */
-		case 'PERM_ADD_QUEUE':		 $permission = 2; break; 
-		case 'PERM_MODIFY_OWN_QUEUE':	 $permission = 3; break;
-		case 'PERM_DELETE_OWN_QUEUE':	 $permission = 4; break;
-		case 'PERM_PRIO_LOWER_5':	 $permission = 5; break;
-		case 'PERM_MODIFY_OTHER_QUEUE':	 $permission = 6; break;
-		case 'PERM_DELETE_OTHER_QUEUE':	 $permission = 7; break;
-                default:                         return false;
-            }
-
-            $query = "
-                INSERT INTO user_permissions
-                    (user_id,user_permission_object_type,user_permission_object_id,user_permission)
-                   VALUES
-                    (?,?,?,?)";
-
-            $rc = $this->_doQuery($query, array($user_id,$object_type,$object_id,$permission), $res);
-
-            if (!$rc) {
-                return false;
-            }
-
-            return true;
-        }
-
-        function getBuildPortsQueueEntries($build_id) {
-            $query = "SELECT build_ports_queue.*, builds.build_name AS build_name, users.user_name AS user_name
-                        FROM build_ports_queue, builds, users
-                       WHERE build_ports_queue.build_id=?
-                         AND builds.build_id = build_ports_queue.build_id
-                         AND users.user_id = build_ports_queue.user_id
-                    ORDER BY priority ASC, build_ports_queue_id ASC";
-            $rc = $this->_doQueryHashRef($query, $results, array($build_id));
-
-            if (!$rc) {
-                return null;
-            }
-
-            $build_ports_queue_entries = $this->_newFromArray("BuildPortsQueue", $results);
-
-            return $build_ports_queue_entries;
-        }
-
-        function deleteBuildPortsQueueEntry($entry_id) {
-            $query = "DELETE FROM build_ports_queue
-                            WHERE build_ports_queue_id=?";
-
-            $rc = $this->_doQuery($query, $entry_id, $res);
-
-            if (!$rc) {
-                return false;
-            }
-
-            return true;
-        }
-
-        function deleteBuildPortsQueueByUserId($user) {
-            $query = "DELETE FROM build_ports_queue
-                            WHERE user_id=?";
-
-            $rc = $this->_doQuery($query, $user->getId(), $res);
-
-            if (!$rc) {
-                return false;
-            }
-
-            return true;
-        }
-
-        function createBuildPortsQueueEntry($build_id,$priority,$port_directory,$user_id,$email_on_completion) {
-            switch( $email_on_completion ) {
-                case '1':    $email_on_completion = 1; break;
-                default:     $email_on_completion = 0; break;
-            }
-
-            $entries[] = array('build_id'       => $build_id,
-                               'priority'       => $priority,
-                               'port_directory' => $port_directory,
-                               'user_id'        => $user_id,
-                               'enqueue_date'   => date("Y-m-d H:i:s", time()),
-                               'email_on_completion' => $email_on_completion,
-                               'status'         => 'ENQUEUED');
-
-            $results = $this->_newFromArray("BuildPortsQueue",$entries);
-
-            return $results[0];
-        }
-
-        function updateBuildPortsQueueEntry($entry) {
-
-            $query = "UPDATE build_ports_queue
-                         SET build_id=?, priority=?, email_on_completion=?, status=?
-                       WHERE build_ports_queue_id=?";
-
-            $rc = $this->_doQuery($query, array($entry->getBuildId(),$entry->getPriority(),$entry->getEmailOnCompletion(),$entry->getStatus(),$entry->getId()), $res);
-
-            if (!$rc) {
-                return false;
-            }
-
-            return true;
-        }
-
-        function addBuildPortsQueueEntry($entry) {
-            $query = "INSERT INTO build_ports_queue
-                         (enqueue_date,build_id,priority,port_directory,user_id,email_on_completion,status)
-                      VALUES
-                         (?,?,?,?,?,?,?)";
-
-            $rc = $this->_doQuery($query, array($entry->getEnqueueDate(),$entry->getBuildId(),$entry->getPriority(),$entry->getPortDirectory(),$entry->getUserId(),$entry->getEmailOnCompletion(),$entry->getStatus()), $res);
-
-            if (!$rc) {
-                return false;
-            }
-
-            return true;
-        }
-
-        function getBuildPortsQueueEntryById($id) {
-            $results = $this->getBuildPortsQueue(array( 'build_ports_queue_id' => $id ));
-
-            if (is_null($results)) {
-                 return null;
-            }
-
-            return $results[0];
-        }
-
-        function getPortsForBuild($build, $sortby = 'port_directory') {
-	    $sortbytable = "bp";
-	    if ($sortby == "") $sortby = "port_directory";
-	    if ($sortby == "port_directory") $sortbytable = "p";
-	    if ($sortby == "port_maintainer") $sortbytable = "p";
-	    if ($sortby == "last_built") {
-		    $sortbytable = "bp";
-		    $sortby = "last_built desc";
-	    }
-            $query = "SELECT p.*,
-                             bp.last_built,
-                             bp.last_status,
-                             bp.last_successful_built,
-                             bp.last_built_version,
-			     bp.last_failed_dependency,
-			     bp.last_run_duration,
-                        CASE bp.last_fail_reason
-                           WHEN '__nofail__' THEN ''
-                           ELSE bp.last_fail_reason
-                        END
-		          AS last_fail_reason
-                        FROM ports p,
-                             build_ports bp
-                       WHERE p.port_id = bp.port_id
-                         AND bp.build_id=?
-                    ORDER BY $sortbytable.$sortby";
-
-            $rc = $this->_doQueryHashRef($query, $results, $build->getId());
-
-            if (!$rc) {
-                return null;
-            }
-
-            $ports = $this->_newFromArray("Port", $results);
-
-            return $ports;
-        }
-
-        function getLatestPorts($build_id,$limit="") {
-            $query = "SELECT p.*,
-                             bp.build_id,
-                             bp.last_built,
-                             bp.last_status,
-                             bp.last_successful_built,
-                             bp.last_built_version,
-			     bp.last_failed_dependency,
-			     bp.last_run_duration,
-                        CASE bp.last_fail_reason
-                           WHEN '__nofail__' THEN ''
-                           ELSE bp.last_fail_reason
-                        END
-		          AS last_fail_reason
-                        FROM ports p,
-                             build_ports bp
-                       WHERE p.port_id = bp.port_id
-                         AND bp.last_built IS NOT NULL ";
-            if($build_id)
-                 $query .= "AND bp.build_id=$build_id ";
-            $query .= " ORDER BY bp.last_built DESC ";
-            if($limit)
-                 $query .= " LIMIT $limit";
-
-            $rc = $this->_doQueryHashRef($query, $results, array());
-
-            if (!$rc) {
-                return null;
-            }
-
-            $ports = $this->_newFromArray("Port", $results);
-
-            return $ports;
-        }
-
-	function getBuildPorts($port_id,$build_id) {
+		$this->db->setFetchMode( DB_FETCHMODE_ASSOC );
+		$this->db->setOption( 'persistent', true );
+	}
+
+	function start_transaction() {
+		$this->db->autoCommit( false );
+	}
+
+	function commit_transaction() {
+		$this->db->commit();
+		$this->db->autoCommit( true );
+	}
+
+	function rollback_transaction() {
+		$this->db->rollback();
+		$this->db->autoCommit( true );
+	}
+
+	function getAllMaintainers() {
+			  $query = "SELECT DISTINCT LOWER(port_maintainer)
+									 AS port_maintainer
+								   FROM ports where port_maintainer IS NOT NULL
+							   ORDER BY LOWER(port_maintainer)";
+		$rc = $this->_doQueryHashRef( $query, $results, array() );
+
+		if ( !$rc ) {
+			return array();
+		}
+
+		foreach( $results as $result )
+			$data[] = $result['port_maintainer'];
+
+		return $data;
+	}
+
+	function getAllPortsByPortID( $portid ) {
 		$query = "SELECT p.*,
-			         bp.last_built,
-				 bp.last_status,
-				 bp.last_successful_built,
-				 bp.last_failed_dependency,
-				 bp.last_run_duration,
-			 CASE bp.last_fail_reason
-			    WHEN '__nofail__' THEN ''
-			    ELSE bp.last_fail_reason
+						 bp.build_id,
+						 bp.last_built,
+						 bp.last_status,
+						 bp.last_successful_built,
+						 bp.last_failed_dependency,
+						 bp.last_run_duration,
+						 bp.last_built_version,
+					CASE bp.last_fail_reason
+					  WHEN '__nofail__' THEN ''
+					  ELSE bp.last_fail_reason
+					END
+					  AS last_fail_reason
+					FROM ports p,
+						 build_ports bp
+				   WHERE p.port_id = bp.port_id
+					 AND bp.port_id = $portid";
+
+		$rc = $this->_doQueryHashRef( $query, $results, array() );
+
+		if ( !$rc ) {
+			return null;
+		}
+
+		$ports = $this->_newFromArray( 'Port', $results );
+
+		return $ports;
+	}
+
+
+	function addUser( $user ) {
+		$query = "INSERT INTO users
+							  (user_name,user_email,user_password,user_www_enabled)
+					   VALUES (?,?,?,?)";
+
+		$rc = $this->_doQuery( $query, array( $user->getName(),$user->getEmail(),$user->getPassword(),$user->getWwwEnabled() ),$res );
+
+		if ( !$rc ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	function deleteUser( $user ) {
+		if( !$user->getId() || $this->deleteUserPermissions( $user, '' ) ) {
+			if ( $user->getId() ) {
+				$this->deleteBuildPortsQueueByUserId( $user );
+			}
+			$query = "DELETE FROM users
+							WHERE user_name=?";
+
+			$rc = $this->_doQuery( $query, array( $user->getName() ), $res );
+
+			if ( !$rc ) {
+				return false;
+			}
+
+			return true;
+		}
+		return false;
+	}
+
+	function updateUser( $user ) {
+		$query = "UPDATE users
+					 SET user_name=?,user_email=?,user_password=?,user_www_enabled=?
+				   WHERE user_id=?";
+
+		$rc = $this->_doQuery( $query, array( $user->getName(),$user->getEmail(),$user->getPassword(),$user->getWwwEnabled(),$user->getId() ), $res );
+
+		if ( !$rc ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	function getUserByLogin( $username, $password ) {
+		$hashPass = md5( $password );
+		$query = "SELECT user_id,user_name,user_email,user_password,user_www_enabled
+					FROM users
+				   WHERE user_name=?
+					 AND user_password=?";
+		$rc = $this->_doQueryHashRef( $query, $results, array( $username,$hashPass ) );
+
+		if ( !$rc ) {
+			return null;
+		}
+
+		$user = $this->_newFromArray( 'User', $results );
+
+		return $user[0];
+	}
+
+	function getUserPermissions( $user_id, $object_type, $object_id ) {
+
+		$query = "
+			SELECT
+			 CASE user_permission
+			   WHEN 1 THEN 'IS_WWW_ADMIN'
+			   WHEN 2 THEN 'PERM_ADD_QUEUE'
+			   WHEN 3 THEN 'PERM_MODIFY_OWN_QUEUE'
+			   WHEN 4 THEN 'PERM_DELETE_OWN_QUEUE'
+			   WHEN 5 THEN 'PERM_PRIO_LOWER_5'
+			   WHEN 6 THEN 'PERM_MODIFY_OTHER_QUEUE'
+			   WHEN 7 THEN 'PERM_DELETE_OTHER_QUEUE'
+			   ELSE 'PERM_UNKNOWN'
 			 END
-			  AS last_fail_reason
-			 FROM ports p,
-			      build_ports bp
-			 WHERE p.port_id = bp.port_id
-			 AND bp.build_id=?
-			 AND bp.port_id=?";
+			   AS user_permission
+			 FROM user_permissions
+			WHERE user_id=?
+			  AND user_permission_object_type=?
+			  AND user_permission_object_id=?";
 
-		$rc = $this->_doQueryHashRef($query, $results, array($build_id, $port_id));
-		if (!$rc) return null;
+		$rc = $this->_doQueryHashRef( $query, $results, array( $user_id,$object_type,$object_id ) );
 
-		$ports = $this->_newFromArray("Port", $results);
+		if ( !$rc ) {
+			return null;
+		}
+
+		return $results;
+	}
+
+	function deleteUserPermissions( $user, $object_type ) {
+
+		$query = "
+			DELETE FROM user_permissions
+				  WHERE user_id=?";
+
+		if( $object_type )
+			$query .= " AND user_permission_object_type='$object_type'";
+
+		$rc = $this->_doQuery( $query, array( $user->getId() ), $res );
+
+		if ( !$rc ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	function addUserPermission( $user_id, $object_type, $object_id, $permission ) {
+
+		switch( $permission ) {
+//			case 'IS_WWW_ADMIN':			$permission = 1; break;   /* only configureable via shell */
+			case 'PERM_ADD_QUEUE':			$permission = 2; break;
+			case 'PERM_MODIFY_OWN_QUEUE':	$permission = 3; break;
+			case 'PERM_DELETE_OWN_QUEUE':	$permission = 4; break;
+			case 'PERM_PRIO_LOWER_5':		$permission = 5; break;
+			case 'PERM_MODIFY_OTHER_QUEUE':	$permission = 6; break;
+			case 'PERM_DELETE_OTHER_QUEUE':	$permission = 7; break;
+			default:						return false;
+		}
+
+		$query = "
+			INSERT INTO user_permissions
+						(user_id,user_permission_object_type,user_permission_object_id,user_permission)
+				 VALUES
+						(?,?,?,?)";
+
+		$rc = $this->_doQuery( $query, array( $user_id, $object_type, $object_id, $permission ), $res );
+
+		if ( !$rc ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	function getBuildPortsQueueEntries( $build_id ) {
+		$query = "SELECT build_ports_queue.*, builds.build_name AS build_name, users.user_name AS user_name
+					FROM build_ports_queue, builds, users
+				   WHERE build_ports_queue.build_id=?
+					 AND builds.build_id = build_ports_queue.build_id
+					 AND users.user_id = build_ports_queue.user_id
+				ORDER BY priority ASC, build_ports_queue_id ASC";
+		$rc = $this->_doQueryHashRef( $query, $results, array( $build_id ) );
+
+		if ( !$rc ) {
+			return null;
+		}
+
+		$build_ports_queue_entries = $this->_newFromArray( 'BuildPortsQueue', $results );
+
+		return $build_ports_queue_entries;
+	}
+
+	function deleteBuildPortsQueueEntry( $entry_id ) {
+		$query = "DELETE FROM build_ports_queue
+						WHERE build_ports_queue_id=?";
+
+		$rc = $this->_doQuery( $query, $entry_id, $res );
+
+		if ( !$rc ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	function deleteBuildPortsQueueByUserId( $user ) {
+		$query = "DELETE FROM build_ports_queue
+						WHERE user_id=?";
+
+		$rc = $this->_doQuery( $query, $user->getId(), $res );
+
+		if ( !$rc ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	function createBuildPortsQueueEntry( $build_id, $priority, $port_directory, $user_id, $email_on_completion ) {
+		switch( $email_on_completion ) {
+			case '1':	$email_on_completion = 1; break;
+			default:	$email_on_completion = 0; break;
+		}
+
+		$entries[] = array( 'build_id'            => $build_id,
+							'priority'            => $priority,
+							'port_directory'      => $port_directory,
+							'user_id'             => $user_id,
+							'enqueue_date'        => date("Y-m-d H:i:s", time()),
+							'email_on_completion' => $email_on_completion,
+							'status'              => 'ENQUEUED');
+
+		$results = $this->_newFromArray( 'BuildPortsQueue', $entries );
+
+		return $results[0];
+	}
+
+	function updateBuildPortsQueueEntry( $entry ) {
+
+		$query = "UPDATE build_ports_queue
+					 SET build_id=?, priority=?, email_on_completion=?, status=?
+				   WHERE build_ports_queue_id=?";
+
+		$rc = $this->_doQuery( $query, array( $entry->getBuildId(), $entry->getPriority(), $entry->getEmailOnCompletion(), $entry->getStatus(), $entry->getId() ), $res );
+
+		if ( !$rc ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	function addBuildPortsQueueEntry( $entry ) {
+		$query = "INSERT INTO build_ports_queue
+							  (enqueue_date,build_id,priority,port_directory,user_id,email_on_completion,status)
+					   VALUES
+							  (?,?,?,?,?,?,?)";
+
+		$rc = $this->_doQuery( $query, array( $entry->getEnqueueDate(), $entry->getBuildId(), $entry->getPriority(), $entry->getPortDirectory(), $entry->getUserId(), $entry->getEmailOnCompletion(), $entry->getStatus() ), $res );
+
+		if ( !$rc ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	function getBuildPortsQueueEntryById( $id ) {
+		$results = $this->getBuildPortsQueue( array( 'build_ports_queue_id' => $id ) );
+
+		if ( is_null( $results ) ) {
+			return null;
+		}
+
+		return $results[0];
+	}
+
+	function getPortsForBuild( $build, $sortby = 'port_directory' ) {
+		$sortbytable = 'bp';
+		if ( $sortby == '' ) $sortby = 'port_directory';
+		if ( $sortby == 'port_directory' ) $sortbytable = 'p';
+		if ( $sortby == 'port_maintainer' ) $sortbytable = 'p';
+		if ( $sortby == 'last_built' ) {
+			$sortbytable = 'bp';
+			$sortby = 'last_built desc';
+		}
+		$query = "SELECT p.*,
+						 bp.last_built,
+						 bp.last_status,
+						 bp.last_successful_built,
+						 bp.last_built_version,
+						 bp.last_failed_dependency,
+						 bp.last_run_duration,
+					CASE bp.last_fail_reason
+					  WHEN '__nofail__' THEN ''
+					  ELSE bp.last_fail_reason
+					END
+					  AS last_fail_reason
+					FROM ports p,
+						 build_ports bp
+				   WHERE p.port_id = bp.port_id
+					 AND bp.build_id=?
+				ORDER BY $sortbytable.$sortby";
+
+		$rc = $this->_doQueryHashRef( $query, $results, $build->getId() );
+
+		if ( !$rc ) {
+			return null;
+		}
+
+		$ports = $this->_newFromArray( 'Port', $results );
+
+		return $ports;
+	}
+
+	function getLatestPorts( $build_id, $limit = '' ) {
+		$query = "SELECT p.*,
+						 bp.build_id,
+						 bp.last_built,
+						 bp.last_status,
+						 bp.last_successful_built,
+						 bp.last_built_version,
+						 bp.last_failed_dependency,
+						 bp.last_run_duration,
+					CASE bp.last_fail_reason
+					  WHEN '__nofail__' THEN ''
+					  ELSE bp.last_fail_reason
+					END
+					  AS last_fail_reason
+					FROM ports p,
+						 build_ports bp
+				   WHERE p.port_id = bp.port_id
+					 AND bp.last_built IS NOT NULL ";
+		if( $build_id )
+			$query .= "AND bp.build_id=$build_id ";
+		$query .= " ORDER BY bp.last_built DESC ";
+		if( $limit )
+			$query .= " LIMIT $limit";
+
+		$rc = $this->_doQueryHashRef( $query, $results, array() );
+
+		if ( !$rc ) {
+			return null;
+		}
+
+		$ports = $this->_newFromArray( 'Port', $results );
+
+		return $ports;
+	}
+
+	function getBuildPorts( $port_id, $build_id ) {
+		$query = "SELECT p.*,
+						 bp.last_built,
+						 bp.last_status,
+						 bp.last_successful_built,
+						 bp.last_failed_dependency,
+						 bp.last_run_duration,
+					CASE bp.last_fail_reason
+					  WHEN '__nofail__' THEN ''
+					  ELSE bp.last_fail_reason
+					END
+					  AS last_fail_reason
+					FROM ports p,
+						 build_ports bp
+				   WHERE p.port_id = bp.port_id
+					 AND bp.build_id=?
+					 AND bp.port_id=?";
+
+		$rc = $this->_doQueryHashRef( $query, $results, array( $build_id, $port_id ) );
+		if ( !$rc ) {
+			return null;
+		}
+
+		$ports = $this->_newFromArray( 'Port', $results );
 
 		return $ports[0];
 	}
 
 
-        function getPortsByStatus($build_id,$maintainer,$status,$notstatus) {
-            $query = "SELECT p.*,
-                             bp.build_id,
-                             bp.last_built,
-                             bp.last_status,
-                             bp.last_successful_built,
-                             bp.last_built_version,
-			     bp.last_failed_dependency,
-			     bp.last_run_duration,
-                        CASE bp.last_fail_reason
-                           WHEN '__nofail__' THEN ''
-                           ELSE bp.last_fail_reason
-                        END
-		          AS last_fail_reason
-                        FROM ports p,
-                             build_ports bp
-                       WHERE p.port_id = bp.port_id ";
+	function getPortsByStatus( $build_id, $maintainer, $status, $notstatus ) {
+		$query = "SELECT p.*,
+						 bp.build_id,
+						 bp.last_built,
+						 bp.last_status,
+						 bp.last_successful_built,
+						 bp.last_built_version,
+						 bp.last_failed_dependency,
+						 bp.last_run_duration,
+					CASE bp.last_fail_reason
+					  WHEN '__nofail__' THEN ''
+					  ELSE bp.last_fail_reason
+					END
+					  AS last_fail_reason
+					FROM ports p,
+						 build_ports bp
+				   WHERE p.port_id = bp.port_id ";
 
-            if($build_id)
-                 $query .= "AND bp.build_id=$build_id ";
-            if($status<>'')
-                 $query .= "AND bp.last_status='$status' ";
-	    if($notstatus<>'')
-		 $query .= "AND bp.last_status<>'$notstatus' AND bp.last_status<>'UNKNOWN'";
-            if($maintainer)
-                 $query .= "AND p.port_maintainer='$maintainer'";
-            $query .= " ORDER BY bp.last_built DESC ";
+		if( $build_id )
+			$query .= "AND bp.build_id=$build_id ";
+		if( $status <> '' )
+			$query .= "AND bp.last_status='$status' ";
+		if( $notstatus <> '' )
+			$query .= "AND bp.last_status<>'$notstatus' AND bp.last_status<>'UNKNOWN'";
+		if( $maintainer )
+			$query .= "AND p.port_maintainer='$maintainer'";
+		$query .= " ORDER BY bp.last_built DESC ";
 
-            $rc = $this->_doQueryHashRef($query, $results, array());
+		$rc = $this->_doQueryHashRef( $query, $results, array() );
 
-            if (!$rc) {
-                return null;
-            }
+		if ( !$rc ) {
+			return null;
+		}
 
-            $ports = $this->_newFromArray("Port", $results);
+		$ports = $this->_newFromArray( 'Port', $results );
 
-            return $ports;
-        }
+		return $ports;
+	}
 
-	function getBuildStatsWithStatus($build_id) {
-	    $query = 'SELECT last_status,COUNT(*) AS c FROM build_ports WHERE build_id = ? GROUP BY last_status';
-	    $rc = $this->_doQueryHashRef($query, $results, $build_id);
-	    if (!$rc) return null;
-	    return $results;
+	function getBuildStatsWithStatus( $build_id ) {
+		$query = 'SELECT last_status,COUNT(*) AS c FROM build_ports WHERE build_id = ? GROUP BY last_status';
+		$rc = $this->_doQueryHashRef( $query, $results, $build_id );
+		if ( !$rc )
+			return null;
+		return $results;
 	}
 
 
-        function getBuildStats($build_id) {
-            $query = 'SELECT COUNT(*) AS fails FROM build_ports WHERE last_status = \'FAIL\' AND build_id = ?';
-            $rc = $this->_doQueryHashRef($query, $results, $build_id);
-            if (!$rc) return null;
-            return $results[0];
-        }
-
-        function getPortById($id) {
-            $results = $this->getPorts(array( 'port_id' => $id ));
-
-            if (is_null($results)) {
-                return null;
-            }
-
-            return $results[0];
-        }
-
-	function getPortByDirectory($dir) {
-	    $results = $this->getPorts(array( 'port_directory' => $dir ));
-
-	    if (is_null($results)) {
-                return null;
-	    }
-
-	    return $results[0];
+	function getBuildStats( $build_id ) {
+		$query = 'SELECT COUNT(*) AS fails FROM build_ports WHERE last_status = \'FAIL\' AND build_id = ?';
+		$rc = $this->_doQueryHashRef( $query, $results, $build_id );
+		if ( !$rc )
+			return null;
+		return $results[0];
 	}
 
-	function getCurrentPortForBuild($build_id) {
-	    $query = 'SELECT port_id AS id FROM build_ports WHERE build_id = ? AND currently_building = \'1\'';
-	    $rc = $this->_doQueryHashRef($query, $results, array($build_id));
-	    if (!$rc) return null;
-	    $port = $this->getPortById($results[0]['id']);
+	function getPortById( $id ) {
+		$results = $this->getPorts( array( 'port_id' => $id ) );
 
-	    return $port;
+		if ( is_null( $results ) ) {
+			return null;
+		}
+
+		return $results[0];
 	}
 
-        function getObjects($type, $params = array()) {
-            global $objectMap;
+	function getPortByDirectory( $dir ) {
+		$results = $this->getPorts( array( 'port_directory' => $dir ) );
 
-            if (!isset($objectMap[$type])) {
-                die("Unknown object type, $type\n");
-            }
+		if ( is_null( $results ) ) {
+			return null;
+		}
 
-            $table = $objectMap[$type];
-            $condition = "";
-
-            $values = array();
-            $conds = array();
-            foreach ($params as $field => $param) {
-                # Each parameter makes up and OR portion of a query.  Within
-                # each parameter can be a hash reference that make up the AND
-                # portion of the query.
-                if (is_array($param)) {
-                    $ands = array();
-                    foreach ($param as $andcond => $value) {
-                        array_push($ands, "$andcond=?");
-                        array_push($values, $value);
-                    }
-                    array_push($conds, "(" . (implode(" AND ", $ands)) . ")");
-                } else {
-                    array_push($conds, "(" . $field . "=?)");
-                    array_push($values, $param);
-                }
-            }
-
-            $condition = implode(" OR ", $conds);
-
-            if ($condition != "") {
-                $query = "SELECT * FROM $table WHERE $condition";
-            }
-            else {
-                $query = "SELECT * FROM $table";
-            }
-
-            $results = array();
-            $rc = $this->_doQueryHashRef($query, $results, $values);
-
-            if (!$rc) {
-                return null;
-            }
-
-            return $this->_newFromArray($type, $results);
-        }
-
-        function getBuildByName($name) {
-            $results = $this->getBuilds(array( 'build_name' => $name ));
-
-            if (is_null($results)) {
-                return null;
-            }
-
-            return $results[0];
-        }
-
-        function getBuildById($id) {
-            $results = $this->getBuilds(array( 'build_id' => $id ));
-
-            if (is_null($results)) {
-                return null;
-            }
-
-            return $results[0];
-        }
-
-        function getJailById($id) {
-            $results = $this->getJails(array( 'jail_id' => $id ));
-
-            if (is_null($results)) {
-                return null;
-            }
-
-            return $results[0];
-        }
-
-        function getPortsTreeForBuild($build) {
-            $portstree = $this->getPortsTreeById($build->getPortsTreeId());
-
-            return $portstree;
-        }
-
-        function getPortsTreeByName($name) {
-             $results = $this->getPortsTrees(array( 'ports_tree_name' => $name ));
-             if (is_null($results)) {
-                 return null;
-             }
-
-             return $results[0];
-        }
-
-        function getPortsTreeById($id) {
-            $results = $this->getPortsTrees(array( 'ports_tree_id' => $id ));
-
-            if (is_null($results)) {
-                 return null;
-            }
-
-            return $results[0];
-        }
-
-        function getUserById($id) {
-            $results = $this->getUsers(array( 'user_id' => $id ));
-
-            if (is_null($results)) {
-                return null;
-            }
-
-            return $results[0];
-        }
-
-        function getUserByName($name) {
-            $results = $this->getUsers(array( 'user_name' => $name ));
-
-            if (is_null($results)) {
-                return null;
-            }
-
-            return $results[0];
-        }
-
-        function getConfig($params = array()) {
-            return $this->getObjects("Config", $params);
-        }
-
-	function getBuildPortsQueue($params = array()) {
-	    return $this->getObjects("BuildPortsQueue", $params);
+		return $results[0];
 	}
 
-        function getBuilds($params = array()) {
-            return $this->getObjects("Build", $params);
-        }
+	function getCurrentPortForBuild( $build_id ) {
+		$query = 'SELECT port_id AS id FROM build_ports WHERE build_id = ? AND currently_building = \'1\'';
+		$rc = $this->_doQueryHashRef( $query, $results, array( $build_id ) );
+		if ( !$rc )
+			return null;
+		$port = $this->getPortById( $results[0]['id'] );
 
-	function getLogfilePatterns($params = array()) {
-		return $this->getObjects("LogfilePattern", $params);
+		return $port;
 	}
 
-	function getPorts($params = array()) {
-	    return $this->getObjects("Port", $params);
+	function getObjects( $type, $params = array() ) {
+		global $objectMap;
+
+		if ( !isset( $objectMap[$type] ) ) {
+			die( "Unknown object type, $type\n" );
+		}
+
+		$table = $objectMap[$type];
+		$condition = '';
+
+		$values = array();
+		$conds = array();
+		foreach ( $params as $field => $param ) {
+			# Each parameter makes up and OR portion of a query.  Within
+			# each parameter can be a hash reference that make up the AND
+			# portion of the query.
+			if ( is_array( $param ) ) {
+				$ands = array();
+				foreach ( $param as $andcond => $value ) {
+					array_push( $ands, "$andcond=?" );
+					array_push( $values, $value );
+				}
+				array_push( $conds, '(' . ( implode( ' AND ', $ands ) ) . ')' );
+			} else {
+				array_push( $conds, '(' . $field . '=?)' );
+				array_push( $values, $param );
+			}
+		}
+
+		$condition = implode( ' OR ', $conds );
+
+		if ( $condition != '' ) {
+			$query = "SELECT * FROM $table WHERE $condition";
+		}
+		else {
+			$query = "SELECT * FROM $table";
+		}
+
+		$results = array();
+		$rc = $this->_doQueryHashRef( $query, $results, $values );
+
+		if ( !$rc ) {
+			return null;
+		}
+
+		return $this->_newFromArray( $type, $results );
 	}
 
-        function getJails($params = array()) {
-            return $this->getObjects("Jail", $params);
-        }
+	function getBuildByName( $name ) {
+		$results = $this->getBuilds( array( 'build_name' => $name ) );
 
-	function getPortFailPatterns($params = array()) {
-		return $this->getObjects("PortFailPattern", $params);
+		if ( is_null( $results ) ) {
+			return null;
+		}
+
+		return $results[0];
 	}
 
-        function getPortFailReasons($params = array()) {
-            return $this->getObjects("PortFailReason", $params);
-        }
+	function getBuildById( $id ) {
+		$results = $this->getBuilds( array( 'build_id' => $id ) );
 
-        function getPortsTrees($params = array()) {
-            return $this->getObjects("PortsTree", $params);
-        }
+		if ( is_null( $results ) ) {
+			return null;
+		}
 
-        function getUsers($params = array()) {
-            return $this->getObjects("User", $params);
-        }
+		return $results[0];
+	}
 
-        function getAllConfig() {
-            $config = $this->getConfig();
+	function getJailById( $id ) {
+		$results = $this->getJails( array( 'jail_id' => $id ) );
 
-            return $config;
-        }
+		if ( is_null( $results ) ) {
+			return null;
+		}
 
-        function getAllBuilds() {
-            $builds = $this->getBuilds();
+		return $results[0];
+	}
 
-            return $builds;
-        }
+	function getPortsTreeForBuild( $build ) {
+		$portstree = $this->getPortsTreeById( $build->getPortsTreeId() );
+
+		return $portstree;
+	}
+
+	function getPortsTreeByName( $name ) {
+		$results = $this->getPortsTrees( array( 'ports_tree_name' => $name ) );
+		if ( is_null( $results ) ) {
+			return null;
+		}
+
+		return $results[0];
+	}
+
+	function getPortsTreeById( $id ) {
+		$results = $this->getPortsTrees( array( 'ports_tree_id' => $id ) );
+
+		if ( is_null( $results ) ) {
+			return null;
+		}
+
+		return $results[0];
+	}
+
+		function getUserById( $id ) {
+			$results = $this->getUsers( array( 'user_id' => $id ) );
+
+		if ( is_null( $results ) ) {
+			return null;
+		}
+
+		return $results[0];
+	}
+
+	function getUserByName( $name ) {
+		$results = $this->getUsers( array( 'user_name' => $name ) );
+
+		if ( is_null( $results ) ) {
+			return null;
+		}
+
+		return $results[0];
+	}
+
+	function getConfig( $params = array() ) {
+		return $this->getObjects( 'Config', $params );
+	}
+
+	function getBuildPortsQueue( $params = array() ) {
+		return $this->getObjects( 'BuildPortsQueue', $params );
+	}
+
+	function getBuilds( $params = array() ) {
+		return $this->getObjects( 'Build', $params );
+	}
+
+	function getLogfilePatterns( $params = array() ) {
+		return $this->getObjects( 'LogfilePattern', $params );
+	}
+
+	function getPorts( $params = array() ) {
+		return $this->getObjects( 'Port', $params );
+	}
+
+	function getJails( $params = array() ) {
+		return $this->getObjects( 'Jail', $params );
+	}
+
+	function getPortFailPatterns( $params = array() ) {
+		return $this->getObjects( 'PortFailPattern', $params );
+	}
+
+	function getPortFailReasons( $params = array() ) {
+		return $this->getObjects( 'PortFailReason', $params );
+	}
+
+	function getPortsTrees( $params = array() ) {
+		return $this->getObjects( 'PortsTree', $params );
+	}
+
+	function getUsers( $params = array() ) {
+		return $this->getObjects( 'User', $params );
+	}
+
+	function getAllConfig() {
+		$config = $this->getConfig();
+
+		return $config;
+	}
+
+	function getAllBuilds() {
+		$builds = $this->getBuilds();
+
+		return $builds;
+	}
 
 	function getAllLogfilePatterns() {
 		$patterns = $this->getLogfilePatterns();
@@ -741,11 +751,11 @@
 		return $patterns;
 	}
 
-        function getAllJails() {
-            $jails = $this->getJails();
+	function getAllJails() {
+		$jails = $this->getJails();
 
-            return $jails;
-        }
+		return $jails;
+	}
 
 	function getAllPortFailPatterns() {
 		$results = $this->getPortFailPatterns();
@@ -753,137 +763,136 @@
 		return $results;
 	}
 
-        function getAllPortFailReasons() {
-            $results = $this->getPortFailReasons();
+	function getAllPortFailReasons() {
+		$results = $this->getPortFailReasons();
 
-            return $results;
-        }
+		return $results;
+	}
 
-        function getAllPortsTrees() {
-            $ports_trees = $this->getPortsTrees();
+	function getAllPortsTrees() {
+		$ports_trees = $this->getPortsTrees();
 
-            return $ports_trees;
-        }
+		return $ports_trees;
+	}
 
-        function getAllUsers() {
-            $users = $this->getUsers();
+	function getAllUsers() {
+		$users = $this->getUsers();
 
-            return $users;
-        }
+		return $users;
+	}
 
-        function addError($error) {
-             return $this->error[] = $error;
-        }
+	function addError( $error ) {
+		return $this->error[] = $error;
+	}
 
-        function getErrors() {
-             return $this->error;
-        }
+	function getErrors() {
+		return $this->error;
+	}
 
-        function _doQueryNumRows($query, $params = array()) {
-            $rows = 0;
-            $rc = $this->_doQuery($query, $params, $res);
+	function _doQueryNumRows( $query, $params = array() ) {
+		$rows = 0;
+		$rc = $this->_doQuery( $query, $params, $res );
 
-            if (!$rc) {
-                return -1;
-            }
+		if ( !$rc ) {
+			return -1;
+		}
 
-            if ($res->numRows() > -1) {
-                $rows = $res->numRows();
-            }
-            else {
-                while($res->fetchRow()) {
-                    $rows++;
-                }
-            }
+		if ( $res->numRows() > -1 ) {
+			$rows = $res->numRows();
+		}
+		else {
+			while( $res->fetchRow() ) {
+				$rows++;
+			}
+		}
 
-            $res->free();
+		$res->free();
 
-            return $rows;
-        }
+		return $rows;
+	}
 
-        function _doQueryHashRef($query, &$results, $params = array()) {
-            $rc = $this->_doQuery($query, $params, $res);
+	function _doQueryHashRef( $query, &$results, $params = array() ) {
+		$rc = $this->_doQuery( $query, $params, $res );
 
-            if (!$rc) {
-                $results = null;
-                return 0;
-            }
+		if ( !$rc ) {
+			$results = null;
+			return 0;
+		}
 
-            $results = array();
-            while ($row = $res->fetchRow()) {
-                array_push($results, $row);
-            }
+		$results = array();
+		while ( $row = $res->fetchRow() ) {
+			array_push( $results, $row );
+		}
 
-            $res->free();
+		$res->free();
 
-            return 1;
-        }
+		return 1;
+	}
 
-        function _doQuery($query, $params, &$res) {
-            $sth = $this->db->prepare($query);
+	function _doQuery( $query, $params, &$res ) {
+		$sth = $this->db->prepare( $query );
 
-            if (DB::isError($this->db)) {
-                $this->addError($this->db->getMessage());
-                return 0;
-            }
+		if ( DB::isError( $this->db ) ) {
+			$this->addError( $this->db->getMessage() );
+			return 0;
+		}
 
-            if (count($params)) {
-                $_res = $this->db->execute($sth, $params);
-            }
-            else {
-                $_res = $this->db->execute($sth);
-            }
+		if ( count( $params ) ) {
+			$_res = $this->db->execute( $sth, $params );
+		}
+		else {
+			$_res = $this->db->execute( $sth );
+		}
 
-            if (DB::isError($_res)) {
-                $this->addError($_res->getMessage());
-                return 0;
-            }
+		if ( DB::isError( $_res ) ) {
+			$this->addError( $_res->getMessage() );
+			return 0;
+		}
 
-            if (!is_null($_res)) {
-                $res = $_res;
-            }
-            else {
-                $res->free();
-            }
+		if ( !is_null( $_res ) ) {
+			$res = $_res;
+		}
+		else {
+			$res->free();
+		}
 
-            return 1;
-        }
+		return 1;
+	}
 
-        function _newFromArray($type, $arr) {
-            $objects = array();
+	function _newFromArray( $type, $arr ) {
+		$objects = array();
 
-            foreach ($arr as $item) {
-                eval('$obj = new $type($item);');
-                if (!is_a($obj, $type)) {
-                    return null;
-                }
-                array_push($objects, $obj);
-            }
+		foreach ( $arr as $item ) {
+			eval( '$obj = new $type( $item );' );
+			if ( !is_a( $obj, $type ) ) {
+				return null;
+			}
+			array_push( $objects, $obj );
+		}
 
-            return $objects;
-        }
+		return $objects;
+	}
 
-        function destroy() {
-            $this->db->disconnect();
-            $this->error = null;
-        }
+	function destroy() {
+		$this->db->disconnect();
+		$this->error = null;
+	}
 
-        function getPackageSuffix($jail_id) {
-            if (empty($jail_id)) return "";
-            /* Use caching to avoid a lot of SQL queries */
-            if ( isset($this->packageSuffixCache[$jail_id])) {
-                return $this->packageSuffixCache[$jail_id];
-            } else {
-                $jail = $this->getJailById($jail_id);
-                if (substr($jail->getName(), 0, 1) <= "4") {
-                        $this->packageSuffixCache[$jail_id] = ".tgz";
-                        return ".tgz";
-                } else {
-                        $this->packageSuffixCache[$jail_id] = ".tbz";
-                        return ".tbz";
-                }
-
-            }
-        }
-   }
+	function getPackageSuffix( $jail_id ) {
+		if ( empty( $jail_id ) ) return '';
+		/* Use caching to avoid a lot of SQL queries */
+		if ( isset( $this->packageSuffixCache[$jail_id] ) ) {
+			return $this->packageSuffixCache[$jail_id];
+		} else {
+			$jail = $this->getJailById( $jail_id );
+			if ( substr( $jail->getName(), 0, 1 ) <= '4' ) {
+				$this->packageSuffixCache[$jail_id] = '.tgz';
+				return '.tgz';
+			} else {
+				$this->packageSuffixCache[$jail_id] = '.tbz';
+				return '.tbz';
+			}
+		}
+	}
+}
 ?>

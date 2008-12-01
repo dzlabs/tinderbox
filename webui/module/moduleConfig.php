@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleConfig.php,v 1.4 2007/10/13 02:28:47 ade Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleConfig.php,v 1.5 2008/12/01 09:34:05 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -42,7 +42,7 @@ class moduleConfig extends module {
 			foreach( $sort_me as $res )
 				$sort[] = $res[$tpl_key.'_name'];
 			array_multisort( $sort, SORT_ASC, $sort_me );
-		        $this->template_assign( $tpl_key.'_data',    $sort_me );
+			$this->template_assign( $tpl_key.'_data',    $sort_me );
 			$this->template_assign( 'no_'.$tpl_key.'_list', false );
 		} else {
 			$this->template_assign( 'no_'.$tpl_key.'_list', true );
@@ -50,12 +50,12 @@ class moduleConfig extends module {
 	}
 
 	function display_config() {
-	       if( !$this->moduleUsers->is_logged_in() ) {
-		       return $this->template_parse( 'please_login.tpl' );
-	       } else if( ! $this->moduleUsers->checkWwwAdmin() ) {
-		       $this->TinderboxDS->addError( permission_denied );
-		       return $this->template_parse( 'config.tpl' );
-	       }
+		if( !$this->moduleUsers->is_logged_in() ) {
+			return $this->template_parse( 'please_login.tpl' );
+		} else if( ! $this->moduleUsers->checkWwwAdmin() ) {
+			$this->TinderboxDS->addError( permission_denied );
+			return $this->template_parse( 'config.tpl' );
+		}
 		$builds          = $this->TinderboxDS->getAllBuilds();
 		$jails           = $this->TinderboxDS->getAllJails();
 		$ports_trees     = $this->TinderboxDS->getAllPortsTrees();
@@ -64,35 +64,35 @@ class moduleConfig extends module {
 		foreach( $jails as $jail ) {
 			$jail_id = $jail->getId();
 			$all_jails[$jail_id] = array( 'jail_name'        => $jail->getName(),
-                                                      'jail_arch'        => $jail->getArch(),
-			                              'jail_tag'         => $jail->getTag(),
-			                              'jail_last_built'  => prettyDatetime($jail->getLastBuilt()),
-			                              'jail_update_cmd'  => $jail->getUpdateCmd(),
-			                              'jail_description' => $jail->getDescription(),
-			                              'jail_src_mount'   => $jail->getSrcMount() );
+										  'jail_arch'        => $jail->getArch(),
+										  'jail_tag'         => $jail->getTag(),
+										  'jail_last_built'  => prettyDatetime( $jail->getLastBuilt() ),
+										  'jail_update_cmd'  => $jail->getUpdateCmd(),
+										  'jail_description' => $jail->getDescription(),
+										  'jail_src_mount'   => $jail->getSrcMount() );
 		};
 
 		foreach( $ports_trees as $ports_tree ) {
 			$ports_tree_id = $ports_tree->getId();
 			$all_ports_trees[$ports_tree_id] = array( 'ports_tree_name'        => $ports_tree->getName(),
-			                   	        	  'ports_tree_last_built'  => prettyDatetime( $ports_tree->getLastBuilt() ),
-			                   	        	  'ports_tree_update_cmd'  => $ports_tree->getUpdateCmd(),
-			                   	        	  'ports_tree_description' => $ports_tree->getDescription(),
-		                           	        	  'ports_tree_cvsweb_url'  => $ports_tree->getCVSwebURL(),
-			                   	        	  'ports_tree_ports_mount' => $ports_tree->getPortsMount() );
+													  'ports_tree_last_built'  => prettyDatetime( $ports_tree->getLastBuilt() ),
+													  'ports_tree_update_cmd'  => $ports_tree->getUpdateCmd(),
+													  'ports_tree_description' => $ports_tree->getDescription(),
+													  'ports_tree_cvsweb_url'  => $ports_tree->getCVSwebURL(),
+													  'ports_tree_ports_mount' => $ports_tree->getPortsMount() );
 		};
 
 		foreach( $builds as $build ) {
 			$build_id = $build->getId();
 			$all_builds[$build_id] = array( 'build_name'        => $build->getName(),
-			                   	        'build_description' => $build->getDescription(),
-		                           	        'jail_name'         => $all_jails[$build->getJailId()]['jail_name'],
-			                   	        'ports_tree_name'   => $all_ports_trees[$build->getPortsTreeId()]['ports_tree_name'] );
+											'build_description' => $build->getDescription(),
+											'jail_name'         => $all_jails[$build->getJailId()]['jail_name'],
+											'ports_tree_name'   => $all_ports_trees[$build->getPortsTreeId()]['ports_tree_name'] );
 		};
 
 		foreach( $config_options as $config_option ) {
 			$all_config_options[] = array( 'config_option_name'  => $config_option->getName(),
-			                               'config_option_value' => $config_option->getValue() );
+										   'config_option_value' => $config_option->getValue() );
 		};
 
 		$this->_array_sort_and_assign( $all_jails,          'jail'          );

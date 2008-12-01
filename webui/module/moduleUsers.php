@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.20 2008/09/23 22:41:26 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.21 2008/12/01 09:34:06 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -150,7 +150,7 @@ class moduleUsers extends module {
 			case 'add':	$user = new User();
 					$user2 = $this->TinderboxDS->getUserByName( $user_name );
 					if( is_object( $user2 ) && $user2->getId() ) {
-						$this->TinderboxDS->addError( user_admin_user_exists." (".$user_name.")" );
+						$this->TinderboxDS->addError( user_admin_user_exists . " (" . $user_name . ")" );
 						return '0';
 					}
 					unset( $user2 );
@@ -167,7 +167,7 @@ class moduleUsers extends module {
 						} else {
 							$user2 = $this->TinderboxDS->getUserByName( $user_name );
 							if( is_object( $user2 ) && $user2->getId() ) {
-								$this->TinderboxDS->addError( user_admin_user_exists." (".$user_name.")" );
+								$this->TinderboxDS->addError( user_admin_user_exists . " (" . $user_name . ")" );
 								return '0';
 							}
 							unset( $user2 );
@@ -353,13 +353,11 @@ class moduleUsers extends module {
 		return $this->get_permission( $object_type, $object_id, 'PERM_PRIO_LOWER_5' );
 	}
 
-	function checkPermModifyOtherQueue( $object_type, $object_id )
- {
+	function checkPermModifyOtherQueue( $object_type, $object_id ) {
 		return $this->get_permission( $object_type, $object_id, 'PERM_MODIFY_OTHER_QUEUE' );
 	}
 
-	function checkPermDeleteOtherQueue( $object_type, $object_id )
- {
+	function checkPermDeleteOtherQueue( $object_type, $object_id ) {
 		return $this->get_permission( $object_type, $object_id, 'PERM_DELETE_OTHER_QUEUE' );
 	}
 }

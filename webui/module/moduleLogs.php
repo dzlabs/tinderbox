@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.3 2008/09/19 15:07:38 as Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.4 2008/12/01 09:34:05 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -51,7 +51,7 @@ class moduleLogs extends module {
 			}
 		}
 
-		list($data) = $this->modulePorts->get_list_data( $build_id, array($build_port) );
+		list( $data ) = $this->modulePorts->get_list_data( $build_id, array( $build_port ) );
 
 		$paterns = array();
 
@@ -93,29 +93,29 @@ class moduleLogs extends module {
 		$counts = array();
 		$displaystats = array();
 
-		$fh = fopen($file_name, 'r');
+		$fh = fopen( $file_name, 'r' );
 
-		for ($lnr = 1; ! feof($fh); $lnr++) {
-			$line = fgets($fh);
+		for ( $lnr = 1; ! feof( $fh ); $lnr++ ) {
+			$line = fgets( $fh );
 
-			$lines[$lnr] = htmlentities(rtrim($line));
+			$lines[$lnr] = htmlentities( rtrim( $line ) );
 			$colors[$lnr] = '';
 
-			foreach ($patterns as $pattern) {
-				if (! preg_match($pattern['expr'], $line))
+			foreach ( $patterns as $pattern ) {
+				if ( !preg_match( $pattern['expr'], $line ) )
 					continue;
 
 				$colors[$lnr] = $pattern['color'];
 
-				if (! isset($stats[$pattern['severity']])) {
+				if ( !isset( $stats[$pattern['severity']] ) ) {
 					$stats[$pattern['severity']] = array();
 					$counts[$pattern['severity']] = 0;
 					$displaystats[$pattern['severity']] = true;
-					if (isset($_COOKIE[$pattern['severity']]) && $_COOKIE[$pattern['severity']] == '0')
+					if ( isset( $_COOKIE[$pattern['severity']] ) && $_COOKIE[$pattern['severity']] == '0' )
 						$displaystats[$pattern['severity']] = false;
 				}
 
-				if (! isset($stats[$pattern['severity']][$pattern['tag']]))
+				if ( !isset( $stats[$pattern['severity']][$pattern['tag']] ) )
 					$stats[$pattern['severity']][$pattern['tag']] = array();
 
 				$stats[$pattern['severity']][$pattern['tag']][] = $lnr;
@@ -124,7 +124,7 @@ class moduleLogs extends module {
 		}
 
 		$displaystats['linenumber'] = true;
-		if (isset($_COOKIE['linenumber']) && $_COOKIE['linenumber'] == '0')
+		if ( isset( $_COOKIE['linenumber'] ) && $_COOKIE['linenumber'] == '0' )
 			$displaystats['linenumber'] = false;
 
 		$this->template_assign( 'lines', $lines );
@@ -137,7 +137,7 @@ class moduleLogs extends module {
 		$this->template_assign( 'data', $data );
 
 		$elapsed_time = '';
-		if ( isset( $with_timer ) && $with_timer == 1)
+		if ( isset( $with_timer ) && $with_timer == 1 )
 			$elapsed_time = get_ui_elapsed_time( $starttimer );
 
 		$this->template_assign( 'ui_elapsed_time', $elapsed_time );
