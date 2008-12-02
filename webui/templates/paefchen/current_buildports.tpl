@@ -20,6 +20,6 @@
 		<?php }?>
 	</table>
 	<script language="JavaScript">
-		setTimeout("reloadpage()", 60000)
+		setTimeout("reloadpage()", <?php echo $reload_interval_current ?>)
 	</script>
 <?php }?>

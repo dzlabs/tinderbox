@@ -14,7 +14,7 @@ include 'header.inc.tpl'
 	function reloadpage() {
 	    document.location.reload();
 	}
-	setTimeout("reloadpage()", 300000)
+	setTimeout("reloadpage()", <?php echo $reload_interval_latest ?>)
 //-->
 </script>
 <?php echo $current_builds?>

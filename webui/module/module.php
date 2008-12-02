@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/module.php,v 1.5 2008/09/12 16:37:32 as Exp $
+# $MCom: portstools/tinderbox/webui/module/module.php,v 1.6 2008/12/02 13:32:27 beat Exp $
 #
 
 require_once 'core/functions.php';
@@ -42,6 +42,16 @@ class module {
 		global $tinderbox_name;
 		global $tinderbox_title;
 		global $display_login;
+		global $reload_interval_latest;
+		global $reload_interval_current;
+
+		if ( !isset( $reload_interval_latest ) ) {
+			$reload_interval_latest = 300000;
+		}
+
+		if ( !isset( $reload_interval_current ) ) {
+			$reload_interval_current = 60000;
+		}
 
 		$this->template_assign( 'templatesuri',    $templatesuri    );
 		$this->template_assign( 'tinderbox_name',  $tinderbox_name  );

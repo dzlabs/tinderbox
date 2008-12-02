@@ -1,8 +1,19 @@
 <?php
 
 # Configurable options
+
+# page title
 $tinderbox_name	 = 'Example Tinderbox';
+# used in page header
 $tinderbox_title = 'Example Tinderbox';
+
+# reload interval for "Current And Latest Builds" page while no port is
+# building in miliseconds
+$reload_interval_latest='300000';
+# reload interval for "Current And Latest Builds" page while a port is building
+# in miliseconds
+$reload_interval_current='60000';
+
 $wwwrootdir	 = dirname( __FILE__ );
 $rootdir	 = realpath( $wwwrootdir . '/../..' );
 $protocol	 = isset( $_SERVER['HTTPS'] ) ? 'https' : 'http';
