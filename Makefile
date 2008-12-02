@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.62 2008/11/27 18:15:33 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.63 2008/12/02 13:52:36 beat Exp $
 
 VERSION=	3.0.0
 
@@ -18,7 +18,7 @@ MIGDATA=	build_ports.map build_ports_queue.map builds.map config.map \
 		hooks.map jails.map order.lst user_permissions.map
 MAN1DATA=	tc-configCcache.1 tc-configDistfile.1 tc-configGet.1 \
 		tc-configJail.1 tc-configTinderd.1 tc-init.1
-WEBUIDATA=	inc_ds.php.dist inc_tinderbox.php.dist index.php
+WEBUIDATA=	favicon.ico inc_ds.php.dist inc_tinderbox.php.dist index.php
 WEBUICDATA=	Build.php BuildPortsQueue.php LogfilePatterns.php Config.php \
 		Jail.php Port.php PortFailPattern.php PortFailReason.php \
 		PortsTree.php TinderObject.php TinderboxDS.php User.php \
