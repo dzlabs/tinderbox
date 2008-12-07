@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.160 2008/11/28 22:13:51 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.161 2008/12/07 20:15:24 marcus Exp $
 #
 
 my $pb;
@@ -2835,10 +2835,15 @@ EOD
                 if (defined($user)) {
                         push @users, $user;
                 } else {
-                        cleanup($ds, 1,
-                                      "User "
-                                    . $opts->{'u'}
-                                    . " is not in the datastore.");
+                        $user = $ds->getUserById($opts->{'u'});
+                        if (defined($user)) {
+                                push @users, $user;
+                        } else {
+                                cleanup($ds, 1,
+                                              "User "
+                                            . $opts->{'u'}
+                                            . " is not in the datastore.");
+                        }
                 }
 
         } else {
