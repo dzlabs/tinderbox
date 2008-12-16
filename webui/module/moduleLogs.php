@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.4 2008/12/01 09:34:05 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.5 2008/12/16 21:10:12 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -53,7 +53,7 @@ class moduleLogs extends module {
 
 		list( $data ) = $this->modulePorts->get_list_data( $build_id, array( $build_port ) );
 
-		$paterns = array();
+		$patterns = array();
 
 		if ( $build_port->getLastStatus() == 'FAIL' ) {
 			foreach ( $this->TinderboxDS->getAllPortFailPatterns() as $pattern ) {
