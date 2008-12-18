@@ -49,7 +49,7 @@ include 'header.inc.tpl';
 </table>
 <?php }else{?>
 <p>There are no build failures at the moment.</p>
-<?php  }
+<?php }
 $footer_legend = array(
 	'port_success'	=> 'Success',
 	'port_default'	=> 'Default',

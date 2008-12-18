@@ -27,4 +27,4 @@ include 'header.inc.tpl';
 </div>
 </form>
 
-<?php  include 'footer.inc.tpl'; ?>
+<?php include 'footer.inc.tpl'; ?>

@@ -57,7 +57,7 @@ include 'header.inc.tpl';
 	</table>
 <?php }else{?>
 	<p>Invalid port ID.</p>
-<?php  }
+<?php }
 $footer_legend = array(
 	'port_success'	=> 'Success',
 	'port_default'	=> 'Default',

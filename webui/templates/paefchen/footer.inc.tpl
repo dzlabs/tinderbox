@@ -12,15 +12,15 @@
 			</ul>
 		</div>
 		<div class="right">
-<?php  if (is_array($footer_legend)) { ?>
-<?php  foreach($footer_legend as $css_class => $legend_title) { ?>
+<?php if (is_array($footer_legend)) { ?>
+<?php foreach($footer_legend as $css_class => $legend_title) { ?>
 				<table>
 					<tr>
 						<td class="<?php echo $css_class?>" style="width:10px;"></td>
 						<td><?php echo $legend_title?></td>
 					</tr>
 				</table>
-<?php  }} ?>
+<?php }} ?>
 		</div>
 	</div>
 </body>
