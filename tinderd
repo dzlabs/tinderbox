@@ -30,7 +30,11 @@ main_loop () {
 	    tinderEcho "INFO: Going to build ${PORT} on ${BUILD}"
 	    ${pb}/scripts/tc updateBuildPortsQueueEntryStatus \
 			-i "${ID}" -s PROCESSING
-	    ${pb}/scripts/tc addPort -b "${BUILD}" -d "${PORT}"
+	    if ! ${pb}/scripts/tc addPort -b "${BUILD}" -d "${PORT}"; then
+	        ${pb}/scripts/tc updateBuildPortsQueueEntryStatus \
+	        -i "${ID}" -s FAIL
+	        continue
+	    fi
 
 	    tinderEcho "INFO: Starting tinderbuild; output will be sent to ${TINDERD_LOGFILE}"
 	    echo "===Tinderd build of ${PORT} on ${BUILD} starting at $(date)===" >> ${TINDERD_LOGFILE}

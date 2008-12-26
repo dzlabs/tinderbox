@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.113 2008/11/27 18:15:33 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.114 2008/12/26 15:04:55 beat Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1741,6 +1741,10 @@ addPortToBuild () {
     if [ -z "${portDir}" ]; then
 	${tc} addPortToOneBuild -b ${build} ${norecurse}
     else
+        if [ ! -d ${PORTSDIR}/${portDir} ]; then
+            echo "addPort: Unknown port ${portDir}"
+            exit 1
+        fi
         ${tc} addPortToOneBuild -b ${build} -d ${portDir} ${norecurse}
     fi
     if [ ${options} -eq 1 -a ${OPTIONS_ENABLED} -eq 1 ]; then
