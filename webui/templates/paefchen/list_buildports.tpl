@@ -29,26 +29,49 @@ include 'header.inc.tpl';
 </div>
 
 <div class="subcontent">
-	<form method="get" action="index.php">
 	<table>
 		<tr>
-			<th>Failed builds in this build for the maintainer</th>
-		</tr>
-		<tr>
 			<td>
- 				<input type="hidden" name="action" value="failed_buildports" />
-				<input type="hidden" name="build" value="<?php echo $build_name?>" />
-				<select name="maintainer">
-					<option></option>
-<?php foreach($maintainers as $maintainer) {?>
-					<option><?php echo $maintainer?></option>
-<?php }?>
-				</select>
-				<input type="submit" name="Go" value="Go" />
+				<form method="get" action="index.php">
+					<table>
+						<tr>
+							<th>Failed builds in this build for the maintainer</th>
+						</tr>
+						<tr>
+							<td>
+ 								<input type="hidden" name="action" value="failed_buildports" />
+								<input type="hidden" name="build" value="<?php echo $build_name?>" />
+								<select name="maintainer">
+									<option></option>
+									<?php foreach($maintainers as $maintainer) {?>
+										<option><?php echo $maintainer?></option>
+									<?php }?>
+								</select>
+								<input type="submit" name="Go" value="Go" />
+							</td>
+						</tr>
+					</table>
+				</form>
+			</td>
+			<td>
+				<form method="get" action="index.php">
+					<table>
+						<tr>
+							<th>Find ports by name</th>
+						</tr>
+						<tr>
+							<td>
+								<input type="hidden" name="action" value="list_buildports" />
+								<input type="hidden" name="build" value="<?php echo $build_name?>" />
+								<input type="text" name="search_port_name" value="<?php echo $search_port_name?>" />
+								<input type="submit" name="Go" value="Go" />
+							</td>
+						</tr>
+					</table>
+				</form>
 			</td>
 		</tr>
 	</table>
-	</form>
 </div>
 
 <?php if(!$no_list){?>

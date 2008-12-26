@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.39 2008/12/01 09:34:03 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.40 2008/12/26 18:36:42 beat Exp $
 #
 
 require_once 'DB.php';
@@ -382,7 +382,7 @@ class TinderboxDS {
 		return $results[0];
 	}
 
-	function getPortsForBuild( $build, $sortby = 'port_directory' ) {
+	function getPortsForBuild( $build, $sortby = 'port_directory', $port_name = '' ) {
 		$sortbytable = 'bp';
 		if ( $sortby == '' ) $sortby = 'port_directory';
 		if ( $sortby == 'port_directory' ) $sortbytable = 'p';
@@ -406,8 +406,10 @@ class TinderboxDS {
 					FROM ports p,
 						 build_ports bp
 				   WHERE p.port_id = bp.port_id
-					 AND bp.build_id=?
-				ORDER BY $sortbytable.$sortby";
+					 AND bp.build_id=?";
+		if ( $port_name )
+			$query .= " AND p.port_name LIKE '%$port_name%'";
+		$query .= " ORDER BY $sortbytable.$sortby";
 
 		$rc = $this->_doQueryHashRef( $query, $results, $build->getId() );
 
