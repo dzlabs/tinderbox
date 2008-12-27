@@ -108,11 +108,11 @@ X=$(echo ${X11BASE} | sed 's,^/,,')
 if [ $phase = 1 ]; then
 
   cd $dir || exit 1
-  echo "maintained by: $(make maintainer)"
-  echo "building for:  $(uname -rm)"
-  echo "Makefile ident: $(ident ${dir}/Makefile | grep 'FreeBSD:' | sed 's/^[ \t]*//')"
-  echo "port directory: ${dir}"
   echo "build started at $(date)"
+  echo "port directory: ${dir}"
+  echo "building for:  $(uname -rm)"
+  echo "maintained by: $(make maintainer)"
+  echo "Makefile ident: $(ident ${dir}/Makefile | grep 'FreeBSD:' | sed 's/^[ \t]*//')"
   echo "prefixes: LOCALBASE=${L} X11BASE=${X} PREFIX=$(make -V PREFIX)"
   echo "Begin Configuration:"
   echo "---Begin Environment---"
