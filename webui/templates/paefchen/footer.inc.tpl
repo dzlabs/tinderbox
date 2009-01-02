@@ -9,7 +9,9 @@
 				<li><a href="#top">top</a></li>
 				<li>Localtime: <?php echo date('Y-m-d H:i:s')?></li>
 				<li><?php echo $ui_elapsed_time?></li>
-				<li><?php echo $mem_info?></li>
+				<?php if (isset($mem_info)) { ?>
+					<li><?php echo $mem_info?></li>
+				<?php } ?>
 			</ul>
 		</div>
 		<div class="right">
