@@ -10,6 +10,13 @@ if ($reason)
 include 'header.inc.tpl';
 ?>
 <!-- $Paefchen: FreeBSD/tinderbox/webui/templates/paefchen/failed_buildports.tpl,v 1.1 2008/01/05 12:25:17 as Exp $ //-->
+<?php if($errors){?>
+	<p style="color:#FF0000">
+	<?php foreach($errors as $error){?>
+		<?php echo $error?><br />
+	<?php }?>
+	</p>
+<?php }?>
 <?php if(!$no_list){?>
 <table>
 	<tr>
@@ -48,7 +55,9 @@ include 'header.inc.tpl';
 <?php }?>
 </table>
 <?php }else{?>
-<p>There are no build failures at the moment.</p>
+<?php if(!$errors){?>
+	<p>There are no build failures at the moment.</p>
+<?php }?>
 <?php }
 $footer_legend = array(
 	'port_success'	=> 'Success',

@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-	<!-- $MCom: portstools/tinderbox/webui/templates/default/display_markup_log.tpl,v 1.3 2008/09/19 15:07:38 as Exp $ //-->
+	<!-- $MCom: portstools/tinderbox/webui/templates/default/display_markup_log.tpl,v 1.4 2009/01/02 14:21:49 beat Exp $ //-->
 	<title><?php echo $tinderbox_name?></title>
 	<link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 	<script type="text/javascript" src="<?php echo $templatesuri?>/tinderstyle.js"></script>
@@ -10,6 +10,13 @@
 	<h1><?php echo $data['port_directory']?> log</h1>
 	<p><a href="<?php echo $data['port_link_logfile']?>">raw log</a></p>
 
+<?php if ($errors) { ?>
+	<p style="color:#FF0000">
+	<?php foreach($errors as $error){ ?>
+		<?php echo $error?><br />
+	<?php } ?>
+	</p>
+<?php }else{?>
 <?php foreach ($stats as $severity => $tags) { ?>
 	<div>
 		<label>
@@ -60,5 +67,6 @@
 	window.onload = log_ini;
 	/* ]]> */
 </script>
+<?php }?>
 </body>
 </html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/latest_buildports.tpl,v 1.14 2009/01/02 13:54:39 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/latest_buildports.tpl,v 1.15 2009/01/02 14:21:49 beat Exp $ //-->
 <script language="JavaScript">
 	function reloadpage() {
 	    document.location.reload();
@@ -12,6 +12,13 @@
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
+<?php if($errors){?>
+	<p style="color:#FF0000">
+	<?php foreach($errors as $error){?>
+		<?php echo $error?><br />
+	<?php }?>
+	</p>
+<?php }?>
 <?php echo $current_builds?>
 
 	<?php if($build_name){?>
@@ -61,7 +68,9 @@
 		<?php }?>
 	</table>
 <?php }else{?>
-	<p>No ports are being built.</p>
+	<?php if(!$errors){?>
+		<p>No ports are being built.</p>
+	<?php }?>
 <?php }?>
 
 <p>Local time: <?php echo $local_time?></p>

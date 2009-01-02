@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.7 2009/01/02 14:16:28 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.8 2009/01/02 14:21:49 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -44,7 +44,16 @@ class moduleLogs extends module {
 		$meminit = memory_get_usage();
 
 		$ports = $this->TinderboxDS->getAllPortsByPortID( $id );
+		if ( ! $ports ) {
+			$this->TinderboxDS->addError( "Unknown port id : " . htmlentities( $id ) );
+			return $this->template_parse( 'display_markup_log.tpl' );
+		}
+
 		$build = $this->TinderboxDS->getBuildByName( $build_id );
+		if ( ! $build ) {
+			$this->TinderboxDS->addError( "Unknown build id : " . htmlentities( $build_id ) );
+			return $this->template_parse( 'display_markup_log.tpl' );
+		}
 
 		foreach ( $ports as $port ) {
 			if ( $port->getBuildID() == $build->getID() ) {
@@ -80,13 +89,15 @@ class moduleLogs extends module {
 		}
 
 		if ( !( is_file( $data['port_logfile_path'] ) ) ) {
-			die( 'File cannot be opened for reading.' );
+			$this->TinderboxDS->addError( "File cannot be opened for reading: " . $data['port_logfile_path'] );
+			return $this->template_parse( 'display_markup_log.tpl' );
 		}
 
 		$file_name = realpath( $data['port_logfile_path'] );
 
 		if ( strpos( $file_name, $logdir ) !== 0 ) {
-			die( 'So long, and thanks for all the fish' );
+			$this->TinderboxDS->addError( "File " . $file_name . " not in log directory: " . $logdir );
+			return $this->template_parse( 'display_markup_log.tpl' );
 		}
 
 		$lines = array();

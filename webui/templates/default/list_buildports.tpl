@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_buildports.tpl,v 1.16 2009/01/02 13:54:39 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_buildports.tpl,v 1.17 2009/01/02 14:21:49 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 <link rel="alternate" type="application/rss+xml" title="<?php echo $tinderbox_name?> (RSS)" href="index.php?action=latest_buildports_rss" />
@@ -49,6 +49,14 @@
 <p>
  <a href="index.php">Back to homepage</a>
 </p>
+
+<?php if($errors){?>
+	<p style="color:#FF0000">
+	<?php foreach($errors as $error){?>
+		<?php echo $error?><br />
+	<?php }?>
+	</p>
+<?php }?>
 
 <?php if(!$no_list){?>
 	<table>
@@ -101,7 +109,9 @@
 	</table>
 	<p>Total: <?php echo count($data)?></p>
 <?php }else{?>
-	<p>No ports are being built.</p>
+	<?php if(!$errors){?>
+		<p>No ports are being built.</p>
+	<?php }?>
 <?php }?>
 
 <p>Local time: <?php echo $local_time?></p>

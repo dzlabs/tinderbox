@@ -7,7 +7,9 @@ $header_title = $build_name;
 include 'header.inc.tpl';
 ?>
 <!-- $Paefchen: FreeBSD/tinderbox/webui/templates/paefchen/list_buildports.tpl,v 1.2 2008/01/07 03:53:59 as Exp $ //-->
+<?php if(!$errors){?>
 <h1><?php echo $build_name?> » <?php echo $build_description?></h1>
+
 <div class="description">
 	<table>
 		<tr>
@@ -73,6 +75,15 @@ include 'header.inc.tpl';
 		</tr>
 	</table>
 </div>
+<?php }?>
+
+<?php if($errors){?>
+	<p style="color:#FF0000">
+	<?php foreach($errors as $error){?>
+		<?php echo $error?><br />
+	<?php }?>
+	</p>
+<?php }?>
 
 <?php if(!$no_list){?>
 <table>
@@ -125,9 +136,12 @@ include 'header.inc.tpl';
 </table>
 <p>Total: <?php echo count($data)?></p>
 <?php }else{?>
-<p>No ports are being built.</p>
+	<?php if(!$errors){?>
+		<p>No ports are being built.</p>
+	<?php }?>
 <?php }?>
 
+<?php if(!$errors){?>
 <div class="subcontent">
 	<form method="get" action="index.php">
 	<table>
@@ -150,6 +164,8 @@ include 'header.inc.tpl';
 	</table>
 	</form>
 </div>
+<?php }?>
+
 <?php
 $footer_legend = array(
 	'port_success'	=> 'Success',

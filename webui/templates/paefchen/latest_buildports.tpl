@@ -18,6 +18,13 @@ include 'header.inc.tpl'
 //-->
 </script>
 <?php echo $current_builds?>
+<?php if($errors){?>
+	<p style="color:#FF0000">
+	<?php foreach($errors as $error){?>
+		<?php echo $error?><br />
+	<?php }?>
+	</p>
+<?php }?>
 <?php if(!$no_list){?>
 	<h2 id="latest">Latest</h2>
 	<table>
@@ -60,7 +67,9 @@ include 'header.inc.tpl'
 		<?php }?>
 	</table>
 <?php }else{?>
-	<p>No ports are being built.</p>
+	<?php if(!$errors){?>
+		<p>No ports are being built.</p>
+	<?php }?>
 <?php }?>
 <?php
 $footer_legend = array(

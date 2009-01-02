@@ -7,6 +7,14 @@ $topmenu = array(
 include 'header.inc.tpl';
 ?>
 
+<?php if ($errors) { ?>
+	<p style="color:#FF0000">
+	<?php foreach($errors as $error){ ?>
+		<?php echo $error?><br />
+	<?php } ?>
+	</p>
+<?php }else{?>
+
 <?php foreach ($stats as $severity => $tags) { ?>
 	<label>
 		<input type="checkbox" id="<?php echo $severity?>"<?php if ($displaystats[$severity]) echo ' checked="checked"'?> />
@@ -55,6 +63,7 @@ include 'header.inc.tpl';
 	window.onload = log_ini;
 	/* ]]> */
 </script>
+<?php } ?>
 
 <?php 
 include 'footer.inc.tpl'; 

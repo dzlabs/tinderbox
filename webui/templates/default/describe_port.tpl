@@ -1,12 +1,19 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/describe_port.tpl,v 1.9 2009/01/02 13:54:39 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/describe_port.tpl,v 1.10 2009/01/02 14:21:49 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <h1><?php echo $tinderbox_title?> - <?php echo $port_name?></h1>
+<?php if($errors){?>
+	<p style="color:#FF0000">
+	<?php foreach($errors as $error){?>
+		<?php echo $error?><br />
+	<?php }?>
+	</p>
+<?php }?>
 <?php if(!$no_list){?>
 	<table>
 		<tr>
@@ -57,8 +64,6 @@
 			</tr>
 		<?php }?>
 	</table>
-<?php }else{?>
-	<p>Invalid port ID.</p>
 <?php }?>
 
 <p>Local time: <?php echo $local_time?></p>

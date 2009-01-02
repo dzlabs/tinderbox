@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.14 2009/01/02 14:16:28 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.15 2009/01/02 14:21:49 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -117,6 +117,11 @@ class moduleTinderd extends module {
 
 			if( !empty( $build_id ) ) {
 				$builds[0] = $this->TinderboxDS->getBuildById( $build_id );
+				if ( ! $builds[0] ) {
+					$this->TinderboxDS->addError( "Unknown build id: " . htmlentities( $build_id ) );
+					$this->template_assign( 'no_list', true );
+					return $this->template_parse( 'list_tinderd_queue.tpl' );
+				}
 			} else {
 				$builds = $this->TinderboxDS->getAllBuilds();
 			}
@@ -235,6 +240,10 @@ class moduleTinderd extends module {
 				$this->TinderboxDS->addError( mandatory_input_fields_are_empty );
 			} else {
 				$build_ports_queue_entry = $this->TinderboxDS->createBuildPortsQueueEntry( $build_id, $priority, $port_directory, $this->moduleUsers->get_id(), $email_on_completion );
+				if ( ! $build_ports_queue_entry ) {
+					$this->TinderboxDS->addError( "Could not create ports queue entry." );
+					return false;
+				}
 				$this->build_id = $build_id;
 				if( $action == 'add' ) {
 					if( $this->checkQueueEntryAccess( $build_ports_queue_entry, 'add' ) ) {
@@ -266,6 +275,10 @@ class moduleTinderd extends module {
 		} else {
 			if( !empty( $build_id ) ) {
 				$builds[0] = $this->TinderboxDS->getBuildById( $build_id );
+				if ( ! $builds[0] ) {
+					$this->TinderboxDS->addError( "Unknown build id: " . htmlentities( $build_id ) );
+					return false;
+				}
 			} else {
 				$builds = $this->TinderboxDS->getAllBuilds();
 			}

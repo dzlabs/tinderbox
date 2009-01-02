@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/failed_buildports.tpl,v 1.11 2009/01/02 13:54:39 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/failed_buildports.tpl,v 1.12 2009/01/02 14:21:49 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -23,6 +23,13 @@
 	<?php }?>
 	</h1>
 
+<?php if($errors){?>
+	<p style="color:#FF0000">
+	<?php foreach($errors as $error){?>
+		<?php echo $error?><br />
+	<?php }?>
+	</p>
+<?php }?>
 
 <?php if(!$no_list){?>
 	<table>
@@ -63,7 +70,9 @@
 		<?php }?>
 	</table>
 <?php }else{?>
-	<p>There are no build failures at the moment.</p>
+	<?php if(!$errors){?>
+		<p>There are no build failures at the moment.</p>
+	<?php }?>
 <?php }?>
 
 <p>Local time: <?php echo $local_time?></p>

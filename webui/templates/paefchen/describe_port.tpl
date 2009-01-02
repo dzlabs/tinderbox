@@ -4,6 +4,13 @@ $header_title = $port_name;
 include 'header.inc.tpl';
 ?>
 <!-- $Paefchen: FreeBSD/tinderbox/webui/templates/paefchen/describe_port.tpl,v 1.1 2008/01/05 12:25:17 as Exp $ //-->
+<?php if($errors){?>
+	<p style="color:#FF0000">
+	<?php foreach($errors as $error){?>
+		<?php echo $error?><br />
+	<?php }?>
+	</p>
+<?php }?>
 <?php if(!$no_list){?>
 <div class="description">
 	<table>
@@ -55,8 +62,6 @@ include 'header.inc.tpl';
 			</tr>
 		<?php }?>
 	</table>
-<?php }else{?>
-	<p>Invalid port ID.</p>
 <?php }
 $footer_legend = array(
 	'port_success'	=> 'Success',
