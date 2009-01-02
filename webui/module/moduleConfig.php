@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleConfig.php,v 1.5 2008/12/01 09:34:05 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleConfig.php,v 1.6 2009/01/02 14:16:27 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -32,9 +32,9 @@ require_once 'module/moduleUsers.php';
 
 class moduleConfig extends module {
 
-	function moduleConfig() {
-		$this->module();
-		$this->moduleUsers = new moduleUsers();
+	function moduleConfig( $TinderboxDS, $moduleUsers ) {
+		$this->module( $TinderboxDS );
+		$this->moduleUsers = $moduleUsers;
 	}
 
 	function _array_sort_and_assign( $sort_me, $tpl_key ) {

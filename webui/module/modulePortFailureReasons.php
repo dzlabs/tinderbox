@@ -24,15 +24,15 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/modulePortFailureReasons.php,v 1.7 2009/01/02 13:54:39 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/modulePortFailureReasons.php,v 1.8 2009/01/02 14:16:28 beat Exp $
 #
 
 require_once 'module/module.php';
 
 class modulePortFailureReasons extends module {
 
-	function modulePortFailureReasons() {
-		$this->module();
+	function modulePortFailureReasons( $TinderboxDS ) {
+		$this->module( $TinderboxDS );
 	}
 
 	function display_failure_reasons( $reason_tag ) {

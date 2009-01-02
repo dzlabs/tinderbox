@@ -24,15 +24,15 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.15 2009/01/02 13:54:39 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.16 2009/01/02 14:16:28 beat Exp $
 #
 
 require_once 'module/module.php';
 
 class modulePorts extends module {
 
-	function modulePorts() {
-		$this->module();
+	function modulePorts( $TinderboxDS ) {
+		$this->module( $TinderboxDS );
 	}
 
 	function display_describe_port( $port_id ) {

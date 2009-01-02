@@ -24,16 +24,15 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/module.php,v 1.6 2008/12/02 13:32:27 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/module.php,v 1.7 2009/01/02 14:16:27 beat Exp $
 #
 
 require_once 'core/functions.php';
-require_once 'core/TinderboxDS.php';
 
 class module {
 
-	function module() {
-		$this->TinderboxDS = new TinderboxDS();
+	function module( $TinderboxDS ) {
+		$this->TinderboxDS = $TinderboxDS;
 	}
 
 	function template_parse( $template ) {

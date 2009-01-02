@@ -24,15 +24,15 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleSession.php,v 1.3 2005/07/21 11:28:29 oliver Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleSession.php,v 1.4 2009/01/02 14:16:28 beat Exp $
 #
 
 require_once 'module/module.php';
 
 class moduleSession extends module {
 
-	function moduleSession() {
-		$this->module();
+	function moduleSession( $TinderboxDS ) {
+		$this->module( $TinderboxDS );
 	}
 
 	function setAttribute( $attribute, $value ) {

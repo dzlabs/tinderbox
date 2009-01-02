@@ -31,9 +31,9 @@ require_once 'module/modulePorts.php';
 
 class moduleRss extends module {
 
-	function moduleRss() {
-		$this->module();
-		$this->modulePorts = new modulePorts();
+	function moduleRss( $TinderboxDS, $modulePorts ) {
+		$this->module( $TinderboxDS );
+		$this->modulePorts = $modulePorts;
 	}
 
 	function display_latest_buildports( $limit = 20 ) {

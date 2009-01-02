@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.23 2009/01/02 13:54:39 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.24 2009/01/02 14:16:27 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -32,9 +32,9 @@ require_once 'module/modulePorts.php';
 
 class moduleBuildPorts extends module {
 
-	function moduleBuildPorts() {
-		$this->module();
-		$this->modulePorts = new modulePorts();
+	function moduleBuildPorts( $TinderboxDS, $modulePorts ) {
+		$this->module( $TinderboxDS );
+		$this->modulePorts = $modulePorts;
 	}
 
 	function display_list_buildports( $build_name, $sort, $search_port_name ) {

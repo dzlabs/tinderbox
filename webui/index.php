@@ -24,11 +24,12 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.31 2008/12/26 18:36:42 beat Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.32 2009/01/02 14:16:27 beat Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
 
+require_once 'core/TinderboxDS.php';
 require_once 'module/moduleBuilds.php';
 require_once 'module/moduleBuildPorts.php';
 require_once 'module/moduleConfig.php';
@@ -42,16 +43,17 @@ require_once 'module/moduleRss.php';
 
 require_once $templatesdir.'/messages.inc';
 
-$moduleBuilds			= new moduleBuilds();
-$moduleBuildPorts		= new moduleBuildPorts();
-$moduleConfig			= new moduleConfig();
-$moduleLogs			= new moduleLogs();
-$modulePorts			= new modulePorts();
-$modulePortFailureReasons	= new modulePortFailureReasons();
-$moduleSession			= new moduleSession();
-$moduleTinderd			= new moduleTinderd();
-$moduleUsers			= new moduleUsers();
-$moduleRss			= new moduleRss();
+$TinderboxDS			= new TinderboxDS();
+$moduleBuilds			= new moduleBuilds( $TinderboxDS );
+$modulePorts			= new modulePorts( $TinderboxDS );
+$moduleSession			= new moduleSession( $TinderboxDS );
+$moduleBuildPorts		= new moduleBuildPorts( $TinderboxDS, $modulePorts );
+$moduleLogs				= new moduleLogs( $TinderboxDS, $modulePorts );
+$modulePortFailureReasons	= new modulePortFailureReasons( $TinderboxDS );
+$moduleUsers			= new moduleUsers( $TinderboxDS, $moduleBuilds );
+$moduleConfig			= new moduleConfig( $TinderboxDS, $moduleUsers );
+$moduleTinderd			= new moduleTinderd( $TinderboxDS, $moduleBuilds, $moduleUsers );
+$moduleRss				= new moduleRss( $TinderboxDS, $modulePorts );
 
 $moduleSession->start();
 if ( isset( $_POST['do_login'] ) ) {

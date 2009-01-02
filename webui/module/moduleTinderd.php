@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.13 2008/12/01 09:34:06 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.14 2009/01/02 14:16:28 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -33,10 +33,10 @@ require_once 'module/moduleUsers.php';
 
 class moduleTinderd extends module {
 
-	function moduleTinderd() {
-		$this->module();
-		$this->moduleBuilds = new moduleBuilds();
-		$this->moduleUsers  = new moduleUsers();
+	function moduleTinderd( $TinderboxDS, $moduleBuilds, $moduleUsers ) {
+		$this->module( $TinderboxDS );
+		$this->moduleBuilds = $moduleBuilds;
+		$this->moduleUsers  = $moduleUsers;
 	}
 
 	function checkQueueEntryAccess( $entry, $mode ) {

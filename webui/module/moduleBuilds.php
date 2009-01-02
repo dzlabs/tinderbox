@@ -24,15 +24,15 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuilds.php,v 1.10 2008/12/01 09:34:05 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuilds.php,v 1.11 2009/01/02 14:16:27 beat Exp $
 #
 
 require_once 'module/module.php';
 
 class moduleBuilds extends module {
 
-	function moduleBuilds() {
-		$this->module();
+	function moduleBuilds( $TinderboxDS ) {
+		$this->module( $TinderboxDS );
 	}
 
 	function display_list_builds() {
