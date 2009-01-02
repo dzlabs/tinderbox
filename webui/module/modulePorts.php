@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.16 2009/01/02 14:16:28 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.17 2009/01/02 14:18:25 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -162,7 +162,7 @@ class modulePorts extends module {
 
 			$data[] = array(	'build_name'                 => $build_name,
 						'port_directory'             => $port->getDirectory(),
-						'port_maintainer'            => prettyEmail( $port->getMaintainer() ).' ',
+						'port_maintainer'            => $port->getMaintainer().' ',
 						'port_id'                    => $port_id,
 						'port_logfile_path'          => $port_logfile_path,
 						'port_last_built_version'    => $port_last_built_version,
