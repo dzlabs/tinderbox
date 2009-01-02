@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/functions.php,v 1.7 2008/12/01 09:34:03 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/functions.php,v 1.8 2009/01/02 13:54:39 beat Exp $
 #
 
 function prettyEmail( $input ) {
@@ -81,6 +81,13 @@ function get_ui_elapsed_time( $starttimer ) {
 	$endtimer = explode( ' ', microtime() );
 	$timer = ( $endtimer[1]-$starttimer[1] )+( $endtimer[0]-$starttimer[0] );
 	return sprintf( 'Elapsed: %03.6f sec.', $timer );
+}
+
+function get_mem_consumption ( $meminit, $mempeak, $memend ) {
+	$meminit  = $meminit / 1048576;
+	$mempeak  = $mempeak / 1048576;
+	$memend   = $memend  / 1048576;
+	return sprintf( 'Initial: %04.2f MB, Peak: %04.2f MB, End: %04.2f MB', $meminit, $mempeak, $memend );
 }
 
 ?>

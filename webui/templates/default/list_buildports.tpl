@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_buildports.tpl,v 1.15 2008/12/26 18:36:43 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_buildports.tpl,v 1.16 2009/01/02 13:54:39 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 <link rel="alternate" type="application/rss+xml" title="<?php echo $tinderbox_name?> (RSS)" href="index.php?action=latest_buildports_rss" />
@@ -123,6 +123,7 @@
 </p>
  </form>
 <p style="color:#FF0000;font-size:10px;"><?php echo $ui_elapsed_time?></p>
+<p style="color:#FF0000;font-size:10px;"><?php echo $mem_info?></p>
 <?php echo $display_login?>
 </body>
 </html>

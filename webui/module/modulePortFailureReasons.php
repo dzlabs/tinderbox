@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/modulePortFailureReasons.php,v 1.6 2008/12/01 09:34:06 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/modulePortFailureReasons.php,v 1.7 2009/01/02 13:54:39 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -36,7 +36,9 @@ class modulePortFailureReasons extends module {
 	}
 
 	function display_failure_reasons( $reason_tag ) {
-		global $with_timer, $starttimer;
+		global $with_timer, $starttimer, $with_meminfo;
+
+		$meminit = memory_get_usage();
 
 		foreach( $this->TinderboxDS->getAllPortFailReasons() as $reason ) {
 			$port_fail_reasons[$reason->getTag()]['tag']   = htmlentities( $reason->getTag() );
@@ -52,6 +54,13 @@ class modulePortFailureReasons extends module {
 			$elapsed_time = get_ui_elapsed_time( $starttimer );
 		}
 		$this->template_assign( 'ui_elapsed_time',           $elapsed_time );
+		$mem_info = '';
+		if ( isset ( $with_meminfo ) && $with_meminfo == 1 ) {
+			$mempeak = memory_get_peak_usage();
+			$memend  = memory_get_usage();
+			$mem_info = get_mem_consumption ( $meminit, $mempeak, $memend );
+		}
+		$this->template_assign( 'mem_info',               $mem_info);
 		return $this->template_parse( 'list_failure_reasons.tpl' );
 	}
 

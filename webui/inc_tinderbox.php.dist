@@ -37,5 +37,6 @@ $errorlogdir	 = $rootdir.'/errors';
 $templatesdir	 = $wwwrootdir.'/templates/'.$template_dir;
 $templatesuri	 = $wwwrooturi.'/templates/'.$template_dir;
 #$with_timer	 = 1;
+#$with_meminfo	 = 1;
 
 ?>

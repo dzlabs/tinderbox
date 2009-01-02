@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.22 2008/12/28 23:47:29 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.23 2009/01/02 13:54:39 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -38,7 +38,9 @@ class moduleBuildPorts extends module {
 	}
 
 	function display_list_buildports( $build_name, $sort, $search_port_name ) {
-		global $starttimer, $with_timer;
+		global $starttimer, $with_timer, $with_meminfo;
+
+		$meminit = memory_get_usage();
 
 		$build = $this->TinderboxDS->getBuildByName( $build_name );
 		$ports = $this->TinderboxDS->getPortsForBuild( $build, $sort, $search_port_name );
@@ -94,12 +96,21 @@ class moduleBuildPorts extends module {
 		}
 		$this->template_assign( 'ui_elapsed_time',        $elapsed_time );
 		$this->template_assign( 'querystring',            $qs );
+		$mem_info = '';
+		if ( isset ( $with_meminfo ) && $with_meminfo == 1 ) {
+			$mempeak = memory_get_peak_usage();
+			$memend  = memory_get_usage();
+			$mem_info = get_mem_consumption ( $meminit, $mempeak, $memend );
+		}
+		$this->template_assign( 'mem_info',	              $mem_info);
 
 		return $this->template_parse( 'list_buildports.tpl' );
 	}
 
 	function display_failed_buildports( $build_name, $maintainer, $all, $wanted_reason  ) {
-		global $with_timer, $starttimer;
+		global $with_timer, $starttimer, $with_meminfo;
+
+		$meminit = memory_get_usage();
 
 		if( $build_name ) {
 			$build = $this->TinderboxDS->getBuildByName( $build_name );
@@ -153,12 +164,21 @@ class moduleBuildPorts extends module {
 		}
 		$this->template_assign( 'ui_elapsed_time',           $elapsed_time );
 		$this->template_assign( 'reason',                    $wanted_reason );
+		$mem_info = '';
+		if ( isset ( $with_meminfo ) && $with_meminfo == 1 ) {
+			$mempeak = memory_get_peak_usage();
+			$memend  = memory_get_usage();
+			$mem_info = get_mem_consumption ( $meminit, $mempeak, $memend );
+		}
+		$this->template_assign( 'mem_info',	                 $mem_info);
 
 		return $this->template_parse( 'failed_buildports.tpl' );
 	}
 
 	function display_latest_buildports( $build_name ) {
-		global $with_timer, $starttimer;
+		global $with_timer, $starttimer, $with_meminfo;
+
+		$meminit = memory_get_usage();
 
 		$current_builds = $this->display_current_buildports( $build_name );
 
@@ -204,6 +224,13 @@ class moduleBuildPorts extends module {
 			$elapsed_time = get_ui_elapsed_time( $starttimer );
 		}
 		$this->template_assign( 'ui_elapsed_time',           $elapsed_time );
+		$mem_info = '';
+		if ( isset ( $with_meminfo ) && $with_meminfo == 1 ) {
+			$mempeak = memory_get_peak_usage();
+			$memend  = memory_get_usage();
+			$mem_info = get_mem_consumption ( $meminit, $mempeak, $memend );
+		}
+		$this->template_assign( 'mem_info',	              $mem_info);
 
 		return $this->template_parse( 'latest_buildports.tpl' );
 	}

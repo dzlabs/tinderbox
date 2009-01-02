@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.5 2008/12/16 21:10:12 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.6 2009/01/02 13:54:39 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -39,7 +39,9 @@ class moduleLogs extends module {
 
 	function markup_log( $build_id, $id ) {
 		global $rootdir, $logdir;
-		global $with_timer, $starttimer;
+		global $with_timer, $starttimer, $with_meminfo;
+
+		$meminit = memory_get_usage();
 
 		$ports = $this->TinderboxDS->getAllPortsByPortID( $id );
 		$build = $this->TinderboxDS->getBuildByName( $build_id );
@@ -141,6 +143,14 @@ class moduleLogs extends module {
 			$elapsed_time = get_ui_elapsed_time( $starttimer );
 
 		$this->template_assign( 'ui_elapsed_time', $elapsed_time );
+
+		$mem_info = '';
+		if ( isset ( $with_meminfo ) && $with_meminfo == 1 ) {
+			$mempeak = memory_get_peak_usage();
+			$memend  = memory_get_usage();
+			$mem_info = get_mem_consumption ( $meminit, $mempeak, $memend );
+		}
+		$this->template_assign( 'mem_info', $mem_info);
 
 		return $this->template_parse( 'display_markup_log.tpl' );
 	}
