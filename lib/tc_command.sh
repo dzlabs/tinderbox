@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.114 2008/12/26 15:04:55 beat Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.115 2009/01/11 22:19:16 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -1892,6 +1892,126 @@ rescanPorts () {
     fi
 
     return 0
+}
+
+#---------------------------------------------------------------------------
+# copy a Build
+#---------------------------------------------------------------------------
+
+copyBuild () {
+    # set up defaults
+    copyEnv=1
+    copyOptions=1
+    copyPorts=1
+    copyPkgs=0
+    copyCcache=0
+    src=""
+    dest=""
+
+    # argument handling
+    while getopts cd:EOPps: arg >/dev/null 2>&1
+    do
+	case "${arg}" in
+
+	E)	copyEnv=0;;
+	O)	copyOptions=0;;
+	P)	copyPorts=0;;
+	p)	copyPkgs=1;;
+	c)	copyCcache=1;;
+	s)	src="${OPTARG}";;
+	d)	dest="${OPTARG}";;
+	?)	return 1;;
+
+        esac
+    done
+
+    if ! tcExists Builds ${src}; then
+	echo "copyBuild: source build does not exist: ${src}"
+	return 1
+    fi
+
+    if ! tcExists Builds ${dest}; then
+	echo "copyBuild: destination build does not exist: ${dest}"
+	return 1
+    fi
+
+    tc=$(tinderLoc scripts tc)
+    jail=$(${tc} getJailForBuild -b ${src})
+    portsTree=$(${tc} getPortsTreeForBuild -b ${src})
+
+    buildenv ${jail} ${portsTree} ${src}
+    buildenvNoHost ${src}
+
+    if [ ${copyEnv} -eq 1 ]; then
+	envDir=$(tinderLoc scripts etc/env)
+	if [ -f ${envDir}/build.${src} ]; then
+	    cp -p ${envDir}/build.${src} ${envDir}/build.${dest}
+	fi
+    fi
+
+    if [ ${copyOptions} -eq 1 ]; then
+	srcOptionsDir=$(tinderLoc options ${src})
+	if [ -n "${srcOptionsDir}" -a -d "${srcOptionsDir}" ]; then
+	    destOptionsDir=$(tinderLoc options ${dest})
+	    if [ -n "${destOptionsDir}" ]; then
+		if [ ! -d ${destOptionsDir} ]; then
+		    mkdir -p ${destOptionsDir}
+		fi
+		(
+		  cd ${srcOptionsDir}
+		  tar -cpf - . | tar -C ${destOptionsDir} -xpf -
+		)
+	    else
+		echo "copyBuild: not copying OPTIONS to ${dest} since it has no OPTIONS directory"
+	    fi
+	else
+	    echo "copyBuild: invalid OPTIONS directory for ${src}: \"${srcOptionsDir}\""
+	fi
+    fi
+
+    if [ ${copyPkgs} -eq 1 ]; then
+	srcPkgDir=$(tinderLoc packages ${src})
+	if [ -d ${srcPkgDir} ]; then
+	    destPkgDir=$(tinderLoc packages ${dest})
+	    if [ ! -d ${destPkgDir} ]; then
+		mkdir -p ${destPkgDir}
+	    fi
+	    (
+	      cd ${srcPkgDir}
+	      tar -cpf - . | tar -C ${destPkgDir} -xpf -
+	    )
+	else
+	    echo "copyBuild: invalid package directory for ${src}: \"${srcPkgDir}\""
+	fi
+    fi
+
+    if [ ${copyCcache} -eq 1 ]; then
+	srcCcacheDir=$(tinderLoc ccache ${src})
+	if [ -n "${srcCcacheDir}" -a -d "${srcCcacheDir}" ]; then
+	    destCcacheDir=$(tinderLoc ccache ${dest})
+	    if [ -n "${destCcacheDir}" ]; then
+		if [ ! -d ${destCcacheDir} ]; then
+		    mkdir -p ${destCcacheDir}
+		fi
+		(
+		  cd ${srcCcacheDir}
+		  tar -cpf - . | tar -C ${destCcacheDir} -xpf -
+		)
+	    else
+		echo "copyBuild: not copying ccache to ${dest} since it has no ccache directory"
+	    fi
+	else
+	    echo "copyBuild: invalid ccache directory for ${src}: \"${srcCcacheDir}\""
+	fi
+    fi
+
+    if [ ${copyPorts} -eq 1 ]; then
+        doPkgs=""
+	if [ ${copyPkgs} -eq 1 ]; then
+	    doPkgs="-p"
+        fi
+	${tc} copyBuildPorts -s ${src} -d ${dest} ${doPkgs}
+    fi
 }
 
 #---------------------------------------------------------------------------
