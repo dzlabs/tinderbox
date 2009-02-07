@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.81 2008/12/05 19:36:04 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.82 2009/02/07 21:15:27 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -279,6 +279,15 @@ The tinderbuild function also accepts some additional command line arguments:
 
 Maintenance:
 ------------
+
+To obtain the version of Tinderbox, run the command:
+
+# cd ${pb}/scripts && ./tc tbversion
+
+This command simply cats the ``.version'' file in ${pb}.  The
+``.version'' file is created during distfile generation.  If the contents
+of the Tinderbox distribution are copied to another location, make sure
+that the ``.version'' file is copied as well.
 
 To update existing Jails:
 
