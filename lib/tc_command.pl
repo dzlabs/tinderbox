@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.162 2009/01/11 22:19:16 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.163 2009/02/07 22:24:46 beat Exp $
 #
 
 my $pb;
@@ -614,6 +614,12 @@ my $ds = new Tinderbox::TinderboxDS();
                     "Cleanup old build logs, and prune old database entries for which no package exists",
                 usage  => "[-d] [-E] [-p]",
                 optstr => 'dEp',
+        },
+
+        "tbkill" => {
+                help   => "Kill a tinderbuild",
+                usage  => "-b <buildname> -s <signal>",
+                optstr => 'b:s:',
         },
 
         "tbversion" => {
