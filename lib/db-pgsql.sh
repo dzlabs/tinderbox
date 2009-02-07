@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/db-pgsql.sh,v 1.6 2008/11/03 22:19:03 marcus Exp $
+# $MCom: portstools/tinderbox/lib/db-pgsql.sh,v 1.7 2009/02/07 20:15:05 marcus Exp $
 #
 export DB_MAN_PREREQS="databases/p5-DBD-Pg databases/postgresql*-client"
 export DB_OPT_PREREQS="databases/php5-pgsql"
@@ -36,7 +36,7 @@ if [ -n "${db_admin_pass}" ]; then
     export DB_CHECK='/usr/local/bin/psql -U ${db_admin} -h ${db_host} -c "SELECT 0" ${db_name}'
     export DB_CREATE='/usr/local/bin/createdb -O ${db_user} -U ${db_admin} -h ${db_host} ${db_name}'
     export DB_GRANT='echo "Make sure ${db_user} owns the database ${db_name} as well as all of its tables."'
-    export DB_QUERY='/usr/local/bin/psql -U ${db_admin} -h ${db_host} -t -q -A -F " " -c "${query}" ${db_name}'
+    export DB_QUERY='/usr/local/bin/psql -U ${db_admin} -h ${db_host} -t -q -A -F "`printf \"\t\"`" -c "${query}" ${db_name}'
     export DB_USER_PROMPT='echo "The next prompt will be for the new user'"'"'s (${db_user}) password on the database server ${db_host}."'
     export DB_CREATE_USER='/usr/local/bin/createuser -E -S -d -R -h ${db_host} -U ${db_admin} -P ${db_user}'
 else
@@ -47,7 +47,7 @@ else
     export DB_CHECK='/usr/local/bin/psql -U ${db_admin} -h ${db_host} -W -c "SELECT 0" ${db_name}'
     export DB_CREATE='/usr/local/bin/createdb -O ${db_user} -U ${db_admin} -h ${db_host} -W ${db_name}'
     export DB_GRANT='echo "Make sure ${db_user} owns the database ${db_name} as well as all of its tables."'
-    export DB_QUERY='/usr/local/bin/psql -U ${db_admin} -W -h ${db_host} -t -q -A -F " " -c "${query}" ${db_name}'
+    export DB_QUERY='/usr/local/bin/psql -U ${db_admin} -W -h ${db_host} -t -q -A -F "`printf \"\t\"`" -c "${query}" ${db_name}'
     export DB_USER_PROMPT='echo "The next prompt will be for the new user'"'"'s (${db_user}) password on the database server ${db_host}.  The prompt after that will be for ${db_admin}'"'"'s password."'
     export DB_CREATE_USER='/usr/local/bin/createuser -E -S -d -R -h ${db_host} -U ${db_admin} -W -P ${db_user}'
 fi
