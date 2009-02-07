@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.82 2009/02/07 21:15:27 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.83 2009/02/07 22:34:45 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -301,6 +301,27 @@ To update existing PortsTrees, use the ``tc'' (Tinderbox Controller)
 application with the ``updatePortsTree'' command.  For example:
 
 # cd ${pb}/scripts && ./tc updatePortsTree -p FreeBSD
+
+If you want to clone various aspects of an existing Build, use the ``tc''
+application with the ``copyBuild'' command.  For example:
+
+# cd ${pb}/scripts && ./tc copyBuild -s 6.3-FreeBSD -d 6.4-FreeBSD
+
+The source and destination Builds (i.e. 6.3-FreeBSD and 6.4-FreeBSD
+respectively in this example) must already exist.  By default,
+``copyBuild'' will copy the environment file, OPTIONS, and ports from
+the source Build to the destination Build.  It can also optionally copy
+ccache data and packages.  The following options are supported by
+``copyBuild'':
+
+ -s : Source Build name
+ -d : Destination Build name
+ -c : (optional) copy ccache data
+ -E : (optional) do NOT copy environment files
+ -O : (optional) do NOT copy OPTIONS data
+ -P : (optional) do NOT copy ports
+ -p : (optional copy packages (including last build status, version, and
+       size)
 
 Over time, Builds may become cluttered with old log files and packages.  To
 cleanup old, unreferenced, files, use the ${pb}/scripts/tc application
