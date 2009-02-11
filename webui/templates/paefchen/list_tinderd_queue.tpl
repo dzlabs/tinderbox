@@ -30,7 +30,15 @@ include 'header.inc.tpl';
 	<?php }?>
 	</p>
 <?php }?>
-
+<p>
+	<form method="post" action="index.php">
+		<input type="hidden" name="action" value="delete_tinderd_queue" />
+		<input type="hidden" name="filter_build_id" value="<?php echo $build_id?>" />
+		<input type="submit" name="delete_tinderd_queue" value="delete all built" />
+		<input type="submit" name="delete_tinderd_queue" value="delete all" />
+	</form>
+</p>
+<br />
 <table>
 	<tr>
 		<th>Build</th>
@@ -131,12 +139,4 @@ include 'header.inc.tpl';
 		<?php }?>
 <?php }?>
 </table>
-<p>
-	<form method="post" action="index.php">
-		<input type="hidden" name="action" value="delete_tinderd_queue" />
-		<input type="hidden" name="filter_build_id" value="<?php echo $build_id?>" />
-		<input type="submit" name="delete_tinderd_queue" value="delete all built" />
-		<input type="submit" name="delete_tinderd_queue" value="delete all" />
-	</form>
-</p>
 <?php include('footer.inc.tpl'); ?>
