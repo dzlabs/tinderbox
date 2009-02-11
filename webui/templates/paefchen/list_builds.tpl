@@ -121,6 +121,20 @@ include 'header.inc.tpl';
 			<input type="submit" name="Go" value="Go" />
 	</fieldset>
 	</form>
+	<br />
+	<form method="get" action="index.php">
+		<fieldset>
+			<label>Find ports by name</label>
+			<input type="hidden" name="action" value="list_buildports" />
+			<select name="build">
+			<?php foreach($data as $row) {?>
+				<option value="<?php echo $row['name']?>"><?php echo $row['name']?></option>
+			<?php }?>
+			</select>
+			<input type="text" name="search_port_name" value="<?php echo $search_port_name?>" />
+			<input type="submit" name="Go" value="Go" />
+		</fieldset>
+	</form>
 </div>
 <?php
 $footer_legend = array(
