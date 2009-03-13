@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.42 2009/01/02 14:18:25 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.43 2009/03/13 07:44:57 beat Exp $
 #
 
 require_once 'DB.php';
@@ -393,7 +393,7 @@ class TinderboxDS {
 		}
 		$query = "SELECT p.port_id,
 						 p.port_directory,
-						 TRIM(TRAILING '@FreeBSD.org' FROM p.port_maintainer) as port_maintainer,
+						 REPLACE(p.port_maintainer, '@FreeBSD.org', '') as port_maintainer,
 						 p.port_name,
 						 p.port_comment,
 						 bp.last_built,
