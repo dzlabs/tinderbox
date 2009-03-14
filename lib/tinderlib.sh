@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.62 2008/11/27 18:16:59 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.63 2009/03/14 23:53:21 marcus Exp $
 #
 
 tinderLocJail () {
@@ -131,7 +131,14 @@ killMountProcesses () {
 
     pids="XXX"
     while [ ! -z "${pids}" ]; do
-	pids=$(fstat -f "${dir}" | tail +2 | awk '{print $3}' | sort -u)
+	# Lsof is more reliable when it comes to nullfs, so prefer it if
+	# found.
+	lsof=$(which lsof 2>/dev/null)
+	if [ -n "${lsof}" ]; then
+	    pids=$(${lsof} | fgrep "${dir}" | awk '{print $2}' | sort -u)
+	else
+	    pids=$(fstat -f "${dir}" | tail +2 | awk '{print $3}' | sort -u)
+	fi
 
 	if [ ! -z "${pids}" ]; then
 	    echo "Killing off pids in ${dir}"
