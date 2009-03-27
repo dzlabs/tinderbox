@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.163 2009/02/07 22:24:46 beat Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.164 2009/03/27 04:16:01 marcus Exp $
 #
 
 my $pb;
@@ -46,6 +46,7 @@ use Tinderbox::TinderboxDS;
 use Tinderbox::MakeCache;
 use Getopt::Std;
 use Text::Wrap;
+use Cwd 'abs_path';
 use vars qw(
     %COMMANDS
     $TINDERBOX_HOST
@@ -3090,7 +3091,7 @@ sub copyBuildPorts {
                         }
 
                         $rc =
-                            $ds->updatePortLastBuiltStatus($port, $dest,
+                            $ds->updatePortLastStatus($port, $dest,
                                 $ds->getPortLastBuiltStatus($port, $src));
                         if (!$rc) {
                                 warn
@@ -3216,6 +3217,10 @@ sub addPorts {
 
         my $portdir = $ENV{'PORTSDIR'} . "/" . $port;
         return if (!-d $portdir);
+
+        # Canonicalize the port directory.
+        $port = abs_path($portdir);
+        $port =~ s|$ENV{'PORTSDIR'}/||;
 
         if (defined($deps)) {
                 my @list;
