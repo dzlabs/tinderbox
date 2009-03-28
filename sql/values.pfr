@@ -55,3 +55,4 @@ INSERT INTO port_fail_reasons VALUES ('sysvipc', 'Your port is interacting badly
 INSERT INTO port_fail_reasons VALUES ('???', 'The automated script cannot even guess what is wrong with your port. Either the script is really stupid (more likely), or your port has ventured into unknown lands (congratulations!).', 'COMMON');
 INSERT INTO port_fail_reasons VALUES ('hook', 'A pre-condition hook failed to execute successfully', 'RARE');
 INSERT INTO port_fail_reasons VALUES ('f77', 'The Fortran 77 compiler is no longer installed in the base OS.  This port requires USE_FORTRAN.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('nested_declaration', 'A function is used before its prototype is defined; or a function is inlined incorrectly.', 'RARE');
