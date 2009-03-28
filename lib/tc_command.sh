@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.115 2009/01/11 22:19:16 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.116 2009/03/28 03:52:26 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup12.FreeBSD.org"
@@ -247,8 +247,9 @@ Setup () {
     do_load=0
     db_driver=$(getDbDriver)
     dbinfo=$(getDbInfo ${db_driver})
+    db_res=$?
     genschema=$(tinderLoc scripts sql/genschema)
-    if [ $? = 0 ]; then
+    if [ ${db_res} = 0 ]; then
         db_admin_host_name=${dbinfo%:*}
 	db_admin_host=${db_admin_host_name%:*}
         db_name=${db_admin_host_name##*:}
