@@ -4,7 +4,8 @@ if ($build_name)
 	$header_title .= " in $build_name";
 $topmenu = array(
 	'Current'	=> '#current',
-	'Latest'	=> '#latest'
+	'Latest'	=> '#latest',
+	'RSS Feed'	=> 'index.php?action=latest_buildports_rss'
 );
 include 'header.inc.tpl'
 ?>
