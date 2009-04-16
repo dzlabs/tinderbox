@@ -36,9 +36,9 @@ include 'header.inc.tpl';
 		<td><?php echo $row['port_last_built_version']?></td>
 		<td class="<?php echo $row['status_field_class']?>"><?php echo $row['status_field_letter']?></td>
 		<?php $reason=$row['port_last_fail_reason']?>
-		<td class="<?php echo "fail_reason_".$port_fail_reasons[$reason]['type']?>">
-		<?php $href=($port_fail_reasons[$reason]['link']) ? "index.php?action=display_failure_reasons&amp;failure_reason_tag=$reason#$reason" : "#"?>
-		<a href="<?php echo $href?>" class="<?php echo "fail_reason_".$port_fail_reasons[$reason]['type']?>" title="<?php echo $port_fail_reasons[$reason]['descr']?>"><?php echo $reason?></a>
+		<td class="<?php if(!empty($reason)) echo "fail_reason_".$port_fail_reasons[$reason]['type']?>">
+		<?php $href=isset($port_fail_reasons[$reason]['link']) ? "index.php?action=display_failure_reasons&amp;failure_reason_tag=$reason#$reason" : "#"?>
+		<a href="<?php echo $href?>" class="<?php if(!empty($reason)) echo "fail_reason_".$port_fail_reasons[$reason]['type']?>" title="<?php if(!empty($reason)) $port_fail_reasons[$reason]['descr']?>"><?php echo $reason?></a>
 		</td>
 		<td>
 	<?php if($row['port_link_logfile']){?>

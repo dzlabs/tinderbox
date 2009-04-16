@@ -68,7 +68,7 @@ include 'header.inc.tpl';
 	<form method="post" action="index.php">
 	<fieldset>
 	<input type="hidden" name="action" value="add_tinderd_queue" />
-	<input type="hidden" name="entry_id" value="<?php echo $row['entry_id']?>" />
+	<input type="hidden" name="entry_id" value="<?php if(!empty($row['entry_id']))echo $row['entry_id']?>" />
 	<input type="hidden" name="filter_build_id" value="<?php echo $build_id?>" />
 	<tr>
 		<td>

@@ -15,6 +15,10 @@ $legend = array(
 	"T = Total"
 );
 
+if ( empty ( $search_port_name ) ) {
+	$search_port_name = '';
+}
+
 include 'header.inc.tpl';
 ?>
 <!-- $Paefchen: FreeBSD/tinderbox/webui/templates/paefchen/list_builds.tpl,v 1.2 2008/01/07 03:53:59 as Exp $ //-->

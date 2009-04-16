@@ -1,4 +1,9 @@
 <!-- $Paefchen: FreeBSD/tinderbox/webui/templates/paefchen/footer.inc.tpl,v 1.1 2008/01/05 12:25:17 as Exp $ //-->
+<?php
+if ( empty ( $ui_elapsed_time ) ) {
+    $ui_elapsed_time = '';
+}
+?>
 <?php echo $display_login?>
 	</div>
 	<div id="footer">
@@ -15,7 +20,7 @@
 			</ul>
 		</div>
 		<div class="right">
-<?php if (is_array($footer_legend)) { ?>
+<?php if (isset($footer_legend) && is_array($footer_legend)) { ?>
 <?php foreach($footer_legend as $css_class => $legend_title) { ?>
 				<table>
 					<tr>

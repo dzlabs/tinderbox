@@ -1,5 +1,5 @@
 <?php
-$header_title = "$directory log";
+$header_title = $data['port_directory'] . " log";
 $topmenu = array(
 	$data['port_directory']	=> "index.php?action=describe_port&amp;id=$id",
 	'raw log'				=> $data['port_link_logfile']

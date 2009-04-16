@@ -28,7 +28,7 @@ if (preg_match('@<!-- (\w+):(\w+);(\w+):(\d*);(\w+):(\d*) //-->@', $display_logi
 	<div id="topmenu">
 		<a id="top"></a>
 		<div class="left">
-<?php if (is_array($topmenu) && count($topmenu) > 0) { ?>
+<?php if (isset($topmenu) && is_array($topmenu) && count($topmenu) > 0) { ?>
 			<ul>
 	<?php foreach ($topmenu as $menu_title => $menu_url) { ?>
 				<li><a href="<?php echo $menu_url?>"><?php echo $menu_title?></a></li>
@@ -52,7 +52,7 @@ if (preg_match('@<!-- (\w+):(\w+);(\w+):(\d*);(\w+):(\d*) //-->@', $display_logi
 <?php } ?>
 		</div>
 	</div>
-	<?php if (is_array($legend) && count($legend) > 0) { ?>
+	<?php if (isset($legend) && is_array($legend) && count($legend) > 0) { ?>
 	<div id="legend">
 		<ul>
 			<?php foreach ($legend as $items) { ?>
