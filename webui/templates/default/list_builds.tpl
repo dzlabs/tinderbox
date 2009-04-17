@@ -12,7 +12,7 @@ $legend = array(
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_builds.tpl,v 1.16 2009/04/16 15:41:47 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_builds.tpl,v 1.17 2009/04/17 15:36:58 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 <link rel="alternate" type="application/rss+xml" title="<?php echo $tinderbox_name?> (RSS)" href="index.php?action=latest_buildports_rss" />
@@ -144,6 +144,19 @@ Find ports by name
 <input type="submit" name="Go" value="Go" />
 </form>
 </p>
+<p>
+<form method="get" action="index.php">
+RSS feed for the maintainer
+<input type="hidden" name="action" value="latest_buildports_rss" />
+<select name="maintainer">
+<option></option>
+<?php foreach($maintainers as $maintainer) {?>
+	<option><?php echo $maintainer?></option>
+<?php }?>
+</select>
+<input type="submit" name="Go" value="Go" />
+</form>
+<p>
 <br />
 <?php echo $display_login?>
 </body>

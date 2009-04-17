@@ -36,12 +36,12 @@ class moduleRss extends module {
 		$this->modulePorts = $modulePorts;
 	}
 
-	function display_latest_buildports( $limit = 20 ) {
+	function display_latest_buildports( $maintainer, $limit = 20 ) {
 		global $wwwrooturi;
 
 		$ports = array();
 
-		foreach ( $this->TinderboxDS->getLatestPorts( false, $limit ) as $port ) {
+		foreach ( $this->TinderboxDS->getLatestPorts( false, $limit, $maintainer ) as $port ) {
 			$build = $this->TinderboxDS->getBuildById( $port->getBuildId() );
 			$jail = $this->TinderboxDS->getJailById( $build->getJailId() );
 

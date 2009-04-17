@@ -112,21 +112,6 @@ include 'header.inc.tpl';
 <?php }?>
 <div class="subcontent">
 	<form method="get" action="index.php">
-	<fieldset>
-		<label>All Build Failures for the maintainer</label>
-	
-			<input type="hidden" name="action" value="failed_buildports" />
-			<select name="maintainer">
-				<option></option>
-<?php foreach($maintainers as $maintainer) {?>
-				<option><?php echo $maintainer?></option>
-<?php }?>
-			</select>
-			<input type="submit" name="Go" value="Go" />
-	</fieldset>
-	</form>
-	<br />
-	<form method="get" action="index.php">
 		<fieldset>
 			<label>Find ports by name</label>
 			<input type="hidden" name="action" value="list_buildports" />
@@ -139,6 +124,42 @@ include 'header.inc.tpl';
 			<input type="submit" name="Go" value="Go" />
 		</fieldset>
 	</form>
+	<br />
+	<fieldset>
+		<label>Maintainer</label>
+		<table>
+			<tr>
+				<th>All Build Failures for the maintainer</th>
+				<th>RSS feed for the maintainer</th>
+			</tr>
+			<tr>
+				<td>
+					<form method="get" action="index.php">
+						<input type="hidden" name="action" value="failed_buildports" />
+						<select name="maintainer">
+							<option></option>
+							<?php foreach($maintainers as $maintainer) {?>
+								<option><?php echo $maintainer?></option>
+							<?php }?>
+						</select>
+						<input type="submit" name="Go" value="Go" />
+					</form>
+				</td>
+				<td>
+					<form method="get" action="index.php">
+						<input type="hidden" name="action" value="latest_buildports_rss" />
+						<select name="maintainer">
+							<option></option>
+							<?php foreach($maintainers as $maintainer) {?>
+								<option><?php echo $maintainer?></option>
+							<?php }?>
+						</select>
+						<input type="submit" name="Go" value="Go" />
+					</form>
+				</td>
+			</tr>
+		</table>
+	</fieldset>
 </div>
 <?php
 $footer_legend = array(

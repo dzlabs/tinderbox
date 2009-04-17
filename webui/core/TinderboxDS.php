@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.43 2009/03/13 07:44:57 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.44 2009/04/17 15:36:57 beat Exp $
 #
 
 require_once 'DB.php';
@@ -426,7 +426,7 @@ class TinderboxDS {
 		return $ports;
 	}
 
-	function getLatestPorts( $build_id, $limit = '' ) {
+	function getLatestPorts( $build_id, $limit = '', $maintainer = '' ) {
 		$query = "SELECT p.*,
 						 bp.build_id,
 						 bp.last_built,
@@ -446,6 +446,8 @@ class TinderboxDS {
 					 AND bp.last_built IS NOT NULL ";
 		if( $build_id )
 			$query .= "AND bp.build_id=" . $this->db->escapeSimple( $build_id );
+		if( $maintainer )
+			$query .= " AND p.port_maintainer='" . $this->db->escapeSimple( $maintainer ) . "' ";
 		$query .= " ORDER BY bp.last_built DESC ";
 		if( $limit )
 			$query .= " LIMIT " . $this->db->escapeSimple( $limit );
