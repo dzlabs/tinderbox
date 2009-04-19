@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.44 2009/04/17 15:36:57 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.45 2009/04/19 20:54:52 beat Exp $
 #
 
 require_once 'DB.php';
@@ -382,7 +382,7 @@ class TinderboxDS {
 		return $results[0];
 	}
 
-	function getPortsForBuild( $build, $sortby = 'port_directory', $port_name = '' ) {
+	function getPortsForBuild( $build, $sortby = 'port_directory', $port_name = '', $limit = 0 , $limit_offset = 0 ) {
 		$sortbytable = 'bp';
 		if ( $sortby == '' ) $sortby = 'port_directory';
 		if ( $sortby == 'port_directory' ) $sortbytable = 'p';
@@ -414,6 +414,8 @@ class TinderboxDS {
 		if ( $port_name )
 			$query .= " AND p.port_name LIKE '%" . $this->db->escapeSimple( $port_name ) . "%'";
 		$query .= " ORDER BY " . $this->db->escapeSimple( $sortbytable ) . "." . $this->db->escapeSimple( $sortby );
+		if( $limit != 0 )
+			$query .= " LIMIT " . $this->db->escapeSimple( $limit_offset ) . "," .  $this->db->escapeSimple( $limit );
 
 		$rc = $this->_doQueryHashRef( $query, $results, $build->getId() );
 
@@ -492,7 +494,7 @@ class TinderboxDS {
 	}
 
 
-	function getPortsByStatus( $build_id, $maintainer, $status, $notstatus ) {
+	function getPortsByStatus( $build_id, $maintainer, $status, $notstatus, $limit = 0 , $limit_offset = 0 ) {
 		$query = "SELECT p.*,
 						 bp.build_id,
 						 bp.last_built,
@@ -519,6 +521,8 @@ class TinderboxDS {
 		if( $maintainer )
 			$query .= "AND p.port_maintainer='" . $this->db->escapeSimple( $maintainer ) . "' ";
 		$query .= " ORDER BY bp.last_built DESC ";
+		if( $limit != 0 )
+			$query .= "LIMIT " . $limit_offset . "," . $limit;
 
 		$rc = $this->_doQueryHashRef( $query, $results, array() );
 

@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.35 2009/04/17 15:36:57 beat Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.36 2009/04/19 20:54:52 beat Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -73,16 +73,19 @@ switch( $action ) {
 					break;
 	case 'failed_buildports':	$build      = isset ( $_REQUEST['build'] ) ? $_REQUEST['build'] : '';
 					$maintainer = isset ( $_REQUEST['maintainer'] ) ? $_REQUEST['maintainer'] : '';
-					$display    = $moduleBuildPorts->display_failed_buildports( $build, $maintainer, null, null );
+					$list_limit_offset = isset ( $_REQUEST['list_limit_offset'] ) ? $_REQUEST['list_limit_offset'] : '0';
+					$display    = $moduleBuildPorts->display_failed_buildports( $build, $maintainer, null, null, $list_limit_offset );
 					break;
 	case 'buildports_by_reason':	$build      = $_REQUEST['build'];
 					$maintainer = isset ( $_REQUEST['maintainer'] ) ? $_REQUEST['maintainer'] : '';
 					$reason = $_REQUEST['reason'];
-					$display    = $moduleBuildPorts->display_failed_buildports( $build, $maintainer, null, $reason );
+					$list_limit_offset = isset ( $_REQUEST['list_limit_offset'] ) ? $_REQUEST['list_limit_offset'] : '0';
+					$display    = $moduleBuildPorts->display_failed_buildports( $build, $maintainer, null, $reason, $list_limit_offset );
 					break;
 	case 'bad_buildports':		$build      = isset ( $_REQUEST['build'] ) ? $_REQUEST['build'] : '';
 					$maintainer = isset ( $_REQUEST['maintainer'] ) ? $_REQUEST['maintainer'] : '';
-					$display    = $moduleBuildPorts->display_failed_buildports( $build, $maintainer, 'foo', null );
+					$list_limit_offset = isset ( $_REQUEST['list_limit_offset'] ) ? $_REQUEST['list_limit_offset'] : '0';
+					$display    = $moduleBuildPorts->display_failed_buildports( $build, $maintainer, 'foo', null, $list_limit_offset );
 					break;
 	case 'latest_buildports':	$build      = isset ( $_REQUEST['build'] ) ? $_REQUEST['build'] : '';
 					$display    = $moduleBuildPorts->display_latest_buildports( $build = '' );
@@ -90,7 +93,8 @@ switch( $action ) {
 	case 'list_buildports':		$build      = $_REQUEST['build'];
 					$sort       = isset ( $_REQUEST['sort'] ) ? $_REQUEST['sort'] : '';
 					$search     = isset ( $_REQUEST['search_port_name'] ) ? $_REQUEST['search_port_name'] : '';
-					$display    = $moduleBuildPorts->display_list_buildports( $build, $sort, $search );
+					$list_limit_offset = isset ( $_REQUEST['list_limit_offset'] ) ? $_REQUEST['list_limit_offset'] : '0';
+					$display    = $moduleBuildPorts->display_list_buildports( $build, $sort, $search, $list_limit_offset );
 					break;
 	case 'list_tinderd_queue':	$build_id   = isset ( $_REQUEST['filter_build_id'] ) ? $_REQUEST['filter_build_id'] : '';
 					$display    = $moduleTinderd->list_tinderd_queue( $build_id );

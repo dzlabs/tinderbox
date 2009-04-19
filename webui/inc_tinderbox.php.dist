@@ -13,6 +13,8 @@ $reload_interval_latest='300000';
 # reload interval for "Current And Latest Builds" page while a port is building
 # in miliseconds
 $reload_interval_current='60000';
+# Define number of shown ports per page
+#$list_limit_nr='1000';
 
 $wwwrootdir	 = dirname( __FILE__ );
 $rootdir	 = realpath( $wwwrootdir . '/../..' );
