@@ -20,14 +20,26 @@ include 'header.inc.tpl';
 <?php if(!$no_list){?>
 <table>
 	<tr>
-		<th>Build</th>
-		<th>Port Directory</th>
-		<th>Version</th>
+		<th>
+			<a href="<?php echo  build_query_string($_SERVER['PHP_SELF'], $querystring, "sort", "build_id") ?>">Build</a>
+		</th>
+		<th>
+			<a href="<?php echo  build_query_string($_SERVER['PHP_SELF'], $querystring, "sort", "port_directory") ?>">Port Directory</a>
+		</th>
+		<th>
+			<a href="<?php echo  build_query_string($_SERVER['PHP_SELF'], $querystring, "sort", "last_built_version") ?>">Version</a>
+		</th>
 		<th style="width: 20px">&nbsp;</th>
-		<th>Reason</th>
+		<th>
+			<a href="<?php echo  build_query_string($_SERVER['PHP_SELF'], $querystring, "sort", "last_fail_reason") ?>">Reason</a>
+		</th>
 		<th>&nbsp;</th>
-		<th>Last Build Attempt</th>
-		<th>Last Successful Build</th>
+		<th>
+			<a href="<?php echo  build_query_string($_SERVER['PHP_SELF'], $querystring, "sort", "last_built") ?>">Last Build Attempt</a>
+		</th>
+		<th>
+			<a href="<?php echo  build_query_string($_SERVER['PHP_SELF'], $querystring, "sort", "last_successful_built") ?>">Last Successful Build</a>
+		</th>
 	</tr>
 <?php foreach($data as $row) {?>
 	<tr>

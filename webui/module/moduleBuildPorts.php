@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.27 2009/04/20 09:16:07 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.28 2009/04/20 14:56:37 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -131,7 +131,7 @@ class moduleBuildPorts extends module {
 		return $this->template_parse( 'list_buildports.tpl' );
 	}
 
-	function display_failed_buildports( $build_name, $maintainer, $all, $wanted_reason, $list_limit_offset ) {
+	function display_failed_buildports( $build_name, $maintainer, $all, $wanted_reason, $list_limit_offset, $sort ) {
 		global $list_limit_nr, $with_timer, $starttimer, $with_meminfo;
 
 		$meminit = memory_get_usage();
@@ -149,13 +149,13 @@ class moduleBuildPorts extends module {
 		}
 
 		if ( $wanted_reason ) {
-			$ports = $this->TinderboxDS->getPortsByStatus( $build_id, NULL, $wanted_reason, '', $list_limit_nr, $list_limit_offset );
+			$ports = $this->TinderboxDS->getPortsByStatus( $build_id, NULL, $wanted_reason, '', $list_limit_nr, $list_limit_offset, $sort );
 		}
 		else {
 			if ( $all ) {
-				$ports = $this->TinderboxDS->getPortsByStatus( $build_id, $maintainer, '', 'SUCCESS', $list_limit_nr, $list_limit_offset );
+				$ports = $this->TinderboxDS->getPortsByStatus( $build_id, $maintainer, '', 'SUCCESS', $list_limit_nr, $list_limit_offset, $sort );
 			} else {
-				$ports = $this->TinderboxDS->getPortsByStatus( $build_id, $maintainer, 'FAIL', '', $list_limit_nr, $list_limit_offset );
+				$ports = $this->TinderboxDS->getPortsByStatus( $build_id, $maintainer, 'FAIL', '', $list_limit_nr, $list_limit_offset, $sort );
 			}
 		}
 
