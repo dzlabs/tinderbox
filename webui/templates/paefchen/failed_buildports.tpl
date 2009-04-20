@@ -56,10 +56,10 @@ include 'header.inc.tpl';
 </table>
 <p>
   <?php if($list_nr_prev!=-1){?>
-	  <a href="index.php?action=<?php echo $_REQUEST['action'] ?>&build=<?php if (isset($_REQUEST['build']))echo $_REQUEST['build'] ?>&reason=<?php if (isset($_REQUEST['reason']))echo $_REQUEST['reason'] ?>&maintainer=<?php if (isset($maintainer))echo $maintainer ?>&list_limit_offset=<?php echo $list_nr_prev ?> ">prev</a>  
+	  <a href="<?php echo build_query_string($_SERVER['PHP_SELF'], $querystring, "list_limit_offset", $list_nr_prev ) ?>">prev</a>
   <?php }?>
   <?php if($list_nr_next!=0){?>
-	  <a href="index.php?action=<?php echo $_REQUEST['action'] ?>&build=<?php if (isset($_REQUEST['build']))echo $_REQUEST['build'] ?>&reason=<?php if (isset($_REQUEST['reason']))echo $_REQUEST['reason'] ?>&maintainer=<?php if (isset($maintainer))echo $maintainer ?>&list_limit_offset=<?php echo $list_nr_next ?> ">next</a>
+	  <a href="<?php echo build_query_string($_SERVER['PHP_SELF'], $querystring, "list_limit_offset", $list_nr_next ) ?>">next</a>
   <?php }?>
 </p>
 <?php }else{?>

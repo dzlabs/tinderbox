@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.26 2009/04/19 20:54:52 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.27 2009/04/20 09:16:07 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -183,6 +183,13 @@ class moduleBuildPorts extends module {
 			}
 		}
 
+		$qs = array();
+		$qkvs = explode( '&', $_SERVER['QUERY_STRING'] );
+		foreach ( $qkvs as $qkv ) {
+			$kv = explode( '=', $qkv );
+			$qs[$kv[0]] = $kv[1];
+		}
+
 		if ( !isset( $list_limit_nr ) || $list_limit_nr == '0' ) {
 			$list_limit_nr = 0;
 			$list_nr_prev = -1;
@@ -205,6 +212,7 @@ class moduleBuildPorts extends module {
 		$this->template_assign( 'build_name', $build_name );
 		$this->template_assign( 'maintainer', $maintainer );
 		$this->template_assign( 'local_time', prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
+		$this->template_assign( 'querystring',$qs );
 		$elapsed_time = '';
 		if ( isset( $with_timer ) && $with_timer == 1 ) {
 			$elapsed_time = get_ui_elapsed_time( $starttimer );

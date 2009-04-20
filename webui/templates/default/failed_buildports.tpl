@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/failed_buildports.tpl,v 1.13 2009/04/16 15:41:47 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/failed_buildports.tpl,v 1.14 2009/04/20 09:16:10 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -69,6 +69,14 @@
 			</tr>
 		<?php }?>
 	</table>
+	<p>
+		<?php if($list_nr_prev!=-1){?>
+			<a href="<?php echo build_query_string($_SERVER['PHP_SELF'], $querystring, "list_limit_offset", $list_nr_prev ) ?>">prev</a>
+		<?php }?>
+		<?php if($list_nr_next!=0){?>
+			<a href="<?php echo build_query_string($_SERVER['PHP_SELF'], $querystring, "list_limit_offset", $list_nr_next ) ?>">next</a>
+		<?php }?>
+	</p>
 <?php }else{?>
 	<?php if(!$errors){?>
 		<p>There are no build failures at the moment.</p>
