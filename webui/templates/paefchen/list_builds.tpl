@@ -2,7 +2,7 @@
 $topmenu = array(
 	"Current And Latest Builds" 	=> "index.php?action=latest_buildports",
 	"Failed builds in this build"	=> "index.php?action=failed_buildports",
-	"All (really) Build Failures"	=> "index.php?action=bad_buildports"
+	"All Failures"					=> "index.php?action=bad_buildports"
 );
 
 $legend = array(

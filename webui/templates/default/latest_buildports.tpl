@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/latest_buildports.tpl,v 1.18 2009/04/25 09:44:12 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/latest_buildports.tpl,v 1.19 2009/04/25 11:46:30 beat Exp $ //-->
 <script language="JavaScript">
 	function reloadpage() {
 	    document.location.reload();
@@ -75,7 +75,7 @@
 
 <p>
 <a href="index.php?action=failed_buildports">All Build Failures</a><br />
-<a href="index.php?action=bad_buildports">All (really) Build Failures</a><br />
+<a href="index.php?action=bad_buildports">All Failures</a><br />
 <a href="index.php?action=latest_buildports_rss">RSS Feed</a><br />
 <p>
 <p>Local time: <?php echo $local_time?></p>

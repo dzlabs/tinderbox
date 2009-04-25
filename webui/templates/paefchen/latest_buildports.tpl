@@ -5,9 +5,9 @@ if ($build_name)
 $topmenu = array(
 	'Current'	=> '#current',
 	'Latest'	=> '#latest',
-	'All Build Failures'			=> 'index.php?action=failed_buildports',
-	'All (really) Build Failures'	=> 'index.php?action=bad_buildports',
-	'RSS Feed'						=> 'index.php?action=latest_buildports_rss'
+	'All Build Failures'=> 'index.php?action=failed_buildports',
+	'All Failures'		=> 'index.php?action=bad_buildports',
+	'RSS Feed'			=> 'index.php?action=latest_buildports_rss'
 
 );
 include 'header.inc.tpl'
