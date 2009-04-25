@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.166 2009/04/25 19:16:34 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.167 2009/04/25 19:29:38 marcus Exp $
 #
 
 my $pb;
@@ -686,6 +686,15 @@ sub failedShell {
         cleanup($ds, 1, undef);
 }
 
+sub trimstr {
+        my $str = shift;
+
+        $str =~ s/^\s+//;
+        $str =~ s/\s+$//;
+
+        return $str;
+}
+
 #---------------------------------------------------------------------------
 # Main dispatching function
 #---------------------------------------------------------------------------
@@ -1310,8 +1319,11 @@ sub addBuild {
         $build->setName($name);
         $build->setJailId($jCls->getId());
         $build->setPortsTreeId($pCls->getId());
-        $build->setDescription($opts->{'d'}) if ($opts->{'d'});
+        if ($opts->{'d'}) {
+                my $descr = trimstr($opts->{'d'});
 
+                $build->setDescription($descr);
+        }
         my $rc = $ds->addBuild($build);
 
         if (!$rc) {
@@ -1349,8 +1361,12 @@ sub addJail {
         $jail->setArch($arch);
         $jail->setTag($tag);
         $jail->setUpdateCmd($ucmd);
-        $jail->setDescription($opts->{'d'}) if ($opts->{'d'});
-        $jail->setSrcMount($opts->{'m'})    if ($opts->{'m'});
+        if ($opts->{'d'}) {
+                my $descr = trimstr($opts->{'d'});
+
+                $jail->setDescription($descr);
+        }
+        $jail->setSrcMount($opts->{'m'}) if ($opts->{'m'});
 
         my $rc = $ds->addJail($jail);
 
@@ -1380,9 +1396,13 @@ sub addPortsTree {
 
         $portstree->setName($name);
         $portstree->setUpdateCmd($ucmd);
-        $portstree->setDescription($opts->{'d'}) if ($opts->{'d'});
-        $portstree->setPortsMount($opts->{'m'})  if ($opts->{'m'});
-        $portstree->setCVSwebURL($opts->{'w'})   if ($opts->{'w'});
+        if ($opts->{'d'}) {
+                my $descr = trimstr($opts->{'d'});
+
+                $portstree->setDescription($descr);
+        }
+        $portstree->setPortsMount($opts->{'m'}) if ($opts->{'m'});
+        $portstree->setCVSwebURL($opts->{'w'})  if ($opts->{'w'});
         $portstree->setLastBuilt($ds->getTime());
 
         my $rc = $ds->addPortsTree($portstree);
