@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.165 2009/03/28 17:27:47 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.166 2009/04/25 19:16:34 marcus Exp $
 #
 
 my $pb;
@@ -179,7 +179,8 @@ my $ds = new Tinderbox::TinderboxDS();
         },
         "addJail" => {
                 func => \&addJail,
-                help => "Add a jail to the datastore",
+                help =>
+                    "Add a jail to the datastore (do NOT call this directly; use createJail instead)",
                 usage =>
                     "-j <jail name> -u CSUP|CVSUP|USER|NONE -t <jail tag> [-d <jail description>] [-m <src mount source>] [-a <arch>]",
                 optstr => 'm:j:t:u:d:a:',
@@ -409,13 +410,19 @@ my $ds = new Tinderbox::TinderboxDS();
                 usage  => "-i id -s <ENQUEUED|PROCESSING|SUCCESS|FAIL>",
                 optstr => 'i:s:',
         },
-        "getPortLastBuiltVersion" => {
+        "getBuildMaxSize" => {
+                func   => \&getBuildMaxSize,
+                help   => "Get the estimated maximum size (in KB) for a Build",
+                usage  => "-b <build name>",
+                optstr => 'b:',
+        };
+            "getPortLastBuiltVersion" => {
                 func => \&getPortLastBuiltVersion,
                 help =>
                     "Get the last built version for the specified port and build",
                 usage  => "-d <port directory> -b <build name>",
                 optstr => 'd:b:',
-        },
+            },
         "getPortLastBuiltStatus" => {
                 func => \&getPortLastBuiltStatus,
                 help =>
@@ -2595,6 +2602,21 @@ sub updateBuildRemakeCount {
                       "Failed to update the remake count in the datastore: "
                     . $ds->getError()
                     . "\n");
+}
+
+sub getBuildMaxSize {
+        if (!$opts->{'b'}) {
+                usage("getBuildMaxSize");
+        }
+        my $build = $ds->getBuildByName($opts->{'b'});
+        if (!defined($build)) {
+                cleanup($ds, 1,
+                        "Build, " . $opts->{'b'} . " is not a valid Build.\n");
+        }
+
+        my $size = $ds->getBuildMaxSize($build);
+
+        print $size . "\n";
 }
 
 sub getPortLastBuiltVersion {
