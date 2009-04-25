@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.167 2009/04/25 19:29:38 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.168 2009/04/25 19:31:15 marcus Exp $
 #
 
 my $pb;
@@ -410,19 +410,13 @@ my $ds = new Tinderbox::TinderboxDS();
                 usage  => "-i id -s <ENQUEUED|PROCESSING|SUCCESS|FAIL>",
                 optstr => 'i:s:',
         },
-        "getBuildMaxSize" => {
-                func   => \&getBuildMaxSize,
-                help   => "Get the estimated maximum size (in KB) for a Build",
-                usage  => "-b <build name>",
-                optstr => 'b:',
-        };
-            "getPortLastBuiltVersion" => {
+        "getPortLastBuiltVersion" => {
                 func => \&getPortLastBuiltVersion,
                 help =>
                     "Get the last built version for the specified port and build",
                 usage  => "-d <port directory> -b <build name>",
                 optstr => 'd:b:',
-            },
+        },
         "getPortLastBuiltStatus" => {
                 func => \&getPortLastBuiltStatus,
                 help =>
@@ -2622,21 +2616,6 @@ sub updateBuildRemakeCount {
                       "Failed to update the remake count in the datastore: "
                     . $ds->getError()
                     . "\n");
-}
-
-sub getBuildMaxSize {
-        if (!$opts->{'b'}) {
-                usage("getBuildMaxSize");
-        }
-        my $build = $ds->getBuildByName($opts->{'b'});
-        if (!defined($build)) {
-                cleanup($ds, 1,
-                        "Build, " . $opts->{'b'} . " is not a valid Build.\n");
-        }
-
-        my $size = $ds->getBuildMaxSize($build);
-
-        print $size . "\n";
 }
 
 sub getPortLastBuiltVersion {
