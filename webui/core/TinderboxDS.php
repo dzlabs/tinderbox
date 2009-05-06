@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.46 2009/04/20 14:56:37 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.47 2009/05/06 18:15:35 beat Exp $
 #
 
 require_once 'DB.php';
@@ -563,7 +563,7 @@ class TinderboxDS {
 	function getPortById( $id ) {
 		$results = $this->getPorts( array( 'port_id' => $id ) );
 
-		if ( is_null( $results ) ) {
+		if ( is_null( $results ) || empty( $results ) ) {
 			return null;
 		}
 
@@ -585,6 +585,11 @@ class TinderboxDS {
 		$rc = $this->_doQueryHashRef( $query, $results, array( $build_id ) );
 		if ( !$rc )
 			return null;
+
+		if ( empty( $results ) ) {
+			return null;
+		}
+
 		$port = $this->getPortById( $results[0]['id'] );
 
 		return $port;
