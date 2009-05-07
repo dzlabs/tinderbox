@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.37 2009/04/20 14:56:37 beat Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.38 2009/05/07 20:00:35 beat Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -91,7 +91,7 @@ switch( $action ) {
 					$display    = $moduleBuildPorts->display_failed_buildports( $build, $maintainer, 'foo', null, $list_limit_offset, $sort );
 					break;
 	case 'latest_buildports':	$build      = isset ( $_REQUEST['build'] ) ? $_REQUEST['build'] : '';
-					$display    = $moduleBuildPorts->display_latest_buildports( $build = '' );
+					$display    = $moduleBuildPorts->display_latest_buildports( $build );
 					break;
 	case 'list_buildports':		$build      = $_REQUEST['build'];
 					$sort       = isset ( $_REQUEST['sort'] ) ? $_REQUEST['sort'] : '';
