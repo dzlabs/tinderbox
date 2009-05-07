@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.47 2009/05/06 18:15:35 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.48 2009/05/07 07:06:52 beat Exp $
 #
 
 require_once 'DB.php';
@@ -530,7 +530,7 @@ class TinderboxDS {
 			$query .= "AND p.port_maintainer='" . $this->db->escapeSimple( $maintainer ) . "' ";
 		$query .= " ORDER BY " . $this->db->escapeSimple( $sortbytable ) . "." . $this->db->escapeSimple( $sortby );
 		if( $limit != 0 )
-			$query .= " LIMIT " . $limit_offset . "," . $limit;
+			$query .= " LIMIT " . $this->db->escapeSimple( $limit_offset ) . "," . $limit;
 
 		$rc = $this->_doQueryHashRef( $query, $results, array() );
 
