@@ -24,36 +24,104 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.38 2009/05/07 20:00:35 beat Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.39 2009/05/09 17:31:20 oliver Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
 
 require_once 'core/TinderboxDS.php';
 require_once 'module/moduleBuilds.php';
-require_once 'module/moduleBuildPorts.php';
-require_once 'module/moduleConfig.php';
-require_once 'module/moduleLogs.php';
-require_once 'module/modulePorts.php';
-require_once 'module/modulePortFailureReasons.php';
 require_once 'module/moduleSession.php';
-require_once 'module/moduleTinderd.php';
 require_once 'module/moduleUsers.php';
-require_once 'module/moduleRss.php';
 
 require_once $templatesdir.'/messages.inc';
 
+$req_moduleBuilds		= false;
+$req_modulePorts		= false;
+$req_moduleBuildPorts		= false;
+$req_moduleLogs			= false;
+$req_modulePortFailureReasons	= false;
+$req_moduleUsers		= false;
+$req_moduleConfig		= false;
+$req_moduleTinderd		= false;
+$req_moduleRss			= false;
+
+$action = isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : '';
+
+switch( $action ) {
+	case 'describe_port':
+					$req_modulePorts		= true;
+					break;
+	case 'failed_buildports':
+	case 'buildports_by_reason':
+	case 'bad_buildports':
+	case 'latest_buildports':
+	case 'list_buildports':
+					$req_modulePorts		= true;
+					$req_moduleBuildPorts		= true;
+					break;
+	case 'list_tinderd_queue':
+	case 'change_tinderd_queue':
+	case 'add_tinderd_queue':
+	case 'delete_tinderd_queue':
+					$req_moduleTinderd		= true;
+					break;
+	case 'display_add_user':
+	case 'add_user':
+	case 'display_modify_user':
+	case 'modify_user':
+					break;
+	case 'display_failure_reasons':
+					$req_modulePortFailureReasons	= true;
+					break;
+	case 'config':
+					$req_moduleConfig		= true;
+					break;
+	case 'latest_buildports_rss':
+					$req_modulePorts		= true;
+					$req_moduleRss			= true;
+					break;
+	case 'display_markup_log':
+					$req_modulePorts		= true;
+					$req_moduleLogs			= true;
+	case 'list_builds':
+					break;
+}
+
+
 $TinderboxDS			= new TinderboxDS();
-$moduleBuilds			= new moduleBuilds( $TinderboxDS );
-$modulePorts			= new modulePorts( $TinderboxDS );
 $moduleSession			= new moduleSession( $TinderboxDS );
-$moduleBuildPorts		= new moduleBuildPorts( $TinderboxDS, $modulePorts );
-$moduleLogs				= new moduleLogs( $TinderboxDS, $modulePorts );
-$modulePortFailureReasons	= new modulePortFailureReasons( $TinderboxDS );
+$moduleBuilds			= new moduleBuilds( $TinderboxDS );
 $moduleUsers			= new moduleUsers( $TinderboxDS, $moduleBuilds );
-$moduleConfig			= new moduleConfig( $TinderboxDS, $moduleUsers );
-$moduleTinderd			= new moduleTinderd( $TinderboxDS, $moduleBuilds, $moduleUsers );
-$moduleRss				= new moduleRss( $TinderboxDS, $modulePorts );
+
+if( $req_modulePorts === true ) {
+	require_once 'module/modulePorts.php';
+	$modulePorts			= new modulePorts( $TinderboxDS );
+}
+if( $req_moduleBuildPorts === true ) {
+	require_once 'module/moduleBuildPorts.php';
+	$moduleBuildPorts		= new moduleBuildPorts( $TinderboxDS, $modulePorts );
+}
+if( $req_moduleLogs === true ) {
+	require_once 'module/moduleLogs.php';
+	$moduleLogs			= new moduleLogs( $TinderboxDS, $modulePorts );
+}
+if( $req_modulePortFailureReasons  === true ) {
+	require_once 'module/modulePortFailureReasons.php';
+	$modulePortFailureReasons	= new modulePortFailureReasons( $TinderboxDS );
+}
+if( $req_moduleConfig === true ) {
+	require_once 'module/moduleConfig.php';
+	$moduleConfig			= new moduleConfig( $TinderboxDS, $moduleUsers );
+}
+if( $req_moduleTinderd === true ) {
+	require_once 'module/moduleTinderd.php';
+	$moduleTinderd			= new moduleTinderd( $TinderboxDS, $moduleBuilds, $moduleUsers );
+}
+if( $req_moduleRss  === true ) {
+	require_once 'module/moduleRss.php';
+	$moduleRss			= new moduleRss( $TinderboxDS, $modulePorts );
+}
 
 $moduleSession->start();
 if ( isset( $_POST['do_login'] ) ) {
@@ -65,7 +133,6 @@ if ( isset( $_POST['do_login'] ) ) {
 
 $display_login = $moduleUsers->display_login();
 
-$action = isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : '';
 
 switch( $action ) {
 	case 'describe_port':		$port_id    = $_REQUEST['id'];
