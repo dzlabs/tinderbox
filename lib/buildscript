@@ -156,6 +156,7 @@ if [ $phase = 1 ]; then
 ./etc/rc.conf
 ./work/*
 ./compat/linux/proc
+./proc
 ./usr/share/man/cat*/*
 ./${L}/etc/apache
 ./${L}/etc/apache2
@@ -221,6 +222,7 @@ else
 ./tmp/*
 ./work/*
 ./compat/linux/proc
+./proc
 ./root/*
 ./var/mail/*
 ./var/tmp/*
@@ -293,6 +295,7 @@ EOF
 ./etc/rc.conf
 ./work/*
 ./compat/linux/proc
+./proc
 EOF
   mtree -X /tmp/mtree.exclude -xcn -k uid,gid,mode -p / > /tmp/mtree
 
