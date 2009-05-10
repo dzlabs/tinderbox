@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.119 2009/05/10 07:12:33 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.120 2009/05/10 07:30:40 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup17.FreeBSD.org"
@@ -937,10 +937,15 @@ updatePortsTree () {
 	       -p $(tinderLoc portstree ${portsTreeName})
     rc=$?
     execute_hook "postPortsTreeUpdate" "PORTSTREE=${portsTreeName} \"UPDATE_CMD=${updateCmd}\" PB=${pb} RC=${rc}"
+    if [ $? -ne 0 ]; then
+	echo "updatePortsTree: ${portsTreeName}: hook postPortsTreeUpdate failed. Terminating."
+        cleanupMounts -t portstree -p ${portsTreeName}
+	return 1
+    fi
 
     cleanupMounts -t portstree -p ${portsTreeName}
 
-    if [ ${rc} != 0 ]; then
+    if [ ${rc} -ne 0 ]; then
 	exit ${rc}
     fi
 
