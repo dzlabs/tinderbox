@@ -24,10 +24,10 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.48 2009/05/07 07:06:52 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.49 2009/05/10 19:58:25 beat Exp $
 #
 
-require_once 'DB.php';
+require_once 'MDB2.php';
 require_once 'Build.php';
 require_once 'BuildPortsQueue.php';
 require_once 'Config.php';
@@ -68,28 +68,26 @@ class TinderboxDS {
 
 		$dsn = "$DB_DRIVER://$DB_USER:$DB_PASS@$DB_HOST/$DB_NAME";
 
-		$this->db = DB::connect( $dsn );
+		$this->db = MDB2::factory( $dsn );
 
-		if ( DB::isError( $this->db ) ) {
+		if ( MDB2::isError( $this->db ) ) {
 			die ( "Tinderbox DS: Unable to initialize datastore: " . $this->db->getMessage() . "\n" );
 		}
 
-		$this->db->setFetchMode( DB_FETCHMODE_ASSOC );
+		$this->db->setFetchMode( MDB2_FETCHMODE_ASSOC );
 		$this->db->setOption( 'persistent', true );
 	}
 
 	function start_transaction() {
-		$this->db->autoCommit( false );
+		$this->db->beginTransaction();
 	}
 
 	function commit_transaction() {
 		$this->db->commit();
-		$this->db->autoCommit( true );
 	}
 
 	function rollback_transaction() {
 		$this->db->rollback();
-		$this->db->autoCommit( true );
 	}
 
 	function getAllMaintainers() {
@@ -240,7 +238,7 @@ class TinderboxDS {
 				  WHERE user_id=?";
 
 		if( $object_type )
-			$query .= " AND user_permission_object_type='" . $this->db->escapeSimple( $object_type ) . "'";
+			$query .= " AND user_permission_object_type='" . $this->db->escape( $object_type, TRUE ) . "'";
 
 		$rc = $this->_doQuery( $query, array( $user->getId() ), $res );
 
@@ -412,10 +410,10 @@ class TinderboxDS {
 				   WHERE p.port_id = bp.port_id
 					 AND bp.build_id=?";
 		if ( $port_name )
-			$query .= " AND p.port_name LIKE '%" . $this->db->escapeSimple( $port_name ) . "%'";
-		$query .= " ORDER BY " . $this->db->escapeSimple( $sortbytable ) . "." . $this->db->escapeSimple( $sortby );
+			$query .= " AND p.port_name LIKE '%" . $this->db->escape( $port_name, TRUE ) . "%'";
+		$query .= " ORDER BY " . $this->db->escape( $sortbytable ) . "." . $this->db->escape( $sortby );
 		if( $limit != 0 )
-			$query .= " LIMIT " . $this->db->escapeSimple( $limit_offset ) . "," .  $this->db->escapeSimple( $limit );
+			$query .= " LIMIT " . $this->db->escape( $limit_offset, TRUE ) . "," .  $this->db->escape( $limit, TRUE );
 
 		$rc = $this->_doQueryHashRef( $query, $results, $build->getId() );
 
@@ -447,12 +445,12 @@ class TinderboxDS {
 				   WHERE p.port_id = bp.port_id
 					 AND bp.last_built IS NOT NULL ";
 		if( $build_id )
-			$query .= "AND bp.build_id=" . $this->db->escapeSimple( $build_id );
+			$query .= "AND bp.build_id=" . $this->db->escape( $build_id, TRUE );
 		if( $maintainer )
-			$query .= " AND p.port_maintainer='" . $this->db->escapeSimple( $maintainer ) . "' ";
+			$query .= " AND p.port_maintainer='" . $this->db->escape( $maintainer, TRUE ) . "' ";
 		$query .= " ORDER BY bp.last_built DESC ";
 		if( $limit )
-			$query .= " LIMIT " . $this->db->escapeSimple( $limit );
+			$query .= " LIMIT " . $this->db->escape( $limit, TRUE );
 
 		$rc = $this->_doQueryHashRef( $query, $results, array() );
 
@@ -521,16 +519,16 @@ class TinderboxDS {
 				   WHERE p.port_id = bp.port_id ";
 
 		if( $build_id )
-			$query .= "AND bp.build_id=" . $this->db->escapeSimple( $build_id ) . " ";
+			$query .= "AND bp.build_id=" . $this->db->escape( $build_id, TRUE ) . " ";
 		if( $status <> '' )
-			$query .= "AND bp.last_status='" . $this->db->escapeSimple( $status ) . "' ";
+			$query .= "AND bp.last_status='" . $this->db->escape( $status, TRUE ) . "' ";
 		if( $notstatus <> '' )
-			$query .= "AND bp.last_status<>'" . $this->db->escapeSimple( $notstatus ) . "' AND bp.last_status<>'UNKNOWN' ";
+			$query .= "AND bp.last_status<>'" . $this->db->escape( $notstatus, TRUE ) . "' AND bp.last_status<>'UNKNOWN' ";
 		if( $maintainer )
-			$query .= "AND p.port_maintainer='" . $this->db->escapeSimple( $maintainer ) . "' ";
-		$query .= " ORDER BY " . $this->db->escapeSimple( $sortbytable ) . "." . $this->db->escapeSimple( $sortby );
+			$query .= "AND p.port_maintainer='" . $this->db->escape( $maintainer, TRUE ) . "' ";
+		$query .= " ORDER BY " . $this->db->escape( $sortbytable ) . "." . $this->db->escape( $sortby );
 		if( $limit != 0 )
-			$query .= " LIMIT " . $this->db->escapeSimple( $limit_offset ) . "," . $limit;
+			$query .= " LIMIT " . $this->db->escape( $limit_offset ) . "," . $limit;
 
 		$rc = $this->_doQueryHashRef( $query, $results, array() );
 
@@ -627,7 +625,7 @@ class TinderboxDS {
 		$condition = implode( ' OR ', $conds );
 
 		if ( $condition != '' ) {
-			$query = "SELECT * FROM $table WHERE " . $this->db->escapeSimple( $condition );
+			$query = "SELECT * FROM $table WHERE " . $this->db->escape( $condition );
 		}
 		else {
 			$query = "SELECT * FROM $table";
@@ -855,30 +853,26 @@ class TinderboxDS {
 	}
 
 	function _doQuery( $query, $params, &$res ) {
-		$sth = $this->db->prepare( $query );
+		$sth = $this->db->prepare( $query, MDB2_PREPARE_RESULT );
 
-		if ( DB::isError( $this->db ) ) {
-			$this->addError( $this->db->getMessage() );
+		if ( MDB2::isError( $sth ) ) {
+			$this->addError( $sth->getMessage() );
 			return 0;
 		}
 
-		if ( count( $params ) ) {
-			$_res = $this->db->execute( $sth, $params );
-		}
-		else {
-			$_res = $this->db->execute( $sth );
-		}
+		$_res = $sth->execute( $params );
 
-		if ( DB::isError( $_res ) ) {
+		if ( MDB2::isError( $_res ) ) {
 			$this->addError( $_res->getMessage() );
 			return 0;
 		}
 
 		if ( !is_null( $_res ) ) {
 			$res = $_res;
+			$sth->free();
 		}
 		else {
-			$res->free();
+			$sth->free();
 		}
 
 		return 1;
