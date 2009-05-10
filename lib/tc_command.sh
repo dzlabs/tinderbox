@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.118 2009/04/25 19:41:00 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.119 2009/05/10 07:12:33 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup17.FreeBSD.org"
@@ -160,15 +160,10 @@ updateTree () {
 
     if [ ! -x ${dir}/update.sh ]; then
 	echo "updateTree: ${what} ${name}: missing update script!"
-	exit 1
+	return 1
     fi
 
     echo "${name}: updating ${what} with ${updateCmd}"
-
-    if ! requestMount -t ${what} ${flag} ${name}; then
-	echo "updateTree: ${what} ${name}: mount failed"
-	exit 1
-    fi
 
     if [ "${updateCmd}" = "USER" ]; then
         eval ${dir}/update.sh ${name} > ${dir}/update.log 2>&1
@@ -178,11 +173,8 @@ updateTree () {
     if [ $? -ne 0 ]; then
 	echo "updateTree: ${what} ${name}: update failed"
 	echo "    see ${dir}/update.log for more details"
-	cleanupMounts -t ${what} ${flag} ${name}
-	exit 1
+	return 1
     fi
-
-    cleanupMounts -t ${what} ${flag} ${name}
 }
 
 #---------------------------------------------------------------------------
@@ -576,9 +568,20 @@ updateJail () {
 	echo "updateJail: hook preJailUpdate failed. Terminating."
 	return 1
     fi
+    if ! requestMount -t jail -j ${jailName}; then
+	echo "updateJail: ${jailName}: mount failed"
+	exit 1
+    fi
     updateTree jail ${jailName} -j $(tinderLoc jail ${jailName})
     rc=$?
     execute_hook "postJailUpdate" "JAIL=${jailName} RC=${rc} PB=${pb}"
+
+    cleanupMounts -t jail -j ${jailName}
+
+    if [ ${rc} != 0 ]; then
+	exit ${rc}
+    fi
+
     return 0
 }
 
@@ -926,13 +929,19 @@ updatePortsTree () {
 	echo "${portsTreeName}: hook prePortsTreeUpdate failed. Terminating."
 	return 1
     fi
+    if ! requestMount -t portstree -p ${portsTreeName}; then
+	echo "updatePortsTree: ${portsTreeName}: mount failed"
+	exit 1
+    fi
     updateTree portstree ${portsTreeName} \
 	       -p $(tinderLoc portstree ${portsTreeName})
     rc=$?
     execute_hook "postPortsTreeUpdate" "PORTSTREE=${portsTreeName} \"UPDATE_CMD=${updateCmd}\" PB=${pb} RC=${rc}"
-    if [ $? -ne 0 ]; then
-	echo "${portsTreeName}: hook postPortsTreeUpdate failed. Terminating."
-	return 1
+
+    cleanupMounts -t portstree -p ${portsTreeName}
+
+    if [ ${rc} != 0 ]; then
+	exit ${rc}
     fi
 
     # Update the last-built time
