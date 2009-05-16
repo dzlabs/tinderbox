@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.66 2009/02/15 18:20:02 beat Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.67 2009/05/16 18:46:48 marcus Exp $
 
 VERSION=	3.0.0
 
@@ -41,6 +41,7 @@ WEBUITpaefchenDATA=config.tpl current_buildports.tpl describe_port.tpl \
 		  rss.tpl tinderstyle.css tinderstyle.js user_admin.tpl \
 		  user_permissions.tpl user_properties.tpl
 WEBUITpaefchenIMAGEDATA=hdr_fill.png
+CONTRIB=	hooks/kse-fix
 
 release:
 	-rm -rf ${.CURDIR}/tinderbox-${VERSION} \
@@ -102,6 +103,10 @@ release:
 .for mf in ${MAN${ms}DATA}
 	cp ${.CURDIR}/man/man${ms}/${mf} ${.CURDIR}/tinderbox-${VERSION}/man/man${ms}
 .endfor
+.endfor
+.for con in ${CONTRIB}
+	mkdir -p ${.CURDIR}/tinderbox-${VERSION}/contrib/${con}
+	cp -R ${.CURDIR}/contrib/${con}/* ${.CURDIR}/tinderbox-${VERSION}/contrib/${con}
 .endfor
 	echo "Tinderbox version ${VERSION}" > tinderbox-${VERSION}/.version
 	cd ${.CURDIR} && \
