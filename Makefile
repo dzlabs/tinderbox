@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.67 2009/05/16 18:46:48 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.68 2009/05/23 18:49:26 marcus Exp $
 
 VERSION=	3.0.0
 
@@ -41,7 +41,7 @@ WEBUITpaefchenDATA=config.tpl current_buildports.tpl describe_port.tpl \
 		  rss.tpl tinderstyle.css tinderstyle.js user_admin.tpl \
 		  user_permissions.tpl user_properties.tpl
 WEBUITpaefchenIMAGEDATA=hdr_fill.png
-CONTRIB=	hooks/kse-fix
+CONTRIB=	hooks/kse-fix hooks/make-jobs-safe
 
 release:
 	-rm -rf ${.CURDIR}/tinderbox-${VERSION} \
