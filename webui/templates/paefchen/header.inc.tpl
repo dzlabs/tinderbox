@@ -37,19 +37,19 @@ if (preg_match('@<!-- (\w+):(\w+);(\w+):(\d*);(\w+):(\d*) //-->@', $display_logi
 <?php } ?>
 		</div>
 		<div class="right">
-<?php if (! empty($user_name)) { ?>
 			<form method="post" action="index.php">
 			<ul>
 				<li><a href="index.php?action=list_tinderd_queue">Queue</a></li>
+<?php if (! empty($user_name)) { ?>
 	<?php if ($is_www_admin == 1) { ?>
 				<li><a href="index.php?action=config">Config</a></li>
 				<li><a href="index.php?action=display_add_user">Add User</a></li>
 	<?php } ?>
 				<li><a href="index.php?action=display_modify_user&amp;modify_user_id=<?php echo $user_id?>">Modify Me</a></li>
 				<li><input type="submit" name="do_logout" value="Logout" /></li>
+<?php } ?>
 			</ul>	
 			</form>
-<?php } ?>
 		</div>
 	</div>
 	<?php if (isset($legend) && is_array($legend) && count($legend) > 0) { ?>

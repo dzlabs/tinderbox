@@ -9,6 +9,9 @@
 <?php }?>
 		<table>
 		<tr>
+			<td class="noborder"><a href="index.php?action=list_tinderd_queue" style="margin-left:10px">Tinderd Queue</a></td>
+		</tr>
+		<tr>
 			<td>Username</td>
 			<td><input type="text" name="User_Name" /></td>
 		</tr>

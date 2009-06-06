@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.15 2009/01/02 14:21:49 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.16 2009/06/06 09:41:49 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -105,9 +105,6 @@ class moduleTinderd extends module {
 
 	function list_tinderd_queue( $build_id ) {
 
-		if( !$this->moduleUsers->is_logged_in() ) {
-			return $this->template_parse( 'please_login.tpl' );
-		} else {
 			$this->template_assign( 'all_builds', $this->moduleBuilds->get_all_builds() );
 			$this->template_assign( 'build_id',   $build_id );
 			$this->template_assign( 'new_build_id', '' );
@@ -181,9 +178,9 @@ class moduleTinderd extends module {
 
 			$this->template_assign( 'all_prio', array( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ) );
 			$this->template_assign( 'new_priority', 10 );
+			$this->template_assign( 'is_logged_in' , $this->moduleUsers->is_logged_in() );
 
 			return $this->template_parse( 'list_tinderd_queue.tpl' );
-		}
 	}
 
 	function change_tinderd_queue( $action, $entry_id, $build_id, $priority, $email_on_completion ) {

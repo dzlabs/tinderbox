@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.23 2009/01/02 14:21:49 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.24 2009/06/06 09:41:49 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -298,6 +298,9 @@ class moduleUsers extends module {
 	function get_id() {
 		global $moduleSession;
 		$user = $moduleSession->getAttribute( 'user' );
+
+		if ( !$user )
+			return false;
 
 		return $user->getId();
 	}

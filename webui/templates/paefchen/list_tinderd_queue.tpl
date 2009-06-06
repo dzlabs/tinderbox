@@ -21,6 +21,7 @@ include 'header.inc.tpl';
 				</fieldset>
 				</form>
 			</td>
+<?php if($is_logged_in) {?>
 			<td style="background-color: #FFFFFF; width: 20px">&nbsp;</td>
 				<td>
 				<form method="post" action="index.php">
@@ -40,6 +41,7 @@ include 'header.inc.tpl';
 				</fieldset>
 				</form>
 			</td>
+<?php }?>
 		</tr>
 	</table>
 
@@ -60,11 +62,23 @@ include 'header.inc.tpl';
 		<th>Port Directory</th>
 		<th>User</th>
 		<th style="width: 20px">&nbsp;</th>
+<?php if($is_logged_in) {?>
 		<th>Email On Completion</th>
 		<th>&nbsp;</th>
 		<th>&nbsp;</th>
 		<th>&nbsp;</th>
+<?php }?>
 	</tr>
+<?php if(!$is_logged_in && $no_list) {?>
+	<tr>
+		<td>Queue empty</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+<?php }?>
+<?php if($is_logged_in) {?>
 	<form method="post" action="index.php">
 	<fieldset>
 	<input type="hidden" name="action" value="add_tinderd_queue" />
@@ -95,6 +109,7 @@ include 'header.inc.tpl';
 	</tr>
 	</fieldset>
 	</form>
+<?php }?>
 <?php if(!$no_list){?>
 
 		<?php foreach($entries as $row) {?>
@@ -105,7 +120,7 @@ include 'header.inc.tpl';
 			<input type="hidden" name="filter_build_id" value="<?php echo $build_id?>" />
 			<tr>
 				<td>
-					<?php if($row['modify'] == 1){?>
+					<?php if($is_logged_in && $row['modify'] == 1){?>
 						<select name="build_id">
 							<?php foreach($all_builds as $build) {?>
 								<option value="<?php echo $build['build_id']?>" <?php if ($row['build'] == $build['build_name']) {?>selected<?php }?> ><?php echo $build['build_name']?></option>
@@ -116,7 +131,7 @@ include 'header.inc.tpl';
 					<?php }?>
 				</td>
 				<td>
-					<?php if($row['modify'] == 1){?>
+					<?php if($is_logged_in && $row['modify'] == 1){?>
 						<select name="priority">
 							<?php foreach($row['all_prio'] as $prio) {?>
 								<option value="<?php echo $prio?>" <?php if ($row['priority'] == $prio) {?>selected<?php }?> ><?php echo $prio?></option>
@@ -129,6 +144,7 @@ include 'header.inc.tpl';
 				<td><?php echo $row['directory']?></td>
 				<td><?php echo $row['user']?></td>
 				<td class="<?php echo $row['status_field_class']?>">&nbsp;</td>
+<?php if($is_logged_in) {?>
 				<td align="center">
 					<?php if($row['modify'] == 1){?>
 						<input type="checkbox" name="email_on_completion" value="1" <?php if($row['email_on_completion'] == 1 ) {?>checked="checked"<?php }?> />
@@ -151,6 +167,7 @@ include 'header.inc.tpl';
 						<input type="submit" name="change_tinderd_queue" value="reset status" />
 					<?php }?>
 				</td>
+<?php }?>
 			</tr>
 			</fieldset>
 			</form>
