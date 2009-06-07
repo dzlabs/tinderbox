@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.130 2009/03/14 23:55:14 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.131 2009/06/07 18:51:55 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -214,6 +214,7 @@ export PACKAGES=/tmp/packages
 # don't pass -j, -k etc. to sub-makes
 unset MAKEFLAGS
 unset PORTSDIR
+unset SRCBASE
 
 # Unset all of the locale variables to ensure C/POSIX is used to build
 # everything.
