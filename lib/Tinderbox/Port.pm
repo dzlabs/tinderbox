@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/Port.pm,v 1.10 2006/02/18 19:57:21 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/Port.pm,v 1.11 2009/06/07 19:18:10 marcus Exp $
 #
 
 package Tinderbox::Port;
@@ -101,6 +101,14 @@ sub setDirectory {
 sub setMaintainer {
         my $self  = shift;
         my $maint = shift;
+
+        my ($user, $domain) = split(/\@/, $maint);
+        if ($domain) {
+                $domain = lc $domain;
+                $maint = join('@', $user, $domain);
+        } else {
+                $maint = $user;
+        }
 
         $self->{port_maintainer} = $maint;
 }
