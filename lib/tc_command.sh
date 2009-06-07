@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.123 2009/06/07 18:27:56 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.124 2009/06/07 19:12:39 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup17.FreeBSD.org"
@@ -698,8 +698,16 @@ buildJail () {
     if [ "${jailArch}" != "${myArch}" ]; then
 	crossEnv="TARGET_ARCH=${jailArch}"
     fi
+
+    ncpus=$(/sbin/sysctl hw.ncpu | awk '{print $2}')
+    factor=$(echo "$ncpus*2+1" | /usr/bin/bc -q)
+
+    if [ -n "${NO_JAIL_JOBS}" ]; then
+	factor=1
+    fi
+
     cd ${SRCBASE} && env DESTDIR=${J_TMPDIR} ${crossEnv} \
-	make world > ${jailBase}/world.tmp 2>&1
+	make -j${factor} -DNO_CLEAN world > ${jailBase}/world.tmp 2>&1
     rc=$?
     execute_hook "postJailBuild" "JAIL=${jailName} DESTDIR=${J_TMPDIR} JAIL_ARCH=${jailArch} MY_ARCH=${myArch} JAIL_OBJDIR=${JAIL_OBJDIR} SRCBASE=${SRCBASE} PB=${pb} RC=${rc}"
     if [ ${rc} -ne 0 ]; then
