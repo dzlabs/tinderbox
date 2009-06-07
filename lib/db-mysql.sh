@@ -22,9 +22,9 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/db-mysql.sh,v 1.4 2008/10/22 01:10:24 marcus Exp $
+# $MCom: portstools/tinderbox/lib/db-mysql.sh,v 1.5 2009/06/07 18:23:21 marcus Exp $
 #
-export DB_MAN_PREREQS="databases/p5-DBD-mysql[45][01] databases/mysql[45][01]-client"
+export DB_MAN_PREREQS="databases/p5-DBD-mysql[456][01] databases/mysql[456][01]-client"
 export DB_OPT_PREREQS="databases/php5-mysql"
 
 if [ -n "${db_admin_pass}" ]; then
