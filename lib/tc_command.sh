@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.125 2009/07/18 21:13:30 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.126 2009/07/18 21:13:59 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup17.FreeBSD.org"
@@ -2075,6 +2075,7 @@ tbcleanup () {
     tc=$(tinderLoc scripts tc)
     builds=$(${tc} listBuilds 2>/dev/null)
     ports=$(${tc} listPorts 2>/dev/null)
+    nonexistentPorts=""
 
     portstrees=$(${tc} listPortsTrees 2>/dev/null)
     trap "tbcleanup_cleanup ${portstrees}" 1 2 3 9 10 11 15
@@ -2125,9 +2126,11 @@ tbcleanup () {
 	    fi
 	done
 
-	if [ ${pathFound} = 0 ]; then
+	if [ ${pathFound} = 0 -a ${cleanErrors} = 1 ]; then
 	    echo "Removing database entry for nonexistent port ${port}"
 	    ${tc} rmPort -d ${port} -f -c
+	elif [ ${pathFound} = 0 -a ${cleanErrors} = 0 ]; then
+	    nonexistentPorts="${nonexistentPorts} ${port}"
 	fi
     done
 
@@ -2172,8 +2175,21 @@ tbcleanup () {
 		pkgs_seen="${pkgs_seen} ${lbv}${package_suffix}"
 	    fi
 	    if [ ! -e ${path} ]; then
-		echo "Removing build port database entry for port with nonexistent package ${port}/${build}"
-		${tc} rmPort -d ${port} -b ${build} -f -c
+	        dodelete=1
+		if [ ${cleanErrors} = 0 ]; then
+		    status=$(${tc} getPortLastBuiltStatus -d ${port} -b ${build} 2>/dev/null)
+		    if [ "${status}" != "SUCCESS" ]; then
+		        dodelete=0
+		    fi
+		fi
+		if [ ${dodelete} = 1 ]; then
+		    echo "Removing build port database entry for port with nonexistent package ${port}/${build}"
+		    ${tc} rmPort -d ${port} -b ${build} -f -c
+		    if echo ${nonexistentPorts} | grep -qw ${port}; then
+			echo "Removing database entry for nonexistent port ${port}"
+			${tc} rmPort -d ${port} -f -c
+		    fi
+		fi
 	    fi
 
 	    path=$(tinderLoc portstree ${portstree})
@@ -2207,8 +2223,10 @@ tbcleanup () {
 	    if expr -- ${file_name} : '^.*\.log$' >/dev/null ; then
 		result=$(${tc} isLogCurrent -b ${build} -l ${file_name} 2>/dev/null)
 		if [ ${result} != 1 ]; then
-		    echo "Deleting stale log ${dir}/${file_name}"
-		    /bin/rm -f "${dir}/${file_name}"
+		    if [ ${cleanErrors} = 1 -o ! -L "${errorDir}/${file_name}" ]; then
+		        echo "Deleting stale log ${dir}/${file_name}"
+		        /bin/rm -f "${dir}/${file_name}"
+		    fi
 		    if [ ${cleanErrors} = 1 ]; then
 			/bin/rm -f "${errorDir}/${file_name}"
 		    fi
