@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.126 2009/07/18 21:13:59 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.127 2009/08/02 17:51:07 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup17.FreeBSD.org"
@@ -2210,7 +2210,7 @@ tbcleanup () {
 	        done
 
 		echo "Pruning broken package symlinks for build ${build}"
-		find -L ${pkg_path} -type l -delete
+		find -L ${pkg_path} -type l | xargs rm -f
         fi
 
         tbcleanup_cleanup ${portstree}
