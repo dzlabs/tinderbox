@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.84 2009/05/11 19:31:54 beat Exp $
+$MCom: portstools/tinderbox/README,v 1.85 2009/09/21 03:46:27 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -137,6 +137,21 @@ nfs_reserved_port_only="YES"
 
 # cd ${pb}/scripts && ./tc createJail -j 6.3 -d "FreeBSD 6.3-RELEASE" \
 	-t RELENG_6_3_0_RELEASE -u CVSUP
+
+    or
+
+# cd ${pb}/scripts && ./tc createJail -j 6.3 -d "FreeBSD 6.3-RELEASE" \
+	-t 6.3-RELEASE -u LFTP -H ftp.freebsd.org
+
+    The first method will download source via cvsup and use make world to
+    compile a complete FreeBSD installation.
+
+    The second method will instead download binary release sets (used on CDs)
+    and install them, making the process much shorter. As the command suggest,
+    the second method requires lftp (ftp/lftp) to be installed. You need to
+    specify what *release* (not the CVS tag, as opposed to the first method)
+    you want to download with the -t option. Also note that you need to provide
+    a FTP server to download the sets from (with the -H option).
 
     Note: all Jail names _MUST_ begin with their FreeBSD major version number.
     That is, the following is an illegal jail name: ``FreeBSD-6.3''.
@@ -394,7 +409,7 @@ Alternative Means of Creating Jail Sources and PortsTrees:
 By default, Jails and PortsTrees are updated using csup (/usr/bin/csup).
 Every time a new Jail or PortsTree is created, they will inherit the default
 update type.  This update type is stored in ${pb}/scripts/etc/env/GLOBAL as
-defaultUpdateType.  The allowed values are CVSUP, CSUP, USER, and NONE.
+defaultUpdateType.  The allowed values are CVSUP, CSUP, LFTP, USER, and NONE.
 for CVSUP and CSUP there is also a defaultUpdateHost.  This can also be
 changed in ${pb}/scripts/etc/env/GLOBAL.
 

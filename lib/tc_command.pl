@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.169 2009/04/25 19:46:05 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.170 2009/09/21 03:46:28 marcus Exp $
 #
 
 my $pb;
@@ -182,7 +182,7 @@ my $ds = new Tinderbox::TinderboxDS();
                 help =>
                     "Add a jail to the datastore (do NOT call this directly; use createJail instead)",
                 usage =>
-                    "-j <jail name> -u CSUP|CVSUP|USER|NONE -t <jail tag> [-d <jail description>] [-m <src mount source>] [-a <arch>]",
+                    "-j <jail name> -u CSUP|CVSUP|LFTP|USER|NONE -t <jail tag> [-d <jail description>] [-m <src mount source>] [-a <arch>]",
                 optstr => 'm:j:t:u:d:a:',
         },
         "addPortsTree" => {
@@ -554,7 +554,7 @@ my $ds = new Tinderbox::TinderboxDS();
         "createJail" => {
                 help => "Create a new jail",
                 usage =>
-                    "-j <jailname> -u CSUP|CVSUP|USER|NONE [-t <tag>] [-d <description>] [-C] [-H <updatehost>] [-m <mountsrc>] [-I] [-a <arch>]",
+                    "-j <jailname> -u CSUP|CVSUP|LFTP|USER|NONE [-t <tag>] [-d <description>] [-C] [-H <updatehost>] [-m <mountsrc>] [-I] [-a <arch>]",
                 optstr => 'j:t:d:CH:m:u:Ia:',
         },
 

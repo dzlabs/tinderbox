@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.128 2009/08/22 23:30:15 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.129 2009/09/21 03:46:28 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup17.FreeBSD.org"
@@ -62,6 +62,47 @@ generateUpdateCode () {
 		    echo "ERROR: ${1} ${2}: no update script (USER)"
 		    exit 1
 		fi
+		;;
+
+    "LFTP")
+    		if [ -z "${5}" -o "${5}" = "UNUSED" ]; then
+		    echo "ERROR: ${1} ${2}: no tag specified for ${3}"
+		    exit 1
+		fi
+
+		updateArch="${7}"
+		if [ -z "${updateArch}" ]; then
+		    updateArch=$(uname -p)
+		fi
+
+		updateCmd="/usr/local/bin/lftp"
+
+		if [ ! -x "${updateCmd}" ]; then
+		    echo "ERROR: ${2} ${3}: ${updateCmd} missing"
+		    exit 1
+		fi
+
+		if [ -d ${treeDir} ]; then
+		    echo "${2}: cleaning out old directories"
+		    cleanDirs ${2} ${treeDir}
+		fi
+		if [ ! -d ${treeDir} ]; then
+		    echo "${2}: creating top-level directory"
+		    mkdir -p ${treeDir} >/dev/null 2>&1
+		fi
+
+		( echo "#!/bin/sh"
+		  echo "mkdir -p ${treeDir}/sets"
+		  echo "cd ${treeDir}/sets"
+		  echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror base\""
+		  echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror src\""
+		  echo "cd src"
+		  echo "sed -i \"\" 's|usr/src|src|' install.sh"
+		  echo "export DESTDIR=${treeDir}"
+		  echo "mkdir ${treeDir}/src"
+		  echo "yes | ./install.sh all"
+		) > ${treeDir}/update.sh
+		chmod +x ${treeDir}/update.sh
 		;;
 
     "CVSUP"|"CSUP")
@@ -619,6 +660,8 @@ buildJail () {
 	return 1
     fi
 
+    updateCmd=$(${tc} getUpdateCmd -j ${jailName})
+
     # Hackery to set SRCBASE accordingly for all combinations
     tc=$(tinderLoc scripts tc)
     jailSrcMt=$(${tc} getSrcMount -j ${jailName})
@@ -690,44 +733,55 @@ buildJail () {
 	return 1
     fi
 
-    # Make world
-    echo "${jailName}: making world"
+    if [ "${updateCmd}" = "LFTP" ]; then
+	export DESTDIR=${J_TMPDIR}
+	cd ${jailBase}/sets/base && yes | ./install.sh > ${jailBase}/world.tmp 2>&1
+	rc=$?
+	execute_hook "postJailBuild" "JAIL=${jailName} DESTDIR=${J_TMPDIR} JAIL_ARCH=${jailArch} MY_ARCH=${myArch} JAIL_OBJDIR=${JAIL_OBJDIR} SRCBASE=${SRCBASE} PB=${pb} RC=${rc}"
+	if [ ${rc} -ne 0 ]; then
+	    echo "ERROR: world failed - see ${jailBase}/world.tmp"
+	    buildJailCleanup 1 ${jailName} ${J_SRCDIR}
+	fi
+    else
+        # Make world
+        echo "${jailName}: making world"
 
-    # determine if we're cross-building world
-    crossEnv=""
-    if [ "${jailArch}" != "${myArch}" ]; then
-	crossEnv="TARGET_ARCH=${jailArch}"
-    fi
+        # determine if we're cross-building world
+        crossEnv=""
+        if [ "${jailArch}" != "${myArch}" ]; then
+	    crossEnv="TARGET_ARCH=${jailArch}"
+        fi
 
-    ncpus=$(/sbin/sysctl hw.ncpu | awk '{print $2}')
-    factor=$(echo "$ncpus*2+1" | /usr/bin/bc -q)
+        ncpus=$(/sbin/sysctl hw.ncpu | awk '{print $2}')
+        factor=$(echo "$ncpus*2+1" | /usr/bin/bc -q)
 
-    if [ -n "${NO_JAIL_JOBS}" ]; then
-	factor=1
-    fi
+        if [ -n "${NO_JAIL_JOBS}" ]; then
+	    factor=1
+        fi
 
-    cd ${SRCBASE} && env DESTDIR=${J_TMPDIR} ${crossEnv} \
-	make -j${factor} -DNO_CLEAN world > ${jailBase}/world.tmp 2>&1
-    rc=$?
-    execute_hook "postJailBuild" "JAIL=${jailName} DESTDIR=${J_TMPDIR} JAIL_ARCH=${jailArch} MY_ARCH=${myArch} JAIL_OBJDIR=${JAIL_OBJDIR} SRCBASE=${SRCBASE} PB=${pb} RC=${rc}"
-    if [ ${rc} -ne 0 ]; then
-	echo "ERROR: world failed - see ${jailBase}/world.tmp"
-	buildJailCleanup 1 ${jailName} ${J_SRCDIR}
-    fi
+        cd ${SRCBASE} && env DESTDIR=${J_TMPDIR} ${crossEnv} \
+	    make -j${factor} -DNO_CLEAN world > ${jailBase}/world.tmp 2>&1
+        rc=$?
+        execute_hook "postJailBuild" "JAIL=${jailName} DESTDIR=${J_TMPDIR} JAIL_ARCH=${jailArch} MY_ARCH=${myArch} JAIL_OBJDIR=${JAIL_OBJDIR} SRCBASE=${SRCBASE} PB=${pb} RC=${rc}"
+        if [ ${rc} -ne 0 ]; then
+	    echo "ERROR: world failed - see ${jailBase}/world.tmp"
+	    buildJailCleanup 1 ${jailName} ${J_SRCDIR}
+        fi
 
-    # Make a complete distribution
-    echo "${jailName}: making distribution"
+        # Make a complete distribution
+        echo "${jailName}: making distribution"
 
-    # determine if we're cross-building world
-    crossEnv=""
-    if [ "${jailArch}" != "${myArch}" ]; then
-	crossEnv="TARGET_ARCH=${jailArch} MACHINE_ARCH=${jailArch} MAKEOBJDIRPREFIX=${J_OBJDIR}/${jailArch} MACHINE=${jailArch}"
-    fi
-    cd ${SRCBASE}/etc && env DESTDIR=${J_TMPDIR} ${crossEnv} \
-	make -m ${J_TMPDIR}/usr/share/mk distribution > ${jailBase}/distribution.tmp 2>&1
-    if [ $? -ne 0 ]; then
-	echo "ERROR: distribution failed - see ${jailBase}/distribution.tmp"
-	buildJailCleanup 1 ${jailName} ${J_SRCDIR}
+        # determine if we're cross-building world
+        crossEnv=""
+        if [ "${jailArch}" != "${myArch}" ]; then
+	    crossEnv="TARGET_ARCH=${jailArch} MACHINE_ARCH=${jailArch} MAKEOBJDIRPREFIX=${J_OBJDIR}/${jailArch} MACHINE=${jailArch}"
+        fi
+        cd ${SRCBASE}/etc && env DESTDIR=${J_TMPDIR} ${crossEnv} \
+	    make -m ${J_TMPDIR}/usr/share/mk distribution > ${jailBase}/distribution.tmp 2>&1
+        if [ $? -ne 0 ]; then
+	    echo "ERROR: distribution failed - see ${jailBase}/distribution.tmp"
+	    buildJailCleanup 1 ${jailName} ${J_SRCDIR}
+	fi
     fi
 
     # Various hacks to keep the ports building environment happy
@@ -764,7 +818,7 @@ buildJail () {
     for logfile in world distribution
     do
 	rm -f ${jailBase}/${logfile}.log
-	mv -f ${jailBase}/${logfile}.tmp ${jailBase}/${logfile}.log
+	mv -f ${jailBase}/${logfile}.tmp ${jailBase}/${logfile}.log 2>/dev/null
     done
 
     # Update the last-built time
@@ -863,7 +917,7 @@ createJail () {
 
     echo "${jailName}: initializing tree"
     generateUpdateCode jail ${jailName} ${updateType} ${updateHost} \
-		       ${updateTag} ${updateCompress}
+		       ${updateTag} ${updateCompress} ${jailArch}
 
     echo -n "${jailName}: adding to datastore... "
 
