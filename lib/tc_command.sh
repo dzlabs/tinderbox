@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.130 2009/10/04 21:24:33 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.131 2009/10/12 17:57:25 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup17.FreeBSD.org"
@@ -1397,6 +1397,9 @@ tinderbuild_cleanup () {
     ${tc} sendBuildCompletionMail -b ${build}
     tinderbuild_reset ${build}
     cleanupMounts -t portstree -p ${portstree}
+    rm -f "/tmp/tb_pipe0.${build}_${date}"
+    rm -f "/tmp/tb_pipe1.${build}_${date}"
+    rm -f "/tmp/tb_pipe2.${build}_${date}"
     echo 
 
     exit $1
@@ -1530,6 +1533,14 @@ tinderbuild_phase () {
     cd ${pkgDir}/All && make PACKAGES=${pkgDir} -k -j${jobs} all \
 	> $(tinderLoc builddata ${build})/make.${num} 2>&1 </dev/null
 
+    if [ -n "${logdir}" ]; then
+	if [ ${LOG_DOCOPY} -eq 1 ]; then
+	    cp $(tinderLoc builddata ${build})/make.${num} ${logdir}/make.${num}
+	else
+	    ln -s $(tinderLoc builddata ${build})/make.${num} ${logdir}/make.${num}
+	fi
+    fi
+
     echo "ended at $(date)"
     end=$(date +%s)
 
@@ -1545,6 +1556,30 @@ tinderbuild_phase () {
 
     echo $(echo $(ls -1 ${pkgDir}/All | wc -l) - 1 | bc) "packages built"
     echo $(echo $(du -sh ${pkgDir} | awk '{print $1}')) " of packages"
+}
+
+setup_logging () {
+    date=$1
+    build=$2
+    logdir=$3
+
+    pipe0="/tmp/tb_pipe0.${build}_${date}"
+    pipe1="/tmp/tb_pipe1.${build}_${date}"
+    pipe2="/tmp/tb_pipe2.${build}_${date}"
+
+    rm -f ${pipe1}
+    mkfifo ${pipe1}
+    cat <${pipe1} &
+
+    rm -f ${pipe2}
+    mkfifo ${pipe2}
+    cat >"${logdir}/tinderbuild.log" <${pipe2} &
+
+    rm -f ${pipe0}
+    mkfifo ${pipe0}
+    tee ${pipe1} >${pipe2} <${pipe0} &
+
+    exec 1>${pipe0} 2>&1
 }
 
 tinderbuild () {
@@ -1563,6 +1598,8 @@ tinderbuild () {
     skipmake=0
     updateports=0
     norebuild=0
+    date=""
+    logdir=""
 
     # argument processing
     while [ $# -gt 0 ]; do
@@ -1639,6 +1676,7 @@ tinderbuild () {
 
     # Let the datastore known what we're doing.
     tc=$(tinderLoc scripts tc)
+    date=$(date +%Y%m%d%H%M%S)
     ${tc} updateBuildStatus -b ${build} -s PREPARE
 
     trap "tinderbuild_cleanup 2" 1 2 3 9 10 11 15
@@ -1654,6 +1692,22 @@ tinderbuild () {
     cleanenv
     buildenv ${jail} ${portstree} ${build}
     cleanupMounts -t jail -j ${jail}
+
+    if [ -n "${LOG_DIRECTORY}" ]; then
+	logdir="${LOG_DIRECTORY}/${build}-${date}"
+	mkdir -p ${logdir}
+	if [ $? -eq 0 ]; then
+	    pbargs="${pbargs} -logdir ${logdir}"
+	    if [ ${LOG_DOCOPY} -eq 1 ]; then
+		pbargs="${pbargs} -docopy"
+	    fi
+            if [ -t 1 ]; then
+	        setup_logging ${date} ${build} ${logdir}
+            fi
+	else
+	    logdir=""
+	fi
+    fi
 
     # Remove the make logs.
     rm -f ${buildData}/make.*

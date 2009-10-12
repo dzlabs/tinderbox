@@ -10,8 +10,17 @@ pb=${pb%%/scripts}
 
 TINDERBUILD_ARGS="$*"
 eval $(${pb}/scripts/tc configTinderd)
+eval $(${pb}/scripts/tc configLog)
 TINDERD_SLEEPTIME=${TINDERD_SLEEPTIME:=120}
 TINDERD_LOGFILE=${TINDERD_LOGFILE:="/dev/null"}
+
+if echo ${TINDERD_LOGFILE} | grep -qv '^/' ; then
+    if [ -n "${LOG_DIRECTORY}" ]; then
+	TINDERD_LOGFILE=$(realpath "${LOG_DIRECTORY}/${TINDERD_LOGFILE}")
+	ld=$(dirname ${TINDERD_LOGFILE})
+	mkdir -p ${ld}
+    fi
+fi
 
 main_loop () {
 

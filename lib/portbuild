@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.131 2009/06/07 18:51:55 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.132 2009/10/12 17:57:25 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -76,6 +76,8 @@ fetchorig=0
 nolog=0
 plistcheck=""
 nice=0
+logdir=""
+docopy=0
 
 # check parameter count
 if [ $# -lt 10 ]; then
@@ -111,6 +113,14 @@ while [ $# -gt 0 -a ${doneargs} -eq 0 ]; do
 			shift;;
 
     x-nolog)		nolog=1
+			shift;;
+
+    x-logdir)
+    			shift
+    			logdir=$1
+			shift;;
+    x-docopy)
+    			docopy=1
 			shift;;
 
     x-*)		echo "portbuild: unknown argument: $1"
@@ -350,6 +360,13 @@ if [ "${error}" = "0" ]; then
     rm ${chroot}/tmp/${pkgname}.log2
 
     cp ${chroot}/tmp/${pkgname}.log ${logsDir}/${pkgname}.log
+    if [ -n "${logdir}" ]; then
+	if [ ${docopy} -eq 1 ]; then
+	    cp ${chroot}/tmp/${pkgname}.log ${logdir}/${pkgname}.log
+	else
+	    ln -s ${logsDir}/${pkgname}.log ${logdir}/${pkgname}.log
+	fi
+    fi
     error=$(cat ${chroot}/tmp/status)
 
 #    rm -rf ${chroot}/${WRKDIRPREFIX}

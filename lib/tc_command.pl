@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.170 2009/09/21 03:46:28 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.171 2009/10/12 17:57:25 marcus Exp $
 #
 
 my $pb;
@@ -125,6 +125,12 @@ my $ds = new Tinderbox::TinderboxDS();
                     "Configure Tinderbox tinder daemon (tinderd) parameters",
                 usage  => "[-t <sleep time>] [-l <log file>]",
                 optstr => 't:l:',
+        },
+        "configLog" => {
+                func   => \&configLog,
+                help   => "Configure Tinderbox logging parameters",
+                usage  => "[-d <log directory> | -D] [-c | -C]",
+                optstr => 'd:DcC',
         },
         "listJails" => {
                 func  => \&listJails,
@@ -865,7 +871,7 @@ sub configDistfile {
                 usage("configDistfile");
         }
         if ($opts->{'u'} && $opts->{'U'}) {
-                usage("configDistFile");
+                usage("configDistfile");
         }
 
         $cache = new Tinderbox::Config();
@@ -928,6 +934,57 @@ sub configTinderd {
         $ds->updateConfig("tinderd", @config)
             or cleanup($ds, 1,
                       "Failed to update tinderd configuration: "
+                    . $ds->getError()
+                    . "\n");
+}
+
+sub configLog {
+        my @config = ();
+        my $directory;
+        my $docopy;
+
+        if (scalar(keys %{$opts}) == 0) {
+                configGet("log");
+                cleanup($ds, 0, undef);
+        }
+
+        if ($opts->{'c'} && $opts->{'C'}) {
+                usage("configLog");
+        }
+
+        if ($opts->{'d'} && $opts->{'D'}) {
+                usage("configLog");
+        }
+
+        $directory = new Tinderbox::Config();
+        $directory->setOptionName("directory");
+
+        $docopy = new Tinderbox::Config();
+        $docopy->setOptionName("docopy");
+
+        if ($opts->{'d'}) {
+                $directory->setOptionValue($opts->{'d'});
+                push @config, $directory;
+        }
+
+        if ($opts->{'D'}) {
+                $directory->setOptionValue(undef);
+                push @config, $directory;
+        }
+
+        if ($opts->{'c'}) {
+                $docopy->setOptionValue($opts->{'c'});
+                push @config, $docopy;
+        }
+
+        if ($opts->{'C'}) {
+                $docopy->setOptionValue(0);
+                push @config, $docopy;
+        }
+
+        $ds->updateConfig("log", @config)
+            or cleanup($ds, 1,
+                      "Failed to update log configuration: "
                     . $ds->getError()
                     . "\n");
 }
