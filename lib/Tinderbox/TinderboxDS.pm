@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.91 2008/09/10 17:05:17 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.92 2009/10/17 07:22:35 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -392,6 +392,26 @@ sub getPortsForBuild {
         @ports = $self->_newFromArray("Port", @results);
 
         return @ports;
+}
+
+sub getBuildMaxSize {
+        my $self  = shift;
+        my $build = shift;
+        my $size;
+
+        my @results;
+        my $rc = $self->_doQueryHashRef(
+                "SELECT MAX(total_size) AS size FROM build_ports WHERE build_id=?",
+                \@results, $build->getId()
+        );
+
+        if (!$rc) {
+                return -1;
+        }
+
+        $size = $results[0]->{'size'};
+
+        return $size;
 }
 
 sub getPortById {

@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.85 2009/09/21 03:46:27 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.86 2009/10/17 07:22:35 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -265,6 +265,29 @@ C shell equivalents:
 # cd ${pb}/scripts && ./tc tinderbuild -b 6.3-FreeBSD x11/gnome2 \
 	>& ${pb}/builds/6.3-FreeBSD/build.log &
 
+More advanced logging options are also available.  All log files including
+tinderbuild output, make logs, and individual port build logs can be
+captured in one location.  This location is specified by the
+LOG_DIRECTORY configuration option.  By default, this option is unset
+meaning that logs will not be centralized.  If set to a directory,
+a subdirectory will be created in the format of {BUILD}-{DATE} where
+{BUILD} is the Build name, and {DATE} is the date in the format
+YYYYMMDDHHMMSS (e.g. 7.2-FreeBSD-20091012112105).  Within this
+subdirectory will be the tinderbuild log, and symlinks to the make logs
+and individual port build logs.  If you would rather have the log files
+copied to this location (instead of using symlinks, set the LOG_DOCOPY
+configuration option to ``1'').
+
+To manipulate the logging configuration, use the command
+``${pb}/scripts/tc configLog'' with the appropriate options.  Those
+options are below.
+
+ -d <directory> : Set the logging directory
+ -D             : Unset the logging directory
+ -c             : Set the LOG_DOCOPY option to 1 which will copy log files
+                  to the log directory instead of using symlinks
+ -C             : Set the LOG_DOCOPY option to 0
+
 The tinderbuild function also accepts some additional command line arguments:
 
  -init           : updates the Jail then updates the Build
@@ -335,7 +358,7 @@ ccache data and packages.  The following options are supported by
  -E : (optional) do NOT copy environment files
  -O : (optional) do NOT copy OPTIONS data
  -P : (optional) do NOT copy ports
- -p : (optional copy packages (including last build status, version, and
+ -p : (optional) copy packages (including last build status, version, and
        size)
 
 Over time, Builds may become cluttered with old log files and packages.  To
