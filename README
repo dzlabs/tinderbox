@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.86 2009/10/17 07:22:35 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.87 2009/10/17 19:30:06 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -29,7 +29,7 @@ PostgreSQL 8.1 (or later) be used.  There are currently no plans to make
 this a requirement, but it may happen in future.
 
 PHP 4.x is now EOL, so the web front-end (found in the ``webui'' subdirectory)
-requires php5 (lang/php5), depending on your choice of backend database 
+requires php5 (lang/php5), depending on your choice of backend database
 PEAR::MDB2_Driver_mysql (databases/pear-MDB2_Driver_mysql) or
 PEAR::MDB2_Driver_pgsql (databases/pear-MDB2_Driver_pgsql), php5-session
 (www/php5-session), and one of php5-mysql (databases/php5-mysql) or php5-pgsql
