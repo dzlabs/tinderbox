@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.132 2009/10/12 20:48:09 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.133 2009/10/18 22:13:09 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -1868,6 +1868,10 @@ addPortToBuild () {
 
     # Save TERM since we need that for OPTIONS
     save_TERM=${TERM}
+    save_SRCBASE=
+    if [ -n "${SRCBASE}" ]; then
+	save_SRCBASE=${SRCBASE}
+    fi
 
     buildenv ${jail} ${portsTree} ${build}
     buildenvNoHost ${build}
@@ -1911,6 +1915,12 @@ addPortToBuild () {
 	        fi
 	    fi
 	done
+    fi
+
+    if [ -n "${save_SRCBASE}" ]; then
+	export SRCBASE=${save_SRCBASE}
+    else
+	unset SRCBASE
     fi
 
     addPortToBuild_cleanup ${jail} ${portsTree}
