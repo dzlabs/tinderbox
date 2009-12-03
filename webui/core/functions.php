@@ -24,14 +24,14 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/functions.php,v 1.9 2009/01/02 14:18:25 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/functions.php,v 1.10 2009/12/03 08:31:42 beat Exp $
 #
 
 function prettyDatetime( $input ) {
-	if ( ereg( '[0-9]{14}', $input ) ) {
+	if ( preg_match( '/[0-9]{14}/', $input ) ) {
 		/* timstamp */
 		return substr( $input, 0, 4) . '-' . substr( $input , 4 , 2 ) . '-' . substr ( $input , 6 , 2 ) . ' ' . substr( $input , 8 , 2 ) . ':' . substr( $input, 10, 2 ) . ':' . substr( $input, 12, 2 );
-	} elseif ( ereg( "[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}", $input ) ) {
+	} elseif ( preg_match( "/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/", $input ) ) {
 		/* datetime */
 		if ( $input == '0000-00-00 00:00:00' ||
 			$input == '0000-00-00 00:00:00.000000') {
