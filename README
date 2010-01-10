@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.87 2009/10/17 19:30:06 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.88 2010/01/10 23:52:15 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -678,3 +678,6 @@ To add a port to the queue. tinderd will automatically pick it up, run a
 tinderbuild on it, and will delete the entry after tinderbuild completed.
 (Where {BUILD} is a Build name, and {PORT DIRECTORY} is a directory under
 {BUILDS}'s PortsTree (e.g. x11/gnome2).)
+
+If the addBuildPortsQueueEntry command is run without the -d argument, then
+all ports for the specified {BUILD} will be added to the queue.
