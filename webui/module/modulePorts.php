@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.19 2009/04/16 15:41:47 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.20 2010/01/20 23:58:25 itetcu Exp $
 #
 
 require_once 'module/module.php';
@@ -100,10 +100,23 @@ class modulePorts extends module {
 	}
 
 	function get_list_data( $build_name, $ports ) {
+		global $wwwrooturi;
+		global $rootdir;
 		global $loguri;
 		global $logdir;
 		global $errorloguri;
 		global $pkguri;
+		global $wrkuri;
+		global $wrkdir;
+
+		if ( !isset( $wrkuri ) ) {
+			$wrkuri = $wwwrooturi.'/wrkdirs';
+                }
+
+		if ( !isset( $wrkdir ) ) {
+			$wrkdir = $rootdir.'/wrkdirs';
+		}
+
 
 		if( empty( $build_name ) ) {
 			$different_builds = true;
@@ -128,11 +141,14 @@ class modulePorts extends module {
 			$port_id = $port->getId();
 			$port_last_built_version = $port->getLastBuiltVersion();
 			$port_logfilename = $port->getLogfileName();
+			$port_errorpackage = $wrkdir . '/' . $build_name . '/' . $port_last_built_version . $package_suffix;
+			$port_erroruri = $wrkuri . '/' . $build_name . '/' . $port_last_built_version . $package_suffix;
 			$port_logfile_path = $logdir . '/' . $build_name . '/' . $port_logfilename;
 			$port_link_logfile = $loguri . '/' . $build_name . '/' . $port_logfilename;
 			$port_link_package = $pkguri . '/' . $build_name . '/All/' . $port_last_built_version . $package_suffix;
 			$port_last_run_duration = $port->getLastRunDuration();
 			$port_last_fail_reason = $port->getLastFailReason();
+			$port_link_wrksrc = false;
 
 			switch( $port->getLastStatus() ) {
 				case 'SUCCESS':
@@ -152,7 +168,13 @@ class modulePorts extends module {
 					$status_field_class    = 'port_fail';
 					$status_field_letter   = '&nbsp;';
 					$port_link_logfile     = $errorloguri . '/' . $build_name . '/' . $port_logfilename;
-					$port_link_package     = '';
+					if( file_exists( $port_errorpackage ) ) {
+						$port_link_package = $port_erroruri;
+						$port_link_wrksrc = true;
+					}
+					else {
+						$port_link_package = '';
+					}
 					break;
 				case 'DEPEND':
 					$status_field_class    = 'port_depend';
@@ -187,6 +209,7 @@ class modulePorts extends module {
 						'port_last_run_duration'     => $port_last_run_duration,
 						'port_link_logfile'          => $port_link_logfile,
 						'port_link_package'          => $port_link_package,
+						'port_link_wrksrc'           => $port_link_wrksrc,
 						'status_field_class'         => $status_field_class,
 						'status_field_letter'        => $status_field_letter );
 		}
