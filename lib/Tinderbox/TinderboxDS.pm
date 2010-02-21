@@ -1,5 +1,5 @@
 #-
-# Copyright (c) 2004-2008 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
+# Copyright (c) 2004-2010 FreeBSD GNOME Team <freebsd-gnome@FreeBSD.org>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.96 2010/01/03 20:58:22 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.97 2010/02/21 19:02:40 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -83,7 +83,10 @@ sub new {
                 $DBI_TYPE = 'database';
         }
 
-        my $dsn = "DBI:$DB_DRIVER:$DBI_TYPE=$DB_NAME;host=$DB_HOST";
+        my $dsn = "DBI:$DB_DRIVER:$DBI_TYPE=$DB_NAME";
+        if ($DB_HOST) {
+                $dsn .= ";host=$DB_HOST";
+        }
 
         $self->{'dbh'} =
                DBI->connect($dsn, $DB_USER, $DB_PASS, {PrintError => 0})
