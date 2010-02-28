@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.88 2010/01/10 23:52:15 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.89 2010/02/28 19:12:38 marcus Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -607,7 +607,7 @@ before a PortsTree is updated, etc.  Pre-condition hooks can even cause
 an operation to terminate if so desired.  To see a list of all available
 Hooks, run ``./tc listHooks''.  To add a new command for an existing Hook,
 use the command ``./tc updateHookCmd -h <hook> -c <command>''.  If you wish
-to disable a Hook, run ``./tc updateHookCmd -h <hook> -c'' (note: do not
+to disable a Hook, run ``./tc updateHookCmd -h <hook> -c ""'' (note: do not
 specify a command after the -c option).
 
 There is no way to add new Hooks dynamically.  However, if you have an idea
