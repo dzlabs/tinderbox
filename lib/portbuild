@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.133 2009/12/24 17:19:16 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.134 2010/02/28 19:16:55 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -211,6 +211,8 @@ unset SRCCONF
 export WRKDIRPREFIX=/work
 export DISTDIR=/tmp/distfiles
 export PACKAGES=/tmp/packages
+
+export TINDERBOX_BUILDING=1
 
 # don't pass -j, -k etc. to sub-makes
 unset MAKEFLAGS
