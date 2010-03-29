@@ -174,4 +174,44 @@ include 'header.inc.tpl';
 		<?php }?>
 <?php }?>
 </table>
+<?php if($is_logged_in) {?>
+<table>
+	<form method="post" action="index.php">
+	<fieldset>
+	<label>Mass testing</label>
+	<input type="hidden" name="action" value="add_tinderd_queue" />
+	<input type="hidden" name="entry_id" value="<?php if(!empty($row['entry_id']))echo $row['entry_id']?>" />
+	<input type="hidden" name="filter_build_id" value="<?php echo $build_id?>" />
+	<tr>
+		<th>Build</th>
+		<th>Priority</th>
+		<th>Port Directories</th>
+		<th>Email On Completion</th>
+		<th>&nbsp;</th>
+	</tr>
+	<tr>
+		<td>
+			<select name="new_build_id">
+				<?php foreach($all_builds as $build) {?>
+					<option value="<?php echo $build['build_id']?>" <?php if ($new_build_id == $build['build_id']) {?>selected<?php }?> ><?php echo $build['build_name']?></option>
+				<?php }?>
+			</select>
+		</td>
+		<td>
+			<select name="new_priority">
+				<?php foreach($all_prio as $prio) {?>
+					<option value="<?php echo $prio?>" <?php if ($new_priority == $prio) {?>selected<?php }?> ><?php echo $prio?></option>
+				<?php }?>
+			</select>
+		</td>
+		<td><textarea cols="30" rows="10" name="new_port_directory"></textarea></td>
+		<td align="center">
+			<input type="checkbox" name="new_email_on_completion" value="1" <?php if($new_email_on_completion == 1 ) {?>checked="checked"<?php }?> />
+		</td>
+		<td colspan="3"><input type="submit" name="add_tinderd_queue" value="add" /></td>
+	</tr>
+	</fieldset>
+	</form>
+</table>
+<?php }?>
 <?php include('footer.inc.tpl'); ?>

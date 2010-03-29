@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.18 2009/06/06 09:41:49 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.19 2010/03/29 19:28:24 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -165,6 +165,45 @@ Build
 <?php }?>
 
 	</table>
+<?php if($is_logged_in) {?>
+<p>Mass testing:</p>
+<table>
+	<form method="post" action="index.php">
+		<input type="hidden" name="action" value="add_tinderd_queue" />
+		<input type="hidden" name="entry_id" value="<?php if(!empty($row['entry_id']))echo $row['entry_id']?>" />
+		<input type="hidden" name="filter_build_id" value="<?php echo $build_id?>" />
+		<tr>
+			<th>Build</th>
+			<th>Priority</th>
+			<th>Port Directories</th>
+			<th>Email On Completion</th>
+			<th>&nbsp;</th>
+		</tr>
+		<tr>
+			<td>
+				<select name="new_build_id">
+					<?php foreach($all_builds as $build) {?>
+						<option value="<?php echo $build['build_id']?>" <?php if ($new_build_id == $build['build_id']) {?>selected<?php }?> ><?php echo $build['build_name']?></option>
+					<?php }?>
+				</select>
+			</td>
+			<td>
+				<select name="new_priority">
+					<?php foreach($all_prio as $prio) {?>
+						<option value="<?php echo $prio?>" <?php if ($new_priority == $prio) {?>selected<?php }?> ><?php echo $prio?></option>
+					<?php }?>
+				</select>
+			</td>
+			<td><textarea cols="30" rows="10" name="new_port_directory"></textarea></td>
+			<td align="center">
+				<input type="checkbox" name="new_email_on_completion" value="1" <?php if($new_email_on_completion == 1 ) {?>checked="checked"<?php }?> />
+			</td>
+			<td colspan="3"><input type="submit" name="add_tinderd_queue" value="add" /></td>
+		</tr>
+	</form>
+</table>
+<?php }?>
+
 <p>
 <a href="index.php">Back to homepage</a>
 </p>
