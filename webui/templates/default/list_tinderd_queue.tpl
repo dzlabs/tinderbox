@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.19 2010/03/29 19:28:24 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.20 2010/04/29 16:26:29 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -79,7 +79,7 @@ Build
 			<td>
 			<br />
 				<select name="new_build_id">
-					<?php foreach($all_builds as $build) {?>
+					<?php foreach($allowed_builds as $build) {?>
 						<option value="<?php echo $build['build_id']?>" <?php if ($new_build_id == $build['build_id']) {?>selected<?php }?> ><?php echo $build['build_name']?></option>
 					<?php }?>
 				</select>
@@ -182,7 +182,7 @@ Build
 		<tr>
 			<td>
 				<select name="new_build_id">
-					<?php foreach($all_builds as $build) {?>
+					<?php foreach($allowed_builds as $build) {?>
 						<option value="<?php echo $build['build_id']?>" <?php if ($new_build_id == $build['build_id']) {?>selected<?php }?> ><?php echo $build['build_name']?></option>
 					<?php }?>
 				</select>

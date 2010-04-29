@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.17 2010/03/29 19:28:24 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.18 2010/04/29 16:26:29 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -105,7 +105,19 @@ class moduleTinderd extends module {
 
 	function list_tinderd_queue( $build_id ) {
 
-			$this->template_assign( 'all_builds', $this->moduleBuilds->get_all_builds() );
+			$all_builds = $this->moduleBuilds->get_all_builds();
+			$allowed_builds = array();
+			if( $this->moduleUsers->checkWwwAdmin() ) {
+				$allowed_builds = $all_builds;
+			} else {
+				foreach( $all_builds as $build ) {
+					if( $this->moduleUsers->checkPermAddQueue( 'builds', $build['build_id'] ) ) {
+						$allowed_builds[] = $build;
+					}
+				}
+			}
+			$this->template_assign( 'all_builds', $all_builds );
+			$this->template_assign( 'allowed_builds', $allowed_builds );
 			$this->template_assign( 'build_id',   $build_id );
 			$this->template_assign( 'new_build_id', '' );
 			$this->template_assign( 'new_priority', '' );

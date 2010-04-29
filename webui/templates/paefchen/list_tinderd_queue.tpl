@@ -87,7 +87,7 @@ include 'header.inc.tpl';
 	<tr>
 		<td>
 			<select name="new_build_id">
-				<?php foreach($all_builds as $build) {?>
+				<?php foreach($allowed_builds as $build) {?>
 					<option value="<?php echo $build['build_id']?>" <?php if ($new_build_id == $build['build_id']) {?>selected<?php }?> ><?php echo $build['build_name']?></option>
 				<?php }?>
 			</select>
@@ -192,7 +192,7 @@ include 'header.inc.tpl';
 	<tr>
 		<td>
 			<select name="new_build_id">
-				<?php foreach($all_builds as $build) {?>
+				<?php foreach($allowed_builds as $build) {?>
 					<option value="<?php echo $build['build_id']?>" <?php if ($new_build_id == $build['build_id']) {?>selected<?php }?> ><?php echo $build['build_name']?></option>
 				<?php }?>
 			</select>
