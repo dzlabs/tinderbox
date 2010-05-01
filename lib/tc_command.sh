@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.134 2009/12/19 22:52:44 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.135 2010/05/01 16:33:43 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -100,7 +100,7 @@ generateUpdateCode () {
 		  echo "sed -i \"\" 's|usr/src|src|' install.sh"
 		  echo "export DESTDIR=${treeDir}"
 		  echo "mkdir ${treeDir}/src"
-		  echo "yes | ./install.sh all"
+		  echo "yes | sh ./install.sh all"
 		) > ${treeDir}/update.sh
 		chmod +x ${treeDir}/update.sh
 		;;
@@ -735,7 +735,7 @@ buildJail () {
 
     if [ "${updateCmd}" = "LFTP" ]; then
 	export DESTDIR=${J_TMPDIR}
-	cd ${jailBase}/sets/base && yes | ./install.sh > ${jailBase}/world.tmp 2>&1
+	cd ${jailBase}/sets/base && yes | sh ./install.sh > ${jailBase}/world.tmp 2>&1
 	rc=$?
 	execute_hook "postJailBuild" "JAIL=${jailName} DESTDIR=${J_TMPDIR} JAIL_ARCH=${jailArch} MY_ARCH=${myArch} JAIL_OBJDIR=${JAIL_OBJDIR} SRCBASE=${SRCBASE} PB=${pb} RC=${rc}"
 	if [ ${rc} -ne 0 ]; then
