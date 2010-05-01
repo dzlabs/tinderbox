@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.172 2010/01/10 23:51:19 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.173 2010/05/01 16:29:13 marcus Exp $
 #
 
 my $pb;
@@ -1543,7 +1543,7 @@ sub addBuildPortsQueueEntry {
                 usage("addBuildPortsQueueEntry");
         }
 
-        my $priority = $opts->{'p'} ? $opts->{'p'} : 10;
+	my $priority = defined $opts->{'p'} ? $opts->{'p'} : 10;
 
         if (!$ds->isValidBuild($opts->{'b'})) {
                 cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
