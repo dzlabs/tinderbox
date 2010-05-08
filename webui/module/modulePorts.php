@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.20 2010/01/20 23:58:25 itetcu Exp $
+# $MCom: portstools/tinderbox/webui/module/modulePorts.php,v 1.21 2010/05/08 22:59:59 marcus Exp $
 #
 
 require_once 'module/module.php';
@@ -140,7 +140,16 @@ class modulePorts extends module {
 
 			$port_id = $port->getId();
 			$port_last_built_version = $port->getLastBuiltVersion();
-			$port_logfilename = $port->getLogfileName();
+			$logfiles = $port->getLogfileName();
+			foreach ($logfiles as $lf) {
+				if (file_exists($logdir . '/' . $build_name . '/' . $lf)) {
+					$port_logfilename = $lf;
+					break;
+				}
+			}
+			if (!isset($port_logfilename)) {
+				$port_logfilename = $logfiles[0];
+			}
 			$port_errorpackage = $wrkdir . '/' . $build_name . '/' . $port_last_built_version . $package_suffix;
 			$port_erroruri = $wrkuri . '/' . $build_name . '/' . $port_last_built_version . $package_suffix;
 			$port_logfile_path = $logdir . '/' . $build_name . '/' . $port_logfilename;
