@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.135 2010/05/01 16:33:43 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.136 2010/05/08 18:23:35 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -1709,6 +1709,10 @@ tinderbuild () {
 	fi
     fi
 
+    if [ ${LOG_COMPRESSLOGS} -eq 1 ]; then
+	pbargs="${pbargs} -compress-logs"
+    fi
+
     # Remove the make logs.
     rm -f ${buildData}/make.*
 
@@ -2338,7 +2342,11 @@ tbcleanup () {
 	errorDir=$(tinderLoc builderrors ${build})
 
 	for file_name in $(/bin/ls -1 ${dir}) ; do
-	    if expr -- ${file_name} : '^.*\.log$' >/dev/null ; then
+	    expr -- ${file_name} : '^.*\.log$' > /dev/null
+	    lres=$?
+	    expr -- ${file_name} : '^.*\.log\.bz2$' > /dev/null
+	    lzres=$?
+	    if [ ${lres} -eq 0 -o ${lzres} -eq 0 ]; then
 		result=$(${tc} isLogCurrent -b ${build} -l ${file_name} 2>/dev/null)
 		if [ ${result} != 1 ]; then
 		    if [ ${cleanErrors} = 1 -o ! -L "${errorDir}/${file_name}" ]; then

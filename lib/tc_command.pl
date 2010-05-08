@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.173 2010/05/01 16:29:13 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.174 2010/05/08 18:23:35 marcus Exp $
 #
 
 my $pb;
@@ -129,8 +129,8 @@ my $ds = new Tinderbox::TinderboxDS();
         "configLog" => {
                 func   => \&configLog,
                 help   => "Configure Tinderbox logging parameters",
-                usage  => "[-d <log directory> | -D] [-c | -C]",
-                optstr => 'd:DcC',
+                usage  => "[-d <log directory> | -D] [-c | -C] [-z | -Z]",
+                optstr => 'd:DcCzZ',
         },
         "listJails" => {
                 func  => \&listJails,
@@ -510,8 +510,8 @@ my $ds = new Tinderbox::TinderboxDS();
                 help =>
                     "Send email to the build interest list when a port fails to build",
                 usage =>
-                    "-b <build name> -d <port directory> -p <package name> [-l]",
-                optstr => 'b:d:lp:',
+                    "-b <build name> -d <port directory> -p <package name> [-l] [-x extension]",
+                optstr => 'b:d:lp:x:',
         },
         "listUsers" => {
                 func  => \&listUsers,
@@ -942,6 +942,7 @@ sub configLog {
         my @config = ();
         my $directory;
         my $docopy;
+        my $compressLogs;
 
         if (scalar(keys %{$opts}) == 0) {
                 configGet("log");
@@ -956,11 +957,18 @@ sub configLog {
                 usage("configLog");
         }
 
+        if ($opts->{'z'} && $opts->{'Z'}) {
+                usage("configLog");
+        }
+
         $directory = new Tinderbox::Config();
         $directory->setOptionName("directory");
 
         $docopy = new Tinderbox::Config();
         $docopy->setOptionName("docopy");
+
+        $compressLogs = new Tinderbox::Config();
+        $compressLogs->setOptionName("compresslogs");
 
         if ($opts->{'d'}) {
                 $directory->setOptionValue($opts->{'d'});
@@ -980,6 +988,16 @@ sub configLog {
         if ($opts->{'C'}) {
                 $docopy->setOptionValue(0);
                 push @config, $docopy;
+        }
+
+        if ($opts->{'z'}) {
+                $compressLogs->setOptionValue(1);
+                push @config, $compressLogs;
+        }
+
+        if ($opts->{'Z'}) {
+                $compressLogs->setOptionValue(0);
+                push @config, $compressLogs;
         }
 
         $ds->updateConfig("log", @config)
@@ -1543,7 +1561,7 @@ sub addBuildPortsQueueEntry {
                 usage("addBuildPortsQueueEntry");
         }
 
-	my $priority = defined $opts->{'p'} ? $opts->{'p'} : 10;
+        my $priority = defined $opts->{'p'} ? $opts->{'p'} : 10;
 
         if (!$ds->isValidBuild($opts->{'b'})) {
                 cleanup($ds, 1, "Unknown build, " . $opts->{'b'} . "\n");
@@ -1582,7 +1600,7 @@ sub addBuildPortsQueueEntry {
                     $ds->addBuildPortsQueueEntry($build, $portdir, $priority,
                         $user_id);
                 if (!$rc) {
-                        warn(         "Failed to add port "
+                        warn(         "Failed to add port " 
                                     . $portdir
                                     . " to the datastore: "
                                     . $ds->getError()
@@ -2888,6 +2906,7 @@ sub sendBuildErrorMail {
 
         my $build = $ds->getBuildByName($buildname);
         my $port  = $ds->getPortByDirectory($portdir);
+        my $lext  = (defined($opts->{'x'}) ? $opts->{'x'} : '');
 
         my $subject =
               $SUBJECT . ' '
@@ -2898,7 +2917,7 @@ sub sendBuildErrorMail {
 Port $portdir failed for build $buildname on $now.  The error log can be
 found at:
 
-${TINDERBOX_HOST}${LOGS_URI}/$buildname/${pkgname}.log
+${TINDERBOX_HOST}${LOGS_URI}/$buildname/${pkgname}.log$lext
 
 EOD
         if (defined($port)) {
@@ -3226,18 +3245,36 @@ sub processLog {
                 $verbose = 1;
         }
 
-        unless (open(LOG, $opts->{'l'})) {
-                cleanup($ds, 1,
-                              "Failed to open "
-                            . $opts->{'l'}
-                            . " for reading: $!.\n");
-        }
+        if ($opts->{'l'} =~ /\.bz2$/) {
+                require Compress::Bzip2;
 
-        while (<LOG>) {
-                $log_text .= $_;
-        }
+                my $lbuf;
+                my $bz = new Compress::Bzip2;
+                unless ($bz->bzopen($opts->{'l'}, 'r')) {
+                        cleanup(1, $ds,
+                                      "Failed to open "
+                                    . $opts->{'l'}
+                                    . " for reading: $!.\n");
+                        while ($bz->bzreadline($lbuf)) {
+                                $log_text .= $lbuf;
+                        }
 
-        close(LOG);
+                        $bz->bzclose();
+                }
+        } else {
+                unless (open(LOG, $opts->{'l'})) {
+                        cleanup($ds, 1,
+                                      "Failed to open "
+                                    . $opts->{'l'}
+                                    . " for reading: $!.\n");
+                }
+
+                while (<LOG>) {
+                        $log_text .= $_;
+                }
+
+                close(LOG);
+        }
 
         @patterns = $ds->getAllPortFailPatterns();
         $parents{'0'} = 1;

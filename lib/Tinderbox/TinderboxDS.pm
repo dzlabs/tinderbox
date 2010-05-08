@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.97 2010/02/21 19:02:40 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.98 2010/05/08 18:23:36 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -2135,13 +2135,19 @@ sub isLogCurrent {
         my $self  = shift;
         my $build = shift;
         my $log   = shift;
+        my $range;
 
         $self->verifyType(1, $build, 'Build');
+        if ($log =~ /\.bz2$/) {
+                $range = -8;
+        } else {
+                $range = -4;
+        }
 
         my $rc = $self->_doQueryNumRows(
                 "SELECT build_port_id FROM build_ports WHERE build_id=? AND last_built_version=?",
                 $build->getId(),
-                substr($log, 0, -4)
+                substr($log, 0, $range)
         );
 
         return ($rc > 0) ? 1 : 0;
