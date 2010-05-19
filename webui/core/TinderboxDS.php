@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.50 2009/07/16 15:16:49 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.51 2010/05/19 06:50:33 beat Exp $
 #
 
 require_once 'MDB2.php';
@@ -593,7 +593,7 @@ class TinderboxDS {
 		return $port;
 	}
 
-	function getObjects( $type, $params = array() ) {
+	function getObjects( $type, $params = array(), $orderby = "" ) {
 		global $objectMap;
 
 		if ( !isset( $objectMap[$type] ) ) {
@@ -629,6 +629,10 @@ class TinderboxDS {
 		}
 		else {
 			$query = "SELECT * FROM $table";
+		}
+
+		if ( $orderby != "" ) {
+			$query = $query . " ORDER BY " . $this->db->escape( $orderby );
 		}
 
 		$results = array();
@@ -724,8 +728,8 @@ class TinderboxDS {
 		return $this->getObjects( 'BuildPortsQueue', $params );
 	}
 
-	function getBuilds( $params = array() ) {
-		return $this->getObjects( 'Build', $params );
+	function getBuilds( $params = array(), $sortby = '' ) {
+		return $this->getObjects( 'Build', $params, $sortby );
 	}
 
 	function getLogfilePatterns( $params = array() ) {
@@ -762,8 +766,8 @@ class TinderboxDS {
 		return $config;
 	}
 
-	function getAllBuilds() {
-		$builds = $this->getBuilds();
+	function getAllBuilds( $sortby = '' ) {
+		$builds = $this->getBuilds( array(), $sortby );
 
 		return $builds;
 	}
