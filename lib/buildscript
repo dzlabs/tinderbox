@@ -158,7 +158,6 @@ if [ $phase = 1 ]; then
 ./proc
 ./usr/share/man/cat*/*
 ./${L}/etc/apache
-./${L}/etc/apache2
 ./${L}/news
 ./${L}/share/xml
 ./${L}/etc/gconf
@@ -226,7 +225,6 @@ else
 ./var/tmp/*
 ./usr/share/man/cat*/*
 ./${L}/etc/apache
-./${L}/etc/apache2
 ./${L}/news
 ./${L}/share/xml
 ./${L}/etc/gconf
