@@ -11,6 +11,7 @@ $legend = array(
 	"F = Number of ports that failed to build",
 	"D = Number of ports that were not built due to a dependency failure",
 	"L = Number of ports with leftovers",
+	"DUD = Number of duds",
 	"R = Number of ports to be remade",
 	"T = Total"
 );
@@ -33,6 +34,7 @@ include 'header.inc.tpl';
 			<th style="width: 25px"><span title="fail"> F </span></th>
 			<th style="width: 25px"><span title="depend"> D </span></th>
 			<th style="width: 25px"><span title="leftovers"> L </span></th>
+			<th style="width: 25px"><span title="dud"> DUD </span></th>
 			<th style="width: 25px"><span title="remake"> R </span></th>
 			<th style="width: 25px"><span title="total"> T </span></th>
 			<th>Build Packages</th>
@@ -85,6 +87,15 @@ include 'header.inc.tpl';
 					<?php }?>
 					<span title="leftovers"><?php echo $row['results']['LEFTOVERS']?></span>
 					<?php if ($row['results']['LEFTOVERS'] != '-') {?>
+						</a>
+					<?php }?>
+				</td>
+				<td align="center">
+					<?php if ($row['results']['DUD'] != '-') {?>
+						<a href="index.php?action=buildports_by_reason&amp;build=<?php echo $row['name']?>&amp;reason=DUD">
+					<?php }?>
+					<span title="dud"><?php echo $row['results']['DUD']?></span>
+					<?php if ($row['results']['DUD'] != '-') {?>
 						</a>
 					<?php }?>
 				</td>

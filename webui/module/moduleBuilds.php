@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuilds.php,v 1.12 2010/05/19 06:50:34 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuilds.php,v 1.13 2010/10/12 19:54:32 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -76,6 +76,7 @@ class moduleBuilds extends module {
 				'DEPEND'     => 0,
 				'SUCCESS'    => 0,
 				'REMAKE'     => 0,
+				'DUD'        => 0,
 				'TOTAL'      => 0,
 			);
 			foreach ( $stats as $stat ) {
