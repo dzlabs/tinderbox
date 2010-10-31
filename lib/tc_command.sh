@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.137 2010/09/06 04:16:11 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.138 2010/10/31 21:52:25 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -226,7 +226,7 @@ updateTree () {
 
 Setup () {
     MAN_PREREQS="lang/perl5.[81]*"
-    OPT_PREREQS="lang/php[45] databases/pear-MDB2 www/php[45]-session"
+    OPT_PREREQS="lang/php[45] databases/pear-MDB2 www/php[45]-session archivers/p5-Compress-Bzip2"
     PREF_FILES="tinderbox.ph"
     README="$(tinderLoc scripts README)"
     TINDERBOX_URL="http://tinderbox.marcuscom.com/"
