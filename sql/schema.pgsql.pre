@@ -150,3 +150,10 @@ CREATE TABLE logfile_patterns (
 	logfile_pattern_expr TEXT,
 	logfile_pattern_color VARCHAR(20) NOT NULL
 );
+
+-- DROP TABLE build_groups CASCADE;
+CREATE TABLE build_groups(
+	build_group_name VARCHAR(30) NOT NULL,
+	build_id INTEGER REFERENCES builds(build_id) ON UPDATE CASCADE,
+	PRIMARY KEY (build_group_name, build_id)
+);

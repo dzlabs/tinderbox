@@ -174,6 +174,51 @@ include 'header.inc.tpl';
 		<?php }?>
 <?php }?>
 </table>
+<?php if($is_logged_in){?>
+	<fieldset>
+		<label>Build Group testing</label>
+		<?php if(!$no_groups){?>
+			<table>
+				<form method="post" action="index.php">
+					<input type="hidden" name="action" value="add_build_group_queue" />
+					<tr>
+						<th>Build Group</th>
+						<th>Priority</th>
+						<th>Port Directory</th>
+						<th>Email On Completion</th>
+						<th>&nbsp;</th>
+					</tr>
+					<tr>
+						<td>
+							<select name="build_group_name">
+								<?php foreach($all_build_groups as $build_group) {?>
+									<option value="<?php echo $build_group?>"><?php echo $build_group?></option>
+								<?php }?>
+							</select>
+						</td>
+						<td>
+							<select name="new_priority">
+								<?php foreach($all_prio as $prio) {?>
+									<option value="<?php echo $prio?>" <?php if ($new_priority == $prio) {?>selected<?php }?> ><?php echo $prio?></option>
+								<?php }?>
+							</select>
+						</td>
+						<td><input type="text" size="20" name="new_port_directory" value="<?php echo $new_port_directory?>" /></td>
+						<td align="center">
+							<input type="checkbox" name="new_email_on_completion" value="1" <?php if($new_email_on_completion == 1 ) {?>checked="checked"<?php }?> />
+						</td>
+						<td><input type="submit" name="add_build_group_queue" value="add" /></td>
+					</tr>	
+				</form>
+			</table>
+		<?php }?>
+	</fieldset>
+	<br />
+	<form method="post" action="index.php">
+		<input type="hidden" name="action" value="list_build_group" />
+		<input type="submit" name="list_build_group" value="Edit Build Groups" />
+        </form>
+<?php }?>
 <?php if($is_logged_in) {?>
 <table>
 	<form method="post" action="index.php">

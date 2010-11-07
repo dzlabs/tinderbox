@@ -24,18 +24,20 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.18 2010/04/29 16:26:29 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleTinderd.php,v 1.19 2010/11/07 11:19:56 beat Exp $
 #
 
 require_once 'module/module.php';
 require_once 'module/moduleBuilds.php';
+require_once 'module/moduleBuildGroups.php';
 require_once 'module/moduleUsers.php';
 
 class moduleTinderd extends module {
 
-	function moduleTinderd( $TinderboxDS, $moduleBuilds, $moduleUsers ) {
+	function moduleTinderd( $TinderboxDS, $moduleBuilds, $moduleBuildGroups, $moduleUsers ) {
 		$this->module( $TinderboxDS );
 		$this->moduleBuilds = $moduleBuilds;
+		$this->moduleBuildGroups = $moduleBuildGroups;
 		$this->moduleUsers  = $moduleUsers;
 	}
 
@@ -116,7 +118,20 @@ class moduleTinderd extends module {
 					}
 				}
 			}
+			$build_groups = $this->moduleBuildGroups->get_list_data();
+			if ( empty( $build_groups ) ) {
+				$this->template_assign( 'no_groups', true );
+			} else {
+				$i = 0;
+				foreach( $build_groups as $key=> $element ) {
+					$build_group_name[$i] = $element['build_group_name'];
+					$i++;
+				}
+				$build_groups = array_unique( $build_group_name );
+				$this->template_assign( 'no_groups', false );
+			}
 			$this->template_assign( 'all_builds', $all_builds );
+			$this->template_assign( 'all_build_groups', $build_groups );
 			$this->template_assign( 'allowed_builds', $allowed_builds );
 			$this->template_assign( 'build_id',   $build_id );
 			$this->template_assign( 'new_build_id', '' );

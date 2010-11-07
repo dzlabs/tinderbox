@@ -24,11 +24,12 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.51 2010/05/19 06:50:33 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.52 2010/11/07 11:19:54 beat Exp $
 #
 
 require_once 'MDB2.php';
 require_once 'Build.php';
+require_once 'BuildGroups.php';
 require_once 'BuildPortsQueue.php';
 require_once 'Config.php';
 require_once 'Jail.php';
@@ -43,6 +44,7 @@ require_once 'inc_tinderbox.php';
 
 $objectMap = array(
 	'Build'           => 'builds',
+	'BuildGroups'     => 'build_groups',
 	'BuildPortsQueue' => 'build_ports_queue',
 	'LogfilePattern'  => 'logfile_patterns',
 	'Config'          => 'config',
@@ -593,6 +595,20 @@ class TinderboxDS {
 		return $port;
 	}
 
+	function addBuildGroupEntry( $build_group_name, $build_id ) {
+                $query = "INSERT INTO build_groups
+					(build_group_name, build_id)
+					VALUES (?,?)";
+                         
+                $rc = $this->_doQuery( $query, array( $build_group_name, $build_id ), $res );
+
+                if ( !$rc ) {
+                        return false;
+                }
+                           
+                return true;
+        }
+
 	function getObjects( $type, $params = array(), $orderby = "" ) {
 		global $objectMap;
 
@@ -732,6 +748,10 @@ class TinderboxDS {
 		return $this->getObjects( 'Build', $params, $sortby );
 	}
 
+	function getBuildGroups( $params = array(), $sortby = '' ) {
+		return $this->getObjects( 'BuildGroups', $params, $sortby );
+	}
+
 	function getLogfilePatterns( $params = array() ) {
 		return $this->getObjects( 'LogfilePattern', $params );
 	}
@@ -770,6 +790,12 @@ class TinderboxDS {
 		$builds = $this->getBuilds( array(), $sortby );
 
 		return $builds;
+	}
+
+	function getAllBuildGroups( $sortby = '' ) {
+		$buildgroups = $this->getBuildGroups( array(), $sortby );
+
+		return $buildgroups;
 	}
 
 	function getAllLogfilePatterns() {

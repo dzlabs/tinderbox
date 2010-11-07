@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.20 2010/04/29 16:26:29 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_tinderd_queue.tpl,v 1.21 2010/11/07 11:19:57 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -165,6 +165,49 @@ Build
 <?php }?>
 
 	</table>
+<?php if($is_logged_in){?>
+	<p>Build Group testing</p>
+	<?php if(!$no_groups){?>
+		<table>
+			<form method="post" action="index.php">
+				<input type="hidden" name="action" value="add_build_group_queue" />
+				<tr>
+					<th>Build Group</th>
+					<th>Priority</th>
+					<th>Port Directory</th>
+					<th>Email On Completion</th>
+					<th>&nbsp;</th>
+				</tr>
+				<tr>
+					<td>
+						<select name="build_group_name">
+							<?php foreach($all_build_groups as $build_group) {?>
+								<option value="<?php echo $build_group?>" <?php if ($row['build'] == $build_group) {?>selected<?php }?> ><?php echo $build_group?></option>
+							<?php }?>
+						</select>
+					</td>
+					<td>
+						<select name="new_priority">
+							<?php foreach($all_prio as $prio) {?>
+								<option value="<?php echo $prio?>" <?php if ($new_priority == $prio) {?>selected<?php }?> ><?php echo $prio?></option>
+							<?php }?>
+						</select>
+					</td>
+					<td><input type="text" size="20" name="new_port_directory" value="<?php echo $new_port_directory?>" /></td>
+					<td align="center">
+						<input type="checkbox" name="new_email_on_completion" value="1" <?php if($new_email_on_completion == 1 ) {?>checked="checked"<?php }?> />
+					</td>
+					<td><input type="submit" name="add_build_group_queue" value="add" /></td>
+				</tr>	
+			</form>
+		</table>
+	<?php }?>
+	<br />
+	<form method="post" action="index.php">
+		<input type="hidden" name="action" value="list_build_group" />
+		<input type="submit" name="list_build_group" value="Edit Build Groups" />
+        </form>
+<?php }?>
 <?php if($is_logged_in) {?>
 <p>Mass testing:</p>
 <table>
