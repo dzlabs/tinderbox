@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.52 2010/11/07 11:19:54 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.53 2010/12/27 00:28:50 beat Exp $
 #
 
 require_once 'MDB2.php';
@@ -57,9 +57,9 @@ $objectMap = array(
 	);
 
 class TinderboxDS {
-	var $db;
-	var $error;
-	var $packageSuffixCache; /* in use by getPackageSuffix() */
+	public $db;
+	public $error;
+	public $packageSuffixCache; /* in use by getPackageSuffix() */
 
 	function TinderboxDS() {
 		global $DB_HOST, $DB_DRIVER, $DB_NAME, $DB_USER, $DB_PASS;
