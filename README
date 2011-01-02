@@ -1,4 +1,4 @@
-$MCom: portstools/tinderbox/README,v 1.89 2010/02/28 19:12:38 marcus Exp $
+$MCom: portstools/tinderbox/README,v 1.90 2011/01/02 00:31:44 itetcu Exp $
 
 BASIC INSTALLATION AND USAGE INSTRUCTIONS
 
@@ -16,7 +16,7 @@ Requirements:
 -------------
 
 Recent FreeBSD (development happens on -CURRENT only, but Tinderbox is known
-to work on RELENG_6 and RELENG_7 too), Perl 5.8 or later (lang/perl5.8) and
+to work on RELENG_8 and RELENG_7 too), Perl 5.8 or later (lang/perl5.8) and
 either MySQL 4.1 or later (databases/mysql41-server) or PostgreSQL 7.4 or
 later (databases/postgres74-server).
 
@@ -133,15 +133,15 @@ nfs_reserved_port_only="YES"
 
 12. Create the required Jails using the tc command.  A Jail is nothing
     more than a version of FreeBSD.  For example, to create a jail for
-    FreeBSD 6.3-RELEASE:
+    FreeBSD 8.2-RELEASE:
 
-# cd ${pb}/scripts && ./tc createJail -j 6.3 -d "FreeBSD 6.3-RELEASE" \
-	-t RELENG_6_3_0_RELEASE -u CVSUP
+# cd ${pb}/scripts && ./tc createJail -j 8.2 -d "FreeBSD 8.2-RELEASE" \
+	-t RELENG_8_2_0_RELEASE -u CVSUP
 
     or
 
-# cd ${pb}/scripts && ./tc createJail -j 6.3 -d "FreeBSD 6.3-RELEASE" \
-	-t 6.3-RELEASE -u LFTP -H ftp.freebsd.org
+# cd ${pb}/scripts && ./tc createJail -j 8.2 -d "FreeBSD 8.2-RELEASE" \
+	-t 8.2-RELEASE -u LFTP -H ftp.freebsd.org
 
     The first method will download source via cvsup and use make world to
     compile a complete FreeBSD installation.
@@ -154,10 +154,10 @@ nfs_reserved_port_only="YES"
     a FTP server to download the sets from (with the -H option).
 
     Note: all Jail names _MUST_ begin with their FreeBSD major version number.
-    That is, the following is an illegal jail name: ``FreeBSD-6.3''.
+    That is, the following is an illegal jail name: ``FreeBSD-8.2''.
 
     Hint: It is recommended that the Jail begin with the FreeBSD
-    major.minor numbers (i.e. ``6.3-FreeBSD'' instead of just ``6-FreeBSD'')
+    major.minor numbers (i.e. ``8.2-FreeBSD'' instead of just ``8-FreeBSD'')
     as this may prove useful when using things such as Hooks.
 
 13. Create the required PortsTrees using the tc command.  A PortsTree is
@@ -174,10 +174,10 @@ nfs_reserved_port_only="YES"
 14. Create the required Builds using the tc command.  A Build is a
     combination of a Jail and a PortsTree.  The build is the object in
     which packages are created.  To create a build that combines a
-    6.3-RELEASE Jail with the FreeBSD ports tree:
+    8.2-RELEASE Jail with the FreeBSD ports tree:
 
-# cd ${pb}/scripts && ./tc createBuild -b 6.3-FreeBSD -j 6.3 -p FreeBSD \
-	-d "6.3-RELEASE with FreeBSD ports tree"
+# cd ${pb}/scripts && ./tc createBuild -b 8.2-FreeBSD -j 8.2 -p FreeBSD \
+	-d "8.2-RELEASE with FreeBSD ports tree"
 
     Note: the recommended way to name Builds is ``Jail-PortsTree''.  All builds
     must also begin with their FreeBSD major version number.
@@ -231,9 +231,9 @@ ${pb}/scripts/tc application:
 Where {BUILD} is the name of the Build for which this port should be built,
 and {PORT DIRECTORY} is the directory within the PortsTree where this port
 can be found.  For example, to build the GNOME 2 Desktop port for the
-Build ``6.3-FreeBSD'':
+Build ``8.2-FreeBSD'':
 
-# cd ${pb}/scripts && ./tc addPort -b 6.3-FreeBSD -d x11/gnome2
+# cd ${pb}/scripts && ./tc addPort -b 8.2-FreeBSD -d x11/gnome2
 
 Note: a port does not have to be added to the database for Tinderbox to
 build it.  If you just want to do a quick ad hoc port build, forgo the
@@ -247,9 +247,9 @@ To start a Tinderbox build, use the tc command:
 
 # cd ${pb}/scripts && ./tc tinderbuild -b {BUILD} {PORT DIRECTORY}
 
-For example, to build the GNOME 2 Desktop for the Build 6.3-FreeBSD:
+For example, to build the GNOME 2 Desktop for the Build 8.2-FreeBSD:
 
-# cd ${pb}/scripts && ./tc tinderbuild -b 6.3-FreeBSD x11/gnome2
+# cd ${pb}/scripts && ./tc tinderbuild -b 8.2-FreeBSD x11/gnome2
 
 TIP: The example above will run the build in the foreground with all messages
 and errors echoing to the terminal.  To capture all of this,  it is
@@ -257,13 +257,13 @@ recommended to redirect tinderbuild output to a log file.  For example:
 
 Bourne shell equivalents:
 
-# cd ${pb}/scripts && ./tc tinderbuild -b 6.3-FreeBSD x11/gnome2 \
-	> ${pb}/builds/6.3-FreeBSD/build.log 2>&1 &
+# cd ${pb}/scripts && ./tc tinderbuild -b 8.2-FreeBSD x11/gnome2 \
+	> ${pb}/builds/8.2-FreeBSD/build.log 2>&1 &
 
 C shell equivalents:
 
-# cd ${pb}/scripts && ./tc tinderbuild -b 6.3-FreeBSD x11/gnome2 \
-	>& ${pb}/builds/6.3-FreeBSD/build.log &
+# cd ${pb}/scripts && ./tc tinderbuild -b 8.2-FreeBSD x11/gnome2 \
+	>& ${pb}/builds/8.2-FreeBSD/build.log &
 
 More advanced logging options are also available.  All log files including
 tinderbuild output, make logs, and individual port build logs can be
@@ -329,7 +329,7 @@ that the ``.version'' file is copied as well.
 
 To update existing Jails:
 
-# cd ${pb}/scripts && ./tc makeJail -j 6.3
+# cd ${pb}/scripts && ./tc makeJail -j 8.2
 
 The output of the Jail build will go to stdout.  The output of the update
 command (e.g. cvsup) will go to ${pb}/jails/{JAIL}/update.log (where
@@ -343,9 +343,9 @@ application with the ``updatePortsTree'' command.  For example:
 If you want to clone various aspects of an existing Build, use the ``tc''
 application with the ``copyBuild'' command.  For example:
 
-# cd ${pb}/scripts && ./tc copyBuild -s 6.3-FreeBSD -d 6.4-FreeBSD
+# cd ${pb}/scripts && ./tc copyBuild -s 8.2-FreeBSD -d 6.4-FreeBSD
 
-The source and destination Builds (i.e. 6.3-FreeBSD and 6.4-FreeBSD
+The source and destination Builds (i.e. 8.2-FreeBSD and 6.4-FreeBSD
 respectively in this example) must already exist.  By default,
 ``copyBuild'' will copy the environment file, OPTIONS, and ports from
 the source Build to the destination Build.  It can also optionally copy
@@ -446,8 +446,8 @@ in the appropriate format.
 
 If the value is USER, then an update.sh script must be created under the
 Jail or PortsTree's root directory.  This script will be called when an update
-is required.  For example, if you have a Jail called ``6.3'', an executable
-update.sh script must be placed under ${pb}/jails/6.3.  If you have a
+is required.  For example, if you have a Jail called ``8.2'', an executable
+update.sh script must be placed under ${pb}/jails/8.2.  If you have a
 PortsTree called ``FreeBSD'', and executable update.sh script must be
 placed under ${pb}/portstrees/FreeBSD.
 
@@ -460,12 +460,12 @@ via nullfs or NFS from another location, use -m switch to create.
 Example for NFS:
 
   ./tc createPortsTree -p FreeBSD -m server:/directory
-  ./tc createJail -j 6-FreeBSD -m server:/directory
+  ./tc createJail -j 8-FreeBSD -m server:/directory
 
 Example for nullfs:
 
   ./tc createPortsTree -p FreeBSD -m /directory
-  ./tc createJail -j 6-FreeBSD -m /directory
+  ./tc createJail -j 8-FreeBSD -m /directory
 
 Tinderbuild will ensure that these file systems are correctly mounted so you do
 not need to mount them by your own before calling tinderbuild.
@@ -511,7 +511,7 @@ opt/g++ -> ccache
 opt/c++ -> ccache
 
 This tarball must be called ccache.tar, and be placed in the Jail directory
-for each Jail that will use ccache (e.g. ${pb}/jails/6.3).
+for each Jail that will use ccache (e.g. ${pb}/jails/8.2).
 
 Once the tarball is created, run (-e for enabling, -d for disabling,
 -c specifies directory, -s maximal size):
@@ -532,8 +532,8 @@ per-PortsTree, and/or per-Build basis.  This is done by creating a file
 named GLOBAL, jail.{JAIL}, portstree.{PORTSTREE}, or build.{BUILD}
 respectively, and placing it in ${pb}/scripts/etc/env.
 
-For example, if you want a particular Build (e.g. "6.3-Perl56") to use Perl
-5.6.2 instead of Perl 5.8.x, create a file named build.6.3-Perl56 in
+For example, if you want a particular Build (e.g. "8.2-Perl56") to use Perl
+5.6.2 instead of Perl 5.8.x, create a file named build.8.2-Perl56 in
 ${pb}/scripts/etc/env that contains the following:
 
 PERL_VER=5.6.2
