@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.53 2010/12/27 00:28:50 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.54 2011/01/04 15:03:57 beat Exp $
 #
 
 require_once 'MDB2.php';
@@ -608,6 +608,19 @@ class TinderboxDS {
                            
                 return true;
         }
+
+	function deleteBuildGroupEntry( $build_group_name, $build_id ) {
+		$query = "DELETE FROM build_groups
+						WHERE build_group_name=? AND build_id=?";
+
+		$rc = $this->_doQuery( $query, array( $build_group_name, $build_id ), $res );
+
+		if ( !$rc ) {
+			return false;
+		}
+
+		return true;
+	}
 
 	function getObjects( $type, $params = array(), $orderby = "" ) {
 		global $objectMap;

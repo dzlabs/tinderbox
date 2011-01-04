@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.41 2011/01/04 12:31:05 beat Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.42 2011/01/04 15:03:57 beat Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -88,6 +88,7 @@ switch( $action ) {
 					$req_modulePorts		= true;
 					$req_moduleLogs			= true;
 	case 'add_build_group':
+	case 'delete_build_group':
 	case 'list_build_group':
 					$req_moduleBuildGroups		= true;
 					break;
@@ -123,7 +124,7 @@ if( $req_moduleConfig === true ) {
 }
 if( $req_moduleBuildGroups === true ) {
 	require_once 'module/moduleBuildGroups.php';
-	$moduleBuildGroups		= new moduleBuildGroups ( $TinderboxDS, $moduleUsers );
+	$moduleBuildGroups		= new moduleBuildGroups ( $TinderboxDS, $moduleUsers, $moduleBuilds );
 }
 if( $req_moduleTinderd === true ) {
 	require_once 'module/moduleTinderd.php';
@@ -248,6 +249,11 @@ switch( $action ) {
 	case 'add_build_group':		$build_group_name = $_REQUEST['build_group_name'];
 					$build_id   = $_REQUEST['build_id'];
 					$moduleBuildGroups->add_build_group( $build_group_name, $build_id );
+					$display    = $moduleBuildGroups->display_build_groups();
+					break;
+	case 'delete_build_group':	$build_group_name = $_REQUEST['build_group_name'];
+					$build_name = $_REQUEST['build_name'];
+					$moduleBuildGroups->delete_build_group( $build_group_name, $build_name );
 					$display    = $moduleBuildGroups->display_build_groups();
 					break;
 	case 'add_build_group_queue':	$build_group_name = $_REQUEST['build_group_name'];

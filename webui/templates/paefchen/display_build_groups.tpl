@@ -7,22 +7,38 @@ $topmenu = array(
 
 include 'header.inc.tpl';
 ?>
+<?php if($errors){?>
+        <p style="color:#FF0000">
+        <?php foreach($errors as $error){?>
+                <?php echo $error?><br />
+        <?php }?>
+        </p>
+<?php } else {?>
 <?php if(!$no_list){?>
 	<label>Build Groups</label>
 	<table>
 		<tr>
 			<th>Build Group Name</th>
 			<th>Build Name</th>
+			<th>&nbsp;</th>
 		</tr>
 
 		<?php foreach($data as $row) {?>
 			<tr>
-				<td>
-					<?php echo $row['build_group_name']?>
-				</td>
-				<td>
-					<?php echo $row['build_name']?>
-				</td>
+				<form method="post" action="index.php">
+					<td>
+						<?php echo $row['build_group_name']?>
+					</td>
+					<td>
+						<?php echo $row['build_name']?>
+					</td>
+					<td>
+						<input type="hidden" name="action" value="delete_build_group" />
+						<input type="hidden" name="build_group_name" value="<?php echo $row['build_group_name']?>" />
+						<input type="hidden" name="build_name" value="<?php echo $row['build_name']?>" />
+						<input type="submit" name="delete_build_group" value="delete" />
+					</td>
+				</form>
 			</tr>
 		<?php }?>
 
@@ -55,6 +71,7 @@ include 'header.inc.tpl';
 			</table>
 		</fieldset>
 	</form>
+<?php }?>
 <?php }?>
 <?php
 include 'footer.inc.tpl'; 

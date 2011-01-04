@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/display_build_groups.tpl,v 1.1 2010/11/07 11:39:52 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/display_build_groups.tpl,v 1.2 2011/01/04 15:03:58 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -19,16 +19,25 @@
 				<tr>
 						<th>Build Group Name</th>
 						<th>Build Name</th>
+						<th>&nbsp;</th>
 				</tr>
 
 				<?php foreach($data as $row) {?>
 						<tr>
+							<form method="post" action="index.php">
 								<td>
 										<?php echo $row['build_group_name']?>
 								</td>
 								<td>
 										<?php echo $row['build_name']?>
 								</td>
+								<td>
+									<input type="hidden" name="action" value="delete_build_group" />
+									<input type="hidden" name="build_group_name" value="<?php echo $row['build_group_name']?>" />
+									<input type="hidden" name="build_name" value="<?php echo $row['build_name']?>" />
+									<input type="submit" name="delete_build_group" value="delete" />
+								</td>
+							</form>
 						</tr>
 				<?php }?>
 

@@ -25,7 +25,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildGroups.php,v 1.1 2010/11/07 11:34:46 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildGroups.php,v 1.2 2011/01/04 15:03:58 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -34,16 +34,18 @@ require_once 'module/moduleUsers.php';
 
 class moduleBuildGroups extends module {
 
-	function moduleBuildGroups( $TinderboxDS, $moduleUsers ) {
+	function moduleBuildGroups( $TinderboxDS, $moduleUsers, $moduleBuilds ) {
 		$this->module( $TinderboxDS );
 		$this->moduleUsers = $moduleUsers;
+		$this->moduleBuilds = $moduleBuilds;
 	}
 
 	function add_build_group( $build_group_name, $build_id ) {
-		global $moduleSession;
 
 		if( !$this->moduleUsers->is_logged_in() ) {
 			return $this->template_parse( 'please_login.tpl' );
+		}  else if( ! $this->moduleUsers->checkWwwAdmin() ) {
+			$this->TinderboxDS->addError( permission_denied );
 		} else {
 			if( empty( $build_id ) || empty( $build_group_name ) ) {
 				$this->TinderboxDS->addError( mandatory_input_fields_are_empty );
@@ -76,6 +78,28 @@ class moduleBuildGroups extends module {
 		return $queue_entry;
 	}
 
+	function delete_build_group( $build_group_name, $build_name ) {
+
+		if( !$this->moduleUsers->is_logged_in() ) {
+			return $this->template_parse( 'please_login.tpl' );
+		}  else if( ! $this->moduleUsers->checkWwwAdmin() ) {
+			$this->TinderboxDS->addError( permission_denied );
+		} else {
+			$all_builds = $this->moduleBuilds->get_all_builds();
+			foreach( $all_builds as $build ) {
+				if ( $build['build_name'] == $build_name )
+					$build_id = $build['build_id'];
+			}
+			if( empty( $build_id ) )
+				$this->TinderboxDS->addError( mandatory_input_fields_are_empty );
+			$build_group_entry = $this->TinderboxDS->deleteBuildGroupEntry( $build_group_name, $build_id );
+			if ( ! $build_group_entry ) {
+				$this->TinderboxDS->addError( "Could not delete build group entry." );
+				return false;
+			}
+		}
+		return;
+	}
 
 	function display_build_groups() {
 
