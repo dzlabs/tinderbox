@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.25 2010/12/27 00:28:50 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleUsers.php,v 1.26 2011/01/04 12:31:06 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -34,16 +34,15 @@ class moduleUsers extends module {
 
 	public $permissions;
 
-	function moduleUsers( $TinderboxDS, $moduleBuilds ) {
+	function moduleUsers( $TinderboxDS, $moduleBuilds, $moduleSession ) {
 		$this->module( $TinderboxDS );
 		$this->moduleBuilds = $moduleBuilds;
+		$this->moduleSession = $moduleSession;
 	}
 
 	function display_login() {
-		global $moduleSession;
-
 		if( $this->is_logged_in() ) {
-			$user = $moduleSession->getAttribute( 'user' );
+			$user = $this->moduleSession->getAttribute( 'user' );
 			$this->template_assign( 'user_name', $user->getName() );
 			$this->template_assign( 'user_id',   $user->getId() );
 			if( $this->checkWwwAdmin() ) {
@@ -246,12 +245,10 @@ class moduleUsers extends module {
 	}
 
 	function do_login( $username, $password ) {
-		global $moduleSession;
-
 		$user = $this->TinderboxDS->getUserByLogin( $username, $password );
 		if( $user ) {
 			if(  $user->getWwwEnabled() ) {
-				$moduleSession->setAttribute( 'user', $user );
+				$this->moduleSession->setAttribute( 'user', $user );
 				return true;
 			} else {
 				$this->TinderboxDS->addError( user_login_not_enabled );
@@ -264,18 +261,14 @@ class moduleUsers extends module {
 	}
 
 	function do_logout() {
-		global $moduleSession;
-
-		$moduleSession->removeAttribute( 'user' );
-		$moduleSession->destroy();
+		$this->moduleSession->removeAttribute( 'user' );
+		$this->moduleSession->destroy();
 
 		return true;
 	}
 
 	function is_logged_in() {
-		global $moduleSession;
-
-		$user = $moduleSession->getAttribute( 'user' );
+		$user = $this->moduleSession->getAttribute( 'user' );
 
 		if( is_object( $user ) && $user->getWwwEnabled() == 1 ) {
 			return true;
@@ -284,8 +277,7 @@ class moduleUsers extends module {
 	}
 
 	function get_www_enabled() {
-		global $moduleSession;
-		$user = $moduleSession->getAttribute( 'user' );
+		$user = $this->moduleSession->getAttribute( 'user' );
 
 		$userobj = $this->TinderboxDS->getUserById( $user->getId() );
 		if( is_object( $userobj ) ) {
@@ -296,8 +288,7 @@ class moduleUsers extends module {
 	}
 
 	function get_id() {
-		global $moduleSession;
-		$user = $moduleSession->getAttribute( 'user' );
+		$user = $this->moduleSession->getAttribute( 'user' );
 
 		if ( !$user )
 			return false;
@@ -315,10 +306,8 @@ class moduleUsers extends module {
 	}
 
 	function fetch_permissions( $object_type, $object_id ) {
-		global $moduleSession;
-
 		if( $this->is_logged_in() ) {
-			$user = $moduleSession->getAttribute( 'user' );
+			$user = $this->moduleSession->getAttribute( 'user' );
 			foreach( $this->TinderboxDS->getUserPermissions( $user->getId(), $object_type, $object_id ) as $perm ) {
 				$this->permissions[$object_type][$object_id][$perm['user_permission']] = 1;
 			}
