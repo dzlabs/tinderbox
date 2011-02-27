@@ -1,5 +1,4 @@
 SET FOREIGN_KEY_CHECKS=0;
-SET SESSION table_type=InnoDB;
 SET SESSION storage_engine=InnoDB;
 
 DROP TABLE IF EXISTS ports;
