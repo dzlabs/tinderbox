@@ -1,5 +1,4 @@
 <?php
-$topmenu = array();
 $header_title = $build_name
 	? "Build Failures in $build_name"
 	: "All Build Failures";
@@ -7,6 +6,12 @@ if ($maintainer)
 	$header_title .= " for $maintainer";
 if ($reason)
 	$header_title = "Build by reason: $reason";
+$topmenu = array(
+	'Current'	=> 'index.php?action=latest_buildports#current',
+	'Latest'	=> 'index.php?action=latest_buildports#latest',
+	'All Build Failures'	=> 'index.php?action=failed_buildports',
+	'All Failures'		=> 'index.php?action=bad_buildports'
+);
 include 'header.inc.tpl';
 ?>
 <!-- $Paefchen: FreeBSD/tinderbox/webui/templates/paefchen/failed_buildports.tpl,v 1.1 2008/01/05 12:25:17 as Exp $ //-->
