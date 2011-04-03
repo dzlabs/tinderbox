@@ -24,17 +24,19 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.28 2009/04/20 14:56:37 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.29 2011/04/03 01:01:30 beat Exp $
 #
 
 require_once 'module/module.php';
 require_once 'module/modulePorts.php';
+require_once 'module/moduleUsers.php';
 
 class moduleBuildPorts extends module {
 
-	function moduleBuildPorts( $TinderboxDS, $modulePorts ) {
+	function moduleBuildPorts( $TinderboxDS, $modulePorts, $moduleUsers ) {
 		$this->module( $TinderboxDS );
 		$this->modulePorts = $modulePorts;
+		$this->moduleUsers = $moduleUsers;
 	}
 
 	function display_list_buildports( $build_name, $sort, $search_port_name, $list_limit_offset ) {
@@ -101,9 +103,11 @@ class moduleBuildPorts extends module {
 			}
 		}
 
+		$this->template_assign( 'is_logged_in',           $this->moduleUsers->is_logged_in() );
 		$this->template_assign( 'port_fail_reasons',      $port_fail_reasons );
 		$this->template_assign( 'maintainers',            $this->TinderboxDS->getAllMaintainers() );
 		$this->template_assign( 'build_description',      $build->getDescription() );
+		$this->template_assign( 'build_id',               $build->getId());
 		$this->template_assign( 'build_name',             $build_name );
 		$this->template_assign( 'jail_name',              $jail->getName() );
 		$this->template_assign( 'jail_tag',               $jail->getTag() );
@@ -208,6 +212,7 @@ class moduleBuildPorts extends module {
 			}
 		}
 
+		$this->template_assign( 'is_logged_in',           $this->moduleUsers->is_logged_in() );
 		$this->template_assign( 'port_fail_reasons',      $port_fail_reasons );
 		$this->template_assign( 'build_name', $build_name );
 		$this->template_assign( 'maintainer', $maintainer );
@@ -277,6 +282,7 @@ class moduleBuildPorts extends module {
 			}
 		}
 
+		$this->template_assign( 'is_logged_in',           $this->moduleUsers->is_logged_in() );
 		$this->template_assign( 'port_fail_reasons',      $port_fail_reasons );
 		$this->template_assign( 'current_builds',         $current_builds );
 		$this->template_assign( 'build_name',             $build_name );

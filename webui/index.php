@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.42 2011/01/04 15:03:57 beat Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.43 2011/04/03 01:01:30 beat Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -52,6 +52,7 @@ $action = isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : '';
 switch( $action ) {
 	case 'describe_port':
 					$req_modulePorts		= true;
+					$req_moduleUsers		= true;
 					break;
 	case 'failed_buildports':
 	case 'buildports_by_reason':
@@ -60,6 +61,7 @@ switch( $action ) {
 	case 'list_buildports':
 					$req_modulePorts		= true;
 					$req_moduleBuildPorts		= true;
+					$req_moduleUsers		= true;
 					break;
 	case 'list_tinderd_queue':
 	case 'change_tinderd_queue':
@@ -104,11 +106,11 @@ $moduleUsers			= new moduleUsers( $TinderboxDS, $moduleBuilds, $moduleSession );
 
 if( $req_modulePorts === true ) {
 	require_once 'module/modulePorts.php';
-	$modulePorts			= new modulePorts( $TinderboxDS );
+	$modulePorts			= new modulePorts( $TinderboxDS, $moduleUsers );
 }
 if( $req_moduleBuildPorts === true ) {
 	require_once 'module/moduleBuildPorts.php';
-	$moduleBuildPorts		= new moduleBuildPorts( $TinderboxDS, $modulePorts );
+	$moduleBuildPorts		= new moduleBuildPorts( $TinderboxDS, $modulePorts, $moduleUsers );
 }
 if( $req_moduleLogs === true ) {
 	require_once 'module/moduleLogs.php';

@@ -55,6 +55,9 @@ include 'header.inc.tpl';
 					<?php if($row['port_link_package']){?>
 						<a href="<?php echo $row['port_link_package']?>">package</a>
 					<?php }?>
+					<?php if($is_logged_in) {?>
+						<a href="index.php?action=add_tinderd_queue&amp;new_build_id=<?php echo $row['build_id']?>&amp;new_port_directory=<?php echo $row['port_directory']?>&amp;new_priority=10&amp;new_email_on_completion=0&amp;add_tinderd_queue=add&amp;filter_build_id=">requeue</a>
+					<?php }?>
 				</td>
 				<td><?php echo $row['port_last_built']?></td>
 				<td><?php echo $row['port_last_successful_built']?></td>
