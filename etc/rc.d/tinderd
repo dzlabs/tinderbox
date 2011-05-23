@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # $FreeBSD$
-#   $MCom: portstools/tinderbox/etc/rc.d/tinderd,v 1.7 2008/09/19 17:06:38 marcus Exp $
+#   $MCom: portstools/tinderbox/etc/rc.d/tinderd,v 1.8 2011/05/23 15:04:45 marcus Exp $
 #
 
 # PROVIDE: tinderd
@@ -36,7 +36,7 @@ if checkyesno tinderd_debug
 then
     command_args=" &"
 else
-    command_args=">/dev/null &"
+    command_args=">/dev/null 2>&1 &"
 fi
 
 run_rc_command "$1"
