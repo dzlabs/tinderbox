@@ -95,6 +95,27 @@ include 'header.inc.tpl';
 	<p>There are no ports trees configured.</p>
 <?php }?>
 
+<h2>configured hooks:</h2>
+<?php if(!$no_hook_list){?>
+	<table>
+		<tr>
+			<th>Name</th>
+			<th>Command</th>
+			<th>Description</th>
+		</tr>
+
+		<?php foreach($hook_data as $row) {?>
+			<tr>
+				<td><?php echo $row['hook_name']?></td>
+				<td><?php echo $row['hook_cmd']?></td>
+				<td><pre><?php echo $row['hook_description']?></pre></td>
+			</tr>
+		<?php }?>
+	</table>
+<?php }else{?>
+	<p>There are no hooks configured.</p>
+<?php }?>
+
 <h2>further configurations:</h2>
 <?php if(!$no_config_option_list){?>
 	<table>

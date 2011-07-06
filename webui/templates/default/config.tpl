@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/config.tpl,v 1.6 2008/09/14 16:22:14 marcus Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/config.tpl,v 1.7 2011/07/06 18:54:52 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -96,6 +96,27 @@
 	</table>
 <?php }else{?>
 	<p>There are no ports trees configured.</p>
+<?php }?>
+
+<h2>configured hooks:</h2>
+<?php if(!$no_hook_list){?>
+	<table>
+		<tr>
+			<th>Name</th>
+			<th>Command</th>
+			<th>Description</th>
+		</tr>
+
+		<?php foreach($hook_data as $row) {?>
+			<tr>
+				<td><?php echo $row['hook_name']?></td>
+				<td><?php echo $row['hook_cmd']?></td>
+				<td><pre><?php echo $row['hook_description']?></pre></td>
+			</tr>
+		<?php }?>
+	</table>
+<?php }else{?>
+	<p>There are no hooks configured.</p>
 <?php }?>
 
 <h2>further configurations:</h2>

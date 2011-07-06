@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.54 2011/01/04 15:03:57 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.55 2011/07/06 18:54:51 beat Exp $
 #
 
 require_once 'MDB2.php';
@@ -32,6 +32,7 @@ require_once 'Build.php';
 require_once 'BuildGroups.php';
 require_once 'BuildPortsQueue.php';
 require_once 'Config.php';
+require_once 'Hooks.php';
 require_once 'Jail.php';
 require_once 'LogfilePattern.php';
 require_once 'Port.php';
@@ -54,6 +55,7 @@ $objectMap = array(
 	'PortFailPattern' => 'port_fail_patterns',
 	'PortFailReason'  => 'port_fail_reasons',
 	'User'            => 'users',
+	'Hooks'           => 'hooks',
 	);
 
 class TinderboxDS {
@@ -753,6 +755,10 @@ class TinderboxDS {
 		return $this->getObjects( 'Config', $params );
 	}
 
+	function getHooks( $params = array() ) {
+		return $this->getObjects( 'Hooks', $params );
+	}
+
 	function getBuildPortsQueue( $params = array() ) {
 		return $this->getObjects( 'BuildPortsQueue', $params );
 	}
@@ -795,6 +801,12 @@ class TinderboxDS {
 
 	function getAllConfig() {
 		$config = $this->getConfig();
+
+		return $config;
+	}
+
+	function getAllHooks() {
+		$config = $this->getHooks();
 
 		return $config;
 	}
