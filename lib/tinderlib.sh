@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.64 2009/12/24 17:19:16 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.65 2011/08/15 23:04:00 marcus Exp $
 #
 
 tinderLocJail () {
@@ -643,7 +643,7 @@ checkPreReqs () {
 backupDbDump () {
     tmpfile=$1
     table=$2
-    db_drvier=$3
+    db_driver=$3
     db_admin=$4
     db_host=$5
     db_name=$6
@@ -661,7 +661,7 @@ backupDbDump () {
 backupDbMap () {
     tmpfile=$1
     table=$2
-    db_drvier=$3
+    db_driver=$3
     db_admin=$4
     db_host=$5
     db_name=$6
