@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_buildports.tpl,v 1.21 2011/04/03 01:01:30 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_buildports.tpl,v 1.22 2011/09/07 21:54:58 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 <link rel="alternate" type="application/rss+xml" title="<?php echo $tinderbox_name?> (RSS)" href="index.php?action=latest_buildports_rss" />
@@ -62,24 +62,24 @@
 	<table>
 		<tr>
 			<th>
-				<a href="<?php echo  build_query_string($_SERVER['PHP_SELF'], $querystring, "sort", "port_directory") ?>">Port Directory</a>
+				<a href="<?php echo  build_query_string(htmlentities($_SERVER['PHP_SELF']), $querystring, "sort", "port_directory") ?>">Port Directory</a>
 			</th>
 			<th>
-				<a href="<?php echo  build_query_string($_SERVER['PHP_SELF'], $querystring, "sort", "port_maintainer") ?>">Maintainer</a>
+				<a href="<?php echo  build_query_string(htmlentities($_SERVER['PHP_SELF']), $querystring, "sort", "port_maintainer") ?>">Maintainer</a>
 			</th>
 			<th>
-				<a href="<?php echo  build_query_string($_SERVER['PHP_SELF'], $querystring, "sort", "last_built_version") ?>">Version</a>
+				<a href="<?php echo  build_query_string(htmlentities($_SERVER['PHP_SELF']), $querystring, "sort", "last_built_version") ?>">Version</a>
 			</th>
 			<th style="width: 20px">&nbsp;</th>
 			<th>
-				<a href="<?php echo  build_query_string($_SERVER['PHP_SELF'], $querystring, "sort", "last_fail_reason") ?>">Reason</a>
+				<a href="<?php echo  build_query_string(htmlentities($_SERVER['PHP_SELF']), $querystring, "sort", "last_fail_reason") ?>">Reason</a>
 			</th>
 			<th>&nbsp;</th>
 			<th>
-				<a href="<?php echo  build_query_string($_SERVER['PHP_SELF'], $querystring, "sort", "last_built") ?>">Last Build Attempt</a>
+				<a href="<?php echo  build_query_string(htmlentities($_SERVER['PHP_SELF']), $querystring, "sort", "last_built") ?>">Last Build Attempt</a>
 			</th>
 			<th>
-				<a href="<?php echo  build_query_string($_SERVER['PHP_SELF'], $querystring, "sort", "last_successful_built") ?>">Last Successful Build</a>
+				<a href="<?php echo  build_query_string(htmlentities($_SERVER['PHP_SELF']), $querystring, "sort", "last_successful_built") ?>">Last Successful Build</a>
 			</th>
 		</tr>
 		<?php foreach($data as $row) {?>
@@ -117,10 +117,10 @@
 	<p>Total: <?php echo count($data)?></p>
 	<p>
 		<?php if($list_nr_prev!=-1){?>
-			<a href="<?php echo build_query_string($_SERVER['PHP_SELF'], $querystring, "list_limit_offset", $list_nr_prev ) ?>">prev</a>
+			<a href="<?php echo build_query_string(htmlentities($_SERVER['PHP_SELF']), $querystring, "list_limit_offset", $list_nr_prev ) ?>">prev</a>
 		<?php }?>
 		<?php if($list_nr_next!=0){?>
-			<a href="<?php echo build_query_string($_SERVER['PHP_SELF'], $querystring, "list_limit_offset", $list_nr_next ) ?>">next</a>
+			<a href="<?php echo build_query_string(htmlentities($_SERVER['PHP_SELF']), $querystring, "list_limit_offset", $list_nr_next ) ?>">next</a>
 		<?php }?>
 	</p>
 <?php }else{?>
