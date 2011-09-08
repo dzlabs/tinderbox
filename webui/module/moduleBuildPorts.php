@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.29 2011/04/03 01:01:30 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.30 2011/09/08 09:36:05 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -215,7 +215,7 @@ class moduleBuildPorts extends module {
 		$this->template_assign( 'is_logged_in',           $this->moduleUsers->is_logged_in() );
 		$this->template_assign( 'port_fail_reasons',      $port_fail_reasons );
 		$this->template_assign( 'build_name', $build_name );
-		$this->template_assign( 'maintainer', $maintainer );
+		$this->template_assign( 'maintainer', htmlentities( $maintainer ) );
 		$this->template_assign( 'local_time', prettyDatetime( date( 'Y-m-d H:i:s' ) ) );
 		$this->template_assign( 'querystring',$qs );
 		$elapsed_time = '';
