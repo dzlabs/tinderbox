@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.174 2010/05/08 18:23:35 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.175 2011/09/25 00:03:57 marcus Exp $
 #
 
 my $pb;
@@ -240,7 +240,7 @@ my $ds = new Tinderbox::TinderboxDS();
                 func => \&getDependenciesForPort,
                 help => "Get stored dependencies for a given port and build",
                 usage =>
-                    "-b <build name> -d <port directory> [-t EXTRACT_DEPENDS|PATCH_DEPENDS|FETCH_DEPENDS|BUILD_DEPENDS|LIB_DEPENDS|DEPENDS|RUN_DEPENDS]",
+                    "-b <build name> -d <port directory> [-t EXTRACT_DEPENDS|PATCH_DEPENDS|FETCH_DEPENDS|BUILD_DEPENDS|LIB_DEPENDS|RUN_DEPENDS|TEST_DEPENDS]",
                 optstr => 'b:d:t:',
         },
         "listHooks" => {
@@ -1522,8 +1522,8 @@ sub addPortToOneBuild {
                                 FETCH_DEPENDS   => 'FetchDepends',
                                 BUILD_DEPENDS   => 'BuildDepends',
                                 LIB_DEPENDS     => 'LibDepends',
-                                DEPENDS         => 'Depends',
                                 RUN_DEPENDS     => 'RunDepends',
+                                TEST_DEPENDS    => 'TestDepends',
                         );
 
                         $ds->clearDependenciesForPort($pCls, $build, undef);
@@ -1718,8 +1718,8 @@ sub getDependenciesForPort {
                 FETCH_DEPENDS   => 2,
                 BUILD_DEPENDS   => 3,
                 LIB_DEPENDS     => 4,
-                DEPENDS         => 5,
-                RUN_DEPENDS     => 6,
+                RUN_DEPENDS     => 5,
+                TEST_DEPEND     => 6,
         );
 
         if (!$opts->{'b'} || !$opts->{'d'}) {
@@ -3369,6 +3369,7 @@ sub addPorts {
                 my @list;
                 push @list, $cache->BuildDependsList($port);
                 push @list, $cache->RunDependsList($port);
+                push @list, $cache->TestDependsList($port);
 
                 my %uniq;
                 foreach my $dep (grep { !$uniq{$_}++ } @list) {

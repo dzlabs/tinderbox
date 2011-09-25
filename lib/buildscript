@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# usage: $0 DIRNAME PHASE ED PD FD BD RD [PLISTCHECK]
+# usage: $0 DIRNAME PHASE ED PD FD BD RD TD [PLISTCHECK]
 #   PHASE is 1 (checksum) or 2 (package)
 
 cleanup() {
@@ -90,6 +90,7 @@ del_pkg() {
       fi
     done
   fi
+  find /var/db/pkg -type f -empty -delete
 }
 
 dir=$1
@@ -100,7 +101,8 @@ PD=$4
 FD=$5
 BD=$6
 RD=$7
-PLISTCHECK=$8
+TD=$8
+PLISTCHECK=$9
 
 L=$(echo ${LOCALBASE} | sed 's,^/,,')
 
@@ -136,6 +138,7 @@ if [ $phase = 1 ]; then
   echo "EXTRACT_DEPENDS=${ED}"
   echo "BUILD_DEPENDS=${BD}"
   echo "RUN_DEPENDS=${RD}"
+  echo "TEST_DEPENDS=${TD}"
 
   #Allow ports to notice they're being run in Tinderbox
   export PACKAGE_BUILDING=1
@@ -261,9 +264,17 @@ EOF
 
   echo "================================================================"
   echo "====================<phase 5: make test>===================="
+
+  pkg_info | awk '{print $1}' | sort > /tmp/pkgs_pre_test
+  add_pkg ${TD}
+  pkg_info | awk '{print $1}' | sort > /tmp/pkgs_post_test      
   cd $dir
   /pnohang $TIMEOUT /tmp/make.log5 ${pkgname} make -k regression-test
   cat /tmp/make.log5
+
+  RTD=`comm -3 /tmp/pkgs_pre_test /tmp/pkgs_post_test | tr -d '\t'`
+  del_pkg ${RTD}
+  rm /tmp/pkgs_pre_test /tmp/pkgs_post_test
 
   mtree -X /tmp/mtree.buildexclude -x -f /tmp/mtree.prebuild -p / | egrep -v "^(${L}/var|${L}/lib/X11/xserver/SecurityPolicy|${L}/share/nls/POSIX|${L}/share/nls/en_US.US-ASCII|etc/services|compat |${L} |etc/manpath.config|etc/.*.bak|${L}/info/dir|${L}/lib/X11/fonts/.*/fonts\.|${L}/man/..( |/man. )|${L}/lib/X11/fonts/TrueType|${L}/etc/gconf/gconf.xml.defaults/%gconf-tree.*.xml|usr/X11R6 )" > /tmp/list.preinstall
 

@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/MakeCache.pm,v 1.10 2006/06/27 18:13:16 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/MakeCache.pm,v 1.11 2011/09/25 00:03:57 marcus Exp $
 #
 
 package Tinderbox::MakeCache;
@@ -36,7 +36,7 @@ our @makeTargets = (
         'EXTRACT_DEPENDS', 'PATCH_DEPENDS',
         'FETCH_DEPENDS',   'BUILD_DEPENDS',
         'LIB_DEPENDS',     'RUN_DEPENDS',
-        'DEPENDS',         'MAINTAINER',
+        'TEST_DEPENDS',    'MAINTAINER',
         'COMMENT',         'PORTNAME',
         'DISTFILES',
 );
@@ -175,11 +175,11 @@ sub RunDepends {
         return $self->_getList($port, 'RUN_DEPENDS');
 }
 
-# Other dependencies
-sub Depends {
+# Test dependencies
+sub TestDepends {
         my $self = shift;
         my $port = shift;
-        return $self->_getList($port, 'DEPENDS');
+        return $self->_getList($port, 'TEST_DEPENDS');
 }
 
 # A close approximation to the 'ignore-list' target
@@ -201,7 +201,6 @@ sub FetchDependsList {
 
         my @deps;
         push(@deps, $self->FetchDepends($port));
-        push(@deps, $self->Depends($port));
 
         my %uniq;
         return grep { !$uniq{$_}++ } @deps;
@@ -213,7 +212,6 @@ sub ExtractDependsList {
 
         my @deps;
         push(@deps, $self->ExtractDepends($port));
-        push(@deps, $self->Depends($port));
 
         my %uniq;
         return grep { !$uniq{$_}++ } @deps;
@@ -225,7 +223,17 @@ sub PatchDependsList {
 
         my @deps;
         push(@deps, $self->PatchDepends($port));
-        push(@deps, $self->Depends($port));
+
+        my %uniq;
+        return grep { !$uniq{$_}++ } @deps;
+}
+
+sub TestDependsList {
+        my $self = shift;
+        my $port = shift;
+
+        my @deps;
+        push(@deps, $self->TestDepends($port));
 
         my %uniq;
         return grep { !$uniq{$_}++ } @deps;
@@ -242,7 +250,6 @@ sub BuildDependsList {
         push(@deps, $self->FetchDepends($port));
         push(@deps, $self->BuildDepends($port));
         push(@deps, $self->LibDepends($port));
-        push(@deps, $self->Depends($port));
 
         my %uniq;
         return grep { !$uniq{$_}++ } @deps;
@@ -256,7 +263,6 @@ sub RunDependsList {
         my @deps;
         push(@deps, $self->LibDepends($port));
         push(@deps, $self->RunDepends($port));
-        push(@deps, $self->Depends($port));
 
         my %uniq;
         return grep { !$uniq{$_}++ } @deps;
