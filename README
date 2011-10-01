@@ -47,6 +47,7 @@ Tinderbox User Guide
         8.8. Using Hooks
         8.9. Creating Users
         8.10. Automating/Queuing Port Builds
+        8.11. Running Tinderbox in a Jail
 
    List of Tables
    5-1. configlog Options
@@ -206,7 +207,7 @@ nfs_reserved_port_only="YES"
        Hint: It is recommended that the Jail begin with the
        FreeBSD major.minor version (i.e. "8.2-FreeBSD" instead of
        just "8-FreeBSD") as this may prove useful when using
-       things such as Hooks.
+       things such as Hooks (Section 8.8).
    13. Create the required PortsTrees using the tc command. A
        PortsTree is a set of ports you wish to build. A PortsTree
        does not have to be a complete FreeBSD ports tree. However,
@@ -236,6 +237,15 @@ nfs_reserved_port_only="YES"
 # cd ${pb}/scripts && ./tc createJail -j 8-STABLE \
         -d "FreeBSD 8-STABLE" -t RELENG_8 -u CVSUP -C \
         -H cvsup2.freebsd.org
+
+   TIP: It is possible to suppress spurious setuid warnings from
+   periodic if ${pb} is on a dedicated partition. Simply add the
+   nosuid flag to the partition; for UFS in /etc/fstab:
+/dev/ad5s1f     /usr/local/tinderbox    ufs     rw,nosuid       1
+1
+
+   and for ZFS:
+# zfs set setuid=off $(zfs list ${pb} | tail -n 1 | cut -d ' ' -f 1)
      __________________________________________________________
 
 Chapter 4. Upgrading
@@ -340,7 +350,7 @@ Chapter 5. Using Tinderbox
   -init           updates the Jail then updates the Build
   -nullfs         uses nullfs instead of NFS to mount Jail and PortsTree
                   file systems
-  -cleanpackages  removes all packages already built for the
+  -cleanpackages  removes all packages already built fors the
                   specified Build
   -updateports    updates the Build's PortsTree (NOTE: dangerous if
                   doing parallel runs with the same PortsTree)
@@ -357,8 +367,6 @@ Chapter 5. Using Tinderbox
   -fetch-original ignores the distfile cache, and fetches all
                   distfiles from their respective sources
   -nolog          disables log analysis code
-  -trybroken      builds ports marked as BROKEN (this does NOT require
-                  -noduds)
   -onceonly       only performs one build pass (i.e. tinderbuild Phase
                   1)
   -norebuild      do not force a rebuild of packages specified on the
@@ -408,6 +416,20 @@ Chapter 6. Maintenance
    -P (optional) do NOT copy ports
    -p (optional) copy packages (including last build status,
       version, and size)
+
+   To remove a Build, use the tc application with the rmBuild
+   command, followed by removal of all directories created for the
+   build:
+# cd ${pb}/scripts && ./tc rmBuild -b {BUILD}
+# for dir in "" builds errors logs options packages ; \
+        do rm -r ${pb}/$dir/{BUILD} ; done
+
+   After a Build has been removed, you may also wish to remove the
+   PortsTree and Jail:
+# cd ${pb}/scripts && ./tc rmPortsTree -p {PORTSTREE}
+# rm -r ${pb}/portstrees/{PORTSTREE}
+# cd ${pb}/scripts && ./tc rmJail -j {JAIL}
+# rm -r ${pb}/jail/{JAIL}
 
    Over time, Builds may become cluttered with old log files and
    packages. To cleanup old, unreferenced, files, use the
@@ -530,20 +552,21 @@ Chapter 8. Advanced Topics
 8.3. Distfile Caching
 
    Caching distfiles in a local repository can greatly improve
-   build times. As long as there is sufficient disk space,
-   enabling a local (or NFS) distfile cache is easy. Just use the
-   following command:
-# ./tc configDistfile -c {mount point}
-
-   Where {mount point} is either an NFS specification, or fully
-   qualified path (in the case of nullfs) in which to store
-   downloaded distfiles. For example:
+   build times, and in cases where downloading a particular port
+   is only necessary for a new build, can reduce bandwidth. As
+   long as there is sufficient disk space, enabling a local
+   distfile cache can be accomplished by one of the following
+   commands:
 
    NFS:
-# ./tc configDistfile -c localhost:${pb}/distfiles
+# ./tc configDistfile -c localhost:${distfiles}
 
    nullfs:
-# ./tc configDistfile -c ${pb}/distfiles
+# ./tc configDistfile -c ${distfiles}
+
+   Where ${distfiles} is either an NFS mount point or, if using
+   nullfs, a fully qualified path where distfiles should be
+   stored.
      __________________________________________________________
 
 8.4. Using Ccache
@@ -666,13 +689,18 @@ WITH_PCRE=true
 # ./tc updateHookCmd -h {hook} -c {command}
 
    To disable a Hook:
-# ./tc updateHookCmd -h {hook} -c
+# ./tc updateHookCmd -h {hook} -c ""
 
-   (note: do not specify a command after the -c option).
+   (note: The null string after the -c option disables the Hook).
 
    There is no way to add new Hooks dynamically. However, if you
    have an idea for a new Hook, please contact
    tinderbox-list@marcuscom.com.
+
+   An example use for a Hook could be to restrict the number of
+   CPUs used when building:
+# ./tc updateHookCmd -h postJailExtract -c 'echo MAKE_JOBS_NUMBER=2 >> $
+{DESTDIR}/etc/make.conf'
      __________________________________________________________
 
 8.9. Creating Users
@@ -730,7 +758,9 @@ WITH_PCRE=true
    If you want to run tinderd automatically when the system boots,
    copy the included ${pb}/etc/rc.d/tinderd script to
    /usr/local/etc/rc.d/. Be sure to check out the various rc.conf
-   variables documented in this script before using it.
+   variables documented in this script before using it. If you
+   installed Tinderbox using the port then the script will have
+   been installed for you as tinderbox.
 
    NOTE: the script used to be called tinderd.sh. If you have a
    /usr/local/etc/rc.d/tinderd.sh script, delete it, then copy the
@@ -750,3 +780,37 @@ WITH_PCRE=true
    If the addBuildPortsQueueEntry command is run without the -d
    argument, then all ports for the specified {BUILD} will be
    added to the queue.
+     __________________________________________________________
+
+8.11. Running Tinderbox in a Jail
+
+   Tinderbox can be run in a FreeBSD jail with some concessions.
+
+   Since neither NFS nor nullfs (at the time of writing) are
+   usable in a jail, we cannot simply install and use as normal.
+   Instead, we simply use a chroot.
+    1. Create a jail for your Tinderbox using the instructions in
+       the FreeBSD Handbook.
+    2. Install dependencies into the jail (Chapter 2).
+    3. Install Tinderbox (in the jail):
+# mkdir ${pb}
+# cd ${pb} && \
+        fetch -o - path_to_tinderbox-x.x.tar.gz | \
+        tar xvzf -
+    4. Now we need to leave the jail, and on the host system
+       chroot into it:
+# chroot ${jail_dir} /bin/csh
+       Now follow from step 3 in Chapter 3.
+    5. Copy ${jail_dir}/${pb}/scripts/etc/rc.d/tinderd to
+       /usr/local/etc/rc.d/
+    6. Add the following lines to /etc/rc.conf (again, in the host
+       system):
+tinderd_enable= "YES"
+tinderd_chroot= "${jail_dir}"
+tinderd_directory=    "${pb}"
+tinderd_flags=  "-nullfs"
+    7. Install a web server of your choice in the jail, and follow
+       the webserver setup.
+
+   All administration and use of the Tinderbox must now be done
+   from the host system, by using chroot into ${jail_dir}.
