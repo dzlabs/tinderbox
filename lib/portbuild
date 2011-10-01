@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.138 2011/09/25 00:03:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.139 2011/10/01 04:39:01 marcus Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -330,7 +330,6 @@ while [ $# -gt 0 ]; do
 
     shift
 done
-
 
 execute_hook "prePortChecksum" "PACKAGE_NAME=${pkgname} BUILD=${build} JAIL=${jail} PORTSTREE=${portstree} CHROOT=${chroot} PORTDIR=${portdir} PB=${pb} TOTAL_SIZE=${total_size}"
 if [ $? -ne 0 ]; then
