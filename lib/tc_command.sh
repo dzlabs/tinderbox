@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.141 2011/09/30 10:11:02 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.142 2011/10/01 18:08:29 ade Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -607,7 +607,7 @@ updateJail () {
     fi
 
     updateCmd=$($(tinderLoc scripts tc) getUpdateCmd -j ${jailName})
-    jailArch=$($(tinderLoc scripts tc) getJailArch -j ${jailArch})
+    jailArch=$($(tinderLoc scripts tc) getJailArch -j ${jailName})
 
     execute_hook "preJailUpdate" "JAIL=${jailName} UPDATE_CMD=${updateCmd} PB=${pb} JAIL_ARCH=${jailArch}"
     if [ $? -ne 0 ]; then
