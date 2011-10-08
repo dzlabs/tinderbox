@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.142 2011/10/01 18:08:29 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.143 2011/10/08 21:07:21 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -96,6 +96,9 @@ generateUpdateCode () {
 		  echo "cd ${treeDir}/sets"
 		  echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror base\""
 		  echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror dict\""
+		  if [ "${updateArch}" = "amd64" ]; then
+		      echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror lib32\""
+		  fi
 		  echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror proflibs\""
 		  echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror src\""
 		  echo "cd src"
@@ -742,6 +745,10 @@ buildJail () {
 	export DESTDIR=${J_TMPDIR}
 	cd ${jailBase}/sets/base && yes | sh ./install.sh > ${jailBase}/world.tmp 2>&1
 	rc=$?
+	if [ ${rc} -eq 0 -a -d "${jailBase}/sets/lib32" ]; then
+	    cd ${jailBase}/sets/lib32 && yes | sh ./install.sh >> ${jailBase}/world.tmp 2>&1
+	    rc=$?
+	fi
 	execute_hook "postJailBuild" "JAIL=${jailName} DESTDIR=${J_TMPDIR} JAIL_ARCH=${jailArch} MY_ARCH=${myArch} JAIL_OBJDIR=${JAIL_OBJDIR} SRCBASE=${SRCBASE} PB=${pb} RC=${rc}"
 	if [ ${rc} -ne 0 ]; then
 	    echo "ERROR: world failed - see ${jailBase}/world.tmp"
