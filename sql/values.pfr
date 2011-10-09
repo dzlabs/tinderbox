@@ -56,3 +56,10 @@ INSERT INTO port_fail_reasons VALUES ('???', 'The automated script cannot even g
 INSERT INTO port_fail_reasons VALUES ('hook', 'A pre-condition hook failed to execute successfully', 'RARE');
 INSERT INTO port_fail_reasons VALUES ('f77', 'The Fortran 77 compiler is no longer installed in the base OS.  This port requires USE_FORTRAN.', 'COMMON');
 INSERT INTO port_fail_reasons VALUES ('nested_declaration', 'A function is used before its prototype is defined; or a function is inlined incorrectly.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('termios', 'This port needs to catch up with the termios.h changes in src.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('utmp_x', 'This port needs to catch up with the utmp_x.h changes in src.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('dirent', 'The port has not caught up with the change to scandir(3) as committed in FreeBSD version 800501.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('clang', 'Your code does not run with the the experimental clang compiler.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('assumes_gcc', 'This port does not install with the the experimental clang compiler due to hardwired assumptions about gcc being the compiler.', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('clang-bug', 'You have tickled a bug in clang itself.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('gmake', 'Your code does not run with the latest, incompatible, gmake version (3.82.)', 'COMMON');
