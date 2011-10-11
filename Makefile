@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.71 2011/10/11 15:46:58 beat Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.72 2011/10/11 15:52:53 beat Exp $
 
 VERSION=	3.0.0
 
@@ -36,7 +36,7 @@ WEBUITDDATA=	config.tpl current_buildports.tpl describe_port.tpl \
 		please_login.tpl rss.tpl tinderstyle.css tinderstyle.js \
 		user_admin.tpl user_permissions.tpl user_properties.tpl
 WEBUITpaefchenDATA=config.tpl current_buildports.tpl describe_port.tpl \
-		  list_tinderd_queue.tpl display_login.tpl \
+		  display_build_groups.tpl display_login.tpl \
 		  display_markup_log.tpl failed_buildports.tpl \
 		  footer.inc.tpl header.inc.tpl latest_buildports.tpl \
 		  list_buildports.tpl list_builds.tpl list_failure_reasons.tpl \
