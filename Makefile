@@ -1,4 +1,4 @@
-# $MCom: portstools/tinderbox/Makefile,v 1.70 2009/10/17 19:56:39 marcus Exp $
+# $MCom: portstools/tinderbox/Makefile,v 1.71 2011/10/11 15:46:58 beat Exp $
 
 VERSION=	3.0.0
 
@@ -19,22 +19,25 @@ MIGDATA=	build_ports.map build_ports_queue.map builds.map config.map \
 MAN1DATA=	tc-configCcache.1 tc-configDistfile.1 tc-configGet.1 \
 		tc-configJail.1 tc-configTinderd.1 tc-init.1
 WEBUIDATA=	favicon.ico inc_ds.php.dist inc_tinderbox.php.dist index.php
-WEBUICDATA=	Build.php BuildPortsQueue.php Config.php Jail.php \
-		LogfilePattern.php Port.php PortFailPattern.php \
-		PortFailReason.php PortsTree.php TinderObject.php TinderboxDS.php \
-		User.php functions.php
-WEBUIMDATA=	module.php moduleBuildPorts.php moduleBuilds.php \
-		moduleConfig.php moduleLogs.php modulePortFailureReasons.php \
-		modulePorts.php moduleRss.php moduleSession.php \
-		moduleTinderd.php moduleUsers.php
+WEBUICDATA=	Build.php BuildGroups.php BuildPortsQueue.php Config.php \
+		Hooks.php Jail.php LogfilePattern.php Port.php \
+		PortFailPattern.php PortFailReason.php PortsTree.php \
+		TinderObject.php TinderboxDS.php User.php functions.php
+WEBUIMDATA=	module.php moduleBuildGroups.php moduleBuildPorts.php \
+		moduleBuilds.php moduleConfig.php moduleLogs.php \
+		modulePortFailureReasons.php modulePorts.php \
+		moduleRss.php moduleSession.php moduleTinderd.php \
+		moduleUsers.php
 WEBUITDDATA=	config.tpl current_buildports.tpl describe_port.tpl \
-		display_login.tpl display_markup_log.tpl failed_buildports.tpl \
+		display_build_groups.tpl display_login.tpl \
+		display_markup_log.tpl failed_buildports.tpl \
 		latest_buildports.tpl list_buildports.tpl list_builds.tpl \
 		list_failure_reasons.tpl list_tinderd_queue.tpl messages.inc \
 		please_login.tpl rss.tpl tinderstyle.css tinderstyle.js \
 		user_admin.tpl user_permissions.tpl user_properties.tpl
 WEBUITpaefchenDATA=config.tpl current_buildports.tpl describe_port.tpl \
-		  display_login.tpl display_markup_log.tpl failed_buildports.tpl \
+		  list_tinderd_queue.tpl display_login.tpl \
+		  display_markup_log.tpl failed_buildports.tpl \
 		  footer.inc.tpl header.inc.tpl latest_buildports.tpl \
 		  list_buildports.tpl list_builds.tpl list_failure_reasons.tpl \
 		  list_tinderd_queue.tpl messages.inc please_login.tpl \
