@@ -149,8 +149,10 @@ include 'header.inc.tpl';
 						<input type="hidden" name="action" value="failed_buildports" />
 						<select name="maintainer">
 							<option></option>
-							<?php foreach($maintainers as $maintainer) {?>
-								<option><?php echo $maintainer?></option>
+							<?php if ( !is_null( $maintainers ) ) {?>
+								<?php foreach($maintainers as $maintainer) {?>
+									<option><?php echo $maintainer?></option>
+								<?php }?>
 							<?php }?>
 						</select>
 						<input type="submit" name="Go" value="Go" />
@@ -161,8 +163,10 @@ include 'header.inc.tpl';
 						<input type="hidden" name="action" value="latest_buildports_rss" />
 						<select name="maintainer">
 							<option></option>
-							<?php foreach($maintainers as $maintainer) {?>
-								<option><?php echo $maintainer?></option>
+							<?php if ( !is_null( $maintainers ) ) {?>
+								<?php foreach($maintainers as $maintainer) {?>
+									<option><?php echo $maintainer?></option>
+								<?php }?>
 							<?php }?>
 						</select>
 						<input type="submit" name="Go" value="Go" />
