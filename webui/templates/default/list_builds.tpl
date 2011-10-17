@@ -13,7 +13,7 @@ $legend = array(
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/list_builds.tpl,v 1.19 2010/10/12 19:54:33 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/list_builds.tpl,v 1.20 2011/10/17 06:46:08 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 <link rel="alternate" type="application/rss+xml" title="<?php echo $tinderbox_name?> (RSS)" href="index.php?action=latest_buildports_rss" />
@@ -135,8 +135,10 @@ $legend = array(
 <input type="hidden" name="action" value="failed_buildports" />
 All Build Failures for the maintainer <select name="maintainer">
 	<option></option>
-<?php foreach($maintainers as $maintainer) {?>
-	<option><?php echo $maintainer?></option>
+<?php if ( !is_null( $maintainers ) ) {?>
+	<?php foreach($maintainers as $maintainer) {?>
+		<option><?php echo $maintainer?></option>
+	<?php }?>
 <?php }?>
 </select>
 <input type="submit" name="Go" value="Go" />
@@ -147,8 +149,10 @@ All Build Failures for the maintainer <select name="maintainer">
 Find ports by name
 <input type="hidden" name="action" value="list_buildports" />
 <select name="build">
-<?php foreach($data as $row) {?>
-	<option value="<?php echo $row['name']?>"><?php echo $row['name']?></option>
+<?php if ( !empty( $data ) ) {?>
+	<?php foreach($data as $row) {?>
+		<option value="<?php echo $row['name']?>"><?php echo $row['name']?></option>
+	<?php }?>
 <?php }?>
 </select>
 <input type="text" name="search_port_name" value="<?php if(isset($search_port_name))echo $search_port_name?>" />
@@ -161,8 +165,10 @@ RSS feed for the maintainer
 <input type="hidden" name="action" value="latest_buildports_rss" />
 <select name="maintainer">
 <option></option>
-<?php foreach($maintainers as $maintainer) {?>
-	<option><?php echo $maintainer?></option>
+<?php if ( !is_null( $maintainers ) ) {?>
+	<?php foreach($maintainers as $maintainer) {?>
+		<option><?php echo $maintainer?></option>
+	<?php }?>
 <?php }?>
 </select>
 <input type="submit" name="Go" value="Go" />
