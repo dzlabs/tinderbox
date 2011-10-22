@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.98 2010/05/08 18:23:36 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.99 2011/10/22 07:59:47 marcus Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -1646,6 +1646,13 @@ sub removeBuild {
         }
 
         $rc = $self->_doQuery("DELETE FROM build_users WHERE build_id=?",
+                [$build->getId()]);
+
+        if (!$rc) {
+                return $rc;
+        }
+
+        $rc = $self->_doQuery("DELETE FROM build_ports_queue WHERE build_id=?",
                 [$build->getId()]);
 
         if (!$rc) {
