@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.143 2011/10/08 21:07:21 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.144 2011/10/23 15:22:21 beat Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -156,6 +156,52 @@ generateUpdateCode () {
 
 		( echo "#!/bin/sh"
 		  echo "${updateCmd} ${treeDir}/supfile"
+		) > ${treeDir}/update.sh
+		chmod +x ${treeDir}/update.sh
+		;;
+    "SVN")
+    		if [ -z "${8}" ]; then
+		    echo "ERROR: ${1} ${2}: no protocol specified for ${3}"
+		    exit 1
+		fi
+
+    		if [ -z "${9}" ]; then
+		    echo "ERROR: ${1} ${2}: no host directory specified for ${3}"
+		    exit 1
+		fi
+
+		updateCmd="/usr/local/bin/svn"
+
+		if [ ! -x "${updateCmd}" ]; then
+		    echo "ERROR: ${2} ${3}: ${updateCmd} missing"
+		    exit 1
+		fi
+
+		if [ -d ${treeDir} ]; then
+		    echo "${2}: cleaning out old directories"
+		    cleanDirs ${2} ${treeDir}
+		fi
+
+		if [ ! -d ${treeDir} ]; then
+		    echo "${2}: creating top-level directory"
+		    mkdir -p ${treeDir} >/dev/null 2>&1
+		fi
+
+		case ${1} in
+		"jail")		treeSubDir="src"
+		;;
+		"portstree")	treeSubDir="ports"
+		;;
+		esac
+
+		( echo "#!/bin/sh"
+		  echo "cd ${treeDir}"
+		  echo "if [ ! -d ${treeDir}/${treeSubDir} ]; then"
+		  echo "${updateCmd} co ${8}://${4}/${9} ${treeSubDir}"
+		  echo "else"
+		  echo "cd ${treeDir}/${treeSubDir}"
+		  echo "${updateCmd} up"
+		  echo "fi"
 		) > ${treeDir}/update.sh
 		chmod +x ${treeDir}/update.sh
 		;;
@@ -881,13 +927,15 @@ createJail () {
     jailArch=$(uname -m)
     mountSrc=""
     init=1
+    protocol=""
+    updateHostDirectory=""
 
     setupDefaults
     updateHost=${defaultUpdateHost}
     updateType=${defaultUpdateType}
 
     # argument handling
-    while getopts a:d:j:m:t:u:CH:I arg >/dev/null 2>&1
+    while getopts a:d:j:m:t:u:CD:H:IP: arg >/dev/null 2>&1
     do
 	case "${arg}" in
 
@@ -898,8 +946,10 @@ createJail () {
 	t)	updateTag="${OPTARG}";;
 	u)	updateType="${OPTARG}";;
 	C)	updateCompress=1;;
+	D)	updateHostDirectory="${OPTARG}";;
 	H)	updateHost="${OPTARG}";;
 	I)	init=0;;
+	P)	protocol="${OPTARG}";;
 	?)	return 1;;
 
 	esac
@@ -929,7 +979,8 @@ createJail () {
 
     echo "${jailName}: initializing tree"
     generateUpdateCode jail ${jailName} ${updateType} ${updateHost} \
-		       ${updateTag} ${updateCompress} ${jailArch}
+		       ${updateTag} ${updateCompress} ${jailArch} \
+		       ${protocol} ${updateHostDirectory}
 
     echo -n "${jailName}: adding to datastore... "
 
@@ -1040,13 +1091,15 @@ createPortsTree () {
     init=1
     mountSrc=""
     portsTreeName=""
+    protocol=""
+    updateHostDirectory=""
 
     setupDefaults
     updateHost=${defaultUpdateHost}
     updateType=${defaultUpdateType}
 
     # argument handling
-    while getopts d:m:p:u:w:CH:I arg >/dev/null 2>&1
+    while getopts d:m:p:u:w:CD:H:IP: arg >/dev/null 2>&1
     do
 	case "${arg}" in
 
@@ -1056,8 +1109,10 @@ createPortsTree () {
 	u)	updateType="${OPTARG}";;
 	w)	cvswebUrl="${OPTARG}";;
 	C)	updateCompress=1;;
+	D)	updateHostDirectory="${OPTARG}";;
 	H)	updateHost="${OPTARG}";;
 	I)	init=0;;
+	P)	protocol="${OPTARG}";;
 	?)	return 1;;
 
 	esac
@@ -1081,7 +1136,8 @@ createPortsTree () {
 
     echo "${portsTreeName}: initializing tree"
     generateUpdateCode portstree ${portsTreeName} ${updateType} \
-		       ${updateHost} "." ${updateCompress}
+		       ${updateHost} "." ${updateCompress} "" \
+		       ${protocol} ${updateHostDirectory}
 
     # add portstree to datastore
     echo -n "${portsTreeName}: adding to datastore... "

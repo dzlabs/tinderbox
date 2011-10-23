@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.175 2011/09/25 00:03:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.176 2011/10/23 15:22:21 beat Exp $
 #
 
 my $pb;
@@ -188,14 +188,14 @@ my $ds = new Tinderbox::TinderboxDS();
                 help =>
                     "Add a jail to the datastore (do NOT call this directly; use createJail instead)",
                 usage =>
-                    "-j <jail name> -u CSUP|CVSUP|LFTP|USER|NONE -t <jail tag> [-d <jail description>] [-m <src mount source>] [-a <arch>]",
+                    "-j <jail name> -u CSUP|CVSUP|LFTP|SVN|USER|NONE -t <jail tag> [-d <jail description>] [-m <src mount source>] [-a <arch>]",
                 optstr => 'm:j:t:u:d:a:',
         },
         "addPortsTree" => {
                 func => \&addPortsTree,
                 help => "Add a portstree to the datastore",
                 usage =>
-                    "-p <portstree name> -u CSUP|CVSUP|USER|NONE [-d <portstree description>] [-m <ports mount source>] [-w <CVSweb URL>]",
+                    "-p <portstree name> -u CSUP|CVSUP|SVN|USER|NONE [-d <portstree description>] [-m <ports mount source>] [-w <CVSweb URL>]",
                 optstr => 'm:p:u:d:w:',
         },
         "addPort" => {
@@ -560,15 +560,15 @@ my $ds = new Tinderbox::TinderboxDS();
         "createJail" => {
                 help => "Create a new jail",
                 usage =>
-                    "-j <jailname> -u CSUP|CVSUP|LFTP|USER|NONE [-t <tag>] [-d <description>] [-C] [-H <updatehost>] [-m <mountsrc>] [-I] [-a <arch>]",
-                optstr => 'j:t:d:CH:m:u:Ia:',
+                    "-j <jailname> -u CSUP|CVSUP|LFTP|SVN|USER|NONE [-t <tag>] [-d <description>] [-C] [-P <protocol>] [-H <updatehost>] [-D <updatehostdirectory>] [-m <mountsrc>] [-I] [-a <arch>]",
+                optstr => 'j:t:d:CP:H:D:m:u:Ia:',
         },
 
         "createPortsTree" => {
                 help => "Create a new portstree",
                 usage =>
-                    "-p <portstreename> -u CSUP|CVSUP|USER|NONE [-d <description>] [-C] [-H <updatehost>] [-m <mountsrc>] [-w <cvsweburl>] [-I]",
-                optstr => 'p:d:CH:Im:u:w:',
+                    "-p <portstreename> -u CSUP|CVSUP|SVN|USER|NONE [-d <description>] [-C] [-P <protocol>] [-H <updatehost>] [-D <updatehostdirectory>] [-m <mountsrc>] [-w <cvsweburl>] [-I]",
+                optstr => 'p:d:CP:H:Im:u:w:',
         },
 
         "createBuild" => {
