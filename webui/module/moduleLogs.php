@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.9 2010/05/08 22:59:59 marcus Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.10 2011/10/26 08:39:35 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -119,6 +119,7 @@ class moduleLogs extends module {
 			if ( ! $is_compressed ) {
 				$line = fgets( $fh );
 			} else {
+				$line = '';
 				while( ! feof( $fh ) ) {
 					$b = bzread( $fh, 1 );
 					if ( $b === FALSE ) break;
