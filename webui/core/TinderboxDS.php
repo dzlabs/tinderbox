@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.57 2011/11/01 10:33:53 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.58 2011/11/01 10:54:41 beat Exp $
 #
 
 require_once 'MDB2.php';
@@ -735,8 +735,8 @@ class TinderboxDS {
 		return $results[0];
 	}
 
-		function getUserById( $id ) {
-			$results = $this->getUsers( array( 'user_id' => $id ) );
+	function getUserById( $id ) {
+		$results = $this->getUsers( array( 'user_id' => $id ) );
 
 		if ( is_null( $results ) ) {
 			return null;
