@@ -1,5 +1,5 @@
 <!-- $Paefchen: FreeBSD/tinderbox/webui/templates/paefchen/display_login.tpl,v 1.3 2008/01/07 04:16:24 as Exp $ //-->
-<!-- user_name:<?php echo isset($user_name)?$user_name:'' ?>;user_id:<?php echo isset($user_id)?>;is_www_admin:<?php echo isset($is_www_admin)?$is_www_admin:''?> //-->
+<!-- user_name:<?php echo isset($user_name)?$user_name:'' ?>;user_id:<?php echo isset($user_id)?$user_id:''?>;is_www_admin:<?php echo isset($is_www_admin)?$is_www_admin:''?> //-->
 <?php if (empty($user_name)) { ?>
 	<form method="post" action="index.php">
 		<fieldset>
