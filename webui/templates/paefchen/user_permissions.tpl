@@ -25,12 +25,36 @@
 		<?php foreach($all_builds as $build) {?>
 		<tr>		
 			<td><?php echo $build['build_name']?></td>
-			<td align="center"><?php if($permission_object[$build['build_id']]['PERM_ADD_QUEUE']){?>X<?php }?></td>
-			<td align="center"><?php if($permission_object[$build['build_id']]['PERM_MODIFY_OWN_QUEUE']){?>X<?php }?></td>
-			<td align="center"><?php if($permission_object[$build['build_id']]['PERM_DELETE_OWN_QUEUE']){?>X<?php }?></td>
-			<td align="center"><?php if($permission_object[$build['build_id']]['PERM_MODIFY_OTHER_QUEUE']){?>X<?php }?></td>
-			<td align="center"><?php if($permission_object[$build['build_id']]['PERM_DELETE_OTHER_QUEUE']){?>X<?php }?></td>
-			<td align="center"><?php if($permission_object[$build['build_id']]['PERM_PRIO_LOWER_5']){?>X<?php }?></td>
+			<?php if(isset($permission_object[$build['build_id']]['PERM_ADD_QUEUE'])){?>
+				<td align="center"><?php if($permission_object[$build['build_id']]['PERM_ADD_QUEUE']){?>X<?php }?></td>
+			<?php }else{?>
+				<td align="center">&nbsp;</td>
+			<?php }?>
+			<?php if(isset($permission_object[$build['build_id']]['PERM_MODIFY_OWN_QUEUE'])){?>
+				<td align="center"><?php if($permission_object[$build['build_id']]['PERM_MODIFY_OWN_QUEUE']){?>X<?php }?></td>
+			<?php }else{?>
+				<td align="center">&nbsp;</td>
+			<?php }?>
+			<?php if(isset($permission_object[$build['build_id']]['PERM_DELETE_OWN_QUEUE'])){?>
+				<td align="center"><?php if($permission_object[$build['build_id']]['PERM_DELETE_OWN_QUEUE']){?>X<?php }?></td>
+			<?php }else{?>
+				<td align="center">&nbsp;</td>
+			<?php }?>
+			<?php if(isset($permission_object[$build['build_id']]['PERM_MODIFY_OTHER_QUEUE'])){?>
+				<td align="center"><?php if($permission_object[$build['build_id']]['PERM_MODIFY_OTHER_QUEUE']){?>X<?php }?></td>
+			<?php }else{?>
+				<td align="center">&nbsp;</td>
+			<?php }?>
+			<?php if(isset($permission_object[$build['build_id']]['PERM_DELETE_OTHER_QUEUE'])){?>
+				<td align="center"><?php if($permission_object[$build['build_id']]['PERM_DELETE_OTHER_QUEUE']){?>X<?php }?></td>
+			<?php }else{?>
+				<td align="center">&nbsp;</td>
+			<?php }?>
+			<?php if(isset($permission_object[$build['build_id']]['PERM_PRIO_LOWER_5'])){?>
+				<td align="center"><?php if($permission_object[$build['build_id']]['PERM_PRIO_LOWER_5']){?>X<?php }?></td>
+			<?php }else{?>
+				<td align="center">&nbsp;</td>
+			<?php }?>
 		</tr>
 		<?php }?>
 	<?php }?>
