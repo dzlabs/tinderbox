@@ -120,23 +120,31 @@ include 'header.inc.tpl';
 			<input type="hidden" name="filter_build_id" value="<?php echo $build_id?>" />
 			<tr>
 				<td>
-					<?php if($is_logged_in && $row['modify'] == 1){?>
-						<select name="build_id">
-							<?php foreach($all_builds as $build) {?>
-								<option value="<?php echo $build['build_id']?>" <?php if ($row['build'] == $build['build_name']) {?>selected<?php }?> ><?php echo $build['build_name']?></option>
-							<?php }?>
-						</select>
+					<?php if(isset($row['modify'])){?>
+						<?php if($is_logged_in && $row['modify'] == 1){?>
+							<select name="build_id">
+								<?php foreach($all_builds as $build) {?>
+									<option value="<?php echo $build['build_id']?>" <?php if ($row['build'] == $build['build_name']) {?>selected<?php }?> ><?php echo $build['build_name']?></option>
+								<?php }?>
+							</select>
+						<?php }else{?>
+							<?php echo $row['build']?>
+						<?php }?>
 					<?php }else{?>
 						<?php echo $row['build']?>
 					<?php }?>
 				</td>
 				<td>
-					<?php if($is_logged_in && $row['modify'] == 1){?>
-						<select name="priority">
-							<?php foreach($row['all_prio'] as $prio) {?>
-								<option value="<?php echo $prio?>" <?php if ($row['priority'] == $prio) {?>selected<?php }?> ><?php echo $prio?></option>
-							<?php }?>
-						</select>
+					<?php if(isset($row['modify'])){?>
+						<?php if($is_logged_in && $row['modify'] == 1){?>
+							<select name="priority">
+								<?php foreach($row['all_prio'] as $prio) {?>
+									<option value="<?php echo $prio?>" <?php if ($row['priority'] == $prio) {?>selected<?php }?> ><?php echo $prio?></option>
+								<?php }?>
+							</select>
+						<?php }else{?>
+							<?php echo $row['priority']?>
+						<?php }?>
 					<?php }else{?>
 						<?php echo $row['priority']?>
 					<?php }?>
@@ -146,25 +154,35 @@ include 'header.inc.tpl';
 				<td class="<?php echo $row['status_field_class']?>">&nbsp;</td>
 <?php if($is_logged_in) {?>
 				<td align="center">
-					<?php if($row['modify'] == 1){?>
-						<input type="checkbox" name="email_on_completion" value="1" <?php if($row['email_on_completion'] == 1 ) {?>checked="checked"<?php }?> />
+					<?php if(isset($row['modify'])){?>
+						<?php if($row['modify'] == 1){?>
+							<input type="checkbox" name="email_on_completion" value="1" <?php if($row['email_on_completion'] == 1 ) {?>checked="checked"<?php }?> />
+						<?php }else{?>
+							<?php if($row['email_on_completion'] == 1 ) {?>X<?php }?>
+						<?php }?>
 					<?php }else{?>
 						<?php if($row['email_on_completion'] == 1 ) {?>X"<?php }?>
 					<?php }?>
 				</td>
 				<td>
-					<?php if($row['modify'] == 1){?>
-						<input type="submit" name="change_tinderd_queue" value="save" />
+					<?php if(isset($row['modify'])){?>
+						<?php if($row['modify'] == 1){?>
+							<input type="submit" name="change_tinderd_queue" value="save" />
+						<?php }?>
 					<?php }?>
 				</td>
 				<td>
-					<?php if($row['delete'] == 1){?>
-						<input type="submit" name="change_tinderd_queue" value="delete" />
+					<?php if(isset($row['delete'])){?>
+						<?php if($row['delete'] == 1){?>
+							<input type="submit" name="change_tinderd_queue" value="delete" />
+						<?php }?>
 					<?php }?>
 				</td>
 				<td>
-					<?php if($row['modify'] == 1){?>
-						<input type="submit" name="change_tinderd_queue" value="reset status" />
+					<?php if(isset($row['modify'])){?>
+						<?php if($row['modify'] == 1){?>
+							<input type="submit" name="change_tinderd_queue" value="reset status" />
+						<?php }?>
 					<?php }?>
 				</td>
 <?php }?>
