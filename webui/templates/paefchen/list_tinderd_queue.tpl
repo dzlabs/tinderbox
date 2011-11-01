@@ -161,7 +161,7 @@ include 'header.inc.tpl';
 							<?php if($row['email_on_completion'] == 1 ) {?>X<?php }?>
 						<?php }?>
 					<?php }else{?>
-						<?php if($row['email_on_completion'] == 1 ) {?>X"<?php }?>
+						<?php if($row['email_on_completion'] == 1 ) {?>X<?php }?>
 					<?php }?>
 				</td>
 				<td>
