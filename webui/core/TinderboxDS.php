@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.58 2011/11/01 10:54:41 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.59 2011/11/01 11:07:48 beat Exp $
 #
 
 require_once 'MDB2.php';
@@ -207,7 +207,11 @@ class TinderboxDS {
 
 		$user = $this->_newFromArray( 'User', $results );
 
-		return $user[0];
+		if ( !empty ( $user[0] ) ) {
+			return $user[0];
+		} else {
+			return null;
+		}
 	}
 
 	function getUserPermissions( $user_id, $object_type, $object_id ) {
