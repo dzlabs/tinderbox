@@ -1,4 +1,4 @@
-INSERT INTO logfile_patterns VALUES ( 10, 'File not found', 'error', '/^(?!fetch).*No such file or directory/', 'Red' );
+INSERT INTO logfile_patterns VALUES ( 10, 'File not found', 'error', '/^(?!.*[f ][ec][to][cn][hf](?:test\*:)?).*No such file or directory/', 'Red' );
 INSERT INTO logfile_patterns VALUES ( 500, 'Declaration prototype', 'warning', '/warning: function declaration isn''t a prototype/', 'Violet' );
 INSERT INTO logfile_patterns VALUES ( 510, 'No prototype', 'warning', '/warning: no previous prototype for ''.*''/', 'Violet' );
 INSERT INTO logfile_patterns VALUES ( 520, 'Implicit function', 'warning', '/warning: implicit declaration of function ''.*''/', 'Magenta' );
