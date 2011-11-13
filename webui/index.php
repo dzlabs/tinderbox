@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/index.php,v 1.44 2011/11/01 10:33:53 beat Exp $
+# $MCom: portstools/tinderbox/webui/index.php,v 1.45 2011/11/13 20:11:15 beat Exp $
 #
 
 $starttimer = explode( ' ', microtime() );
@@ -187,7 +187,7 @@ switch( $action ) {
 					$entry_id   = $_REQUEST['entry_id'];
 					$build_id   = $_REQUEST['build_id'];
 					$priority   = $_REQUEST['priority'];
-					$emailoc    = isset ( $_REQUEST['new_email_on_completion'] ) ? $_REQUEST['new_email_on_completion'] : '';
+					$emailoc    = isset ( $_REQUEST['email_on_completion'] ) ? $_REQUEST['email_on_completion'] : '';
 					$moduleTinderd->change_tinderd_queue( $ctinderdq, $entry_id, $build_id, $priority, $emailoc );
 					$build_id   = $_REQUEST['filter_build_id'];
 					$display    = $moduleTinderd->list_tinderd_queue( $build_id );
