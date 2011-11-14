@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.59 2011/11/01 11:07:48 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.60 2011/11/14 06:52:00 beat Exp $
 #
 
 require_once 'MDB2.php';
@@ -425,7 +425,7 @@ class TinderboxDS {
 			$query .= " AND p.port_name LIKE '%" . $this->db->escape( $port_name, TRUE ) . "%'";
 		$query .= " ORDER BY " . $this->db->escape( $sortbytable ) . "." . $this->db->escape( $sortby );
 		if( $limit != 0 )
-			$query .= " LIMIT " . $this->db->escape( $limit_offset, TRUE ) . "," .  $this->db->escape( $limit, TRUE );
+			$query .= " LIMIT " . $this->db->escape( $limit, TRUE ) . " OFFSET " . $this->db->escape( $limit_offset, TRUE );
 
 		$rc = $this->_doQueryHashRef( $query, $results, $build->getId() );
 
@@ -540,7 +540,7 @@ class TinderboxDS {
 			$query .= "AND p.port_maintainer='" . $this->db->escape( $maintainer, TRUE ) . "' ";
 		$query .= " ORDER BY " . $this->db->escape( $sortbytable ) . "." . $this->db->escape( $sortby );
 		if( $limit != 0 )
-			$query .= " LIMIT " . $this->db->escape( $limit_offset ) . "," . $limit;
+			$query .= " LIMIT " . $this->db->escape( $limit, TRUE ) . " OFFSET " . $this->db->escape( $limit_offset, TRUE );
 
 		$rc = $this->_doQueryHashRef( $query, $results, array() );
 
