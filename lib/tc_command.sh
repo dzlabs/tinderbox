@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.144 2011/10/23 15:22:21 beat Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.145 2011/11/15 07:03:39 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -832,10 +832,10 @@ buildJail () {
         # determine if we're cross-building world
         crossEnv=""
         if [ "${jailArch}" != "${myArch}" ]; then
-	    crossEnv="TARGET_ARCH=${jailArch} MACHINE_ARCH=${jailArch} MAKEOBJDIRPREFIX=${J_OBJDIR}/${jailArch} MACHINE=${jailArch}"
+	    crossEnv="TARGET_ARCH=${jailArch}"
         fi
-        cd ${SRCBASE}/etc && env DESTDIR=${J_TMPDIR} ${crossEnv} \
-	    make -m ${J_TMPDIR}/usr/share/mk distribution > ${jailBase}/distribution.tmp 2>&1
+        cd ${SRCBASE} && env DESTDIR=${J_TMPDIR} ${crossEnv} \
+	    make distribution > ${jailBase}/distribution.tmp 2>&1
         if [ $? -ne 0 ]; then
 	    echo "ERROR: distribution failed - see ${jailBase}/distribution.tmp"
 	    buildJailCleanup 1 ${jailName} ${J_SRCDIR}
