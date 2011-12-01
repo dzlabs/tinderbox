@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.10 2011/10/26 08:39:35 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleLogs.php,v 1.11 2011/12/01 18:16:46 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -177,6 +177,9 @@ class moduleLogs extends module {
 			$elapsed_time = get_ui_elapsed_time( $starttimer );
 
 		$this->template_assign( 'ui_elapsed_time', $elapsed_time );
+
+		$load_average = get_load_average();
+		$this->template_assign( 'load_average', $load_average );
 
 		$mem_info = '';
 		if ( isset ( $with_meminfo ) && $with_meminfo == 1 ) {

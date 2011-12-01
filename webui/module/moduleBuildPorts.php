@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.30 2011/09/08 09:36:05 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/moduleBuildPorts.php,v 1.31 2011/12/01 18:16:46 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -123,6 +123,8 @@ class moduleBuildPorts extends module {
 			$elapsed_time = get_ui_elapsed_time( $starttimer );
 		}
 		$this->template_assign( 'ui_elapsed_time',        $elapsed_time );
+		$load_average = get_load_average();
+		$this->template_assign( 'load_average', $load_average );
 		$this->template_assign( 'querystring',            $qs );
 		$mem_info = '';
 		if ( isset ( $with_meminfo ) && $with_meminfo == 1 ) {
@@ -223,6 +225,8 @@ class moduleBuildPorts extends module {
 			$elapsed_time = get_ui_elapsed_time( $starttimer );
 		}
 		$this->template_assign( 'ui_elapsed_time',           $elapsed_time );
+		$load_average = get_load_average();
+		$this->template_assign( 'load_average', $load_average );
 		$this->template_assign( 'reason',                    $wanted_reason );
 		$this->template_assign( 'list_nr_prev',              $list_nr_prev );
 		$this->template_assign( 'list_nr_next',              $list_nr_next );
@@ -292,6 +296,8 @@ class moduleBuildPorts extends module {
 			$elapsed_time = get_ui_elapsed_time( $starttimer );
 		}
 		$this->template_assign( 'ui_elapsed_time',           $elapsed_time );
+		$load_average = get_load_average();
+		$this->template_assign( 'load_average', $load_average );
 		$mem_info = '';
 		if ( isset ( $with_meminfo ) && $with_meminfo == 1 ) {
 			$mempeak = memory_get_peak_usage();

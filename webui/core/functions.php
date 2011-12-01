@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/functions.php,v 1.10 2009/12/03 08:31:42 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/functions.php,v 1.11 2011/12/01 18:16:46 beat Exp $
 #
 
 function prettyDatetime( $input ) {
@@ -84,6 +84,11 @@ function get_mem_consumption ( $meminit, $mempeak, $memend ) {
 	$mempeak  = $mempeak / 1048576;
 	$memend   = $memend  / 1048576;
 	return sprintf( 'Initial: %04.2f MB, Peak: %04.2f MB, End: %04.2f MB', $meminit, $mempeak, $memend );
+}
+
+function get_load_average() {
+	$load_average = preg_replace(array('/{/','/}/'),'',`/sbin/sysctl -n vm.loadavg`);
+	return $load_average;
 }
 
 ?>

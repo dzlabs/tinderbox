@@ -13,6 +13,7 @@ if ( empty ( $ui_elapsed_time ) ) {
 				<li><a href="javascript:history.back()">back</a></li>
 				<li><a href="#top">top</a></li>
 				<li>Localtime: <?php echo date('Y-m-d H:i:s')?></li>
+				<li><?php if (isset($load_average)) echo "LA:", $load_average?></li>
 				<li><?php echo $ui_elapsed_time?></li>
 				<?php if (isset($mem_info)) { ?>
 					<li><?php echo $mem_info?></li>

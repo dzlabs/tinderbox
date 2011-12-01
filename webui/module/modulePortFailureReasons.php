@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/module/modulePortFailureReasons.php,v 1.8 2009/01/02 14:16:28 beat Exp $
+# $MCom: portstools/tinderbox/webui/module/modulePortFailureReasons.php,v 1.9 2011/12/01 18:16:46 beat Exp $
 #
 
 require_once 'module/module.php';
@@ -54,6 +54,8 @@ class modulePortFailureReasons extends module {
 			$elapsed_time = get_ui_elapsed_time( $starttimer );
 		}
 		$this->template_assign( 'ui_elapsed_time',           $elapsed_time );
+		$load_average = get_load_average();
+		$this->template_assign( 'load_average', $load_average );
 		$mem_info = '';
 		if ( isset ( $with_meminfo ) && $with_meminfo == 1 ) {
 			$mempeak = memory_get_peak_usage();

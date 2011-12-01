@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- $MCom: portstools/tinderbox/webui/templates/default/describe_port.tpl,v 1.11 2011/04/03 01:01:30 beat Exp $ //-->
+<!-- $MCom: portstools/tinderbox/webui/templates/default/describe_port.tpl,v 1.12 2011/12/01 18:16:46 beat Exp $ //-->
 <title><?php echo $tinderbox_name?></title>
 <link href="<?php echo $templatesuri?>/tinderstyle.css" rel="stylesheet" type="text/css" />
 </head>
@@ -71,6 +71,9 @@
 
 <p>Local time: <?php echo $local_time?></p>
 <p style="color:#FF0000;font-size:10px;"><?php echo $ui_elapsed_time?></p>
+<?php if(isset($load_average)){?>
+	<p style="color:#FF0000;font-size:10px;">LA: <?php echo $load_average?></p>
+<?php }?>
 <p style="color:#FF0000;font-size:10px;"><?php echo $mem_info?></p>
 <?php echo $display_login?>
 <p><a href="index.php">Back to homepage</a></p>
