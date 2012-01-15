@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # $FreeBSD$
-#   $MCom: portstools/tinderbox/etc/rc.d/tinderd,v 1.8 2011/05/23 15:04:45 marcus Exp $
+#   $MCom: portstools/tinderbox/etc/rc.d/tinderd,v 1.9 2012/01/15 08:30:10 crees Exp $
 #
 
 # PROVIDE: tinderd
@@ -16,7 +16,7 @@
 . /etc/rc.subr
 
 name="tinderd"
-rcvar=`set_rcvar`
+rcvar=tinderd_enable
 
 # read settings, set default values
 load_rc_config "${name}"
