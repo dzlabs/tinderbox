@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.145 2011/11/15 07:03:39 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.146 2012/01/16 04:43:00 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -76,6 +76,14 @@ generateUpdateCode () {
 		fi
 
 		updateCmd="/usr/local/bin/lftp"
+		fetchCmd="/usr/bin/fetch"
+		fetchSets="base src"
+		if [ "${updateArch}" = "amd64" ]; then
+		   fetchSets="${fetchSets} lib32"
+		fi
+		fetchSufx=".txz"
+		fetchUrl="ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}"
+
 
 		if [ ! -x "${updateCmd}" ]; then
 		    echo "ERROR: ${2} ${3}: ${updateCmd} missing"
@@ -91,22 +99,36 @@ generateUpdateCode () {
 		    mkdir -p ${treeDir} >/dev/null 2>&1
 		fi
 
-		( echo "#!/bin/sh"
-		  echo "mkdir -p ${treeDir}/sets"
-		  echo "cd ${treeDir}/sets"
-		  echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror base\""
-		  echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror dict\""
-		  if [ "${updateArch}" = "amd64" ]; then
-		      echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror lib32\""
-		  fi
-		  echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror proflibs\""
-		  echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror src\""
-		  echo "cd src"
-		  echo "sed -i \"\" 's|usr/src|src|' install.sh"
-		  echo "export DESTDIR=${treeDir}"
-		  echo "mkdir ${treeDir}/src"
-		  echo "yes | sh ./install.sh all"
-		) > ${treeDir}/update.sh
+		if [ "$(${fetchCmd} -s ${fetchUrl}/${fetchSets%% *}${fetchSufx})" != "Unknown" ]; then
+		  ( updateCmd="${fetchCmd}"
+		    echo "#!/bin/sh"
+		    echo "mkdir -p ${treeDir}/sets"
+		    echo "cd ${treeDir}/sets"
+		    for set in ${fetchSets}; do
+		        echo "${updateCmd} -r ${fetchUrl}/${set}${fetchSufx}"
+		    done
+		    echo "mkdir ${treeDir}/src"
+		    echo "tar --unlink -xpf src${fetchSufx} -s '/usr//' -C ${treeDir}"
+		  ) > ${treeDir}/update.sh
+		else
+		  ( updateCmd="/usr/local/bin/lftp"
+		    echo "#!/bin/sh"
+		    echo "mkdir -p ${treeDir}/sets"
+		    echo "cd ${treeDir}/sets"
+		    echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror base\""
+		    echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror dict\""
+		    if [ "${updateArch}" = "amd64" ]; then
+		        echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror lib32\""
+		    fi
+		    echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror proflibs\""
+		    echo "${updateCmd} -c \"open ftp://${4}/pub/FreeBSD/releases/${updateArch}/${5}/; mirror src\""
+		    echo "cd src"
+		    echo "sed -i \"\" 's|usr/src|src|' install.sh"
+		    echo "export DESTDIR=${treeDir}"
+		    echo "mkdir ${treeDir}/src"
+		    echo "yes | sh ./install.sh all"
+		  ) > ${treeDir}/update.sh
+		fi
 		chmod +x ${treeDir}/update.sh
 		;;
 
@@ -789,11 +811,18 @@ buildJail () {
 
     if [ "${updateCmd}" = "LFTP" ]; then
 	export DESTDIR=${J_TMPDIR}
-	cd ${jailBase}/sets/base && yes | sh ./install.sh > ${jailBase}/world.tmp 2>&1
-	rc=$?
-	if [ ${rc} -eq 0 -a -d "${jailBase}/sets/lib32" ]; then
-	    cd ${jailBase}/sets/lib32 && yes | sh ./install.sh >> ${jailBase}/world.tmp 2>&1
+        if [ -f ${jailBase}/sets/base.txz ]; then
+	    cd ${jailBase}/sets && tar --unlink -xpf base.txz -C ${DESTDIR} 
+	    if [ -f ${jailBAse}/sets/lib32.txz ]; then
+	      cd ${jailBase}/sets && tar --unlink -xpf lib32.txz -C ${DESTDIR}
+	    fi
+	else
+	    cd ${jailBase}/sets/base && yes | sh ./install.sh > ${jailBase}/world.tmp 2>&1
 	    rc=$?
+	    if [ ${rc} -eq 0 -a -d "${jailBase}/sets/lib32" ]; then
+	        cd ${jailBase}/sets/lib32 && yes | sh ./install.sh >> ${jailBase}/world.tmp 2>&1
+	        rc=$?
+	    fi
 	fi
 	execute_hook "postJailBuild" "JAIL=${jailName} DESTDIR=${J_TMPDIR} JAIL_ARCH=${jailArch} MY_ARCH=${myArch} JAIL_OBJDIR=${JAIL_OBJDIR} SRCBASE=${SRCBASE} PB=${pb} RC=${rc}"
 	if [ ${rc} -ne 0 ]; then
