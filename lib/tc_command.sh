@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.146 2012/01/16 04:43:00 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.147 2012/02/25 19:39:26 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -813,7 +813,7 @@ buildJail () {
 	export DESTDIR=${J_TMPDIR}
         if [ -f ${jailBase}/sets/base.txz ]; then
 	    cd ${jailBase}/sets && tar --unlink -xpf base.txz -C ${DESTDIR} 
-	    if [ -f ${jailBAse}/sets/lib32.txz ]; then
+	    if [ -f ${jailBase}/sets/lib32.txz ]; then
 	      cd ${jailBase}/sets && tar --unlink -xpf lib32.txz -C ${DESTDIR}
 	    fi
 	else
