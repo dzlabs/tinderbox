@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.147 2012/02/25 19:39:26 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.148 2012/02/26 01:30:50 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -1339,6 +1339,25 @@ makeBuild () {
     tinderbuild_reset ${buildName}
     cleanDirs ${buildName} ${BUILD_DIR}
 
+    if [ "${MD_FSTYPE}" = "ufs" -o "${MD_FSTYPE}" = "zfs" ]; then
+	if [ ${MD_SIZE} -gt 0 ]; then
+	    # setup md (ramdisk) backing for the build
+	    mdconfig -a -t swap -s ${MD_SIZE} > /tmp/tinderbuild_md.${build}
+	    read MD_UNIT </tmp/tinderbuild_md.${build}
+
+	    if [ "${MD_FSTYPE}" = "ufs" ]; then
+		newfs -m 0 -o time /dev/${MD_UNIT}
+		mount /dev/${MD_UNIT} ${BUILD_DIR}
+	    else
+		zpool create ${MD_UNIT} /dev/${MD_UNIT}
+		zfs set compression=on ${MD_UNIT}
+		zfs set mountpoint=${BUILD_DIR} ${MD_UNIT}
+	    fi
+	fi
+    elif [ -n "${MD_FSTYPE}" ]; then
+	echo "You must define either ufs or zfs as your memory device."
+    fi
+
     # Extract the tarball
     echo "makeBuild: extracting jail tarball"
     tar -C ${BUILD_DIR} -xpf ${JAIL_TARBALL}
@@ -1481,6 +1500,21 @@ tinderbuild_reset () {
     cleanupMounts -t builddistcache -b $1
     cleanupMounts -t buildoptions -b $1
     umount -f $(tinderLoc buildroot $1)/dev >/dev/null 2>&1
+
+    if [ "${MD_FSTYPE}" = "ufs" -o "${MD_FSTYPE}" = "zfs" ]; then
+	if [ -f /tmp/tinderbuild_md.${build} ]; then
+	    read MD_UNIT </tmp/tinderbuild_md.${build}
+	    df | grep ${build} | grep ${MD_UNIT}
+	    if [ $? -eq 0 ]; then
+		if [ "${MD_FSTYPE}" = "ufs" ]; then
+		    umount -f /dev/${MD_UNIT}
+		else
+		    zpool destroy ${MD_UNIT}
+		fi
+		mdconfig -d -u ${MD_UNIT}
+	    fi
+	fi
+    fi
 }
 
 tinderbuild_cleanup () {

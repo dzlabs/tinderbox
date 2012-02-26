@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.176 2011/10/23 15:22:21 beat Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.177 2012/02/26 01:30:49 marcus Exp $
 #
 
 my $pb;
@@ -131,6 +131,12 @@ my $ds = new Tinderbox::TinderboxDS();
                 help   => "Configure Tinderbox logging parameters",
                 usage  => "[-d <log directory> | -D] [-c | -C] [-z | -Z]",
                 optstr => 'd:DcCzZ',
+        },
+        "configMd" => {
+                func  => \&configMd,
+                help  => "Configure Tinderbox to build against a memory device",
+                usage => "[-s <memory size>] [-t <filesystem type>]",
+                optstr => 's:t:',
         },
         "listJails" => {
                 func  => \&listJails,
@@ -1003,6 +1009,39 @@ sub configLog {
         $ds->updateConfig("log", @config)
             or cleanup($ds, 1,
                       "Failed to update log configuration: "
+                    . $ds->getError()
+                    . "\n");
+}
+
+sub configMd {
+        my @config = ();
+        my $size;
+        my $fstype;
+
+        if (scalar(keys %{$opts}) == 0) {
+                configGet("md");
+                cleanup($fd, 0, undef);
+        }
+
+        $size = new Tinderbox::Config();
+        $size->setOptionName("size");
+
+        $fstype = new Tinderbox::Config();
+        $fstype->setOptionName("fstype");
+
+        if ($opts->{'s'}) {
+                $size->setOptionValue($opts->{'s'});
+                push @config, $size;
+        }
+
+        if ($opts->{'t'}) {
+                $fstype->setOptionValue($opts->{'t'});
+                push @config, $fstype;
+        }
+
+        $ds->updateConfig("md", @config)
+            or cleanup($fd, 1,
+                      "Failed to update memory disk configuration: "
                     . $ds->getError()
                     . "\n");
 }
