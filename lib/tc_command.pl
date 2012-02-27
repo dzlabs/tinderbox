@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.177 2012/02/26 01:30:49 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.178 2012/02/27 22:42:44 marcus Exp $
 #
 
 my $pb;
@@ -135,7 +135,7 @@ my $ds = new Tinderbox::TinderboxDS();
         "configMd" => {
                 func  => \&configMd,
                 help  => "Configure Tinderbox to build against a memory device",
-                usage => "[-s <memory size>] [-t <filesystem type>]",
+                usage => "[-s <memory size in bytes>] [-t <filesystem type>]",
                 optstr => 's:t:',
         },
         "listJails" => {
