@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.178 2012/02/27 22:42:44 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.179 2012/02/28 07:15:16 beat Exp $
 #
 
 my $pb;
@@ -1020,7 +1020,7 @@ sub configMd {
 
         if (scalar(keys %{$opts}) == 0) {
                 configGet("md");
-                cleanup($fd, 0, undef);
+                cleanup($ds, 0, undef);
         }
 
         $size = new Tinderbox::Config();
@@ -1040,7 +1040,7 @@ sub configMd {
         }
 
         $ds->updateConfig("md", @config)
-            or cleanup($fd, 1,
+            or cleanup($ds, 1,
                       "Failed to update memory disk configuration: "
                     . $ds->getError()
                     . "\n");
