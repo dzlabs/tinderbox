@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.149 2012/02/27 22:43:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.150 2012/03/02 19:27:43 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -1342,7 +1342,7 @@ makeBuild () {
     if [ "${MD_FSTYPE}" = "ufs" -o "${MD_FSTYPE}" = "zfs" ]; then
 	if [ ${MD_SIZE} -gt 0 ]; then
 	    # setup md (ramdisk) backing for the build
-	    mdconfig -a -t swap -s ${MD_SIZE}b > /tmp/tinderbuild_md.${build}
+	    mdconfig -a -t swap -s ${MD_SIZE} > /tmp/tinderbuild_md.${build}
 	    read MD_UNIT </tmp/tinderbuild_md.${build}
 
 	    if [ "${MD_FSTYPE}" = "ufs" ]; then

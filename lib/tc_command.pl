@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.179 2012/02/28 07:15:16 beat Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.pl,v 1.180 2012/03/02 19:27:43 marcus Exp $
 #
 
 my $pb;
@@ -133,9 +133,10 @@ my $ds = new Tinderbox::TinderboxDS();
                 optstr => 'd:DcCzZ',
         },
         "configMd" => {
-                func  => \&configMd,
-                help  => "Configure Tinderbox to build against a memory device",
-                usage => "[-s <memory size in bytes>] [-t <filesystem type>]",
+                func => \&configMd,
+                help => "Configure Tinderbox to build against a memory device",
+                usage =>
+                    "[-s <memory size with optional units>] [-t <filesystem type>]",
                 optstr => 's:t:',
         },
         "listJails" => {
@@ -1030,6 +1031,13 @@ sub configMd {
         $fstype->setOptionName("fstype");
 
         if ($opts->{'s'}) {
+                if ($opts->{'s'} !~ /^\d+[\dbkmgt]$/) {
+                        cleanup($ds, 1,
+                                      "Invalid MD size, "
+                                    . $opts->{'s'}
+                                    . ".  Size must be all digits and end with either a digit, b, k, m, g, or t.\n"
+                        );
+                }
                 $size->setOptionValue($opts->{'s'});
                 push @config, $size;
         }
