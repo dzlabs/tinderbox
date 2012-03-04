@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# usage: $0 DIRNAME PHASE ED PD FD BD RD TD [PLISTCHECK]
+# usage: $0 DIRNAME PHASE ED PD FD BD RD TD PKGD [PLISTCHECK]
 #   PHASE is 1 (checksum) or 2 (package)
 
 cleanup() {
@@ -37,13 +37,36 @@ add_pkg() {
       echo "pkg_add $i"
       base=$(basename $i .tgz)
       base=$(basename $base .tbz)
-      if pkg_info -q -e $base; then
-        echo "skipping $base, already added"
+      base=$(basename $base .txz)
+      if [ "${use_pkgng}" = "yes" ]; then
+        if pkg info -q -e ${base}; then
+          echo "skipping $base, already added"
+        else
+          pkgname=${base%-*}
+          if [ "${pkgname}" = "pkg" ]; then
+            tar xf $i -C . -s ",/.*/,,g" "*/pkg-static"
+            if ! ./pkg-static add $i; then
+              echo "error in dependency $i, exiting"
+              echo "1" > /tmp/status
+              exit 1
+            fi
+          else
+            if ! pkg add $i; then
+              echo "error in dependency $i, exiting"
+              echo "1" > /tmp/status
+              exit 1
+            fi
+          fi
+        fi
       else
-        if ! pkg_add $i; then
-          echo "error in dependency $i, exiting"
-          echo "1" > /tmp/status
-          exit 1
+        if pkg_info -q -e ${base}; then
+          echo "skipping ${base}, already added"
+        else
+          if ! pkg_add $i; then
+            echo "error in dependency $i, exiting"
+            echo "1" > /tmp/status
+            exit 1
+          fi
         fi
       fi
     done
@@ -64,26 +87,46 @@ del_pkg() {
       for i in $pkgs; do
         base=$(basename $i .tgz)
         base=$(basename $base .tbz)
-        if [ -s /var/db/pkg/${base}/+REQUIRED_BY ]; then
-          recursion=1
-          nextpkg="${base} ${nextpkg}"
-        elif [ -d /var/db/pkg/${base}/ ]; then
-          delpkg="${base} ${delpkg}"
+        base=$(basename $base .txz)
+        if [ "${use_pkgng}" = "yes" ]; then
+         if [ "$(pkg query %?r $base)" = "1" ]; then
+            recursion=1
+            nextpkg="${base} ${nextpkg}"
+          elif pkg info -q -e ${base}; then
+            delpkg="${base} ${delpkg}"
+          fi
+        else
+          if [ -s /var/db/pkg/${base}/+REQUIRED_BY ]; then
+            recursion=1
+            nextpkg="${base} ${nextpkg}"
+          elif [ -d /var/db/pkg/${base}/ ]; then
+            delpkg="${base} ${delpkg}"
+          fi
         fi
       done
       pkgs="${nextpkg}"
       if [ "$dellist" != "" -a "$dellist" = "$delpkg" ]; then
         echo "deleted list =\""$dellist"\", packages to delete ="\"$delpkg\" #"
         echo "The following packages were left behind (perhaps your dependency list is incomplete):"
-        ls /var/db/pkg
+        if [ "${use_pkgng}" = "yes" ]; then
+          pkg info -qa
+        else
+          ls /var/db/pkg
+        fi
         echo "error in pkg_delete, exiting"
         cleanup 0
       else
         for j in ${delpkg}; do
           echo "Deleting ${j}"
-          if ! (pkg_delete -f $j); then
-            echo "--> error in pkg_delete, exiting"
-            cleanup 0
+          if [ "${use_pkgng}" = "yes" ]; then
+            if ! pkg delete -y -f ${j}; then
+              echo "--> error in pkg delete, exiting"
+            fi
+          else
+            if ! (pkg_delete -f $j); then
+              echo "--> error in pkg_delete, exiting"
+              cleanup 0
+            fi
           fi
         done
         dellist=$delpkg
@@ -102,7 +145,12 @@ FD=$5
 BD=$6
 RD=$7
 TD=$8
-PLISTCHECK=$9
+PKGD=$9
+PLISTCHECK=${10}
+
+use_pkgng=no
+
+use_pkgng=$(make -VWITH_PKGNG)
 
 L=$(echo ${LOCALBASE} | sed 's,^/,,')
 
@@ -133,6 +181,7 @@ if [ $phase = 1 ]; then
   fi
   echo "End Configuration."
 
+  echo "PKG_DEPENDS=${PKGD}"
   echo "FETCH_DEPENDS=${FD}"
   echo "PATCH_DEPENDS=${PD}"
   echo "EXTRACT_DEPENDS=${ED}"
@@ -166,6 +215,8 @@ if [ $phase = 1 ]; then
 ./${L}/etc/gconf
 ./var/db/fontconfig
 EOF
+
+  add_pkg ${PKGD}
 
   # Record a "pristine" mtree.
   mtree -X /tmp/mtree.preexclude -xcn -k uid,gid,mode -p / > /tmp/mtree.pristine
@@ -265,9 +316,17 @@ EOF
   echo "================================================================"
   echo "====================<phase 5: make test>===================="
 
-  pkg_info | awk '{print $1}' | sort > /tmp/pkgs_pre_test
+  if [ "${use_pkgng}" = "yes" ]; then
+	  pkg info -qa | sort > /tmp/pkgs_pre_test
+  else
+	  pkg_info | awk '{print $1}' | sort > /tmp/pkgs_pre_test
+  fi
   add_pkg ${TD}
-  pkg_info | awk '{print $1}' | sort > /tmp/pkgs_post_test      
+  if [ "${use_pkgng}" = "yes" ]; then
+	  pkg info -qa | sort > /tmp/pkgs_post_test
+  else
+	  pkg_info | awk '{print $1}' | sort > /tmp/pkgs_post_test      
+  fi
   cd $dir
   /pnohang $TIMEOUT /tmp/make.log5 ${pkgname} make -k regression-test
   cat /tmp/make.log5
@@ -325,6 +384,8 @@ EOF
   cat /tmp/make.log7
   prefix=$(make -V PREFIX)
   du -skx / | awk '{print $1}' > /tmp/size
+  cd $dir || exit 1
+  pkgname=$(make package-name)
   del_pkg ${pkgname}
 
 
@@ -376,12 +437,15 @@ EOF
   # Concatenate and remove duplicates
   BRD=$(echo $BD $RD | tr ' ' '\n' | sort -u | tr '\n' ' ')
   del_pkg ${BRD}
-  cd /var/db/pkg
-  if [ $(echo $(echo * | wc -c)) != 2 ]; then
-    echo "leftover packages:" *
-    del_pkg *
-    echo "1" > /tmp/status
-    cleanup 0
+# XXX: Check for leftover packages
+  if [ "${use_pkgng}" != "yes" ]; then
+    cd /var/db/pkg
+    if [ $(echo $(echo * | wc -c)) != 2 ]; then
+      echo "leftover packages:" *
+      del_pkg *
+      echo "1" > /tmp/status
+      cleanup 0
+    fi
   fi
 
   # Compare the state of the filesystem now to clean system (should again be clean)

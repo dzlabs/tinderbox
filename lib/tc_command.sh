@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.150 2012/03/02 19:27:43 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.151 2012/03/04 12:53:08 beat Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -2404,13 +2404,20 @@ tbcleanup () {
 
     for build in ${builds} ; do
 	jail=$(${tc} getJailForBuild -b ${build} 2>/dev/null)
-	package_suffix=$(${tc} getPackageSuffix -j ${jail} 2>/dev/null)
+	portstree=$(${tc} getPortsTreeForBuild -b ${build} 2>/dev/null)
+
+	buildenv ${jail} ${portstree} ""
+
+	if [ -n "${WITH_PKGNG}" ]; then
+	    package_suffix=".txz"
+	else
+	    package_suffix=$(${tc} getPackageSuffix -j ${jail} 2>/dev/null)
+	fi
 
 	echo ${build}
 
         # Delete database records for nonexistent packages.
 	ports=$(${tc} getPortsForBuild -b ${build} 2>/dev/null)
-        portstree=$(${tc} getPortsTreeForBuild -b ${build} 2>/dev/null)
 
         if ! requestMount -t portstree -p ${portstree} -r; then
             echo "tbcleanup: cannot mount portstree source"

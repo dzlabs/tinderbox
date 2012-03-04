@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/makemake,v 1.46 2011/09/25 00:03:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/makemake,v 1.47 2012/03/04 12:53:08 beat Exp $
 #
 
 my $pb;
@@ -135,7 +135,7 @@ if (!scalar(@ARGV)) {
 my (
         %pkgdir,   %pkgdeps,  %pkgedeps, %pkgpdeps, %pkgfdeps,
         %pkgbdeps, %pkgrdeps, @duds,     $portbase, $makecache,
-        %pkgtdeps,
+        %pkgtdeps, %pkgpkgdeps,
 );
 
 $portbase  = $ENV{'PORTSDIR'};
@@ -168,7 +168,7 @@ while (scalar(@PORTS)) {
                 push @duds, $dudpkg if ($dudpkg);
         }
 
-        my (@edeps, @pdeps, @fdeps, @bdeps, @rdeps, @tdeps) = ();
+        my (@edeps, @pdeps, @fdeps, @bdeps, @rdeps, @tdeps, @pkgpkgdeps) = ();
         $pkgdeps{$portdir}  = [];
         $pkgedeps{$portdir} = [];
         $pkgpdeps{$portdir} = [];
@@ -176,6 +176,7 @@ while (scalar(@PORTS)) {
         $pkgbdeps{$portdir} = [];
         $pkgrdeps{$portdir} = [];
         $pkgtdeps{$portdir} = [];
+        $pkgpkgdeps{$portdir} = [];
         $pkgdir{$portdir}   = $pkgname;
         push @edeps, $makecache->ExtractDependsList($portdir);
         push @pdeps, $makecache->PatchDependsList($portdir);
@@ -183,6 +184,7 @@ while (scalar(@PORTS)) {
         push @bdeps, $makecache->BuildDependsList($portdir);
         push @rdeps, $makecache->RunDependsList($portdir);
         push @tdeps, $makecache->TestDependsList($portdir);
+        push @pkgpkgdeps, $makecache->PkgDependsList($portdir);
 
         findRunDepends(\@edeps, \%pkgedeps, $portdir, $makecache, \@PORTS);
         findRunDepends(\@pdeps, \%pkgpdeps, $portdir, $makecache, \@PORTS);
@@ -190,11 +192,13 @@ while (scalar(@PORTS)) {
         findRunDepends(\@bdeps, \%pkgbdeps, $portdir, $makecache, \@PORTS);
         findRunDepends(\@rdeps, \%pkgrdeps, $portdir, $makecache, \@PORTS);
         findRunDepends(\@tdeps, \%pkgtdeps, $portdir, $makecache, \@PORTS);
+        findRunDepends(\@pkgpkgdeps, \%pkgpkgdeps, $portdir, $makecache, \@PORTS);
 
         foreach my $depport (
                 @{$pkgedeps{$portdir}}, @{$pkgpdeps{$portdir}},
                 @{$pkgfdeps{$portdir}}, @{$pkgbdeps{$portdir}},
                 @{$pkgrdeps{$portdir}}, @{$pkgtdeps{$portdir}},
+                @{$pkgpkgdeps{$portdir}},
             )
         {
                 if (defined($depport) && $depport ne "") {
@@ -222,6 +226,7 @@ foreach my $key (keys %pkgdir) {
         my $bdeplst  = makeList(\%pkgdir, 1, $makecache, @{$pkgbdeps{$key}});
         my $rdeplst  = makeList(\%pkgdir, 1, $makecache, @{$pkgrdeps{$key}});
         my $tdeplst  = makeList(\%pkgdir, 1, $makecache, @{$pkgtdeps{$key}});
+        my $pkgdeplst = makeList(\%pkgdir, 1, $makecache, @{$pkgpkgdeps{$key}});
 
         printf MK "all: %s\n", $pname;
         printf MK "%s: %s\n",  $pkgdir{$key}, $pname;
@@ -229,8 +234,8 @@ foreach my $key (keys %pkgdir) {
         printf MK "\t@%s %s %s %s %s %s ",
             tinderLoc($pb, 'scripts', 'lib/portbuild'), $BUILD_NAME, $JAIL_NAME,
             $PORTSTREE_NAME, $ENV{'PORTBUILD_ARGS'};
-        printf MK "\"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" ", $edeplst, $pdeplst,
-            $fdeplst, $bdeplst, $rdeplst, $tdeplst;
+        printf MK "\"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" ", $edeplst, $pdeplst,
+            $fdeplst, $bdeplst, $rdeplst, $tdeplst, $pkgdeplst;
         printf MK "%s /usr/ports/%s\n", $pname, $key;
 }
 

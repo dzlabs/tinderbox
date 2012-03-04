@@ -1,11 +1,11 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.139 2011/10/01 04:39:01 marcus Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.140 2012/03/04 12:53:08 beat Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
 usage () {
-    echo "usage: $0 <build name> <jail name> <portstree name> [-noclean] [-plistcheck] [-nullfs] [-fetch-original] [-nolog] ED PD FD BD RD TD pkgname dirname"
+    echo "usage: $0 <build name> <jail name> <portstree name> [-noclean] [-plistcheck] [-nullfs] [-fetch-original] [-nolog] ED PD FD BD RD TD PKGD pkgname dirname"
     exit 1
 }
 
@@ -142,8 +142,13 @@ FD=$3
 BD=$4
 RD=$5
 TD=$6
-pkgname=$(basename $7 ${PKGSUFFIX})
-dirname=$8
+PKGD=$7
+pkgname=$(basename $8 ${PKGSUFFIX})
+dirname=$9
+
+use_pkgng=no
+
+use_pkgng=$(make -VWITH_PKGNG)
 
 echo ${pkgname}
 echo ${dirname}
@@ -308,7 +313,7 @@ if [ ${ARCH} = "i386" ]; then
     chroot ${chroot} /sbin/ldconfig -aout /usr/lib/aout /usr/lib/compat/aout
 fi
 
-set x $ED $FD $PD $BD $RD $TD
+set x $ED $FD $PD $BD $RD $TD $PKGD
 shift 1
 
 cd ${chroot}/tmp/depends
@@ -339,7 +344,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-chroot ${chroot} /buildscript ${dirname} 1 "$ED" "$PD" "$FD" "$BD" "$RD" "$TD" "${plistcheck}" 2>&1 | tee -a ${chroot}/tmp/${pkgname}.log
+chroot ${chroot} /buildscript ${dirname} 1 "$ED" "$PD" "$FD" "$BD" "$RD" "$TD" "$PKGD" "${plistcheck}" 2>&1 | tee -a ${chroot}/tmp/${pkgname}.log
 if [ -f ${chroot}/tmp/status ]; then
     error=$(cat ${chroot}/tmp/status)
 else
@@ -360,7 +365,7 @@ if [ "${error}" = "0" ]; then
 	    -cf - . | tar --unlink -C ${chroot}${DISTCACHE} -xvf -
     fi
 
-    chroot ${chroot} /usr/bin/nice -n $nice /buildscript ${dirname} 2  "$ED" "$PD" "$FD" "$BD" "$RD" "$TD" "${plistcheck}" > ${chroot}/tmp/${pkgname}.log2 2>&1
+    chroot ${chroot} /usr/bin/nice -n $nice /buildscript ${dirname} 2  "$ED" "$PD" "$FD" "$BD" "$RD" "$TD" "$PKGD" "${plistcheck}" > ${chroot}/tmp/${pkgname}.log2 2>&1
 
     grep pnohang ${chroot}/tmp/${pkgname}.log2
     cat ${chroot}/tmp/${pkgname}.log2 >> ${chroot}/tmp/${pkgname}.log

@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/MakeCache.pm,v 1.11 2011/09/25 00:03:57 marcus Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/MakeCache.pm,v 1.12 2012/03/04 12:53:08 beat Exp $
 #
 
 package Tinderbox::MakeCache;
@@ -33,6 +33,7 @@ use strict;
 our @makeTargets = (
         'PKGNAME',         'IGNORE',
         'NO_PACKAGE',      'FORBIDDEN',
+        'PKG_DEPENDS',
         'EXTRACT_DEPENDS', 'PATCH_DEPENDS',
         'FETCH_DEPENDS',   'BUILD_DEPENDS',
         'LIB_DEPENDS',     'RUN_DEPENDS',
@@ -133,6 +134,13 @@ sub Maintainer {
         return $self->_getVariable($port, 'MAINTAINER');
 }
 
+# Pkg dependencies
+sub PkgDepends {
+	my $self = shift;
+	my $port = shift;
+	return $self->_getList($port, 'PKG_DEPENDS');
+}
+
 # Extract dependencies
 sub ExtractDepends {
         my $self = shift;
@@ -193,6 +201,17 @@ sub IgnoreList {
                 $n++ if ($self->{CACHE}->{$port}{$var} ne "");
         }
         return $n eq 0 ? "" : $self->PkgName($port);
+}
+
+sub PkgDependsList {
+	my $self = shift;
+	my $port = shift;
+
+	my @deps;
+	push(@deps, $self->PkgDepends($port));
+
+	my %uniq;
+	return grep { !$uniq{$_}++ } @deps;
 }
 
 sub FetchDependsList {
