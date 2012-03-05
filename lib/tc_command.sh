@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.151 2012/03/04 12:53:08 beat Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.152 2012/03/05 01:06:56 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -2362,9 +2362,9 @@ tbcleanup () {
 		    oldcwd=${PWD}
 		    path=$(tinderLoc portstree ${portstree})
 		    cd "${path}/ports/${port}"
-		    distinfo=$(env PORTSDIR="${path}/ports" make -V MD5_FILE)
+		    distinfo=$(env PORTSDIR="${path}/ports" make -V DISTINFO_FILE)
 		    if [ -f "${distinfo}" ]; then
-			for df in $(grep '^MD5' ${distinfo} | awk -F '[\(\)]' '{print $2}'); do
+			for df in $(grep '^SHA256' ${distinfo} | awk -F '[\(\)]' '{print $2}'); do
 			    if ! grep -q "^${df}\$" ${disttmp}; then
 				echo ${df} >> ${disttmp}
 			    fi
@@ -2406,7 +2406,7 @@ tbcleanup () {
 	jail=$(${tc} getJailForBuild -b ${build} 2>/dev/null)
 	portstree=$(${tc} getPortsTreeForBuild -b ${build} 2>/dev/null)
 
-	buildenv ${jail} ${portstree} ""
+	buildenv ${jail} ${portstree} ${build}
 
 	if [ -n "${WITH_PKGNG}" ]; then
 	    package_suffix=".txz"
