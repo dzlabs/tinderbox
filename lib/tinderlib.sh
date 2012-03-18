@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.66 2012/03/04 12:53:08 beat Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.67 2012/03/18 16:36:59 marcus Exp $
 #
 
 tinderLocJail () {
@@ -135,7 +135,7 @@ killMountProcesses () {
 	# found.
 	lsof=$(which lsof 2>/dev/null)
 	if [ -n "${lsof}" ]; then
-	    pids=$(${lsof} | fgrep "${dir}" | awk '{print $2}' | sort -u)
+	    pids=$(${lsof} -w | fgrep "${dir}" | awk '{print $2}' | sort -u)
 	else
 	    pids=$(fstat -f "${dir}" | tail +2 | awk '{print $3}' | sort -u)
 	fi
@@ -362,9 +362,11 @@ requestMount () {
 	return 0
     fi
 
+    _mount_prog="mount"
+
     # is _nullfs mount specified?
     if [ ${_nullfs} -eq 1 -a ${_fqsrcloc} -ne 1 ] ; then
-	_options="-t nullfs"
+	_mount_prog="mount_nullfs"
     else
 	# it probably has to be a nfs mount then
 	# lets check what kind of _srcloc we have. If it is allready in
@@ -382,7 +384,7 @@ requestMount () {
 		    # The user wants exactly what he specified as _srcloc
 		    # don't modify anything. If it's not a nfs mount, it has
 		    # to be a nullfs mount.
-		    _options="-t nullfs"
+		    _mount_prog="mount_nullfs"
 		else
 		    _options="-o nfsv3,intr,tcp"
 
@@ -424,7 +426,7 @@ requestMount () {
 	mkdir -p ${_dstloc}
     fi
 
-    mount ${_options} ${_srcloc} ${_dstloc}
+    ${_mount_prog} ${_options} ${_srcloc} ${_dstloc}
     return ${?}
 }
 
