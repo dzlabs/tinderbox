@@ -20,7 +20,7 @@ INSERT INTO port_fail_reasons VALUES ('WRKDIR', 'The port is attempting to chang
 INSERT INTO port_fail_reasons VALUES ('perl5', 'There is a problem in processing a perl5 module.', 'RARE');
 INSERT INTO port_fail_reasons VALUES ('LIB_DEPENDS', 'The LIB_DEPENDS line specifies a library name incorrectly. This often happens when a port is upgraded and the shared library version number changes.', 'COMMON');
 INSERT INTO port_fail_reasons VALUES ('missing_header', 'There is a missing header file. This is usually caused by either (1) a missing dependency, or (2) specifying an incorrect location with -I in the compiler command line.', 'COMMON');
-INSERT INTO port_fail_reasons VALUES ('USE_XLIB', 'You should specify USE_XLIB for this port since it appears to use X.', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('USE_XORG', 'You should specify USE_XORG with the correct dependencies for this port since it appears to use X.', 'RARE');
 INSERT INTO port_fail_reasons VALUES ('fetch_timeout', 'Your fetch process was killed because it took too long. (More accurately, it did not produce any output for a long time.) Please put sites with better connectivity near the beginning of MASTER_SITES.', 'RARE');
 INSERT INTO port_fail_reasons VALUES ('runaway_process', 'Your make package process was killed because it took too long. (More accurately, it did not produce any output for a long time.) It is probably because there is a process spinning in an infinite loop. Please check the log to determine the exact cause of the problem.', 'RARE');
 INSERT INTO port_fail_reasons VALUES ('disk_full', 'The disk filled up on the build system. It is not your fault.', 'TRANSIENT');

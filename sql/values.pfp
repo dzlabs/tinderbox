@@ -18,7 +18,7 @@ INSERT INTO port_fail_patterns VALUES (800, 'Error: shared library ".*" does not
 INSERT INTO port_fail_patterns VALUES (900, '\\.(c|cc|cxx|cpp|h|y)[1-9:]+ .+\\.[hH]: No such file', '__parent__', 0);
 INSERT INTO port_fail_patterns VALUES (1000, '(X11/.*|Xosdefs)\\.h: No such file', '__parent__', 900);
 INSERT INTO port_fail_patterns VALUES (1100, 'XFree86-.*\\.tgz', 'missing_header', 1000);
-INSERT INTO port_fail_patterns VALUES (1200, '.*', 'USE_XLIB', 1000);
+INSERT INTO port_fail_patterns VALUES (1200, '.*', 'USE_XORG', 1000);
 INSERT INTO port_fail_patterns VALUES (1300, '.*', 'missing_header', 900);
 INSERT INTO port_fail_patterns VALUES (1400, '(nested function.*declared but never defined|warning: nested extern declaration)', 'nested_declaration', 0);
 INSERT INTO port_fail_patterns VALUES (1500, '(parse error|too (many|few) arguments to|argument.*doesn.*prototype|incompatible type for argument|conflicting types for|undeclared \\(first use (in |)this function\\)|incorrect number of parameters|has incomplete type and cannot be initialized|error: storage size.* isn.t known)', 'compiler_error', 0);
