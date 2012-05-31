@@ -24,10 +24,9 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.61 2012/02/07 20:05:04 beat Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.62 2012/05/31 22:09:39 ade Exp $
 #
 
-require_once 'MDB2.php';
 require_once 'Build.php';
 require_once 'BuildGroups.php';
 require_once 'BuildPortsQueue.php';
@@ -64,22 +63,20 @@ class TinderboxDS {
 	public $packageSuffixCache; /* in use by getPackageSuffix() */
 
 	function TinderboxDS() {
-		global $DB_HOST, $DB_DRIVER, $DB_NAME, $DB_USER, $DB_PASS;
+		global $DB_HOST, $DB_DRIVER, $DB_NAME, $DB_USER, $DB_PASS, $DB_PATH;
 
 		# XXX: backwards compatibility
 		if ( $DB_DRIVER == '' )
 			$DB_DRIVER = 'mysql';
 
-		$dsn = "$DB_DRIVER://$DB_USER:$DB_PASS@$DB_HOST/$DB_NAME";
+		$dsn = "$DB_DRIVER:host=${DB_HOST};dbname=${DB_NAME}";
 
-		$this->db = MDB2::factory( $dsn );
-
-		if ( MDB2::isError( $this->db ) ) {
-			die ( "Tinderbox DS: Unable to initialize datastore: " . $this->db->getMessage() . "\n" );
+		try {
+			$this->db = new PDO( $dsn, $DB_USER, $DB_PASS, array( PDO::ATTR_PERSISTENT => true ) );
+			$this->db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT );
+		} catch ( PDOException $e ) {
+			die( "Tinderbox DS: Unable to connect to database: " . $e->getMessage(). "\n" );
 		}
-
-		$this->db->setFetchMode( MDB2_FETCHMODE_ASSOC );
-		$this->db->setOption( 'persistent', true );
 	}
 
 	function start_transaction() {
@@ -91,7 +88,7 @@ class TinderboxDS {
 	}
 
 	function rollback_transaction() {
-		$this->db->rollback();
+		$this->db->rollBack();
 	}
 
 	function getAllMaintainers() {
@@ -117,13 +114,13 @@ class TinderboxDS {
 
 	function getAllPortsByPortID( $portid ) {
 		$query = "SELECT p.*,
-						 bp.build_id,
-						 bp.last_built,
-						 bp.last_status,
-						 bp.last_successful_built,
-						 bp.last_failed_dependency,
-						 bp.last_run_duration,
-						 bp.last_built_version,
+						 bp.build_id AS build_id,
+						 bp.last_built AS last_built,
+						 bp.last_status AS last_status,
+						 bp.last_successful_built AS last_successful_built,
+						 bp.last_failed_dependency AS last_failed_dependency,
+						 bp.last_run_duration AS last_run_duration,
+						 bp.last_built_version AS last_built_version,
 					CASE bp.last_fail_reason
 					  WHEN '__nofail__' THEN ''
 					  ELSE bp.last_fail_reason
@@ -134,7 +131,7 @@ class TinderboxDS {
 				   WHERE p.port_id = bp.port_id
 					 AND bp.port_id = ?";
 
-		$rc = $this->_doQueryHashRef( $query, $results, $portid );
+		$rc = $this->_doQueryHashRef( $query, $results, array( $portid ) );
 
 		if ( !$rc ) {
 			return null;
@@ -249,8 +246,8 @@ class TinderboxDS {
 			DELETE FROM user_permissions
 				  WHERE user_id=?";
 
-		if( $object_type )
-			$query .= " AND user_permission_object_type='" . $this->db->escape( $object_type, TRUE ) . "'";
+		if ( $object_type )
+			$query .= " AND user_permission_object_type=" . $this->db->quote( $object_type );
 
 		$rc = $this->_doQuery( $query, array( $user->getId() ), $res );
 
@@ -394,24 +391,25 @@ class TinderboxDS {
 
 	function getPortsForBuild( $build, $sortby = 'port_directory', $port_name = '', $limit = 0 , $limit_offset = 0 ) {
 		$sortbytable = 'bp';
+		$sortbyqual = '';
 		if ( $sortby == '' ) $sortby = 'port_directory';
 		if ( $sortby == 'port_directory' ) $sortbytable = 'p';
 		if ( $sortby == 'port_maintainer' ) $sortbytable = 'p';
-		if ( $sortby == 'last_built' ) {
+		if ( $sortby == 'last_built' || $sortby == 'last_successful_built' ) {
 			$sortbytable = 'bp';
-			$sortby = 'last_built desc';
+			$sortby .= ' DESC';
 		}
-		$query = "SELECT p.port_id,
-						 p.port_directory,
+		$query = "SELECT p.port_id AS port_id,
+						 p.port_directory AS port_directory,
 						 REPLACE(p.port_maintainer, '@freebsd.org', '') as port_maintainer,
-						 p.port_name,
-						 p.port_comment,
-						 bp.last_built,
-						 bp.last_status,
-						 bp.last_successful_built,
-						 bp.last_built_version,
-						 bp.last_failed_dependency,
-						 bp.last_run_duration,
+						 p.port_name AS port_name,
+						 p.port_comment AS port_comment,
+						 bp.last_built AS last_built,
+						 bp.last_status AS last_status,
+						 bp.last_successful_built AS last_successful_built,
+						 bp.last_built_version AS last_built_version,
+						 bp.last_failed_dependency AS last_failed_dependency,
+						 bp.last_run_duration AS last_run_duration,
 					CASE bp.last_fail_reason
 					  WHEN '__nofail__' THEN ''
 					  ELSE bp.last_fail_reason
@@ -422,12 +420,14 @@ class TinderboxDS {
 				   WHERE p.port_id = bp.port_id
 					 AND bp.build_id=?";
 		if ( $port_name )
-			$query .= " AND p.port_name LIKE '%" . $this->db->escape( $port_name, TRUE ) . "%'";
-		$query .= " ORDER BY " . $this->db->escape( $sortbytable ) . "." . $this->db->escape( $sortby );
-		if( $limit != 0 )
-			$query .= " LIMIT " . $this->db->escape( $limit, TRUE ) . " OFFSET " . $this->db->escape( $limit_offset, TRUE );
+			$query .= " AND p.port_name LIKE " . $this->db->quote( "%${port_name}%" );
+		$query .= " ORDER BY " . $sortbytable . "." . substr( $this->db->quote( $sortby ), 1, strlen( $sortby ) );
+		if ( $limit != 0 ) {
+			$query .= " LIMIT " . substr( $this->db->quote( $limit ), 1, strlen( $sortby ) );
+			$query .= " OFFSET " . substr( $this->db->quote( $limit_offset ), 1, strlen( $limit_offset ) );
+		}
 
-		$rc = $this->_doQueryHashRef( $query, $results, $build->getId() );
+		$rc = $this->_doQueryHashRef( $query, $results, array( $build->getId() ) );
 
 		if ( !$rc ) {
 			return null;
@@ -440,13 +440,13 @@ class TinderboxDS {
 
 	function getLatestPorts( $build_id, $limit = '', $maintainer = '' ) {
 		$query = "SELECT p.*,
-						 bp.build_id,
-						 bp.last_built,
-						 bp.last_status,
-						 bp.last_successful_built,
-						 bp.last_built_version,
-						 bp.last_failed_dependency,
-						 bp.last_run_duration,
+						 bp.build_id AS build_id,
+						 bp.last_built AS last_built,
+						 bp.last_status AS last_status,
+						 bp.last_successful_built AS last_successful_built,
+						 bp.last_built_version AS last_built_version,
+						 bp.last_failed_dependency AS last_failed_dependency,
+						 bp.last_run_duration AS last_run_duration,
 					CASE bp.last_fail_reason
 					  WHEN '__nofail__' THEN ''
 					  ELSE bp.last_fail_reason
@@ -457,12 +457,12 @@ class TinderboxDS {
 				   WHERE p.port_id = bp.port_id
 					 AND bp.last_built IS NOT NULL ";
 		if( $build_id )
-			$query .= "AND bp.build_id=" . $this->db->escape( $build_id, TRUE );
+			$query .= "AND bp.build_id=" . $this->db->quote( $build_id );
 		if( $maintainer )
-			$query .= " AND p.port_maintainer='" . $this->db->escape( $maintainer, TRUE ) . "' ";
+			$query .= " AND p.port_maintainer=" . $this->db->quote( $maintainer );
 		$query .= " ORDER BY bp.last_built DESC ";
-		if( $limit )
-			$query .= " LIMIT " . $this->db->escape( $limit, TRUE );
+		if ( $limit )
+			$query .= " LIMIT " . substr( $this->db->quote( $limit ), 1, strlen( $limit ) );
 
 		$rc = $this->_doQueryHashRef( $query, $results, array() );
 
@@ -477,11 +477,11 @@ class TinderboxDS {
 
 	function getBuildPorts( $port_id, $build_id ) {
 		$query = "SELECT p.*,
-						 bp.last_built,
-						 bp.last_status,
-						 bp.last_successful_built,
-						 bp.last_failed_dependency,
-						 bp.last_run_duration,
+						 bp.last_built AS last_built,
+						 bp.last_status AS last_status,
+						 bp.last_successful_built AS last_successful_built,
+						 bp.last_failed_dependency AS last_failed_dependency,
+						 bp.last_run_duration AS last_run_duration,
 					CASE bp.last_fail_reason
 					  WHEN '__nofail__' THEN ''
 					  ELSE bp.last_fail_reason
@@ -506,21 +506,22 @@ class TinderboxDS {
 
 	function getPortsByStatus( $build_id, $maintainer, $status, $notstatus, $limit = 0 , $limit_offset = 0, $sortby = 'last_built' ) {
 		$sortbytable = 'bp';
+		$sortbyqual = '';
 		if ( $sortby == '' ) $sortby = 'port_directory';
 		if ( $sortby == 'port_directory' ) $sortbytable = 'p';
 		if ( $sortby == 'port_maintainer' ) $sortbytable = 'p';
-		if ( $sortby == 'last_built' ) {
+		if ( $sortby == 'last_built' || $sortby == 'last_successful_built' ) {
 			$sortbytable = 'bp';
-			$sortby = 'last_built desc';
+			$sortby .= ' DESC';
 		}
 		$query = "SELECT p.*,
-						 bp.build_id,
-						 bp.last_built,
-						 bp.last_status,
-						 bp.last_successful_built,
-						 bp.last_built_version,
-						 bp.last_failed_dependency,
-						 bp.last_run_duration,
+						 bp.build_id AS build_id,
+						 bp.last_built AS last_built,
+						 bp.last_status AS last_status,
+						 bp.last_successful_built AS last_successful_built,
+						 bp.last_built_version AS last_built_version,
+						 bp.last_failed_dependency AS last_failed_dependency,
+						 bp.last_run_duration AS last_run_duration,
 					CASE bp.last_fail_reason
 					  WHEN '__nofail__' THEN ''
 					  ELSE bp.last_fail_reason
@@ -531,16 +532,18 @@ class TinderboxDS {
 				   WHERE p.port_id = bp.port_id ";
 
 		if( $build_id )
-			$query .= "AND bp.build_id=" . $this->db->escape( $build_id, TRUE ) . " ";
+			$query .= "AND bp.build_id=" . $this->db->quote( $build_id ) . " ";
 		if( $status <> '' )
-			$query .= "AND bp.last_status='" . $this->db->escape( $status, TRUE ) . "' ";
+			$query .= "AND bp.last_status=" . $this->db->quote( $status ) . " ";
 		if( $notstatus <> '' )
-			$query .= "AND bp.last_status<>'" . $this->db->escape( $notstatus, TRUE ) . "' AND bp.last_status<>'UNKNOWN' ";
+			$query .= "AND bp.last_status<>" . $this->db->quote( $notstatus ) . " AND bp.last_status<>'UNKNOWN' ";
 		if( $maintainer )
-			$query .= "AND p.port_maintainer='" . $this->db->escape( $maintainer, TRUE ) . "' ";
-		$query .= " ORDER BY " . $this->db->escape( $sortbytable ) . "." . $this->db->escape( $sortby );
-		if( $limit != 0 )
-			$query .= " LIMIT " . $this->db->escape( $limit, TRUE ) . " OFFSET " . $this->db->escape( $limit_offset, TRUE );
+			$query .= "AND p.port_maintainer=" . $this->db->quote( $maintainer ) . " ";
+		$query .= " ORDER BY " . $sortbytable . "." . substr( $this->db->quote( $sortby ), 1, strlen( $sortby ) );
+		if ( $limit != 0 ) {
+			$query .= " LIMIT " . substr( $this->db->quote( $limit ), 1, strlen( $sortby ) );
+			$query .= " OFFSET " . substr( $this->db->quote( $limit_offset ), 1, strlen( $limit_offset ) );
+		}
 
 		$rc = $this->_doQueryHashRef( $query, $results, array() );
 
@@ -554,8 +557,8 @@ class TinderboxDS {
 	}
 
 	function getBuildStatsWithStatus( $build_id ) {
-		$query = 'SELECT last_status,COUNT(*) AS c FROM build_ports WHERE build_id = ? GROUP BY last_status';
-		$rc = $this->_doQueryHashRef( $query, $results, $build_id );
+		$query = 'SELECT last_status, COUNT(*) AS c FROM build_ports WHERE build_id = ? GROUP BY last_status';
+		$rc = $this->_doQueryHashRef( $query, $results, array( $build_id ) );
 		if ( !$rc )
 			return null;
 		return $results;
@@ -564,7 +567,7 @@ class TinderboxDS {
 
 	function getBuildStats( $build_id ) {
 		$query = 'SELECT COUNT(*) AS fails FROM build_ports WHERE last_status = \'FAIL\' AND build_id = ?';
-		$rc = $this->_doQueryHashRef( $query, $results, $build_id );
+		$rc = $this->_doQueryHashRef( $query, $results, array( $build_id ) );
 		if ( !$rc )
 			return null;
 		return $results[0];
@@ -664,14 +667,14 @@ class TinderboxDS {
 		$condition = implode( ' OR ', $conds );
 
 		if ( $condition != '' ) {
-			$query = "SELECT * FROM $table WHERE " . $this->db->escape( $condition );
+			$query = "SELECT * FROM $table WHERE " . $condition;
 		}
 		else {
 			$query = "SELECT * FROM $table";
 		}
 
 		if ( $orderby != "" ) {
-			$query = $query . " ORDER BY " . $this->db->escape( $orderby );
+			$query .= " ORDER BY " . $this->db->quote( $orderby );
 		}
 
 		$results = array();
@@ -891,18 +894,7 @@ class TinderboxDS {
 			return -1;
 		}
 
-		if ( $res->numRows() > -1 ) {
-			$rows = $res->numRows();
-		}
-		else {
-			while( $res->fetchRow() ) {
-				$rows++;
-			}
-		}
-
-		$res->free();
-
-		return $rows;
+		return count( $rc );
 	}
 
 	function _doQueryHashRef( $query, &$results, $params = array() ) {
@@ -913,37 +905,28 @@ class TinderboxDS {
 			return 0;
 		}
 
-		$results = array();
-		while ( $row = $res->fetchRow() ) {
-			array_push( $results, $row );
-		}
-
-		$res->free();
+		$results = $res;
 
 		return 1;
 	}
 
 	function _doQuery( $query, $params, &$res ) {
-		$sth = $this->db->prepare( $query, MDB2_PREPARE_RESULT );
+		$sth = $this->db->prepare( $query );
 
-		if ( MDB2::isError( $sth ) ) {
-			$this->addError( $sth->getMessage() );
+		if ( !$sth ) {
+			$this->addError( implode( $this->db->errorInfo(), ":" ) );
 			return 0;
 		}
 
-		$_res = $sth->execute( $params );
-
-		if ( MDB2::isError( $_res ) ) {
-			$this->addError( $_res->getMessage() );
+		if ( !$sth->execute( $params ) ) {
+			$this->addError( implode( $sth->errorInfo(), ":" ) );
 			return 0;
 		}
+
+		$_res = $sth->fetchAll();
 
 		if ( !is_null( $_res ) ) {
 			$res = $_res;
-			$sth->free();
-		}
-		else {
-			$sth->free();
 		}
 
 		return 1;
@@ -964,7 +947,7 @@ class TinderboxDS {
 	}
 
 	function destroy() {
-		$this->db->disconnect();
+		$this->db = null;
 		$this->error = null;
 	}
 

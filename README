@@ -118,12 +118,12 @@
    to make this a requirement, but it may happen in the future.
 
    PHP 4.x is now EOL, so the web front-end (found in the webui/
-   subdirectory) requires PHP 5 (lang/php5), PEAR::MDB2_Driver_mysql
-   (databases/pear-MDB2_Driver_mysql) or PEAR::MDB2_Driver_pgsql
-   (databases/pear-MDB2_Driver_pgsql), PHP Session
-   (www/php5-session), and one of the PHP MySQL
-   (databases/php5-mysql) or PHP Pgsql (databases/php5-pgsql)
-   depending on your choice of backend database above.
+   subdirectory) requires PHP 5 (lang/php5), PHP PDO
+   (databases/php5-pdo), PDO_MYSQL (databases/php5-pdo_mysql) or
+   PDO_PGSQL (databases/php5-pdo_pgsql), PHP Session (www/php5-session),
+   and one of PHP MySQL (databases/php5-mysql) or PHP Pgsql
+   (databases/php5-pgsql) depending on your choice of backend database
+   above.
 
    If you will be sending emails from Tinderbox (e.g. build failure
    or build completion emails) you must install net/p5-Net to get the
