@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.62 2012/05/31 22:09:39 ade Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.63 2012/06/03 06:45:33 marcus Exp $
 #
 
 require_once 'Build.php';
@@ -421,10 +421,10 @@ class TinderboxDS {
 					 AND bp.build_id=?";
 		if ( $port_name )
 			$query .= " AND p.port_name LIKE " . $this->db->quote( "%${port_name}%" );
-		$query .= " ORDER BY " . $sortbytable . "." . substr( $this->db->quote( $sortby ), 1, strlen( $sortby ) );
+		$query .= " ORDER BY " . $sortbytable . "." . addslashes( $sortby );
 		if ( $limit != 0 ) {
-			$query .= " LIMIT " . substr( $this->db->quote( $limit ), 1, strlen( $sortby ) );
-			$query .= " OFFSET " . substr( $this->db->quote( $limit_offset ), 1, strlen( $limit_offset ) );
+			$query .= " LIMIT " . addslashes( $limit );
+			$query .= " OFFSET " . addslashes( $limit_offset );
 		}
 
 		$rc = $this->_doQueryHashRef( $query, $results, array( $build->getId() ) );
@@ -462,7 +462,7 @@ class TinderboxDS {
 			$query .= " AND p.port_maintainer=" . $this->db->quote( $maintainer );
 		$query .= " ORDER BY bp.last_built DESC ";
 		if ( $limit )
-			$query .= " LIMIT " . substr( $this->db->quote( $limit ), 1, strlen( $limit ) );
+			$query .= " LIMIT " . addslashes( $limit );
 
 		$rc = $this->_doQueryHashRef( $query, $results, array() );
 
@@ -539,10 +539,10 @@ class TinderboxDS {
 			$query .= "AND bp.last_status<>" . $this->db->quote( $notstatus ) . " AND bp.last_status<>'UNKNOWN' ";
 		if( $maintainer )
 			$query .= "AND p.port_maintainer=" . $this->db->quote( $maintainer ) . " ";
-		$query .= " ORDER BY " . $sortbytable . "." . substr( $this->db->quote( $sortby ), 1, strlen( $sortby ) );
+		$query .= " ORDER BY " . $sortbytable . "." . addslashes( $sortby );
 		if ( $limit != 0 ) {
-			$query .= " LIMIT " . substr( $this->db->quote( $limit ), 1, strlen( $sortby ) );
-			$query .= " OFFSET " . substr( $this->db->quote( $limit_offset ), 1, strlen( $limit_offset ) );
+			$query .= " LIMIT " . addslashes( $limit );
+			$query .= " OFFSET " . addslashes( $limit_offset );
 		}
 
 		$rc = $this->_doQueryHashRef( $query, $results, array() );
@@ -674,7 +674,7 @@ class TinderboxDS {
 		}
 
 		if ( $orderby != "" ) {
-			$query .= " ORDER BY " . $this->db->quote( $orderby );
+			$query .= " ORDER BY " . addslashes( $orderby );
 		}
 
 		$results = array();
