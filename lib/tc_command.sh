@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.153 2012/05/31 22:09:39 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.154 2012/06/03 15:54:59 beat Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -1494,6 +1494,9 @@ createBuild () {
 #---------------------------------------------------------------------------
 
 tinderbuild_reset () {
+
+    tbcleanup_jail
+
     cleanupMounts -t buildsrc -b $1
     cleanupMounts -t buildports -b $1
     cleanupMounts -t buildccache -b $1
@@ -1520,6 +1523,9 @@ tinderbuild_reset () {
 tinderbuild_cleanup () {
     trap "" 1 2 3 9 10 11 15
     echo "tinderbuild: Cleaning up after tinderbuild.  Please be patient."
+
+    tbcleanup_jail
+
     rm -f ${lock}
 
     tc=$(tinderLoc scripts tc)
@@ -2304,6 +2310,13 @@ tbcleanup_cleanup () {
     for portstree in ${portstrees} ; do
         cleanupMounts -t portstree -p ${portstree}
     done
+}
+
+tbcleanup_jail () {
+    jname=j$(echo ${build} | sed -E -e 's|\.||')
+
+    # Stop the jail if running
+    jls -qj ${jname} > /dev/null 2>&1 && jail -r ${jname}
 }
 
 tbcleanup () {

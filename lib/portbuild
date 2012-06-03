@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.140 2012/03/04 12:53:08 beat Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.141 2012/06/03 15:54:59 beat Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -19,6 +19,12 @@ cleanup()
     build=$6
     nullfs=$7
 
+    jname=j$(echo ${build} | sed -E -e 's|\.||')
+
+    jexec -U root ${jname} /usr/sbin/service ldconfig start
+
+    jail -r ${jname}
+
     umount ${chroot}/compat/linux/proc >/dev/null
     umount ${chroot}/proc >/dev/null
 
@@ -29,11 +35,6 @@ cleanup()
 	        cleanDirs ${build} ${chroot}${dir}
 	    done
 	    rm -rf ${chroot}/tmp/*
-
-	    chroot ${chroot} /sbin/ldconfig -R
-	    if [ ${ARCH} = "i386" ]; then
-	        chroot ${chroot} /sbin/ldconfig -aout -R
-	    fi
 	else
 	    ${tc} resetBuild -b ${build} ${nullfs}
 	fi
@@ -156,6 +157,8 @@ echo ${dirname}
 tc=$(tinderLoc scripts tc)
 chroot=$(tinderLoc buildroot ${build})
 echo "chroot is: ${chroot}"
+jname=j$(echo ${build} | sed -E -e 's|\.||')
+echo "jailname is: ${jname}"
 portdir=$(echo ${dirname} | sed -e 's|^/usr/ports/||')
 
 total_size=$(${tc} getPortTotalSize -d ${portdir} -b ${build})
@@ -262,6 +265,17 @@ if [ x"${OPTIONS_ENABLED}" = x"1" ]; then
     export PORT_DBDIR=/var/db/ports
 fi
 
+# jexec -U root will have the right arch in uname -m and uname -p
+LOGIN_ENV=",UNAME_p=${ARCH},UNAME_m=${ARCH}"
+sed -i "" -e "s/:\(setenv.*\):/:\1${LOGIN_ENV}:/" ${chroot}/etc/login.conf
+cap_mkdb ${chroot}/etc/login.conf
+
+cat >> ${chroot}/etc/make.conf << EOF
+ARCH=${ARCH}
+MACHINE=${ARCH}
+MACHINE_ARCH=${ARCH}
+EOF
+
 echo "building $pkgname in $chroot"
 
 ${tc} updateBuildStatus -b ${build} -s PORTBUILD
@@ -301,27 +315,38 @@ if [ x"${CCACHE_ENABLED}" ]; then
     unset CCACHE_DISABLE
 fi
 
-_ldconfig_dirs="/lib /usr/lib /usr/lib/compat"
-ldconfig_dirs=""
-for i in ${_ldconfig_dirs}; do
-    if [ -d ${chroot}/${i} ]; then
-	ldconfig_dirs="${ldconfig_dirs} ${i}"
-    fi
-done
-chroot ${chroot} /sbin/ldconfig ${ldconfig_dirs}
-if [ ${ARCH} = "i386" ]; then
-    chroot ${chroot} /sbin/ldconfig -aout /usr/lib/aout /usr/lib/compat/aout
+# Start a jail 
+# XXX bapt: the network 127.0.0.1 allows ports like postfix do not fail querying a network
+# device
+jail -c persist name=${jname} ip4.addr=127.0.0.1 ip6=disable path=${chroot} \
+    host.hostname=${jname} allow.sysvipc allow.socket_af allow.raw_sockets
+error=$?
+if [ ${error} -ne 0 ]; then
+    echo "portbuild: Start of jail ${jname} failed with return code ${error}"
+    cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${build} ${nullfs}
 fi
+jexec -U root ${jname} /usr/sbin/service ldconfig start
 
 set x $ED $FD $PD $BD $RD $TD $PKGD
 shift 1
 
 cd ${chroot}/tmp/depends
+
+# restart the jail with network for the fetch part
+jail -r ${jname}
+jail -c persist name=${jname} ip4=inherit ip6=inherit path=${chroot} \
+	host.hostname=${jname} allow.sysvipc allow.socket_af allow.raw_sockets
+error=$?
+if [ ${error} -ne 0 ]; then
+    echo "portbuild: Start of jail ${jname} failed with return code ${error}"
+    cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${build} ${nullfs}
+fi
+
 while [ $# -gt 0 ]; do
 
     if [ ! -f $1 -a -n "${PACKAGE_URI}" ]; then
 	echo "fetching package $1 for ${pkgname}"
-	fetch ${PACKAGE_URI}/${build}/All/$1
+	jexec -U root ${jname} "cd /tmp/depends && fetch ${PACKAGE_URI}/${build}/All/$1"
     fi
 
     if [ ! -f $1 -a -f ${packages}/All/$1 ]; then
@@ -344,7 +369,15 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-chroot ${chroot} /buildscript ${dirname} 1 "$ED" "$PD" "$FD" "$BD" "$RD" "$TD" "$PKGD" "${plistcheck}" 2>&1 | tee -a ${chroot}/tmp/${pkgname}.log
+jexec -U root ${jname} /buildscript ${dirname} 1 "$ED" "$PD" "$FD" "$BD" "$RD" "$TD" "$PKGD" "${plistcheck}" 2>&1 | tee -a ${chroot}/tmp/${pkgname}.log
+jail -r ${jname}
+jail -c persist name=${jname} ip4.addr=127.0.0.1 ip6=disable path=${chroot} \
+	host.hostname=${jname} allow.sysvipc allow.socket_af allow.raw_sockets
+error=$?
+if [ ${error} -ne 0 ]; then
+    echo "portbuild: Start of jail ${jname} failed with return code ${error}"
+    cleanup ${chroot} ${noclean} ${error} "${cleandirs}" ${pkgname} ${build} ${nullfs}
+fi
 if [ -f ${chroot}/tmp/status ]; then
     error=$(cat ${chroot}/tmp/status)
 else
@@ -361,11 +394,11 @@ if [ "${error}" = "0" ]; then
     # Cache the distfiles if requested.  We will wait a maximum of
     # ten minutes before giving up on the lock.
     if [ -n "${DISTFILE_CACHE}" ]; then
-	lockf -t 600 ${chroot}${DISTCACHE}/.lock tar -C ${chroot}/${DISTDIR} \
-	    -cf - . | tar --unlink -C ${chroot}${DISTCACHE} -xvf -
+	lockf -t 600 ${DISTFILE_CACHE}/.lock tar -C ${chroot}/${DISTDIR} \
+	    -cf - . | tar --unlink -C ${DISTFILE_CACHE} -xvf -
     fi
 
-    chroot ${chroot} /usr/bin/nice -n $nice /buildscript ${dirname} 2  "$ED" "$PD" "$FD" "$BD" "$RD" "$TD" "$PKGD" "${plistcheck}" > ${chroot}/tmp/${pkgname}.log2 2>&1
+    jexec -U root ${jname} LOCALBASE=${LOCALBASE:-/usr/local} /usr/bin/nice -n $nice /buildscript ${dirname} 2 "$ED" "$PD" "$FD" "$BD" "$RD" "$TD" "$PKGD" "${plistcheck}" > ${chroot}/tmp/${pkgname}.log2 2>&1
 
     grep pnohang ${chroot}/tmp/${pkgname}.log2
     cat ${chroot}/tmp/${pkgname}.log2 >> ${chroot}/tmp/${pkgname}.log
@@ -387,6 +420,7 @@ if [ "${error}" = "0" ]; then
     fi
     error=$(cat ${chroot}/tmp/status)
 
+    jail -r ${jname}
 #    rm -rf ${chroot}/${WRKDIRPREFIX}
 
     if [ -e ${chroot}/tmp/work.tbz ]; then
