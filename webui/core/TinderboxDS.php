@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.63 2012/06/03 06:45:33 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.64 2012/06/03 22:20:10 marcus Exp $
 #
 
 require_once 'Build.php';
@@ -308,7 +308,7 @@ class TinderboxDS {
 		$query = "DELETE FROM build_ports_queue
 						WHERE build_ports_queue_id=?";
 
-		$rc = $this->_doQuery( $query, $entry_id, $res );
+		$rc = $this->_doQuery( $query, array( $entry_id ), $res );
 
 		if ( !$rc ) {
 			return false;
@@ -321,7 +321,7 @@ class TinderboxDS {
 		$query = "DELETE FROM build_ports_queue
 						WHERE user_id=?";
 
-		$rc = $this->_doQuery( $query, $user->getId(), $res );
+		$rc = $this->_doQuery( $query, array( $user->getId() ), $res );
 
 		if ( !$rc ) {
 			return false;
