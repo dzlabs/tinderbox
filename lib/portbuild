@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.142 2012/06/03 16:59:07 beat Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.143 2012/06/11 08:04:17 beat Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -319,7 +319,7 @@ fi
 # XXX bapt: the network 127.0.0.1 allows ports like postfix do not fail querying a network
 # device
 jail -c persist name=${jname} ip4.addr=127.0.0.1 ip6=disable path=${chroot} \
-    host.hostname=${jname} allow.sysvipc allow.socket_af allow.raw_sockets
+    host.hostname=${jname} allow.sysvipc allow.socket_af allow.raw_sockets allow.chflags
 error=$?
 if [ ${error} -ne 0 ]; then
     echo "portbuild: Start of jail ${jname} failed with return code ${error}"
@@ -335,7 +335,7 @@ cd ${chroot}/tmp/depends
 # restart the jail with network for the fetch part
 jail -r ${jname}
 jail -c persist name=${jname} ip4=inherit ip6=inherit path=${chroot} \
-	host.hostname=${jname} allow.sysvipc allow.socket_af allow.raw_sockets
+	host.hostname=${jname} allow.sysvipc allow.socket_af allow.raw_sockets allow.chflags
 error=$?
 if [ ${error} -ne 0 ]; then
     echo "portbuild: Start of jail ${jname} failed with return code ${error}"
@@ -372,7 +372,7 @@ fi
 jexec -U root ${jname} /buildscript ${dirname} 1 "$ED" "$PD" "$FD" "$BD" "$RD" "$TD" "$PKGD" "${plistcheck}" 2>&1 | tee -a ${chroot}/tmp/${pkgname}.log
 jail -r ${jname}
 jail -c persist name=${jname} ip4.addr=127.0.0.1 ip6=disable path=${chroot} \
-	host.hostname=${jname} allow.sysvipc allow.socket_af allow.raw_sockets
+	host.hostname=${jname} allow.sysvipc allow.socket_af allow.raw_sockets allow.chflags
 error=$?
 if [ ${error} -ne 0 ]; then
     echo "portbuild: Start of jail ${jname} failed with return code ${error}"
