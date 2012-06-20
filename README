@@ -105,17 +105,21 @@
 
    Recent FreeBSD (development happens on 9-CURRENT only, but
    Tinderbox is known to work on RELENG_7 and RELENG_8 too), Perl 5.8
-   or later (lang/perl5.8), and either MySQL 4.1 or later
-   (databases/mysql41-server) or PostgreSQL 7.4 or later
-   (databases/postgres74-server).
+   or later (lang/perl5.8), and one of MySQL 4.1 or later
+   (databases/mysql41-server), PostgreSQL 7.4 or later
+   (databases/postgres74-server), or SQLite 3.7 or later
+   (databases/sqlite3).
 
    If MySQL is used, the MySQL Perl module must also be installed
    (databases/p5-DBD-mysql41). If PostgreSQL is used, the Pg Perl
-   module must also be installed (databases/p5-DBD-Pg).
+   module must also be installed (databases/p5-DBD-Pg). Similarly, if
+   SQLite is used, the SQLite Perl module must be installed
+   (databases/p5-DBD-SQLite).
 
-   Please note, however, that is is recommended that either MySQL 5.0
-   or PostgreSQL 8.1 (or later) be used. There are currently no plans
-   to make this a requirement, but it may happen in the future.
+   Please note, however, that it is recommended that either MySQL 5.0
+   or PostgreSQL 8.1 (or later) be used if SQLite is not being used.
+   There are currently no plans to make this a requirement, but it may
+   happen in the future.
 
    PHP 4.x is now EOL, so the web front-end (found in the webui/
    subdirectory) requires PHP 5 (lang/php5), PHP PDO
@@ -158,7 +162,8 @@
 
        If your Tinderbox host does not have administrative access to
        the database server, you must perform the next few steps by
-       hand. Else, skip to step 7.
+       hand. Else, skip to step 7. Since any user may create a SQLite
+       database, users of SQLite can also skip to step 7.
 
     4. Edit ${pb}/scripts/ds.ph.dist for your setup. Once this file
        has been edited, copy it to ds.ph.
@@ -184,6 +189,8 @@
          Tinderbox database as well as all the tables within that
          database.
 
+         SQLite users need not do anything for this step.
+
     6. Populate the database with the Tinderbox schema:
 
        MySQL:
@@ -205,6 +212,14 @@
          are required for upgrading, a separate upgrade schema file
          will be included, and instructions will be available at
          http://tinderbox.marcuscom.com.
+
+       SQLite:
+
+# cd sql
+# ./genschema sqlite | sqlite3 {DB_NAME}
+
+       Where {DB_NAME} is the name of the desired SQLite database file,
+       along with the desired full or relative path.
 
     7. Edit ${pb}/scripts/tinderbox.ph.dist for your environment (if
        you are using the web front-end, also edit

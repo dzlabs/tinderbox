@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.154 2012/06/03 15:54:59 beat Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.155 2012/06/20 20:47:42 ade Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -352,16 +352,26 @@ Setup () {
     db_admin=""
     do_load=0
     db_driver=$(getDbDriver)
-    dbinfo=$(getDbInfo ${db_driver})
+    case "${db_driver}" in
+        sqlite)
+            dbinfo=$(getDbInfoSQLite)
+            ;;
+        *)
+            dbinfo=$(getDbInfo ${db_driver})
+            ;;
+    esac
     db_res=$?
     genschema=$(tinderLoc scripts sql/genschema)
-    if [ ${db_res} = 0 ]; then
+    if [ ${db_res} = 0 ] && [ ${db_driver} != "sqlite" ]; then
         db_admin_host_name=${dbinfo%:*}
-	db_admin_host=${db_admin_host_name%:*}
+        db_admin_host=${db_admin_host_name%:*}
         db_name=${db_admin_host_name##*:}
         db_admin=${db_admin_host%:*}
         db_host=${db_admin_host#*:}
-	db_admin_pass=${dbinfo##*:}
+        db_admin_pass=${dbinfo##*:}
+        do_load=1
+    else
+        db_name=${dbinfo}
         do_load=1
     fi
 
@@ -374,7 +384,7 @@ Setup () {
 	fi
 	. ${dblib}
 
-        if ! createDb ${db_driver} ${db_admin} ${db_host} ${db_name} 1; then
+        if ! createDb "${db_driver}" "${db_admin}" "${db_host}" "${db_name}" 1; then
     	    tinderExit "ERROR: Error creating the new database!  Consult the output above for more information." $?
         fi
     fi
@@ -444,7 +454,14 @@ Upgrade () {
     db_admin=""
     do_load=0
     db_driver=$(getDbDriver)
-    dbinfo=$(getDbInfo ${db_driver})
+    case "${db_driver}" in
+        sqlite)
+            dbinfo=$(getDbInfoSQLite)
+            ;;
+        *)
+            dbinfo=$(getDbInfo ${db_driver})
+            ;;
+    esac
     if [ $? = 0 ]; then
         db_admin_host_name=${dbinfo%:*}
 	db_admin_host=${db_admin_host_name%:*}
@@ -498,20 +515,20 @@ Upgrade () {
                 if [ $? != 0 ]; then
     	            tinderExit "Failed to create temp file for database backup." $?
                 fi
-	        if ! backupDb ${bkup_file} ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
+	        if ! backupDb "${bkup_file}" "${db_driver}" "${db_admin}" "${db_host}" "${db_name}" ; then
     	            tinderExit "ERROR: Database backup failed!  Consult the output above for more information." $?
     	            rm -f ${bkup_file}
                 fi
 	    fi
-            if ! dropDb ${db_driver} ${db_admin} ${db_host} ${db_name} ; then
+            if ! dropDb "${db_driver}" "${db_admin}" "${db_host}" "${db_name}" ; then
     	        tinderExit "ERROR: Error dropping the old database!  Consult the output above for more information.  Once the problem is corrected, run \"${tc} Upgrade -backup ${bkup_file}\" to resume migration." $?
             fi
-            if ! createDb ${db_driver} ${db_admin} ${db_host} ${db_name} 0; then
+            if ! createDb "${db_driver}" "${db_admin}" "${db_host}" "${db_name}" 0; then
     	        tinderExit "ERROR: Error creating the new database!  Consult the output above for more information.  Once the problem is corrected, run \"${tc} Upgrade -backup ${bkup_file}\" to resume migration." $?
             fi
 # XXX This will not work for Postgres as any new tables will be created with
 # the wrong owner.
-            if ! loadSchema ${bkup_file} ${db_driver} ${db_admin} ${db_admin} ${db_host} ${db_name} ; then
+            if ! loadSchema "${bkup_file}" "${db_driver}" "${db_admin}" "${db_admin}" "${db_host}" "${db_name}" ; then
     	        tinderExit "ERROR: Database restoration failed!  Consult the output above for more information.  Once the problem is corrected, run \"${tc} Upgrade -backup ${bkup_file}\" to resume migration." $?
             fi
             rm -f ${bkup_file}

@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.68 2012/05/21 01:19:00 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.69 2012/06/20 20:47:42 ade Exp $
 #
 
 tinderLocJail () {
@@ -521,7 +521,7 @@ buildenvNoHost () {
 }
 
 getDbDriver () {
-    db_drivers="mysql pgsql"
+    db_drivers="mysql pgsql sqlite"
     finished=0
     db_driver=""
 
@@ -603,6 +603,37 @@ getDbInfo () {
     esac
 
     echo "${db_admin}:${db_host}:${db_name}:${db_pass}"
+
+    return 0
+}
+
+getDbInfoSQLite() {
+
+    db_name=""
+    db_dir=""
+
+    finished=0
+    while [ ${finished} != 1 ]; do
+        read -p "Enter database name (full or relative paths allowed) [tinderbox]: " db_name
+        db_name=${db_name:-"tinderbox"}
+
+        echo 1>&2 "Is this setting correct:"
+        echo 1>&2 "    Database name : ${db_name}"
+        read -p "(y/N)" option
+
+        case "${option}" in
+            [Yy]|[Yy][Ee][Ss])
+                if $(realpath -q "${db_name}" > /dev/null 2>&1); then
+                    finished=1
+                else
+                    echo 1>&2 "ERROR: directory $(dirname ${db_name}) does not exist."
+                    return 1
+                fi
+                ;;
+        esac
+    done
+
+    echo $(realpath "${db_name}")
 
     return 0
 }
@@ -784,76 +815,77 @@ createDb () {
     tinderEcho "DONE."
     echo ""
 
-    finished=0
-    while [ ${finished} != 1 ]; do
-	read -p "Enter the desired username for the Tinderbox database : " db_user
-	db_pass=""
-	if [ "${db_driver}" = "mysql" ]; then
-	    pwfinished=0
-	    while [ ${pwfinished} != 1 ]; do
-		stty -echo
-		read -p "Enter the desired password for ${db_user} : " db_pass
-		stty echo
-		echo ""
-		stty -echo
-		read -p "Confirm password for ${db_user} : " confirm_pass
-		stty echo
-		echo ""
-		if [ x"${db_pass}" = x"${confirm_pass}" ]; then
-		    pwfinished=1
-		else
-		    echo "WARN: Passwords do not match!"
-		fi
-	    done
-	fi
-	echo "Are these the settings you want:"
-	echo "    Database username      : ${db_user}"
-	if [ -n "${db_pass}" ]; then
-	    echo "    Database user password : ****"
-	fi
-	read -p "(y/N) " option
+    if [ "${db_driver}" != "sqlite" ]; then
+        finished=0
+        while [ ${finished} != 1 ]; do
+            read -p "Enter the desired username for the Tinderbox database : " db_user
+            db_pass=""
+            if [ "${db_driver}" = "mysql" ]; then
+                pwfinished=0
+                while [ ${pwfinished} != 1 ]; do
+                    stty -echo
+                    read -p "Enter the desired password for ${db_user} : " db_pass
+                    stty echo
+                    echo ""
+                    stty -echo
+                    read -p "Confirm password for ${db_user} : " confirm_pass
+                    stty echo
+                    echo ""
+                    if [ x"${db_pass}" = x"${confirm_pass}" ]; then
+                        pwfinished=1
+                    else
+                        echo "WARN: Passwords do not match!"
+                    fi
+                done
+            fi
+            echo "Are these the settings you want:"
+            echo "    Database username      : ${db_user}"
+            if [ -n "${db_pass}" ]; then
+                echo "    Database user password : ****"
+            fi
+            read -p "(y/N) " option
 
-	case "${option}" in
-	    [Yy]|[Yy][Ee][Ss])
-	        finished=1
-		;;
-	esac
-    done
+            case "${option}" in
+                [Yy]|[Yy][Ee][Ss])
+                    finished=1
+                    ;;
+            esac
+        done
 
+        tinderEcho "INFO: Checking to see if database ${db_name} already exists on ${db_host} ..."
+        eval ${DB_PROMPT}
+        eval ${DB_CHECK} >/dev/null 2>&1
+        if [ $? = 0 ]; then
+            tinderEcho "WARN: A database with the name ${db_name} already exists on ${db_host}.  Do you want to use this database for Tinderbox (note: if you type 'n', database creation will abort)?"
+            read -p "(y/N) " i
+            case "${i}" in
+                [Yy]|[Yy][Ee][Ss])
+                    # continue
+                    ;;
+                *)
+                    tinderEcho "INFO: Database creation aborted by user."
+                    return 1
+                    ;;
+            esac
+        else
+            tinderEcho "INFO: Database ${db_name} does not exist.  Creating ${db_name} on ${db_host} ..."
+            tinderEcho "INFO: Creating user ${db_user} on host ${db_host} (if required) ..."
+            eval ${DB_USER_PROMPT}
+            eval ${DB_CREATE_USER}
+            if [ $? != 0 ]; then
+                tinderEcho "ERROR: User creation failed!  Consult the output above for more information."
+                return $?
+            fi
 
-    tinderEcho "INFO: Checking to see if database ${db_name} already exists on ${db_host} ..."
-    eval ${DB_PROMPT}
-    eval ${DB_CHECK} >/dev/null 2>&1
-    if [ $? = 0 ]; then
-	tinderEcho "WARN: A database with the name ${db_name} already exists on ${db_host}.  Do you want to use this database for Tinderbox (note: if you type 'n', database creation will abort)?"
-	read -p "(y/N) " i
-	case "${i}" in
-	    [Yy]|[Yy][Ee][Ss])
-	        # continue
-		;;
-	    *)
-	        tinderEcho "INFO: Database creation aborted by user."
-		return 1
-		;;
-	esac
-    else
-	tinderEcho "INFO: Database ${db_name} does not exist.  Creating ${db_name} on ${db_host} ..."
-        tinderEcho "INFO: Creating user ${db_user} on host ${db_host} (if required) ..."
-        eval ${DB_USER_PROMPT}
-        eval ${DB_CREATE_USER}
-        if [ $? != 0 ]; then
-            tinderEcho "ERROR: User creation failed!  Consult the output above for more information."
-	    return $?
+            tinderEcho "DONE."
+            echo ""
         fi
 
-        tinderEcho "DONE."
-        echo ""
-
-	eval ${DB_PROMPT}
-	eval ${DB_CREATE}
-	if [ $? != 0 ]; then
-	    return $?
-	fi
+        eval ${DB_PROMPT}
+        eval ${DB_CREATE}
+        if [ $? != 0 ]; then
+            return $?
+        fi
     fi
 
     tinderEcho "INFO: Loading Tinderbox schema into ${db_name} ..."
@@ -865,7 +897,7 @@ createDb () {
 	return 1
     fi
 
-    loadSchema ${schema} ${db_driver} ${db_admin} ${db_user} ${db_host} ${db_name}
+    loadSchema "${schema}" "${db_driver}" "${db_admin}" "${db_user}" "${db_host}" "${db_name}"
     rc=$?
     rm -f ${schema}
 
@@ -875,13 +907,13 @@ createDb () {
     fi
 
     grant_host=""
-    if [ ${db_host} = "localhost" ]; then
+    if [ "${db_host}" = "localhost" ]; then
 	grant_host="localhost"
     else
 	grant_host=$(hostname)
     fi
 
-    if [ "${db_driver}" != "pgsql" ]; then
+    if [ "${db_driver}" != "pgsql" ] && [ "${db_driver}" != "sqlite" ]; then
         tinderEcho "INFO: Adding permissions to ${db_name} for ${db_user} ..."
         eval ${DB_PROMPT}
     fi
@@ -901,6 +933,10 @@ createDb () {
 	if [ "${db_driver}" = "pgsql" ]; then
 	    db_driver="Pg"
 	    db_type="dbname"
+	elif [ "${db_driver}" = "sqlite" ]; then
+	    db_driver="SQLite"
+	    db_type="database_name"
+	    db_name="$(realpath "${db_name}")"
 	fi
 	cat > ${ds_ph} << EOT
 \$DB_DRIVER	= '${db_driver}';
@@ -929,7 +965,7 @@ migDb () {
     if [ -s "${mig_file}" ]; then
 	if [ ${do_load} = 1 ]; then
 	    tinderEcho "INFO: Migrating database schema from ${MIG_VERSION_FROM} to ${MIG_VERSION_TO} ..."
-	    if ! loadSchema "${mig_file}" ${db_driver} ${db_admin} ${db_user} ${db_host} ${db_name} ; then
+	    if ! loadSchema "${mig_file}" "${db_driver}" "${db_admin}" "${db_user}" "${db_host}" "${db_name}" ; then
 	        tinderEcho "ERROR: Failed to load upgrade database schema."
 	        return 2
 	    fi

@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.100 2012/01/30 17:32:25 beat Exp $
+# $MCom: portstools/tinderbox/lib/Tinderbox/TinderboxDS.pm,v 1.101 2012/06/20 20:47:42 ade Exp $
 #
 
 package Tinderbox::TinderboxDS;
@@ -77,15 +77,24 @@ sub new {
         my $self = {
                 dbh   => undef,
                 error => undef,
+                now_fn => undef,
         };
 
         if (!$DBI_TYPE) {
                 $DBI_TYPE = 'database';
         }
 
-        my $dsn = "DBI:$DB_DRIVER:$DBI_TYPE=$DB_NAME";
-        if ($DB_HOST) {
-                $dsn .= ";host=$DB_HOST";
+        my $dsn = "";
+
+        if ($DB_DRIVER eq "SQLite") {
+                $dsn = "DBI:$DB_DRIVER:$DB_NAME";
+                $self->{'now_fn'} = "DATETIME(\'now\',\'localtime\')";
+        } else {
+                $dsn = "DBI:$DB_DRIVER:$DBI_TYPE=$DB_NAME";
+                if ($DB_HOST) {
+                        $dsn .= ";host=$DB_HOST";
+                }
+                $self->{'now_fn'} = "NOW()";
         }
 
         $self->{'dbh'} =
@@ -247,7 +256,7 @@ sub updateBuildPortsQueueEntryCompletionDate {
 
         if (!defined($entry->getCompletionDate())) {
                 $rc = $self->_doQuery(
-                        "UPDATE build_ports_queue SET completion_date=NOW() WHERE build_ports_queue_id=?",
+                        "UPDATE build_ports_queue SET completion_date=$self->{'now_fn'} WHERE build_ports_queue_id=?",
                         [$entry->getId()]
                 );
         } else {
@@ -641,7 +650,7 @@ sub addBuildPortsQueueEntry {
                 "INSERT INTO build_ports_queue
                     ( build_id, user_id, port_directory, priority, email_on_completion, enqueue_date )
                  VALUES
-                     ( ?, ?, ?, ?, '0', NOW() )",
+                     ( ?, ?, ?, ?, '0', $self->{'now_fn'} )",
                 [$build->getId(), $user, $directory, $priority]
         );
 
@@ -957,7 +966,7 @@ sub updateJailLastBuilt {
                         [$last_built, $jail->getId()]);
         } else {
                 $rc = $self->_doQuery(
-                        "UPDATE jails SET jail_last_built=NOW() WHERE jail_id=?",
+                        "UPDATE jails SET jail_last_built=$self->{'now_fn'} WHERE jail_id=?",
                         [$jail->getId()]
                 );
         }
@@ -979,9 +988,12 @@ sub updatePortLastBuilt {
         if ($DB_DRIVER eq 'mysql') {
                 $query =
                     'SELECT UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(build_last_updated) AS d FROM builds WHERE build_id=?';
-        } else {
+        } elsif ($DB_DRIVER eq 'Pg') {
                 $query =
                     "SELECT DATE_PART('EPOCH', NOW()) - DATE_PART('EPOCH', build_last_updated) AS d FROM builds WHERE build_id=?";
+        } else {
+                $query =
+                    "SELECT strftime('%s', 'now', 'localtime') - strftime('%s', build_last_updated) AS d FROM builds WHERE build_id=?";
         }
 
         $rc = $self->_doQueryHashRef($query, \@results, $build->getId());
@@ -1034,7 +1046,7 @@ sub updatePortLastBuilts {
                 && $column ne "last_failed_dependency")
         {
                 $rc = $self->_doQuery(
-                        "UPDATE build_ports SET $column=NOW() WHERE port_id=? AND build_id=?",
+                        "UPDATE build_ports SET $column=$self->{'now_fn'} WHERE port_id=? AND build_id=?",
                         [$port->getId(), $build->getId()]
                 );
         } else {
@@ -1194,7 +1206,7 @@ sub updatePortsTreeLastBuilt {
                 );
         } else {
                 $rc = $self->_doQuery(
-                        "UPDATE ports_trees SET ports_tree_last_built=NOW() WHERE ports_tree_id=?",
+                        "UPDATE ports_trees SET ports_tree_last_built=$self->{'now_fn'} WHERE ports_tree_id=?",
                         [$portstree->getId()]
                 );
         }
@@ -1209,7 +1221,7 @@ sub updateBuildStatus {
         $self->verifyType(1, $build, 'Build');
 
         my $rc = $self->_doQuery(
-                "UPDATE builds SET build_status=?,build_last_updated=NOW() WHERE build_id=?",
+                "UPDATE builds SET build_status=?,build_last_updated=$self->{'now_fn'} WHERE build_id=?",
                 [$build->getStatus(), $build->getId()]
         );
 
@@ -1256,12 +1268,12 @@ sub updateBuildCurrentPort {
 
         if (!defined($pkgname)) {
                 $rc = $self->_doQuery(
-                        "UPDATE builds SET build_current_port=NULL,build_last_updated=NOW() WHERE build_id=?",
+                        "UPDATE builds SET build_current_port=NULL,build_last_updated=$self->{'now_fn'} WHERE build_id=?",
                         [$build->getId()]
                 );
         } else {
                 $rc = $self->_doQuery(
-                        "UPDATE builds SET build_current_port=?,build_last_updated=NOW() WHERE build_id=?",
+                        "UPDATE builds SET build_current_port=?,build_last_updated=$self->{'now_fn'} WHERE build_id=?",
                         [$pkgname, $build->getId()]
                 );
         }
@@ -1923,7 +1935,9 @@ sub _doQueryNumRows {
                 return -1;
         }
 
-        if ($sth->rows > -1) {
+        # According to the DBI documentation, $DBI::rows isn't intended to get
+        # the row count of a SELECT query; indeed, with SQLite it's always 0.
+        if ($sth->rows > -1 && $DB_DRIVER != "SQLite") {
                 $rows = $sth->rows;
         } else {
                 my $all = $sth->fetchall_arrayref;

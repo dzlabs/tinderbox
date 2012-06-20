@@ -1,0 +1,159 @@
+-- DROP TABLE ports CASCADE;
+CREATE TABLE ports (
+	port_id INTEGER PRIMARY KEY,
+	port_directory VARCHAR(255) UNIQUE NOT NULL,
+	port_name VARCHAR(64),
+	port_maintainer VARCHAR(128),
+	port_comment VARCHAR(255)
+);
+CREATE INDEX ports_port_maintainer_idx ON ports(port_maintainer);
+
+-- DROP TABLE jails CASCADE;
+CREATE TABLE jails (
+	jail_id INTEGER PRIMARY KEY,
+	jail_name VARCHAR(32) UNIQUE NOT NULL,
+	jail_arch VARCHAR(32),
+	jail_tag VARCHAR(32),
+	jail_last_built TIMESTAMP,
+	jail_update_cmd VARCHAR(255) DEFAULT 'CSUP',
+	jail_description TEXT,
+	jail_src_mount TEXT
+);
+
+-- DROP TABLE ports_trees CASCADE;
+CREATE TABLE ports_trees (
+	ports_tree_id INTEGER PRIMARY KEY,
+	ports_tree_name VARCHAR(255) UNIQUE NOT NULL,
+	ports_tree_description TEXT,
+	ports_tree_last_built TIMESTAMP,
+	ports_tree_update_cmd VARCHAR(255) DEFAULT 'CSUP',
+	ports_tree_cvsweb_url VARCHAR(255),
+	ports_tree_ports_mount TEXT
+);
+
+-- DROP TABLE builds CASCADE;
+CREATE TABLE builds (
+	build_id INTEGER PRIMARY KEY,
+	build_name VARCHAR(255) UNIQUE NOT NULL,
+	jail_id INTEGER REFERENCES jails(jail_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	ports_tree_id INTEGER REFERENCES ports_trees(ports_tree_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	build_description TEXT,
+	build_status VARCHAR(16) CHECK (build_status IN ('IDLE','PREPARE','PORTBUILD')) DEFAULT 'IDLE',
+	build_current_port VARCHAR(255),
+	build_last_updated TIMESTAMP,
+	build_remake_count INTEGER NOT NULL DEFAULT 0
+);
+
+-- DROP TABLE users CASCADE;
+CREATE TABLE users (
+	user_id INTEGER PRIMARY KEY,
+	user_name VARCHAR(16) UNIQUE NOT NULL,
+	user_email VARCHAR(255),
+	user_password VARCHAR(41),
+	user_www_enabled BOOLEAN NOT NULL default FALSE
+);
+
+-- DROP TABLE user_permissions CASCADE;
+CREATE TABLE user_permissions (
+	user_id INTEGER REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	user_permission_object_type VARCHAR(16) CHECK (user_permission_object_type IN ('builds', 'users')),
+	user_permission_object_id INTEGER NOT NULL DEFAULT 0,
+	user_permission INTEGER NOT NULL DEFAULT 0,
+	PRIMARY KEY  (user_id,user_permission_object_type,user_permission_object_id,user_permission)
+);
+
+-- DROP TABLE build_users CASCADE;
+CREATE TABLE build_users (
+	build_user_id INTEGER PRIMARY KEY,
+	build_id INTEGER REFERENCES builds(build_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	user_id INTEGER REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	email_on_completion BOOLEAN DEFAULT TRUE,
+	email_on_error BOOLEAN DEFAULT TRUE
+);
+
+-- DROP TABLE port_fail_reasons CASCADE;
+CREATE TABLE port_fail_reasons (
+	port_fail_reason_tag VARCHAR(20) PRIMARY KEY,
+	port_fail_reason_descr TEXT,
+	port_fail_reason_type VARCHAR(16) CHECK (port_fail_reason_type IN ('COMMON','RARE','TRANSIENT')) NOT NULL DEFAULT 'COMMON'
+);
+
+-- DROP TABLE build_ports CASCADE;
+CREATE TABLE build_ports (
+	build_port_id INTEGER PRIMARY KEY,
+	build_id INTEGER REFERENCES builds(build_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	port_id INTEGER REFERENCES ports(port_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	last_built TIMESTAMP,
+	last_status VARCHAR(16) CHECK (last_status IN ('UNKNOWN','SUCCESS','FAIL','BROKEN', 'LEFTOVERS', 'DUD', 'DEPEND')) DEFAULT 'UNKNOWN',
+	last_fail_reason VARCHAR(20) NOT NULL DEFAULT '__nofail__' REFERENCES port_fail_reasons(port_fail_reason_tag) ON UPDATE CASCADE ON DELETE RESTRICT,
+	last_successful_built TIMESTAMP,
+	last_built_version VARCHAR(100),
+	last_failed_dependency VARCHAR(255),
+	last_run_duration INTEGER,
+	currently_building INTEGER NOT NULL DEFAULT 0,
+	total_size INTEGER
+);
+CREATE INDEX build_ports_build_id_idx ON build_ports(build_id);
+CREATE INDEX build_ports_port_id_idx ON build_ports(port_id);
+
+-- DROP TABLE port_dependencies CASCADE;
+CREATE TABLE port_dependencies (
+	port_dependency_id INTEGER PRIMARY KEY,
+	build_port_id INTEGER REFERENCES build_ports(build_port_id) ON UPDATE CASCADE ON DELETE CASCADE,
+	port_id INTEGER REFERENCES ports(port_id) ON UPDATE CASCADE ON DELETE CASCADE,
+	dependency_type VARCHAR(16) CHECK (dependency_type IN ('UNKNOWN', 'EXTRACT_DEPENDS', 'PATCH_DEPENDS', 'FETCH_DEPENDS', 'BUILD_DEPENDS', 'LIB_DEPENDS', 'DEPENDS', 'RUN_DEPENDS')) DEFAULT 'UNKNOWN'
+);
+CREATE INDEX port_dependencies_build_port_id_idx ON port_dependencies(build_port_id);
+CREATE INDEX port_dependencies_port_id_idx ON port_dependencies(port_id);
+
+-- DROP TABLE config CASCADE;
+CREATE TABLE config (
+	config_option_name VARCHAR(255) NOT NULL PRIMARY KEY,
+	config_option_value TEXT
+);
+
+-- DROP TABLE build_ports_queue CASCADE;
+CREATE TABLE build_ports_queue (
+	build_ports_queue_id INTEGER PRIMARY KEY,
+	enqueue_date TIMESTAMP,
+	completion_date TIMESTAMP,
+	build_id INTEGER REFERENCES builds(build_id) ON UPDATE CASCADE,
+	user_id INTEGER REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	port_directory VARCHAR(255) NOT NULL,
+	priority INTEGER NOT NULL DEFAULT 10,
+	email_on_completion BOOLEAN NOT NULL,
+	status VARCHAR(16) CHECK (status IN ('ENQUEUED','PROCESSING','SUCCESS','FAIL')) DEFAULT 'ENQUEUED'
+);
+CREATE INDEX build_ports_queue_user_id_idx ON build_ports_queue(user_id);
+
+-- DROP TABLE port_fail_patterns CASCADE;
+CREATE TABLE port_fail_patterns (
+	port_fail_pattern_id INTEGER PRIMARY KEY,
+	port_fail_pattern_expr TEXT NOT NULL,
+	port_fail_pattern_reason VARCHAR(20) NOT NULL DEFAULT '__nofail__' REFERENCES port_fail_reasons(port_fail_reason_tag) ON UPDATE CASCADE ON DELETE RESTRICT,
+	port_fail_pattern_parent INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX port_fail_pattern_parent_idx ON port_fail_patterns(port_fail_pattern_parent);
+
+-- DROP TABLE hooks CASCADE;
+CREATE TABLE hooks (
+	hook_name VARCHAR(32) NOT NULL PRIMARY KEY,
+	hook_cmd VARCHAR(255),
+	hook_description TEXT
+);
+
+-- DROP TABLE logfile_patterns CASCADE;
+CREATE TABLE logfile_patterns (
+	logfile_pattern_id INTEGER PRIMARY KEY,
+	logfile_pattern_tag VARCHAR(30) NOT NULL,
+	logfile_pattern_severity VARCHAR(12) CHECK (logfile_pattern_severity IN ('error','warning','information')) DEFAULT 'information',
+	logfile_pattern_expr TEXT,
+	logfile_pattern_color VARCHAR(20) NOT NULL
+);
+
+-- DROP TABLE build_groups CASCADE;
+CREATE TABLE build_groups(
+	build_group_name VARCHAR(30) NOT NULL,
+	build_id INTEGER REFERENCES builds(build_id) ON UPDATE CASCADE,
+	PRIMARY KEY (build_group_name, build_id)
+);

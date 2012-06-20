@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.64 2012/06/03 22:20:10 marcus Exp $
+# $MCom: portstools/tinderbox/webui/core/TinderboxDS.php,v 1.65 2012/06/20 20:47:42 ade Exp $
 #
 
 require_once 'Build.php';
@@ -69,7 +69,13 @@ class TinderboxDS {
 		if ( $DB_DRIVER == '' )
 			$DB_DRIVER = 'mysql';
 
-		$dsn = "$DB_DRIVER:host=${DB_HOST};dbname=${DB_NAME}";
+		if ( strcmp( $DB_DRIVER, 'sqlite' ) == 0 ) {
+			$dsn = "$DB_DRIVER:$DB_PATH";
+			$DB_USER = "";
+			$DB_PASS = "";
+		} else {
+			$dsn = "$DB_DRIVER:host=${DB_HOST};dbname=${DB_NAME}";
+		}
 
 		try {
 			$this->db = new PDO( $dsn, $DB_USER, $DB_PASS, array( PDO::ATTR_PERSISTENT => true ) );

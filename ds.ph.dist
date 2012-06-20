@@ -1,5 +1,6 @@
 $DB_DRIVER       = 'mysql';
 #$DB_DRIVER       = 'Pg';
+#$DB_DRIVER       = 'SQLite';
 $DB_HOST         = 'mysql.example.com';
 $DB_NAME         = 'tinderbox';
 $DB_USER         = 'tinder';
