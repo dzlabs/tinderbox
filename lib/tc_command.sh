@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.155 2012/06/20 20:47:42 ade Exp $
+# $MCom: portstools/tinderbox/lib/tc_command.sh,v 1.156 2012/07/15 20:36:14 marcus Exp $
 #
 
 export _defaultUpdateHost="cvsup18.FreeBSD.org"
@@ -2436,6 +2436,7 @@ tbcleanup () {
 	jail=$(${tc} getJailForBuild -b ${build} 2>/dev/null)
 	portstree=$(${tc} getPortsTreeForBuild -b ${build} 2>/dev/null)
 
+	cleanenv
 	buildenv ${jail} ${portstree} ${build}
 
 	if [ -n "${WITH_PKGNG}" ]; then
