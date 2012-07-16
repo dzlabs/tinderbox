@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.71 2012/07/15 20:36:33 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.72 2012/07/16 22:01:07 marcus Exp $
 #
 
 tinderLocJail () {
@@ -442,7 +442,6 @@ buildenvlist () {
 
     envdir=$(tinderLoc scripts etc/env)
 
-    {
     if [ -f ${envdir}/GLOBAL ]; then
 	cat ${envdir}/GLOBAL
     fi
@@ -455,10 +454,6 @@ buildenvlist () {
     if [ -n "${build}" -a -f ${envdir}/build.${build} ]; then
 	cat ${envdir}/build.${build}
     fi
-    } | sed -E -e 's|^#.*$||' \
-        -e "s|^export ||" \
-        -e 's|[[:blank:]]||g' \
-        -e 's|\^\^([^\^]+)\^\^|${\1}|g' 
 }
 
 cleanenv () {
@@ -493,7 +488,10 @@ buildenv () {
 
     for _tb_var in $(buildenvlist "${jail}" "${portstree}" "${build}")
     do
-	var=$(echo "${_tb_var}")
+	var=$(echo "${_tb_var}" | sed \
+		-e "s|^#${major_version}||" \
+		-e "s|^export ||" \
+		-E -e 's|\^\^([^\^]+)\^\^|${\1}|g' -e 's|^#.*$||')
 
 	if [ -n "${var}" ]; then
 	    eval "export ${var}" >/dev/null 2>&1
