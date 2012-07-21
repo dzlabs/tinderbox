@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.72 2012/07/16 22:01:07 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.73 2012/07/21 20:20:35 marcus Exp $
 #
 
 tinderLocJail () {
@@ -435,25 +435,36 @@ buildenvlist () {
     jail=$1
     portstree=$2
     build=$3
-
-    $(tinderLoc scripts tc) configGet
-
-    cat $(tinderLoc scripts lib/tinderbox.env)
+    major_version=$4
 
     envdir=$(tinderLoc scripts etc/env)
 
-    if [ -f ${envdir}/GLOBAL ]; then
+    cat $(tinderLoc scripts lib/tinderbox.env) \
+		| sed -E \
+        -e "s|^#${major_version}||" \
+        -e 's|\^\^([^\^]+)\^\^|${\1}|g' \
+        -e 's|^#.*$||'
+
+    {
+    $(tinderLoc scripts tc) configGet
+
+
+    if [ -s ${envdir}/GLOBAL ]; then
 	cat ${envdir}/GLOBAL
     fi
-    if [ -n "${jail}" -a -f ${envdir}/jail.${jail} ]; then
+    if [ -n "${jail}" -a -s ${envdir}/jail.${jail} ]; then
 	cat ${envdir}/jail.${jail}
     fi
-    if [ -n "${portstree}" -a -f ${envdir}/portstree.${portstree} ]; then
+    if [ -n "${portstree}" -a -s ${envdir}/portstree.${portstree} ]; then
 	cat ${envdir}/portstree.${portstree}
     fi
-    if [ -n "${build}" -a -f ${envdir}/build.${build} ]; then
+    if [ -n "${build}" -a -s ${envdir}/build.${build} ]; then
 	cat ${envdir}/build.${build}
     fi
+    } | sed \
+		-e 's|^#.*$||' \
+		-e "s|^export ||" \
+		-e 's|[[:blank:]]||g'
 }
 
 cleanenv () {
@@ -486,13 +497,9 @@ buildenv () {
     eval "export SRCBASE=${SRCBASE:-`realpath $(tinderLoc jail ${jail})/src`}" \
 	>/dev/null 2>&1
 
-    for _tb_var in $(buildenvlist "${jail}" "${portstree}" "${build}")
+    for _tb_var in $(buildenvlist "${jail}" "${portstree}" "${build}" "${major_version}")
     do
-	var=$(echo "${_tb_var}" | sed \
-		-e "s|^#${major_version}||" \
-		-e "s|^export ||" \
-		-E -e 's|\^\^([^\^]+)\^\^|${\1}|g' -e 's|^#.*$||')
-
+	var=$(echo "${_tb_var}")
 	if [ -n "${var}" ]; then
 	    eval "export ${var}" >/dev/null 2>&1
 	fi
