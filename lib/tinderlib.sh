@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.73 2012/07/21 20:20:35 marcus Exp $
+# $MCom: portstools/tinderbox/lib/tinderlib.sh,v 1.74 2012/08/13 23:09:33 marcus Exp $
 #
 
 tinderLocJail () {
@@ -628,19 +628,29 @@ getDbInfoSQLite() {
         echo 1>&2 "    Database name : ${db_name}"
         read -p "(y/N)" option
 
+	db_dir=$(dirname "${db_name}")
+
         case "${option}" in
             [Yy]|[Yy][Ee][Ss])
-                if $(realpath -q "${db_name}" > /dev/null 2>&1); then
-                    finished=1
-                else
-                    echo 1>&2 "ERROR: directory $(dirname ${db_name}) does not exist."
-                    return 1
+		if ! realpath -q $db_dir > /dev/null 2>&1; then
+		     echo 1>&2 "WARNING: directory $db_dir does not exist. Would you like to create it?"
+		     read -p "(Y/n)" option
+		     case "${option}" in
+			 ""|[Yy]|[Yy][Ee][Ss])
+			     mkdir -p $db_dir
+			     ;;
+			 *)
+			     echo 1>&2 "ERROR: directory $db_dir does not exist, cannot perform database initialization"
+			     exit 1
+			     ;;
+		     esac
                 fi
+		finished=1
                 ;;
         esac
     done
 
-    echo $(realpath "${db_name}")
+    echo $(realpath ${db_dir})/$(basename "${db_name}")
 
     return 0
 }
