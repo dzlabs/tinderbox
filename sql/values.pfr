@@ -63,3 +63,5 @@ INSERT INTO port_fail_reasons VALUES ('clang', 'Your code does not run with the 
 INSERT INTO port_fail_reasons VALUES ('assumes_gcc', 'This port does not install with the the experimental clang compiler due to hardwired assumptions about gcc being the compiler.', 'COMMON');
 INSERT INTO port_fail_reasons VALUES ('clang-bug', 'You have tickled a bug in clang itself.', 'RARE');
 INSERT INTO port_fail_reasons VALUES ('gmake', 'Your code does not run with the latest, incompatible, gmake version (3.82.)', 'COMMON');
+INSERT INTO port_fail_reasons VALUES ('apache_version', 'USE_APACHE is defined and the port is not compatible with the default apache version', 'RARE');
+INSERT INTO port_fail_reasons VALUES ('apache_macro', 'Illegal use of USE_APACHE macros', 'COMMON');

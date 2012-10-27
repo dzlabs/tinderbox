@@ -75,4 +75,6 @@ INSERT INTO port_fail_patterns VALUES (6500, '(error: a parameter list without t
 INSERT INTO port_fail_patterns VALUES (6600, '(Cannot exec cc|cannot find program cc|cc: No such file or directory|cc.*must be installed to build|compiler not found|error: no acceptable C compiler|g\\+\\+: No such file or directory|g\\+\\+.*not found)', 'assumes_gcc', 0);
 INSERT INTO port_fail_patterns VALUES (6700, '(clang: error: unable to execute command|error: cannot compile this.*yet|error: clang frontend command failed|error:.*ignoring directive for now|error: (invalid|unknown) argument|error: (invalid|unknown use of) instruction mnemonic|error:.*please report this as a bug)', 'clang-bug', 0);
 INSERT INTO port_fail_patterns VALUES (6800, '(missing separator|mixed implicit and normal rules|recipe commences before first target).*Stop', 'gmake', 0);
+INSERT INTO port_fail_patterns VALUES (6900, 'apache.*and port requires apache', 'apache_version', 0);
+INSERT INTO port_fail_patterns VALUES (7000, 'Illegal use of USE_APACHE', 'apache_macro', 0);
 INSERT INTO port_fail_patterns VALUES (2147483647, '.*', '???', 0);
