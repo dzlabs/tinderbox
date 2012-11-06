@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $MCom: portstools/tinderbox/lib/portbuild,v 1.144 2012/07/17 20:17:03 ade Exp $
+# $MCom: portstools/tinderbox/lib/portbuild,v 1.145 2012/11/06 21:48:01 beat Exp $
 
 . ${pb}/scripts/lib/tinderlib.sh
 
@@ -413,7 +413,7 @@ if [ "${error}" = "0" ]; then
 	    -cf - . | tar --unlink -C ${DISTFILE_CACHE} -xvf -
     fi
 
-    jexec -U root ${jname} /usr/bin/nice -n $nice /buildscript ${dirname} 2 "$ED" "$PD" "$FD" "$BD" "$RD" "$TD" "$PKGD" "${plistcheck}" > ${chroot}/tmp/${pkgname}.log2 2>&1
+    jexec -U root ${jname} env LOCALBASE=${LOCALBASE:-/usr/local} PREFIX=${PREFIX:-/usr/local} PATH=${LOCALBASE}/bin:${LOCALBASE}/sbin:${PATH} /usr/bin/nice -n $nice /buildscript ${dirname} 2 "$ED" "$PD" "$FD" "$BD" "$RD" "$TD" "$PKGD" "${plistcheck}" > ${chroot}/tmp/${pkgname}.log2 2>&1
 
     grep pnohang ${chroot}/tmp/${pkgname}.log2
     cat ${chroot}/tmp/${pkgname}.log2 >> ${chroot}/tmp/${pkgname}.log
