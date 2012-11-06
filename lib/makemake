@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $MCom: portstools/tinderbox/lib/makemake,v 1.47 2012/03/04 12:53:08 beat Exp $
+# $MCom: portstools/tinderbox/lib/makemake,v 1.48 2012/11/06 21:55:47 beat Exp $
 #
 
 my $pb;
@@ -198,7 +198,6 @@ while (scalar(@PORTS)) {
                 @{$pkgedeps{$portdir}}, @{$pkgpdeps{$portdir}},
                 @{$pkgfdeps{$portdir}}, @{$pkgbdeps{$portdir}},
                 @{$pkgrdeps{$portdir}}, @{$pkgtdeps{$portdir}},
-                @{$pkgpkgdeps{$portdir}},
             )
         {
                 if (defined($depport) && $depport ne "") {
@@ -217,6 +216,8 @@ my $builddir = tinderLoc($pb, 'builddata', $BUILD_NAME);
 cleanup($ds, 1, "Failed to open $builddir makefile for writing: $!\n")
     unless (open(MK, "> $builddir/Makefile"));
 
+my $pkgdepset = 0;
+
 foreach my $key (keys %pkgdir) {
         my $pname    = $pkgdir{$key} . $ENV{'PKGSUFFIX'};
         my $pkgnames = makeList(\%pkgdir, 1, $makecache, @{$pkgdeps{$key}});
@@ -230,7 +231,12 @@ foreach my $key (keys %pkgdir) {
 
         printf MK "all: %s\n", $pname;
         printf MK "%s: %s\n",  $pkgdir{$key}, $pname;
-        printf MK "%s: %s\n",  $pname, $pkgnames;
+        if ($pkgdepset eq 0) {
+            printf MK "%s: %s %s\n",  $pname, $pkgdeplst, $pkgnames;
+            $pkgdepset = 1
+        } else {
+            printf MK "%s: %s\n",  $pname, $pkgnames;
+        }
         printf MK "\t@%s %s %s %s %s %s ",
             tinderLoc($pb, 'scripts', 'lib/portbuild'), $BUILD_NAME, $JAIL_NAME,
             $PORTSTREE_NAME, $ENV{'PORTBUILD_ARGS'};
